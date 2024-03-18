@@ -1,0 +1,19 @@
+{
+  "name": "@libs/common",
+  "version": "1.4.4",
+  "main": "src/index.js",
+  "private": false,
+  "description": "moasis library common project",
+  "scripts": {
+    "format": "../../tools/eslint/node_modules/.bin/prettier --write \"**/*.{ts, js, json}\"",
+    "test": "../../node_modules/jest/bin/jest.js --maxWorkers=50%",
+    "lint": "yarn format && ../../tools/eslint/node_modules/.bin/eslint \"src/**/*.{ts, js, json}\" --fix"
+  },
+  "author": {
+    "name": "Leo Jung",
+    "email": "myjung@moaiworks.co.kr"
+  },
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@app/contents",
+  "version": "1.0.0",
+  "description": "monorepo contents",
+  "scripts": {
+    "format": "../../tools/eslint/node_modules/.bin/prettier --write \"**/*.{ts, js, json}\"",
+    "test": "../../node_modules/jest/bin/jest.js --maxWorkers=50%",
+    "lint": "yarn format && ../../tools/eslint/node_modules/.bin/eslint \"src/**/*.{ts, js, json}\" --fix"
+  },
+  "rootDir": ".",
+  "author": {
+    "name": "Leo Jung",
+    "email": "myjung@moaiworks.co.kr"
+  },
+  "engines": {
+    "node": ">=18 <=20"
+  },
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

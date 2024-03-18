@@ -1,0 +1,13 @@
+{
+  "name": "@libs/constants",
+  "version": "1.5.4",
+  "main": "src/index.js",
+  "private": false,
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^4.0.0"
+  }
+}
