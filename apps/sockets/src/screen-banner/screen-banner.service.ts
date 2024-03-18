@@ -10,6 +10,8 @@ import {
 } from '@libs/entity';
 import { Repository } from 'typeorm';
 import { ScreenBannerGateway } from './screen-banner.gateway';
+import { Redis } from 'ioredis';
+import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
 import {
   NAMESPACE,

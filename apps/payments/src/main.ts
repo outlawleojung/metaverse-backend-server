@@ -25,8 +25,8 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('azrMETA 결제 서버 API')
-    .setDescription('azrMETA 결제 기능 개발을 위한 API 문서')
+    .setTitle('moasis 결제 서버 API')
+    .setDescription('moasis 결제 기능 개발을 위한 API 문서')
     .addCookieAuth('connect.sid')
     .setVersion('1.0.0')
     .build();

@@ -1,0 +1,16 @@
+{
+  "name": "@apps/payments",
+  "version": "1.0.0",
+  "description": "moasis monorepo payments",
+  "scripts": {
+    "format": "../../tools/eslint/node_modules/.bin/prettier --write \"**/*.{ts, js, json}\"",
+    "test": "../../node_modules/jest/bin/jest.js --maxWorkers=50%",
+    "lint": "yarn format && ../../tools/eslint/node_modules/.bin/eslint \"src/**/*.{ts, js, json}\" --fix"
+  },
+  "author": {
+    "name": "Leo Jung",
+    "email": "myjung@moaiworks.co.kr"
+  },
+  "license": "MIT",
+  "dependencies": {}
+}

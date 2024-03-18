@@ -1,5 +1,5 @@
 {
-  "name": "@app/contents",
+  "name": "@apps/contents",
   "version": "1.0.0",
   "description": "monorepo contents",
   "scripts": {

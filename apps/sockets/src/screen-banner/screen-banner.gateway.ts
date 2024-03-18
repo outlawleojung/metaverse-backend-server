@@ -7,6 +7,8 @@ import { Inject, Logger, forwardRef } from '@nestjs/common';
 import { ScreenBannerService } from './screen-banner.service';
 import { Server, Socket } from 'socket.io';
 import { NatsService } from '../nats/nats.service';
+import { InjectRedis } from '@liaoliaots/nestjs-redis';
+import { Redis } from 'ioredis';
 import { GatewayInitiService } from '../services/gateway-init.service';
 import { Decrypt } from '@libs/common';
 import { NAMESPACE, NATS_EVENTS } from '../constants/constants';

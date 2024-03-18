@@ -1,5 +1,5 @@
 {
-  "name": "@app/webview",
+  "name": "@apps/webview",
   "version": "1.0.0",
   "description": "monorepo webview",
   "scripts": {

@@ -8,12 +8,12 @@ const numCPUs = os.cpus().length;
 @Injectable()
 export class AppClusterService {
   private static readonly logger = new Logger(AppClusterService.name);
-  ß;
+
   static async clusterize(callback: () => any): Promise<Promise<void>> {
     if (cluster.isPrimary) {
       AppClusterService.logger.debug(`마스터 서버 시작 ${process.pid}`);
 
-      for (let i = 0; i < numCPUs; i++) {
+      for (let i = 0; i < 2; i++) {
         cluster.fork();
       }
       cluster.on('exit', (worker, code, signal) => {

@@ -1,17 +1,17 @@
 {
-  "name": "moasis",
+  "name": "moai-backend-webserver",
   "version": "0.0.1",
   "description": "",
   "author": "",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "libs/*"
-  ],
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/apps/moai-backend-webserver/main",
     "dev:account": "nest start account --watch",
     "dev:contents": "nest start contents --watch",
     "dev:admin": "nest start admin --watch",
@@ -20,16 +20,12 @@
     "dev:payments": "nest start payments --watch",
     "dev:pass": "nest start pass-auth --watch",
     "dev:sockets": "nest start sockets --watch",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/apps/moasis/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/moasis/test/jest-e2e.json"
+    "test:e2e": "jest --config ./apps/moai-backend-webserver/test/jest-e2e.json"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.17.0",
@@ -46,6 +42,7 @@
     "@nestjs/swagger": "^7.3.0",
     "@nestjs/typeorm": "^10.0.2",
     "@nestjs/websockets": "^10.3.3",
+    "@redis/client": "^1.5.14",
     "@socket.io/admin-ui": "^0.5.1",
     "@socket.io/redis-adapter": "^8.3.0",
     "@types/ejs": "^3.1.5",
@@ -84,7 +81,7 @@
     "rxjs": "^7.8.1",
     "sharp": "^0.33.2",
     "socket.io": "^4.7.4",
-    "socket.io-adapter": "^2.5.4",
+    "socket.io-redis": "^6.1.1",
     "typeorm": "^0.3.20",
     "uuidv4": "^6.2.13"
   },

@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ManagerService } from './manager/manager.service';
 import { ManagerController } from './manager/manager.controller';
-import { ChattingModule } from './chatting/chatting.module';
+import { ChatModule } from './chat/chat.module';
 import { ConfigModule } from '@nestjs/config';
 import { RedisModule } from '@liaoliaots/nestjs-redis';
 import { RedisConfigService } from './services/redis-config.service';
@@ -36,7 +36,7 @@ import { PlayerModule } from './player/player.module';
     }),
     // PrometheusModule.register(),
     TypeOrmModule.forFeature([Member, DataSource, SessionInfo]),
-    ChattingModule,
+    ChatModule,
     EntityModule,
     SchemaModule,
     ScreenBannerModule,

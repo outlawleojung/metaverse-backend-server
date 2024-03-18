@@ -19,7 +19,11 @@ export class RedisFunctionService {
   }
 
   // Redis 기존 저장된 JSON 데이터 value 수정
-  async updateJson(key: string, fieldName: string, fieldValue: any): Promise<void> {
+  async updateJson(
+    key: string,
+    fieldName: string,
+    fieldValue: any,
+  ): Promise<void> {
     const jsonValue = await this.redisClient.get(key);
     const objValue = JSON.parse(jsonValue);
 

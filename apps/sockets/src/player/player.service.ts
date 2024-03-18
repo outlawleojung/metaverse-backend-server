@@ -1,5 +1,5 @@
 import { RedisFunctionService } from '@libs/redis';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { TokenCheckService } from '../manager/auth/tocket-check.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';

@@ -126,7 +126,7 @@ export const PLAYER_SOCKET_C_MESSAGE = Object.freeze({
 });
 
 export const NAMESPACE = Object.freeze({
-  CHATTING: 'chatting',
+  CHAT: 'chat',
   BLOCKCHAIN: 'blockchain',
   FRIEND: 'friend',
   OFFICE: 'office',

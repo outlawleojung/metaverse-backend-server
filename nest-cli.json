@@ -1,14 +1,14 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "apps/moasis/src",
+  "sourceRoot": "apps/moai-backend-webserver/src",
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "tsConfigPath": "apps/moasis/tsconfig.app.json"
+    "tsConfigPath": "apps/moai-backend-webserver/tsconfig.app.json"
   },
   "monorepo": true,
-  "root": "apps/moasis",
+  "root": "apps/moai-backend-webserver",
   "projects": {
     "account": {
       "type": "application",
@@ -37,42 +37,6 @@
         "tsConfigPath": "libs/common/tsconfig.lib.json"
       }
     },
-    "contents": {
-      "type": "application",
-      "root": "apps/contents",
-      "entryFile": "main",
-      "sourceRoot": "apps/contents/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/contents/tsconfig.app.json"
-      }
-    },
-    "gateway": {
-      "type": "application",
-      "root": "apps/gateway",
-      "entryFile": "main",
-      "sourceRoot": "apps/gateway/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/gateway/tsconfig.app.json"
-      }
-    },
-    "admin": {
-      "type": "application",
-      "root": "apps/admin",
-      "entryFile": "main",
-      "sourceRoot": "apps/admin/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/admin/tsconfig.app.json"
-      }
-    },
-    "webview": {
-      "type": "application",
-      "root": "apps/webview",
-      "entryFile": "main",
-      "sourceRoot": "apps/webview/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/webview/tsconfig.app.json"
-      }
-    },
     "constants": {
       "type": "library",
       "root": "libs/constants",
@@ -91,13 +55,40 @@
         "tsConfigPath": "libs/mongodb/tsconfig.lib.json"
       }
     },
-    "redis": {
-      "type": "library",
-      "root": "libs/redis",
-      "entryFile": "index",
-      "sourceRoot": "libs/redis/src",
+    "admin": {
+      "type": "application",
+      "root": "apps/admin",
+      "entryFile": "main",
+      "sourceRoot": "apps/admin/src",
       "compilerOptions": {
-        "tsConfigPath": "libs/redis/tsconfig.lib.json"
+        "tsConfigPath": "apps/admin/tsconfig.app.json"
+      }
+    },
+    "contents": {
+      "type": "application",
+      "root": "apps/contents",
+      "entryFile": "main",
+      "sourceRoot": "apps/contents/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/contents/tsconfig.app.json"
+      }
+    },
+    "gateway": {
+      "type": "application",
+      "root": "apps/gateway",
+      "entryFile": "main",
+      "sourceRoot": "apps/gateway/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/gateway/tsconfig.app.json"
+      }
+    },
+    "pass": {
+      "type": "application",
+      "root": "apps/pass",
+      "entryFile": "main",
+      "sourceRoot": "apps/pass/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/pass/tsconfig.app.json"
       }
     },
     "payments": {
@@ -109,15 +100,6 @@
         "tsConfigPath": "apps/payments/tsconfig.app.json"
       }
     },
-    "pass-auth": {
-      "type": "application",
-      "root": "apps/pass-auth",
-      "entryFile": "main",
-      "sourceRoot": "apps/pass-auth/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/pass-auth/tsconfig.app.json"
-      }
-    },
     "sockets": {
       "type": "application",
       "root": "apps/sockets",
@@ -125,6 +107,24 @@
       "sourceRoot": "apps/sockets/src",
       "compilerOptions": {
         "tsConfigPath": "apps/sockets/tsconfig.app.json"
+      }
+    },
+    "webview": {
+      "type": "application",
+      "root": "apps/webview",
+      "entryFile": "main",
+      "sourceRoot": "apps/webview/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/webview/tsconfig.app.json"
+      }
+    },
+    "redis": {
+      "type": "library",
+      "root": "libs/redis",
+      "entryFile": "index",
+      "sourceRoot": "libs/redis/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/redis/tsconfig.lib.json"
       }
     }
   }

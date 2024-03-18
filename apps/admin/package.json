@@ -1,5 +1,5 @@
 {
-  "name": "@app/admin",
+  "name": "@apps/admin",
   "version": "1.0.0",
   "description": "monorepo admin",
   "scripts": {
@@ -10,9 +10,6 @@
   "author": {
     "name": "Leo Jung",
     "email": "myjung@moaiworks.co.kr"
-  },
-  "engines": {
-    "node": ">=18 <=20"
   },
   "license": "MIT",
   "dependencies": {},
