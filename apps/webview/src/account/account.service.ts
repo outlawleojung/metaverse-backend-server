@@ -1,7 +1,4 @@
-import { EmailOptions, MailService } from '../mail/mail.service';
-import { v1 } from 'uuid';
-import bcrypt from 'bcrypt';
-import { CommonService } from '@libs/common';
+import bcryptjs from 'bcryptjs';
 import { PROVIDER_TYPE } from '@libs/constants';
 import {
   Injectable,
@@ -12,16 +9,12 @@ import {
 } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import {
-  EmailCheck,
-  EmailConfirm,
-  EmailLimit,
   KtmfEventEmailInfo,
   Member,
   MemberAccount,
   MemberPasswordAuth,
 } from '@libs/entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import dayjs from 'dayjs';
 import { ResetPasswordtDto } from './dto/req/reset.password.dto';
 import { KtmfEmailDto } from './dto/req/ktmf.email.dto';
 
@@ -92,7 +85,7 @@ export class AccountService {
       memberAccount.providerType = PROVIDER_TYPE.ARZMETA;
 
       // 패스워드 설정
-      const hashedPassword = await bcrypt.hash(data.password, 12);
+      const hashedPassword = await bcryptjs.hash(data.password, 12);
       memberAccount.password = hashedPassword;
 
       await queryRunner.manager
