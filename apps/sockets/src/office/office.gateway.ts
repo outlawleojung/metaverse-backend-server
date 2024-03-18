@@ -19,7 +19,7 @@ import {
   OFFICE_SOCKET_C_MESSAGE,
   OFFICE_SOCKET_S_MESSAGE,
   SOCKET_SERVER_ERROR_CODE_GLOBAL,
-} from '../constants/constants';
+} from '@libs/constants';
 
 @WebSocketGateway({
   namespace: NAMESPACE.OFFICE,

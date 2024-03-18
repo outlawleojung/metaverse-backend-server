@@ -15,7 +15,7 @@ import {
   NATS_EVENTS,
   RedisKey,
   SOCKET_S_GLOBAL,
-} from '../constants/constants';
+} from '@libs/constants';
 
 @Injectable()
 export class ManagerService {

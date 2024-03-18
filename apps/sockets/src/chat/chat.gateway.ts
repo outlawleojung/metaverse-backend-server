@@ -15,7 +15,7 @@ import {
   CHATTING_SOCKET_C_MESSAGE,
   NAMESPACE,
   NATS_EVENTS,
-} from '../constants/constants';
+} from '@libs/constants';
 
 @WebSocketGateway({
   namespace: NAMESPACE.CHAT,

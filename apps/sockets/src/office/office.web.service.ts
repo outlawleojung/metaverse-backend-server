@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { OfficeGateway } from './office.gateway';
 import { NatsService } from '../nats/nats.service';
-import { NATS_EVENTS } from '../constants/constants';
+import { NATS_EVENTS } from '@libs/constants';
 
 @Injectable()
 export class OfficeWebService {

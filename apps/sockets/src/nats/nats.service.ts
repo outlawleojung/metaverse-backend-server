@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { connect, NatsConnection, StringCodec, Subscription } from 'nats';
 import { EventEmitter } from 'events';
-import { NATS_EVENTS } from '../constants/constants';
+import { NATS_EVENTS } from '@libs/constants';
 
 @Injectable()
 export class NatsService extends EventEmitter implements OnModuleInit {

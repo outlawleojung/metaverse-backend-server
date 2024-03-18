@@ -19,7 +19,7 @@ import {
   NAMESPACE,
   NATS_EVENTS,
   RedisKey,
-} from '../constants/constants';
+} from '@libs/constants';
 
 @WebSocketGateway({
   cors: {

@@ -17,7 +17,7 @@ import {
   NAMESPACE,
   NATS_EVENTS,
   SCREEN_BANNER_SOCKET_S_MESSAGE,
-} from '../constants/constants';
+} from '@libs/constants';
 
 @Injectable()
 export class ScreenBannerService {

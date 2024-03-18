@@ -29,7 +29,7 @@ import {
   NATS_EVENTS,
   RedisKey,
   SOCKET_SERVER_ERROR_CODE_GLOBAL,
-} from '../constants/constants';
+} from '@libs/constants';
 import { RootServerService } from '../services/root-server.service';
 
 @Injectable()

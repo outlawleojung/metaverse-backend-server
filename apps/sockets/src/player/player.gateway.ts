@@ -13,7 +13,7 @@ import {
   PLAYER_SOCKET_C_MESSAGE,
   NAMESPACE,
   NATS_EVENTS,
-} from '../constants/constants';
+} from '@libs/constants';
 import {
   C_BASE_SET_ANIMATION,
   C_BASE_SET_EMOJI,

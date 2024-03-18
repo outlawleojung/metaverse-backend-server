@@ -11,7 +11,7 @@ import {
   FRIEND_SOCKET_S_MESSAGE,
   RedisKey,
   SOCKET_SERVER_ERROR_CODE_GLOBAL,
-} from '../constants/constants';
+} from '@libs/constants';
 
 @Injectable()
 export class FriendService {

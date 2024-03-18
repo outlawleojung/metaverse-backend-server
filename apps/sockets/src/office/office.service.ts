@@ -9,7 +9,7 @@ import {
   OFFICE_SOCKET_S_MESSAGE,
   RedisKey,
   SOCKET_SERVER_ERROR_CODE_GLOBAL,
-} from '../constants/constants';
+} from '@libs/constants';
 import { TokenCheckService } from '../manager/auth/tocket-check.service';
 import { Repository } from 'typeorm';
 import { promisify } from 'util';

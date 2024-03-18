@@ -13,7 +13,7 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { BlockchainService } from './blockchain.service';
 import { GatewayInitiService } from '../services/gateway-init.service';
 import { Decrypt } from '@libs/common';
-import { NAMESPACE, RedisKey } from '../constants/constants';
+import { NAMESPACE, RedisKey } from '@libs/constants';
 
 @WebSocketGateway({
   namespace: NAMESPACE.BLOCKCHAIN,

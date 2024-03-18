@@ -11,7 +11,7 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
 import { GatewayInitiService } from '../services/gateway-init.service';
 import { Decrypt } from '@libs/common';
-import { NAMESPACE, NATS_EVENTS } from '../constants/constants';
+import { NAMESPACE, NATS_EVENTS } from '@libs/constants';
 
 @WebSocketGateway({
   namespace: NAMESPACE.SCREEN_BANNER,

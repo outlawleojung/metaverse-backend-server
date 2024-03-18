@@ -8,7 +8,7 @@ import { Server, Socket } from 'socket.io';
 import { FriendService } from './friend.service';
 import { GatewayInitiService } from '../services/gateway-init.service';
 import { Decrypt } from '@libs/common';
-import { FRIEND_SOCKET_C_MESSAGE, NAMESPACE } from '../constants/constants';
+import { FRIEND_SOCKET_C_MESSAGE, NAMESPACE } from '@libs/constants';
 
 @WebSocketGateway({
   namespace: NAMESPACE.FRIEND,

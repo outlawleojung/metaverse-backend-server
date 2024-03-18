@@ -4,7 +4,7 @@ import { Socket } from 'socket.io';
 import { Member, SessionInfo } from '@libs/entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SOCKET_S_GLOBAL } from '../../constants/constants';
+import { SOCKET_S_GLOBAL } from '@libs/constants';
 
 interface JwtPayload {
   idx: string;
