@@ -1,7 +1,6 @@
 {
   "name": "@libs/redis",
   "version": "2.0.2",
-  "main": "src/index.js",
   "private": false,
   "description": "moasis library redis project",
   "scripts": {

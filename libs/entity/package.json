@@ -1,7 +1,6 @@
 {
   "name": "@libs/entity",
   "version": "3.0.4",
-  "main": "src/index.js",
   "private": false,
   "description": "moasis library entity project",
   "scripts": {

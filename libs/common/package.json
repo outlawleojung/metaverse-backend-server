@@ -1,7 +1,6 @@
 {
   "name": "@libs/common",
   "version": "1.4.4",
-  "main": "src/index.js",
   "private": false,
   "description": "moasis library common project",
   "scripts": {
