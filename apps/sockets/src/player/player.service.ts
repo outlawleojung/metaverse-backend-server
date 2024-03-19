@@ -49,7 +49,7 @@ export class PlayerService {
       return;
     }
 
-    const memberId = memberInfo.memberInfo.memberId;
+    const memberId = memberInfo.memberId;
 
     client.join(memberId);
     client.join(sessionId);
@@ -101,7 +101,7 @@ export class PlayerService {
         return;
       }
 
-      const memberId = memberInfo.memberInfo.memberId;
+      const memberId = memberInfo.memberId;
 
       // 룸아이디로 룸 정보 조회
       const checkRoom = await this.redisClient.get(redisRoomId);

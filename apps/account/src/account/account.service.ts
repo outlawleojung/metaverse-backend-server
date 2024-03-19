@@ -32,15 +32,11 @@ import {
   SessionInfo,
   EmailLimit,
   MemberPasswordAuth,
-  MemberLoginRewardLog,
   MemberWalletInfo,
   KtmfNftTokenToWallet,
   MemberNftRewardLog,
   KtmfNftToken,
   MemberMoney,
-  MemberMyRoomInfo,
-  StartMyRoom,
-  MemberFurnitureItemInven,
 } from '@libs/entity';
 import { SignMemberDto } from './dto/request/sign.member.dto';
 import { LogInMemberDto } from './dto/request/login.member.dto';

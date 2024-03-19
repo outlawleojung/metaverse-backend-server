@@ -25,6 +25,7 @@ export class JwtService {
   signToken(member: Member): string {
     const payload = {
       idx: member.memberId,
+      nickname: member.nickname,
     };
 
     return jwt.sign(payload, secretKey, options);

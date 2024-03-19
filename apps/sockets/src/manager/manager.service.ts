@@ -51,7 +51,7 @@ export class ManagerService {
     const memberInfo =
       await this.tokenCheckService.checkLoginToken(jwtAccessToken);
 
-    const memberId = memberInfo.memberInfo.memberId;
+    const memberId = memberInfo.memberId;
 
     // 소켓 정보 조회
     const socketInfo = await this.redisClient.get(

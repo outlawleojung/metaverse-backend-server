@@ -41,7 +41,7 @@ export class OfficeService {
       return;
     }
 
-    const memberId = memberInfo.memberInfo.memberId;
+    const memberId = memberInfo.memberId;
 
     client.join(memberId);
     client.join(client.handshake.auth.sessionId);
@@ -98,7 +98,7 @@ export class OfficeService {
     if (
       (
         await smembersAsync(RedisKey.getStrOfficeReservRoomCode(roomCode))
-      ).includes(memberInfo.memberInfo.memberId)
+      ).includes(memberInfo.memberId)
     ) {
       this.logger.debug('이미 예약 대기중인 회의실 입니다.');
       return client.emit(
@@ -136,7 +136,7 @@ export class OfficeService {
         // 예약 목록에 회원 추가
         await saddAsync(
           RedisKey.getStrOfficeReservRoomCode(roomCode),
-          memberInfo.memberInfo.memberId,
+          memberInfo.memberId,
         );
 
         // 회의실 대기방 접속 (채팅방이나 나머지는 roomId를 기준으로 접속되어서 roomCode로 별도 입장)

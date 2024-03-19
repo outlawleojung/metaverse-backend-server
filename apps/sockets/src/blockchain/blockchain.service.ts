@@ -30,7 +30,7 @@ export class BlockchainService {
       return;
     }
 
-    const memberId = memberInfo.memberInfo.memberId;
+    const memberId = memberInfo.memberId;
 
     client.join(memberId);
     client.join(client.handshake.auth.sessionId);

@@ -20,7 +20,7 @@
     "start:webview": "npx cross-env NODE_ENV=production pm2 --name webview-api start dist/apps/webview/main.js",
     "start:payments": "npx cross-env NODE_ENV=production pm2 --name payments start dist/apps/payments/main.js",
     "start:pass": "npx cross-env NODE_ENV=production pm2 --name pass start dist/apps/pass/main.js",
-    "start:sockets": "cnpx ross-env NODE_ENV=production pm2 --name sockets start dist/apps/sockets/main.js",
+    "start:sockets": "npx cross-env NODE_ENV=production pm2 --name sockets start dist/apps/sockets/main.js",
     "dev:account": "nest start account --watch",
     "dev:contents": "nest start contents --watch",
     "dev:admin": "nest start admin --watch",

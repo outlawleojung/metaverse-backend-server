@@ -30,7 +30,6 @@ import {
   RedisKey,
   SOCKET_SERVER_ERROR_CODE_GLOBAL,
 } from '@libs/constants';
-import { RootServerService } from '../services/root-server.service';
 
 @Injectable()
 export class ChatService {
@@ -82,7 +81,7 @@ export class ChatService {
       return;
     }
 
-    const memberId = memberInfo.memberInfo.memberId;
+    const memberId = memberInfo.memberId;
 
     // 클라이언트 데이터 설정
     client.data.memberId = memberId;
@@ -264,7 +263,7 @@ export class ChatService {
     await roomDataLogArr.save();
   }
 
-  // 메세지 받기
+  // 메세지 보내기
   async sendMessage(
     client: Socket,
     jwtAccessToken: string,
@@ -282,7 +281,7 @@ export class ChatService {
     }
 
     const messageInfo = {
-      sendNickName: memberInfo.memberInfo.nickname,
+      sendNickName: memberInfo.nickname,
       message: message,
       color: color,
     };
@@ -291,15 +290,15 @@ export class ChatService {
 
     const findMemberCode = await this.memberRepository.findOne({
       where: {
-        memberId: memberInfo.memberInfo.memberId,
+        memberId: memberInfo.memberId,
       },
     });
 
     const kstCreatedAt = moment.tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');
     const worldChattingLogSave = await new this.worldChattingLog({
-      memberId: memberInfo.memberInfo.memberId,
+      memberId: memberInfo.memberId,
       memberCode: findMemberCode.memberCode,
-      nickName: memberInfo.memberInfo.nickname,
+      nickName: memberInfo.nickname,
       roomCode: roomCode,
       roomName: roomName, // 룸코드가 안넘어올 수 있어서 안될 수 있으니 테스트 해봐야함
       roomId: client.data.roomId,
