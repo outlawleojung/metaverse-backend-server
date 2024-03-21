@@ -709,18 +709,20 @@ export const randomString = (num: number) => {
 
 export const RedisKey = {
   getStrRoomId: (roomId: string): string => `room:${roomId}`,
+  getStrRooms: (): string => `rooms`,
   getStrRoomPlayerList: (roomId: string): string => `${roomId}:playerlist`,
   getStrMemberCurrentRoom: (memberId: string): string =>
     `member:${memberId}:currentRoom`,
   getStrMemberLockSocket: (memberId: string): string =>
     `lock:socket:${memberId}`,
   getStrMemberSocket: (memberId: string): string => `socket:${memberId}`,
-
-  getStrMemberCurruntRoom: (memberId: string): string =>
-    `member:${memberId}:currentRoom`,
+  getStrRedisLockKey: (gateway: string): string =>
+    `lock:gateway:init:${gateway}`,
   getStrOfficeReservRoomCode: (roomCode: string): string =>
     `officeReservation:${roomCode}`,
   getStrOfficeReservKey: (): string => `officeReservationRoomCode`,
+  getStrRoomIdCounter: (): string => `roomIdCounter`,
+  getStrMyRoom: (roomId): string => `myroom:${roomId}`,
 };
 
 export const SOCKET_SERVER_ERROR_CODE_GLOBAL = Object.freeze({
@@ -873,4 +875,23 @@ export const NATS_EVENTS = Object.freeze({
 
   NATS_CONNECTED: 'NATS_CONNECTED',
   DUPLICATE_LOGIN_USER: 'DUPLICATE_LOGIN_USER',
+});
+
+export const ROOM_TYPE = Object.freeze({
+  Arz: 0,
+  Busan: 1,
+  JumpingMatching: 2,
+  OXQuiz: 3,
+  Lecture: 4,
+  Meeting: 5,
+  Consulting: 6,
+  MyRoom: 7,
+  Conference: 8,
+  Game: 9,
+  Office: 10,
+  Store: 11,
+  Vote: 12,
+  Hospital: 13,
+  Festival: 14,
+  Unknown: 15,
 });

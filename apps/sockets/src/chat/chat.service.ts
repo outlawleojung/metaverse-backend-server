@@ -136,7 +136,7 @@ export class ChatService {
       client.data.memberId,
     );
 
-    const memberKey = RedisKey.getStrMemberCurruntRoom(client.data.memberId);
+    const memberKey = RedisKey.getStrMemberCurrentRoom(client.data.memberId);
     await this.redisClient.del(memberKey);
 
     // 구독 해제
@@ -646,7 +646,7 @@ export class ChatService {
     );
 
     // 기존 룸에서 사용자 제거
-    const memberKey = RedisKey.getStrMemberCurruntRoom(client.data.memberId);
+    const memberKey = RedisKey.getStrMemberCurrentRoom(client.data.memberId);
     await this.redisClient.del(memberKey);
 
     const kstCreatedAt = moment.tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');

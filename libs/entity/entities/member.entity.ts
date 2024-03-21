@@ -30,7 +30,6 @@ import { MemberVoteInfo } from './memberVoteInfo.entity';
 import { SessionInfo } from './sessionInfo.entity';
 import { MemberOfficeReservationInfo } from './memberOfficeReservationInfo.entity';
 import { MemberOfficeReservationWaitingInfo } from './memberOfficeReservationWaitingInfo.entity';
-import { ApiProperty } from '@nestjs/swagger';
 import { ProviderType } from './providerType.entity';
 import { MemberDefaultCardInfo } from './memberDefaultCardInfo.entity';
 import { MemberAvatarPartsItemInven } from './memberAvatarPartsItemInven.entity';
@@ -118,19 +117,31 @@ export class Member {
   @OneToMany(() => BlockMember, (blockmember) => blockmember.BlockMember)
   BlockMembers: BlockMember[];
 
-  @OneToMany(() => FriendRequest, (friendrequest) => friendrequest.RequestMember)
+  @OneToMany(
+    () => FriendRequest,
+    (friendrequest) => friendrequest.RequestMember,
+  )
   RequestMembers: FriendRequest[];
 
-  @OneToMany(() => FriendRequest, (friendrequest) => friendrequest.ReceivedMember)
+  @OneToMany(
+    () => FriendRequest,
+    (friendrequest) => friendrequest.ReceivedMember,
+  )
   ReceivedMembers: FriendRequest[];
 
-  @OneToOne(() => InfiniteCodeRank, (infinitecoderank) => infinitecoderank.Member)
+  @OneToOne(
+    () => InfiniteCodeRank,
+    (infinitecoderank) => infinitecoderank.Member,
+  )
   InfiniteCodeRank: InfiniteCodeRank;
 
   @OneToMany(() => MemberAccount, (memberaccount) => memberaccount.Member)
   MemberAccounts: MemberAccount[];
 
-  @OneToMany(() => MemberAvatarInfo, (memberavatarinfo) => memberavatarinfo.Member)
+  @OneToMany(
+    () => MemberAvatarInfo,
+    (memberavatarinfo) => memberavatarinfo.Member,
+  )
   MemberAvatarInfos: MemberAvatarInfo[];
 
   @OneToMany(() => MemberFriend, (memberfriend) => memberfriend.Member)
@@ -139,13 +150,22 @@ export class Member {
   @OneToMany(() => MemberFriend, (memberfriend) => memberfriend.friendMember)
   MemberFriends: MemberFriend[];
 
-  @OneToMany(() => MemberNicknameLog, (membernicknamelog) => membernicknamelog.Member)
+  @OneToMany(
+    () => MemberNicknameLog,
+    (membernicknamelog) => membernicknamelog.Member,
+  )
   MemberNicknameLogs: MemberNicknameLog[];
 
-  @OneToMany(() => MemberInfiniteCodeRank, (memberinfinitecoderank) => memberinfinitecoderank.Member)
+  @OneToMany(
+    () => MemberInfiniteCodeRank,
+    (memberinfinitecoderank) => memberinfinitecoderank.Member,
+  )
   MemberInfiniteCodeRanks: MemberInfiniteCodeRank[];
 
-  @OneToMany(() => MemberAvatarPartsItemInven, (memberavatarpartsiteminven) => memberavatarpartsiteminven.Member)
+  @OneToMany(
+    () => MemberAvatarPartsItemInven,
+    (memberavatarpartsiteminven) => memberavatarpartsiteminven.Member,
+  )
   MemberAvatarPartsItemInvens: MemberAvatarPartsItemInven[];
 
   @OneToMany(() => MemberItemInven, (memberiteminven) => memberiteminven.Member)
@@ -154,28 +174,44 @@ export class Member {
   @OneToMany(() => MemberLoginLog, (memberloginlog) => memberloginlog.Member)
   MemberLoginLogs: MemberLoginLog[];
 
-  @OneToMany(() => MemberReportInfo, (memberreportinfo) => memberreportinfo.ReportMember)
+  @OneToMany(
+    () => MemberReportInfo,
+    (memberreportinfo) => memberreportinfo.ReportMember,
+  )
   MemberReportInfos: MemberReportInfo[];
 
-  @OneToMany(() => MemberReportInfo, (memberreportinfo) => memberreportinfo.TargetMember)
+  @OneToMany(
+    () => MemberReportInfo,
+    (memberreportinfo) => memberreportinfo.TargetMember,
+  )
   MemberReportTargetInfos: MemberReportInfo[];
 
   @OneToMany(() => MemberVoteInfo, (membervoteinfo) => membervoteinfo.Member)
   MemberVoteInfos: MemberVoteInfo[];
 
-  @OneToMany(() => MemberSelectVoteInfo, (membervoteinfo) => membervoteinfo.Member)
+  @OneToMany(
+    () => MemberSelectVoteInfo,
+    (membervoteinfo) => membervoteinfo.Member,
+  )
   MemberSelectVoteInfos: MemberSelectVoteInfo[];
 
-  @OneToMany(() => MemberOfficeReservationInfo, (memberOfficeReservationInfo) => memberOfficeReservationInfo.Member)
+  @OneToMany(
+    () => MemberOfficeReservationInfo,
+    (memberOfficeReservationInfo) => memberOfficeReservationInfo.Member,
+  )
   MemberOfficeReservationInfos: MemberOfficeReservationInfo[];
 
   @OneToMany(
     () => MemberOfficeReservationWaitingInfo,
-    (memberOfficeReservationWaitingInfo) => memberOfficeReservationWaitingInfo.Member,
+    (memberOfficeReservationWaitingInfo) =>
+      memberOfficeReservationWaitingInfo.Member,
   )
   MemberOfficeReservationWaitingInfos: MemberOfficeReservationWaitingInfo[];
 
-  @OneToMany(() => MemberBusinessCardInfo, (memberBusinessCardInfo) => memberBusinessCardInfo.Member)
+  @OneToMany(
+    () => MemberBusinessCardInfo,
+    (memberBusinessCardInfo) => memberBusinessCardInfo.Member,
+  )
   MemberBusinessCardInfos: MemberBusinessCardInfo[];
 
   @OneToMany(() => MemberInquiryGroup, (inquiry) => inquiry.Member)
@@ -242,13 +278,22 @@ export class Member {
   @OneToOne(() => SessionInfo, (sessioninfo) => sessioninfo.Member)
   SessionInfo: SessionInfo;
 
-  @OneToOne(() => MemberDefaultCardInfo, (memberDefaultCardInfo) => memberDefaultCardInfo.Member)
+  @OneToOne(
+    () => MemberDefaultCardInfo,
+    (memberDefaultCardInfo) => memberDefaultCardInfo.Member,
+  )
   MemberDefaultCardInfo: MemberDefaultCardInfo;
 
-  @OneToOne(() => MemberIdentification, (memberIdentification) => memberIdentification.Member)
+  @OneToOne(
+    () => MemberIdentification,
+    (memberIdentification) => memberIdentification.Member,
+  )
   MemberIdentification: MemberIdentification;
 
-  @OneToOne(() => MemberPasswordAuth, (memberPasswordAuth) => memberPasswordAuth.Member)
+  @OneToOne(
+    () => MemberPasswordAuth,
+    (memberPasswordAuth) => memberPasswordAuth.Member,
+  )
   MemberPasswordAuth: MemberPasswordAuth;
 
   @OneToOne(() => KtmfEventEmailInfo, (info) => info.Member)

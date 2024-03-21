@@ -2,6 +2,7 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Injectable, Logger } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { RedisLockService } from './redis-lock.service';
+import { RedisKey } from '@libs/constants';
 
 @Injectable()
 export class GatewayInitiService {
@@ -14,7 +15,7 @@ export class GatewayInitiService {
     gateway: string,
     logger: Logger,
   ): Promise<boolean> {
-    const lockKey = `lock:gateway:init:${gateway}`;
+    const lockKey = RedisKey.getStrRedisLockKey(gateway);
 
     // Lock 획득 시도
     if (await this.lockService.tryLock(lockKey, 30000)) {

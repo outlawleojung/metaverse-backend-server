@@ -11,7 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Not, QueryRunner, Repository } from 'typeorm';
 import { LoginTokenService } from './../auth/login-token.service';
 import { v1 } from 'uuid';
-import bcrypt from 'bcryptjs';
+import bcryptjs from 'bcryptjs';
 import crypto from 'crypto';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -68,7 +68,7 @@ export class AccountService {
   ) {}
   private readonly logger = new Logger(AccountService.name);
 
-  // 아즈메타 계정 생성
+  // 자체 계정 생성
   async createMember(memberData: SignMemberDto) {
     const accountToken = Decrypt(memberData.accountToken) as string;
     // 이메일 중복 검증
@@ -127,7 +127,7 @@ export class AccountService {
       //패스워드 설정
       // 패스워드 해싱
       const password: string = String(Decrypt(memberData.password));
-      const hashedPassword = await bcrypt.hash(password, 12);
+      const hashedPassword = await bcryptjs.hash(password, 12);
 
       const memberAccount = new MemberAccount();
       memberAccount.memberId = memberInfo.memberId;
@@ -195,7 +195,7 @@ export class AccountService {
     this.logger.debug({ exAccount });
 
     const password = String(Decrypt(memberData.password));
-    const validPassword = await bcrypt.compareSync(
+    const validPassword = await bcryptjs.compareSync(
       password,
       exAccount.password!,
     );
@@ -504,7 +504,7 @@ export class AccountService {
       newAccount.providerType = data.providerType;
       newAccount.memberId = data.memberId;
       if (data.password) {
-        const hashedpassword = await bcrypt.hash(
+        const hashedpassword = await bcryptjs.hash(
           String(Decrypt(data.password)),
           12,
         );
@@ -577,7 +577,7 @@ export class AccountService {
     this.logger.debug({ exAccount });
 
     const password = String(Decrypt(data.password));
-    const validPassword = await bcrypt.compareSync(
+    const validPassword = await bcryptjs.compareSync(
       password,
       exAccount.password!,
     );
@@ -1203,7 +1203,7 @@ export class AccountService {
   }
 
   // 공용 계정 생성 모듈
-  private async commonCreateAccount(
+  async commonCreateAccount(
     queryRunner: QueryRunner,
     accountToken,
     providerType,

@@ -81,6 +81,15 @@ export class MemberService {
     };
   }
 
+  async getMemberByEmail(email: string) {
+    return this.memberAccountRepository.findOne({
+      where: {
+        providerType: PROVIDER_TYPE.ARZMETA,
+        accountToken: email,
+      },
+    });
+  }
+
   // 탈퇴 진행 여부 체크
   async checkWithdrawalProcess(data: CheckWidhDrawalDto) {
     const accountToken = String(Decrypt(data.accountToken));

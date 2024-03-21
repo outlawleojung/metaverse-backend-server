@@ -22,8 +22,8 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('[a:zrmeta] 컨텐츠 서버 API')
-    .setDescription('[a:zrmeta] 컨텐츠 서버 개발을 위한 API 문서')
+    .setTitle('[moasis] 컨텐츠 서버 API')
+    .setDescription('[moasis] 컨텐츠 서버 개발을 위한 API 문서')
     .addCookieAuth('connect.sid')
     .setVersion('1.0.0')
     .build();

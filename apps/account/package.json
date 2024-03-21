@@ -12,6 +12,8 @@
     "email": "myjung@moaiworks.co.kr"
   },
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "@nestjs/jwt": "^10.2.0"
+  },
   "devDependencies": {}
 }

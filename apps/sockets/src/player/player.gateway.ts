@@ -9,6 +9,7 @@ import { GatewayInitiService } from '../services/gateway-init.service';
 import { Server, Socket } from 'socket.io';
 import { Decrypt } from '@libs/common';
 import { NatsService } from '../nats/nats.service';
+import { RoomType } from '../room/room-type';
 import {
   PLAYER_SOCKET_C_MESSAGE,
   NAMESPACE,
@@ -19,6 +20,7 @@ import {
   C_BASE_SET_EMOJI,
   C_BASE_SET_TRANSFORM,
 } from './packets/packet';
+import { RoomService } from '../room/room.service';
 
 @WebSocketGateway({
   namespace: NAMESPACE.PLAYER,
@@ -37,6 +39,7 @@ export class PlayerGateway {
   constructor(
     @Inject(forwardRef(() => PlayerService))
     private readonly playerService: PlayerService,
+    private roomService: RoomService,
     private readonly gatewayInitService: GatewayInitiService,
     private readonly natsService: NatsService,
   ) {}
@@ -51,6 +54,10 @@ export class PlayerGateway {
       // 초기화 작업 수행
       this.logger.debug(`동기화 서버 실행 ✅`);
     }
+
+    this.natsService.on(NATS_EVENTS.NATS_CONNECTED, async () => {
+      // 룸 생성 구독
+    });
   }
 
   async handleConnection(client: Socket) {
@@ -164,4 +171,16 @@ export class PlayerGateway {
     this.playerService.baseSetEmoji(client, data);
     this.logger.debug('플레이어 이모지 동기화 데이터 : ', JSON.stringify(data));
   }
+
+  // @SubscribeMessage('C_GET_ROOM')
+  // async getRoom(client: Socket) {
+  //   const rooms = await this.roomService.getRooms();
+  //   this.logger.debug('룸 리스트 : ', JSON.stringify(rooms));
+  // }
+
+  // @SubscribeMessage('C_CREATE_ROOM')
+  // async creatRoom(client: Socket) {
+  //   const rooms = await this.roomService.createRoom(RoomType.MyRoom);
+  //   this.logger.debug('룸 생성 : ', JSON.stringify(rooms));
+  // }
 }

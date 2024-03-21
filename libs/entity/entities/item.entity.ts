@@ -1,6 +1,15 @@
 import { CommerceZoneMannequin } from './commerceZoneMannequin.entity';
 import { AvatarPreset } from './avatarPreset.entity';
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { InteriorInstallInfo } from './interiorInstallInfo.entity';
 import { ItemType } from './itemType.entity';
 import { CategoryType } from './categoryType.entity';
@@ -80,7 +89,10 @@ export class Item {
   @Column('int', { name: 'buySellType' })
   buySellType: number;
 
-  @OneToOne(() => InteriorInstallInfo, (interiorinstallinfo) => interiorinstallinfo.Item)
+  @OneToOne(
+    () => InteriorInstallInfo,
+    (interiorinstallinfo) => interiorinstallinfo.Item,
+  )
   InteriorInstallInfo: InteriorInstallInfo;
 
   @ManyToOne(() => ItemType, (itemtype) => itemtype.Items, {
@@ -104,17 +116,25 @@ export class Item {
   @JoinColumn([{ name: 'packageType', referencedColumnName: 'type' }])
   PackageType: PackageType;
 
-  @ManyToOne(() => Localization, (localization) => localization.LocalizationItemName, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => Localization,
+    (localization) => localization.LocalizationItemName,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'name', referencedColumnName: 'id' }])
   LocalizationName: Localization;
 
-  @ManyToOne(() => Localization, (localization) => localization.LocalizationItemDesc, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => Localization,
+    (localization) => localization.LocalizationItemDesc,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'description', referencedColumnName: 'id' }])
   LocalizationDesc: Localization;
 
@@ -149,7 +169,10 @@ export class Item {
   @OneToMany(() => MemberFurnitureItemInven, (inven) => inven.Item)
   MemberFurnitureItemInvens: MemberFurnitureItemInven[];
 
-  @OneToMany(() => MemberAvatarPartsItemInven, (memberavatarpartsiteminven) => memberavatarpartsiteminven.Item)
+  @OneToMany(
+    () => MemberAvatarPartsItemInven,
+    (memberavatarpartsiteminven) => memberavatarpartsiteminven.Item,
+  )
   MemberAvatarPartsItemInvens: MemberAvatarPartsItemInven[];
 
   @OneToMany(() => MemberItemInven, (memberiteminven) => memberiteminven.Item)

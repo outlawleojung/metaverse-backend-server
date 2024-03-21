@@ -27,6 +27,9 @@ export class MemberAccount {
   @Column('varchar', { name: 'password', nullable: true, length: 100 })
   password: string | null;
 
+  @Column('int', { name: 'regPathType', nullable: true })
+  regPathType: number | null;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -40,10 +43,14 @@ export class MemberAccount {
   @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
   Member: Member;
 
-  @ManyToOne(() => ProviderType, (providertype) => providertype.MemberAccounts, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => ProviderType,
+    (providertype) => providertype.MemberAccounts,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'providerType', referencedColumnName: 'type' }])
   ProviderType: ProviderType;
 }

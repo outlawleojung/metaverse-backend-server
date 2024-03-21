@@ -1,5 +1,5 @@
 import { RedisFunctionService } from '@libs/redis';
-import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { TokenCheckService } from '../manager/auth/tocket-check.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
@@ -19,6 +19,8 @@ import {
   C_BASE_SET_TRANSFORM,
 } from './packets/packet';
 import { NatsService } from '../nats/nats.service';
+import { RoomService } from '../room/room.service';
+import { IRoom } from '../room/room';
 
 @Injectable()
 export class PlayerService {
@@ -31,6 +33,7 @@ export class PlayerService {
     private readonly messageHandler: NatsMessageHandler,
     private readonly natsService: NatsService,
     private readonly redisFunctionService: RedisFunctionService,
+    private readonly roomService: RoomService,
   ) {}
 
   // 소켓 연결
@@ -119,7 +122,7 @@ export class PlayerService {
 
       // 기존에 속해있는 룸 정보 조회 및 처리
       const currentRoomId = await this.redisClient.get(
-        RedisKey.getStrMemberCurruntRoom(memberId),
+        RedisKey.getStrMemberCurrentRoom(memberId),
       );
       if (currentRoomId) {
         const currentMemberSetKey =
@@ -134,7 +137,7 @@ export class PlayerService {
 
       // 사용자의 현재 룸 정보 업데이트
       await this.redisClient.set(
-        RedisKey.getStrMemberCurruntRoom(memberId),
+        RedisKey.getStrMemberCurrentRoom(memberId),
         redisRoomId,
       );
 
@@ -228,7 +231,7 @@ export class PlayerService {
     );
 
     // 기존 룸에서 사용자 제거
-    const memberKey = RedisKey.getStrMemberCurruntRoom(client.data.memberId);
+    const memberKey = RedisKey.getStrMemberCurrentRoom(client.data.memberId);
     await this.redisClient.del(memberKey);
 
     // 룸 퇴장 이벤트 발생

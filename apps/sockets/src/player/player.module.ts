@@ -12,9 +12,13 @@ import { RootServerService } from '../services/root-server.service';
 import { ManagerGateway } from '../manager/manager.gateway';
 import { RedisFunctionService } from '@libs/redis';
 import { ManagerService } from '../manager/manager.service';
+import { PlayerController } from './player.controller';
+import { RoomService } from '../room/room.service';
+import { RoomModule } from '../room/room.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Member, SessionInfo])],
+  imports: [TypeOrmModule.forFeature([Member, SessionInfo]), RoomModule],
+  controllers: [PlayerController],
   providers: [
     PlayerGateway,
     PlayerService,
@@ -27,6 +31,7 @@ import { ManagerService } from '../manager/manager.service';
     RedisFunctionService,
     ManagerGateway,
     ManagerService,
+    RoomService,
   ],
 })
 export class PlayerModule {}

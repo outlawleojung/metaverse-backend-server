@@ -25,8 +25,8 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('[a:zrmeta] 유니티 웹뷰 API')
-    .setDescription('[a:zrmeta] 유니티 개발을 위한 API 문서')
+    .setTitle('[moasis] 유니티 웹뷰 API')
+    .setDescription('[moasis] 유니티 개발을 위한 API 문서')
     .addCookieAuth('connect.sid')
     .setVersion('1.0.0')
     .build();

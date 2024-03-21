@@ -57,14 +57,14 @@ export class AccountController {
     status: HttpStatus.OK,
     type: SignUpResponseDto,
   })
-  @ApiOperation({ summary: '아즈메타 계정 생성' })
+  @ApiOperation({ summary: '자체 계정 생성' })
   @Post('create')
   async createMember(@Body() memberData: SignMemberDto) {
     return await this.accountService.createMember(memberData);
   }
 
   //로그인
-  @ApiOperation({ summary: '아즈메타 로그인' })
+  @ApiOperation({ summary: '자체 로그인' })
   @ApiResponse({
     status: HttpStatus.FORBIDDEN,
     type: ErrorDto,

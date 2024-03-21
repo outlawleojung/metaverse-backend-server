@@ -26,8 +26,8 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('[a:zrmeta] 로그인 서버 API')
-    .setDescription('[a:zrmeta] 로그인 및 계정 관련 개발을 위한 API 문서')
+    .setTitle('[moasis] 로그인 서버 API')
+    .setDescription('[moasis] 로그인 및 계정 관련 개발을 위한 API 문서')
     .setVersion('1.0.0')
     .build();
 
