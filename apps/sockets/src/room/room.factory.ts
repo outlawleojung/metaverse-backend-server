@@ -23,10 +23,11 @@ export class RoomFactory {
     roomId: string,
     ownerId: string = null,
     roomCode: string = null,
+    roomName: string = null,
   ): Promise<IRoom> {
     switch (type) {
       case RoomType.Game:
-        return new GameRoom(roomId, type, sceneName);
+        return new GameRoom({ roomId, roomName, ownerId, sceneName });
       case RoomType.MyRoom:
         // 중복 검증
         const exMyRoom = await this.redisClient.get(
@@ -35,9 +36,14 @@ export class RoomFactory {
         if (exMyRoom) {
           return JSON.parse(exMyRoom) as MyRoom;
         }
-        return new MyRoom(roomId, sceneName, ownerId);
+        return new MyRoom({ roomId, sceneName, ownerId });
       case RoomType.Office:
-        return new OfficeRoom(roomId, sceneName, ownerId, roomCode);
+        return new OfficeRoom({
+          roomId,
+          sceneName,
+          ownerId,
+          roomCode,
+        });
       default:
         throw new Error('Invalid room type');
     }

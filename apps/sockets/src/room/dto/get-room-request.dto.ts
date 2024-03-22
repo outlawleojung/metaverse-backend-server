@@ -19,10 +19,18 @@ export class GetRoomRequestDto {
   ownerId: string | null;
 
   @ApiProperty({
-    example: '닉네임이다',
-    description: '닉네임',
+    example: 'MyRoom',
+    description: '룸 타입',
   })
   @IsString()
   @IsOptional()
   roomType: string | null;
+
+  @ApiProperty({
+    example: '2412232',
+    description: '룸 코드',
+  })
+  @IsString()
+  @IsOptional()
+  roomCode: string | null;
 }

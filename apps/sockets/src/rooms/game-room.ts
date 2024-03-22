@@ -1,17 +1,24 @@
-import { Room } from '../room/room';
+import { IRoomWithOwner, IRoomWithPlaying } from '../room/room';
 
-export class GameRoom extends Room {
-  startGame() {
-    // 게임 시작 로직
-    this.broadcast('gameStarted', {});
+import { RoomType } from '../room/room-type';
+
+export interface GameRoomRoomDetails {
+  ownerId: string;
+  roomId: string;
+  roomName: string;
+  sceneName: string;
+}
+
+export class GameRoom implements IRoomWithOwner, IRoomWithPlaying {
+  roomCode: string;
+  isPlaying: boolean;
+  ownerId: string;
+  roomId: string;
+  type: RoomType;
+  sceneName: string;
+
+  constructor(details: GameRoomRoomDetails) {
+    this.type = RoomType.Game;
+    Object.assign(this, details);
   }
-
-  endGame() {
-    // 게임 종료 로직
-    this.broadcast('gameEnded', {});
-  }
-
-  join(clientId: string) {}
-  leave(clientId: string) {}
-  broadcast(event: string, data: any) {}
 }

@@ -1,16 +1,23 @@
-import { Room } from '../room/room';
+import { IRoom, IRoomWithCode, IRoomWithOwner } from './../room/room';
 import { RoomType } from '../room/room-type';
 
-export class OfficeRoom extends Room {
+export interface OfficeRoomDetails {
+  roomId: string;
+  ownerId: string;
+  roomCode: string;
+  sceneName: string;
+}
+
+export class OfficeRoom implements IRoomWithCode, IRoomWithOwner {
+  roomId: string;
+  type: RoomType;
+  sceneName: string;
   ownerId: string;
   ownerNickname: string;
   ownerAvatarInfo: any;
   roomCode: string;
 
-  constructor(roomId, sceneName, ownerId, roomCode) {
-    super(roomId, RoomType.Office, sceneName);
-
-    this.ownerId = ownerId;
-    this.roomCode = roomCode;
+  constructor(details: OfficeRoomDetails) {
+    Object.assign(this, details);
   }
 }

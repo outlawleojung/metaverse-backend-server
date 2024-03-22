@@ -710,6 +710,7 @@ export const randomString = (num: number) => {
 export const RedisKey = {
   getStrRoomId: (roomId: string): string => `room:${roomId}`,
   getStrRooms: (): string => `rooms`,
+  getRoomsByType: (type): string => `roomType:${type}`,
   getStrRoomPlayerList: (roomId: string): string => `${roomId}:playerlist`,
   getStrMemberCurrentRoom: (memberId: string): string =>
     `member:${memberId}:currentRoom`,

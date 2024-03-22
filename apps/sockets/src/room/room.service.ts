@@ -6,7 +6,7 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
-import { IRoom } from './room';
+import { IRoom, IRoomWithCode, IRoomWithOwner, IRoomWithPlaying } from './room';
 import { RoomFactory } from './room.factory';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
@@ -27,47 +27,47 @@ export class RoomService {
     private readonly lockService: RedisLockService,
   ) {}
 
-  indexRoom(room: IRoom) {
-    switch (room.type) {
-      case RoomType.MyRoom:
-        const myRoom = room as MyRoom;
-        this.redisClient.set(
-          RedisKey.getStrMyRoom(myRoom.ownerId),
-          JSON.stringify(myRoom),
-        );
-        break;
+  // indexRoom(room: IRoom) {
+  //   switch (room.type) {
+  //     case RoomType.MyRoom:
+  //       const myRoom = room as MyRoom;
+  //       this.redisClient.set(
+  //         RedisKey.getStrMyRoom(myRoom.ownerId),
+  //         JSON.stringify(myRoom),
+  //       );
+  //       break;
 
-      case RoomType.Arz:
-        break;
+  //     case RoomType.Arz:
+  //       break;
 
-      case RoomType.Game:
-        break;
+  //     case RoomType.Game:
+  //       break;
 
-      case RoomType.Festival:
-        break;
+  //     case RoomType.Festival:
+  //       break;
 
-      case RoomType.Conference:
-        break;
+  //     case RoomType.Conference:
+  //       break;
 
-      case RoomType.Vote:
-        break;
+  //     case RoomType.Vote:
+  //       break;
 
-      case RoomType.Store:
-        break;
+  //     case RoomType.Store:
+  //       break;
 
-      case RoomType.Office:
-        break;
+  //     case RoomType.Office:
+  //       break;
 
-      case RoomType.Busan:
-        break;
+  //     case RoomType.Busan:
+  //       break;
 
-      case RoomType.Hospital:
-        break;
+  //     case RoomType.Hospital:
+  //       break;
 
-      default:
-        break;
-    }
-  }
+  //     default:
+  //       break;
+  //   }
+  // }
 
   async getRoom(roomId: string): Promise<IRoom> {
     const roomKey = RedisKey.getStrRooms();
@@ -122,37 +122,68 @@ export class RoomService {
 
     const type = req.roomType;
 
+    const redisTypeRooms = await this.redisClient.smembers(type);
+    const _rooms: IRoom[] = [];
+
     switch (type) {
       case RoomType.Arz:
-        break;
-
       case RoomType.Game:
-        break;
-
       case RoomType.Festival:
-        break;
-
       case RoomType.Conference:
-        break;
-
       case RoomType.Vote:
-        break;
-
       case RoomType.Store:
-        break;
-
       case RoomType.Office:
-        break;
-
       case RoomType.Busan:
+        for (const room of redisTypeRooms) {
+          const r = JSON.parse(room) as IRoom;
+          _rooms.push(r);
+        }
         break;
-
       case RoomType.MyRoom:
         if (req.ownerId) {
+          for (const room of redisTypeRooms) {
+            const r = JSON.parse(room) as IRoomWithOwner;
+            if (r.ownerId === req.ownerId) {
+              _rooms.push(r);
+            }
+          }
         }
-      default:
         break;
+      case RoomType.Meeting:
+      case RoomType.Lecture:
+      case RoomType.Consulting:
+        if (req.roomCode) {
+          for (const room of redisTypeRooms) {
+            const r = JSON.parse(room) as IRoomWithCode;
+            if (r.roomCode === req.roomCode) {
+              _rooms.push(r);
+            }
+          }
+        }
+        break;
+      case RoomType.JumpingMatching:
+      case RoomType.OXQuiz:
+        if (req.roomCode) {
+          for (const room of redisTypeRooms) {
+            const r = JSON.parse(room) as IRoomWithPlaying;
+            if (r.roomCode === req.roomCode && r.isPlaying) {
+              _rooms.push(r);
+            }
+          }
+        } else {
+          for (const room of redisTypeRooms) {
+            const r = JSON.parse(room) as IRoomWithPlaying;
+            if (!r.isPlaying) {
+              _rooms.push(r);
+            }
+          }
+        }
+        break;
+      default:
+        throw new Error('Invalid RoomType value');
     }
+
+    return _rooms;
   }
 
   async createRoom(req: CreateRoomRequestDto): Promise<IRoom> {
@@ -169,12 +200,15 @@ export class RoomService {
 
     this.logger.debug('create Room : ', JSON.stringify({ room }));
 
-    // 레디스에 저장
+    // 레디스에 룸아이디를 키로 저장 'rooms:{roomId}:roomData'
     await this.redisClient.hset(
       RedisKey.getStrRooms(),
       room.roomId,
       JSON.stringify(room),
     );
+
+    // 레디스에 type을 키로 룸 아이디를 리스트로 저장 'roomType:${type}:[roomId]'
+    await this.redisClient.sadd(RedisKey.getRoomsByType(room.type), roomId);
 
     return room;
   }
