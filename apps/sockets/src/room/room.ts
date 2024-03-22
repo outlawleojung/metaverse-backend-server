@@ -4,10 +4,12 @@ export interface IRoom {
   roomId: string;
   type: RoomType;
   sceneName: string;
+  roomCode?: string;
+  ownerId?: string;
 
-  join(clientId: string): void;
-  leave(clientId: string): void;
-  broadcast(event: string, data: any): void;
+  // join(clientId: string): { isEnterSucceed: boolean; errorCode: string };
+  // leave(clientId: string): void;
+  // broadcast(event: string, data: any): void;
 }
 
 export abstract class Room implements IRoom {
@@ -21,7 +23,10 @@ export abstract class Room implements IRoom {
     this.sceneName = sceneName;
   }
 
-  abstract join(clientId: string): void;
-  abstract leave(clientId: string): void;
-  abstract broadcast(event: string, data: any): void;
+  // abstract join(clientId: string): {
+  //   isEnterSucceed: boolean;
+  //   errorCode: string;
+  // };
+  // abstract leave(clientId: string): void;
+  // abstract broadcast(event: string, data: any): void;
 }

@@ -1,3 +1,4 @@
+import { join } from 'path';
 import {
   SubscribeMessage,
   WebSocketGateway,
@@ -9,7 +10,6 @@ import { GatewayInitiService } from '../services/gateway-init.service';
 import { Server, Socket } from 'socket.io';
 import { Decrypt } from '@libs/common';
 import { NatsService } from '../nats/nats.service';
-import { RoomType } from '../room/room-type';
 import {
   PLAYER_SOCKET_C_MESSAGE,
   NAMESPACE,
@@ -19,6 +19,7 @@ import {
   C_BASE_SET_ANIMATION,
   C_BASE_SET_EMOJI,
   C_BASE_SET_TRANSFORM,
+  C_ENTER,
 } from './packets/packet';
 import { RoomService } from '../room/room.service';
 
@@ -81,74 +82,56 @@ export class PlayerGateway {
 
   // 룸 입장
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_ENTER_PLAYER_ROOM)
-  async enterChatRoom(
-    client: Socket,
-    roomInfo: {
-      roomId: string;
-      sceneName: string;
-      roomName: string;
-      roomCode: string;
-    },
-  ) {
+  async enterChatRoom(client: Socket, packet: C_ENTER) {
     const jwtAccessToken = String(
       Decrypt(client.handshake.auth.jwtAccessToken),
     );
 
-    await this.playerService.joinRoom(
-      client,
-      jwtAccessToken,
-      roomInfo.roomId,
-      roomInfo.sceneName,
-      roomInfo?.roomName,
-      roomInfo?.roomCode,
-    );
+    await this.playerService.joinRoom(client, jwtAccessToken, packet);
+
+    // await this.playerService.joinRoom(
+    //   client,
+    //   jwtAccessToken,
+    //   roomInfo.roomId,
+    //   roomInfo.sceneName,
+    //   roomInfo?.roomName,
+    //   roomInfo?.roomCode,
+    // );
   }
 
   // 룸 퇴장 후 입장
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_EXIT_AND_ENTER_PLAYER_ROOM)
-  async exitAndEnterChatRoom(
-    client: Socket,
-    payload: {
-      roomId: string;
-      sceneName: string;
-      roomName: string;
-      roomCode: string;
-    },
-  ) {
-    await this.playerService.leaveRoom(client, client.data.roomId);
-
-    const jwtAccessToken = String(
-      Decrypt(client.handshake.auth.jwtAccessToken),
-    );
-
-    await this.playerService.joinRoom(
-      client,
-      jwtAccessToken,
-      payload.roomId,
-      payload.sceneName,
-      payload?.roomName,
-      payload?.roomCode,
-    );
-
-    this.logger.debug(
-      '룸 퇴장 후 입장 이벤트 발생' +
-        JSON.stringify({
-          client: client.data.memberId,
-          roomId: client.data.roomId,
-        }),
-    );
-
-    await this.natsService.publish(
-      `${NATS_EVENTS.EXIT_AND_ENTER_PLAYER_ROOM}:${client.data.memberId}`,
-      JSON.stringify({
-        memberId: client.data.memberId,
-        exitRoomId: client.data.roomId,
-        enterRoomId: payload.roomId,
-        sceneName: payload.sceneName,
-        roomName: payload?.roomName,
-        roomCode: payload?.roomCode,
-      }),
-    );
+  async exitAndEnterChatRoom(client: Socket, packet: C_ENTER) {
+    // await this.playerService.leaveRoom(client, client.data.roomId);
+    // const jwtAccessToken = String(
+    //   Decrypt(client.handshake.auth.jwtAccessToken),
+    // );
+    // await this.playerService.joinRoom(
+    //   client,
+    //   jwtAccessToken,
+    //   payload.roomId,
+    //   payload.sceneName,
+    //   payload?.roomName,
+    //   payload?.roomCode,
+    // );
+    // this.logger.debug(
+    //   '룸 퇴장 후 입장 이벤트 발생' +
+    //     JSON.stringify({
+    //       client: client.data.memberId,
+    //       roomId: client.data.roomId,
+    //     }),
+    // );
+    // await this.natsService.publish(
+    //   `${NATS_EVENTS.EXIT_AND_ENTER_PLAYER_ROOM}:${client.data.memberId}`,
+    //   JSON.stringify({
+    //     memberId: client.data.memberId,
+    //     exitRoomId: client.data.roomId,
+    //     enterRoomId: payload.roomId,
+    //     sceneName: payload.sceneName,
+    //     roomName: payload?.roomName,
+    //     roomCode: payload?.roomCode,
+    //   }),
+    // );
   }
 
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_TRANSFORM)

@@ -126,3 +126,29 @@ export class S_ADD_CLIENT implements PACKET {
   event: 'C_GET_CLIENT';
   clientInfo: ClientInfo[];
 }
+
+export class C_ENTER implements PACKET {
+  event: 'C_ENTER';
+  roomId: string;
+  sceneName: string;
+  clientId: string;
+
+  // for office
+  password: string;
+  isObserver: boolean;
+}
+
+export class S_ENTER implements PACKET {
+  event: 'S_ENTER';
+  result: string;
+}
+
+export class C_REENTER implements PACKET {
+  event: 'C_REENTER';
+  clientId: string;
+}
+
+export class S_REENTER implements PACKET {
+  event: 'S_REENTER';
+  success: boolean;
+}

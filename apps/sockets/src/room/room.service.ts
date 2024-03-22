@@ -69,12 +69,55 @@ export class RoomService {
     }
   }
 
+  async getRoom(roomId: string): Promise<IRoom> {
+    const roomKey = RedisKey.getStrRooms();
+
+    const roomData = await this.redisClient.hget(roomKey, roomId);
+
+    if (roomData) {
+      const room = JSON.parse(roomData) as IRoom;
+
+      return await this.convertRoomTypeForRoom(room);
+    } else {
+      return null;
+    }
+  }
+
+  async convertRoomTypeForRoom(room: IRoom): Promise<IRoom> {
+    const type = room.type;
+
+    switch (type) {
+      case RoomType.Arz:
+      case RoomType.Game:
+      case RoomType.Festival:
+      case RoomType.Conference:
+      case RoomType.Vote:
+      case RoomType.Store:
+      case RoomType.Office:
+      case RoomType.Busan:
+        return null;
+      case RoomType.MyRoom:
+        return room as MyRoom;
+      default:
+        return null;
+    }
+  }
+
   async getRooms(
     req: GetRoomRequestDto,
   ): Promise<IRoom | IRoom[] | undefined | null> {
     const redisRooms = await this.redisClient.hgetall(RedisKey.getStrRooms());
     if (!req.roomId && !req.ownerId && !req.roomType) {
       return Object.values(redisRooms).map((data) => JSON.parse(data));
+    }
+
+    if (req.roomId && !req.ownerId && !req.roomType) {
+      const room = await this.redisClient.hget(
+        RedisKey.getStrRooms(),
+        req.roomId,
+      );
+
+      return JSON.parse(room);
     }
 
     const type = req.roomType;

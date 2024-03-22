@@ -20,6 +20,7 @@ export class JwtService {
     const payload = {
       idx: member.memberId,
       nickname: member.nickname,
+      memberCode: member.memberCode,
     };
 
     return jwt.sign(payload, secretKey, options);

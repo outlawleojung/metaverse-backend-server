@@ -7,6 +7,7 @@ import { RoomService } from './room.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
 import { RedisKey } from '@libs/constants';
+import { OfficeRoom } from '../rooms/office-room';
 
 @Injectable()
 export class RoomFactory {
@@ -34,8 +35,9 @@ export class RoomFactory {
         if (exMyRoom) {
           return JSON.parse(exMyRoom) as MyRoom;
         }
-        return new MyRoom(roomId, type, sceneName, ownerId, this.roomService);
-      // 추가 Room 타입 처리
+        return new MyRoom(roomId, sceneName, ownerId);
+      case RoomType.Office:
+        return new OfficeRoom(roomId, sceneName, ownerId, roomCode);
       default:
         throw new Error('Invalid room type');
     }

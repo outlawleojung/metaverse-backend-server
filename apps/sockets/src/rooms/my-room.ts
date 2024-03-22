@@ -1,6 +1,5 @@
-import { Logger } from '@nestjs/common';
 import { Room } from '../room/room';
-import { RoomService } from '../room/room.service';
+import { RoomType } from '../room/room-type';
 
 export class MyRoom extends Room {
   ownerId: string;
@@ -9,21 +8,8 @@ export class MyRoom extends Room {
   myroomInfo: string;
   isShutdown: boolean;
 
-  constructor(roomId, roomType, sceneName, ownerId, roomService: RoomService) {
-    super(roomId, roomType, sceneName);
-
+  constructor(roomId, sceneName, ownerId) {
+    super(roomId, RoomType.MyRoom, sceneName);
     this.ownerId = ownerId;
-    roomService.indexRoom(this);
-  }
-
-  join(clientId: string) {
-    console.log(`My Room Join : ${clientId}`);
-  }
-
-  leave(clientId: string) {
-    console.log(`My Room Leave : ${clientId}`);
-  }
-  broadcast(event: string, data: any) {
-    console.log(`My Room broadcast : ${event} - ${data}`);
   }
 }
