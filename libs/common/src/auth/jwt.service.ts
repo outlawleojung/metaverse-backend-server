@@ -1,12 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
-import {
-  JsonWebTokenError,
-  NotBeforeError,
-  TokenExpiredError,
-  Jwt,
-  JwtPayload,
-} from 'jsonwebtoken';
+import { Jwt, JwtPayload } from 'jsonwebtoken';
 import { options, secretKey } from '../config/jwtSecret';
 import { Member } from '@libs/entity';
 import { Decrypt } from '../utils/crypter';
@@ -26,6 +20,7 @@ export class JwtService {
     const payload = {
       idx: member.memberId,
       nickname: member.nickname,
+      memberCode: member.memberCode,
     };
 
     return jwt.sign(payload, secretKey, options);
