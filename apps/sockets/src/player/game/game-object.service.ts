@@ -1,4 +1,10 @@
-import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
+import {
+  ForbiddenException,
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { GameObject } from './game-object';
 import {
   C_BASE_INSTANTIATE_OBJECT,
@@ -19,6 +25,7 @@ import { PLAYER_SOCKET_S_MESSAGE, RedisKey } from '@libs/constants';
 import { RedisLockService } from '../../services/redis-lock.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
+import { PlayerService } from '../player.service';
 
 @Injectable()
 export class GameObjectService {
@@ -28,6 +35,8 @@ export class GameObjectService {
 
   constructor(
     @InjectRedis() private readonly redisClient: Redis,
+    @Inject(forwardRef(() => PlayerService))
+    private readonly playerService: PlayerService,
     private readonly lockService: RedisLockService,
   ) {}
 
@@ -63,26 +72,34 @@ export class GameObjectService {
     }
     {
       const addObjectPacket = new S_BASE_ADD_OBJECT();
-      addObjectPacket.gameObjects.push({
-        objectId: gameObject.objectId,
-        position: gameObject.position,
-        rotation: gameObject.rotation,
-        prefabName: gameObject.prefabName,
-        objectData: gameObject.objectData,
-        ownerId: gameObject.ownerId,
-        animationId: '',
-        isLoop: false,
-        blend: 0,
-      });
+      addObjectPacket.gameObjects.push(gameObject);
 
       const { event, ...packetData } = addObjectPacket;
 
       server.to(roomId).emit(event, packetData);
+
+      console.log(this.gameObjects);
     }
   }
 
-  getObjects(client: Socket) {
+  async getObjects(client: Socket) {
+    const roomInfo = await this.playerService.getUserRoomId(
+      client.data.memberId,
+    );
+
     const packet = new S_BASE_ADD_OBJECT();
+
+    const roomGameObjects = await this.gameObjects.get(roomInfo.redisRoomId);
+
+    if (roomGameObjects) {
+      for (const gameObject of roomGameObjects.values()) {
+        packet.gameObjects.push(gameObject);
+      }
+    }
+
+    const { event, ...packetData } = packet;
+
+    client.emit(event, packetData);
   }
 
   setObjectData(roomId: string, objectId: number, data: string) {

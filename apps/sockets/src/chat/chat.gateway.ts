@@ -48,6 +48,7 @@ export class ChatGateway {
 
     await this.natsService.on(NATS_EVENTS.NATS_CONNECTED, async () => {
       // 룸에 입장 정보 구독
+      this.logger.debug(`룸에 입장 정보 구독 ✅`);
       await this.messageHandler.registerHandler(
         NATS_EVENTS.JOIN_ROOM,
         async (data) => {
@@ -59,10 +60,19 @@ export class ChatGateway {
   }
 
   async handleConnection(client: Socket) {
-    const jwtAccessToken = String(
-      Decrypt(client.handshake.auth.jwtAccessToken),
-    );
-    const sessionId = String(Decrypt(client.handshake.auth.sessionId));
+    let jwtAccessToken;
+    let sessionId;
+
+    if (client.handshake.auth) {
+      jwtAccessToken = String(Decrypt(client.handshake.auth.jwtAccessToken));
+      sessionId = String(Decrypt(client.handshake.auth.sessionId));
+    } else {
+      jwtAccessToken = String(Decrypt(client.handshake.headers.authorization));
+      sessionId = String(Decrypt(client.handshake.headers.cookie));
+    }
+
+    jwtAccessToken = String(Decrypt(client.handshake.headers.authorization));
+    sessionId = String(Decrypt(client.handshake.headers.cookie));
 
     await this.chatService.handleConnection(
       this.server,

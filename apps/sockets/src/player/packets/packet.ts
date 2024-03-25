@@ -9,6 +9,8 @@ import {
   Position,
   Rotation,
 } from './packet-interface';
+import { GameObject } from '../game/game-object';
+import { IsNotEmpty, IsString } from 'class-validator';
 export interface PACKET {
   event: string;
 }
@@ -114,7 +116,7 @@ export class S_INTERACTION_REMOVE_ITEM_NOTICE implements PACKET {
 
 export class S_BASE_ADD_OBJECT implements PACKET {
   event = PLAYER_SOCKET_S_MESSAGE.S_BASE_ADD_OBJECT;
-  gameObjects: GameObjectInfo[] = [];
+  gameObjects: GameObject[] = [];
 }
 
 export class S_BASE_REMOVE_OBJECT implements PACKET {
@@ -133,8 +135,17 @@ export class S_ADD_CLIENT implements PACKET {
 
 export class C_ENTER implements PACKET {
   event = PLAYER_SOCKET_C_MESSAGE.C_ENTER;
+
+  @IsString()
+  @IsNotEmpty()
   roomId: string;
+
+  @IsString()
+  @IsNotEmpty()
   sceneName: string;
+
+  @IsString()
+  @IsNotEmpty()
   clientId: string;
 
   // for office

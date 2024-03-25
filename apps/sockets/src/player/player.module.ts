@@ -7,15 +7,12 @@ import { TokenCheckService } from '../manager/auth/tocket-check.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Member, SessionInfo } from '@libs/entity';
 import { NatsService } from '../nats/nats.service';
-import { NatsMessageHandler } from '../nats/nats-message.handler';
-import { RootServerService } from '../services/root-server.service';
-import { ManagerGateway } from '../manager/manager.gateway';
 import { RedisFunctionService } from '@libs/redis';
-import { ManagerService } from '../manager/manager.service';
 import { PlayerController } from './player.controller';
 import { RoomService } from '../room/room.service';
 import { RoomModule } from '../room/room.module';
 import { GameObjectService } from './game/game-object.service';
+import { NatsMessageHandler } from '../nats/nats-message.handler';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Member, SessionInfo]), RoomModule],
@@ -28,10 +25,7 @@ import { GameObjectService } from './game/game-object.service';
     TokenCheckService,
     NatsService,
     NatsMessageHandler,
-    RootServerService,
     RedisFunctionService,
-    ManagerGateway,
-    ManagerService,
     RoomService,
     GameObjectService,
   ],

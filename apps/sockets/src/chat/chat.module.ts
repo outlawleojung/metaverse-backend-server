@@ -20,9 +20,6 @@ import { NatsService } from '../nats/nats.service';
 import { GatewayInitiService } from '../services/gateway-init.service';
 import { RedisLockService } from '../services/redis-lock.service';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
-import { RootServerService } from '../services/root-server.service';
-import { ManagerGateway } from '../manager/manager.gateway';
-import { ManagerService } from '../manager/manager.service';
 
 @Module({
   imports: [
@@ -69,9 +66,6 @@ import { ManagerService } from '../manager/manager.service';
     GatewayInitiService,
     RedisLockService,
     NatsMessageHandler,
-    RootServerService,
-    ManagerGateway,
-    ManagerService,
   ],
   exports: [ChatGateway, ChatService],
 })

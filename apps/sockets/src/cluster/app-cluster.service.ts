@@ -13,7 +13,7 @@ export class AppClusterService {
     if (cluster.isPrimary) {
       AppClusterService.logger.debug(`마스터 서버 시작 ${process.pid}`);
 
-      for (let i = 0; i < numCPUs; i++) {
+      for (let i = 0; i < 1; i++) {
         cluster.fork();
       }
       cluster.on('exit', (worker, code, signal) => {

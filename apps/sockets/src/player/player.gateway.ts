@@ -1,11 +1,17 @@
-import { join } from 'path';
 import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { PlayerService } from './player.service';
-import { Inject, Logger, forwardRef } from '@nestjs/common';
+import {
+  Inject,
+  Logger,
+  UseFilters,
+  UsePipes,
+  ValidationPipe,
+  forwardRef,
+} from '@nestjs/common';
 import { GatewayInitiService } from '../services/gateway-init.service';
 import { Server, Socket } from 'socket.io';
 import { Decrypt } from '@libs/common';
@@ -23,12 +29,16 @@ import {
   C_ENTER,
 } from './packets/packet';
 import { RoomService } from '../room/room.service';
+import { GameObjectService } from './game/game-object.service';
+import { WsExceptionFilter } from '../ws-exception.filter';
 
 @WebSocketGateway({
   namespace: NAMESPACE.PLAYER,
   pingInterval: 30000, //30초마다 클라이언트에게 ping을 보냄
   pingTimeout: 30000, //클라이언트로부터 ping을 30초동안 받지 못하면 연결 해제
 })
+@UsePipes(new ValidationPipe({ transform: true }))
+@UseFilters(new WsExceptionFilter())
 export class PlayerGateway {
   @WebSocketServer()
   private server: Server;
@@ -41,6 +51,7 @@ export class PlayerGateway {
   constructor(
     @Inject(forwardRef(() => PlayerService))
     private readonly playerService: PlayerService,
+    private readonly gameObjectService: GameObjectService,
     private roomService: RoomService,
     private readonly gatewayInitService: GatewayInitiService,
     private readonly natsService: NatsService,
@@ -107,15 +118,6 @@ export class PlayerGateway {
     jwtAccessToken = String(Decrypt(client.handshake.headers.authorization));
 
     await this.playerService.joinRoom(client, jwtAccessToken, packet);
-
-    // await this.playerService.joinRoom(
-    //   client,
-    //   jwtAccessToken,
-    //   roomInfo.roomId,
-    //   roomInfo.sceneName,
-    //   roomInfo?.roomName,
-    //   roomInfo?.roomCode,
-    // );
   }
 
   // 클라이언트 목록 요청
@@ -126,46 +128,16 @@ export class PlayerGateway {
 
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_BASE_INSTANTIATE_OBJECT)
   async getInstantiateObject(
-    server: Server,
     client: Socket,
     packet: C_BASE_INSTANTIATE_OBJECT,
   ) {
-    await this.playerService.getInstantiateObject(server, client, packet);
+    await this.playerService.getInstantiateObject(this.server, client, packet);
   }
 
-  // 룸 퇴장 후 입장
-  @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_EXIT_AND_ENTER_PLAYER_ROOM)
-  async exitAndEnterChatRoom(client: Socket, packet: C_ENTER) {
-    // await this.playerService.leaveRoom(client, client.data.roomId);
-    // const jwtAccessToken = String(
-    //   Decrypt(client.handshake.auth.jwtAccessToken),
-    // );
-    // await this.playerService.joinRoom(
-    //   client,
-    //   jwtAccessToken,
-    //   payload.roomId,
-    //   payload.sceneName,
-    //   payload?.roomName,
-    //   payload?.roomCode,
-    // );
-    // this.logger.debug(
-    //   '룸 퇴장 후 입장 이벤트 발생' +
-    //     JSON.stringify({
-    //       client: client.data.memberId,
-    //       roomId: client.data.roomId,
-    //     }),
-    // );
-    // await this.natsService.publish(
-    //   `${NATS_EVENTS.EXIT_AND_ENTER_PLAYER_ROOM}:${client.data.memberId}`,
-    //   JSON.stringify({
-    //     memberId: client.data.memberId,
-    //     exitRoomId: client.data.roomId,
-    //     enterRoomId: payload.roomId,
-    //     sceneName: payload.sceneName,
-    //     roomName: payload?.roomName,
-    //     roomCode: payload?.roomCode,
-    //   }),
-    // );
+  @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_BASE_GET_OBJECT)
+  async getObject(client: Socket) {
+    this.logger.debug('C_BASE_GET_OBJECT : ', client.data.memberId);
+    await this.gameObjectService.getObjects(client);
   }
 
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_TRANSFORM)

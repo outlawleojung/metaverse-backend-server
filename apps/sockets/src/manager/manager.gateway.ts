@@ -22,13 +22,11 @@ import {
 } from '@libs/constants';
 
 @WebSocketGateway({
-  cors: {
-    origin: '*',
-  },
-  pingInterval: 30000, //30초마다 클라이언트에게 ping을 보냄
-  pingTimeout: 30000, //클라이언트로부터 ping을 30초동안 받지 못하면 연결 해제
-  // pingInterval: 10000, //10초마다 클라이언트에게 ping을 보냄
-  // pingTimeout: 5000, //클라이언트로부터 ping을 5초동안 받지 못하면 연결 해제
+  // cors: {
+  //   origin: '*',
+  // },
+  // pingInterval: 30000, //30초마다 클라이언트에게 ping을 보냄
+  // pingTimeout: 30000, //클라이언트로부터 ping을 30초동안 받지 못하면 연결 해제
 })
 @Injectable()
 export class ManagerGateway
@@ -62,32 +60,33 @@ export class ManagerGateway
 
   //소켓 연결
   async handleConnection(client: Socket) {
+    this.logger.debug('매니저 소켓 연결중.✅');
     // const jwtAccessToken = String(
     //   Decrypt(client.handshake.auth.jwtAccessToken),
     // );
 
     // const sessionId = String(Decrypt(client.handshake.auth.sessionId));
 
-    const jwtAccessToken = String(
-      Decrypt(client.handshake.headers.authorization),
-    );
-    const sessionId = String(Decrypt(client.handshake.headers.cookie));
+    // const jwtAccessToken = String(
+    //   Decrypt(client.handshake.headers.authorization),
+    // );
+    // const sessionId = String(Decrypt(client.handshake.headers.cookie));
 
-    this.managerService.handleConnection(
-      this.server,
-      client,
-      jwtAccessToken,
-      sessionId,
-    );
+    // this.managerService.handleConnection(
+    //   this.server,
+    //   client,
+    //   jwtAccessToken,
+    //   sessionId,
+    // );
 
-    // 중복 로그인 알림 구독
-    this.messageHandler.registerHandler(
-      `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${sessionId}`,
-      (sessionId) => {
-        // 서버에서 소켓 연결 제거
-        this.server.sockets.sockets.get(sessionId)?.disconnect();
-      },
-    );
+    // // 중복 로그인 알림 구독
+    // this.messageHandler.registerHandler(
+    //   `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${sessionId}`,
+    //   (sessionId) => {
+    //     // 서버에서 소켓 연결 제거
+    //     this.server.sockets.sockets.get(sessionId)?.disconnect();
+    //   },
+    // );
   }
 
   //소켓 해제
