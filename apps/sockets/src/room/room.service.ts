@@ -107,6 +107,7 @@ export class RoomService {
     req: GetRoomRequestDto,
   ): Promise<IRoom | IRoom[] | undefined | null> {
     const redisRooms = await this.redisClient.hgetall(RedisKey.getStrRooms());
+
     if (!req.roomId && !req.ownerId && !req.roomType) {
       return Object.values(redisRooms).map((data) => JSON.parse(data));
     }
@@ -122,7 +123,9 @@ export class RoomService {
 
     const type = req.roomType;
 
-    const redisTypeRooms = await this.redisClient.smembers(type);
+    const redisTypeRooms = await this.redisClient.smembers(
+      RedisKey.getRoomsByType(type),
+    );
     const _rooms: IRoom[] = [];
 
     switch (type) {
@@ -141,8 +144,8 @@ export class RoomService {
         break;
       case RoomType.MyRoom:
         if (req.ownerId) {
-          for (const room of redisTypeRooms) {
-            const r = JSON.parse(room) as IRoomWithOwner;
+          for (const [_, roomData] of Object.entries(redisRooms)) {
+            const r = JSON.parse(roomData) as IRoomWithOwner;
             if (r.ownerId === req.ownerId) {
               _rooms.push(r);
             }
@@ -153,8 +156,8 @@ export class RoomService {
       case RoomType.Lecture:
       case RoomType.Consulting:
         if (req.roomCode) {
-          for (const room of redisTypeRooms) {
-            const r = JSON.parse(room) as IRoomWithCode;
+          for (const [_, roomData] of Object.entries(redisRooms)) {
+            const r = JSON.parse(roomData) as IRoomWithCode;
             if (r.roomCode === req.roomCode) {
               _rooms.push(r);
             }
@@ -164,15 +167,15 @@ export class RoomService {
       case RoomType.JumpingMatching:
       case RoomType.OXQuiz:
         if (req.roomCode) {
-          for (const room of redisTypeRooms) {
-            const r = JSON.parse(room) as IRoomWithPlaying;
+          for (const [_, roomData] of Object.entries(redisRooms)) {
+            const r = JSON.parse(roomData) as IRoomWithPlaying;
             if (r.roomCode === req.roomCode && r.isPlaying) {
               _rooms.push(r);
             }
           }
         } else {
-          for (const room of redisTypeRooms) {
-            const r = JSON.parse(room) as IRoomWithPlaying;
+          for (const [_, roomData] of Object.entries(redisRooms)) {
+            const r = JSON.parse(roomData) as IRoomWithPlaying;
             if (!r.isPlaying) {
               _rooms.push(r);
             }
@@ -189,12 +192,13 @@ export class RoomService {
   async createRoom(req: CreateRoomRequestDto): Promise<IRoom> {
     const roomId = await this.generateRoomId();
 
+    const redisRoomId = RedisKey.getStrRoomId(roomId);
     this.logger.debug('create Room : ', JSON.stringify({ req }));
 
     const room = await this.roomFactory.createRoom(
       req.roomType,
       req.sceneName,
-      roomId,
+      redisRoomId,
       req.ownerId,
     );
 
@@ -208,14 +212,20 @@ export class RoomService {
     );
 
     // 레디스에 type을 키로 룸 아이디를 리스트로 저장 'roomType:${type}:[roomId]'
-    await this.redisClient.sadd(RedisKey.getRoomsByType(room.type), roomId);
+    await this.redisClient.sadd(
+      RedisKey.getRoomsByType(room.type),
+      room.roomId,
+    );
 
     return room;
   }
 
   async removeRoom(roomId: string): Promise<void> {
     // 레디스에서 삭제
-    await this.redisClient.hdel(RedisKey.getStrRooms(), roomId);
+    await this.redisClient.hdel(
+      RedisKey.getStrRooms(),
+      RedisKey.getStrRoomId(roomId),
+    );
   }
 
   private async generateRoomId(): Promise<string> {

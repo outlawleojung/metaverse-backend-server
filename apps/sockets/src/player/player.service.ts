@@ -1,5 +1,5 @@
 import { RedisFunctionService } from '@libs/redis';
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { TokenCheckService } from '../manager/auth/tocket-check.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
@@ -14,14 +14,17 @@ import {
   SOCKET_SERVER_ERROR_CODE_GLOBAL,
 } from '@libs/constants';
 import {
+  C_BASE_INSTANTIATE_OBJECT,
   C_BASE_SET_ANIMATION,
   C_BASE_SET_EMOJI,
   C_BASE_SET_TRANSFORM,
   C_ENTER,
+  S_ENTER,
 } from './packets/packet';
 import { NatsService } from '../nats/nats.service';
 import { RoomService } from '../room/room.service';
-import { IRoom } from '../room/room';
+import { GameObjectService } from './game/game-object.service';
+import { PlayerGateway } from './player.gateway';
 
 @Injectable()
 export class PlayerService {
@@ -29,12 +32,15 @@ export class PlayerService {
 
   constructor(
     @InjectRedis() private readonly redisClient: Redis,
+    @Inject(forwardRef(() => PlayerGateway))
+    private readonly playerGateway: PlayerGateway,
     private readonly tokenCheckService: TokenCheckService,
     private readonly rootServer: RootServerService,
     private readonly messageHandler: NatsMessageHandler,
     private readonly natsService: NatsService,
     private readonly redisFunctionService: RedisFunctionService,
     private readonly roomService: RoomService,
+    private readonly gameObjectService: GameObjectService,
   ) {}
 
   // 소켓 연결
@@ -53,6 +59,7 @@ export class PlayerService {
       return;
     }
 
+    console.log(memberInfo);
     const memberId = memberInfo.memberId;
 
     client.join(memberId);
@@ -62,7 +69,7 @@ export class PlayerService {
     client.data.memberId = memberId;
     client.data.sessionId = sessionId;
     client.data.jwtAccessToken;
-    client.data.clientId = client.id;
+    client.data.clientId = memberInfo.memberCode;
 
     this.logger.debug(
       `동기화 서버에 연결되었어요 ✅ : ${memberId} - sessionId : ${sessionId}`,
@@ -79,13 +86,16 @@ export class PlayerService {
       await this.tokenCheckService.checkLoginToken(jwtAccessToken);
 
     const memberId = memberInfo.memberId;
+    const memberCode = memberInfo.memberCode;
+
+    console.log('@@@@@@@@@@@@@@@@@@@@@@@@@ packet : ', packet);
 
     // 사용자키로 룸에 속해 있는지 조회
     const redisRoomId = RedisKey.getStrRoomId(packet.roomId);
     const memberSetKey = RedisKey.getStrRoomPlayerList(redisRoomId);
     const members = await this.redisClient.smembers(memberSetKey);
 
-    // 사용자가 이미 룸에 접속한 상태라면
+    // 사용자가 현재 룸에 이미 입장 하고 있는 상태라면
     if (members.includes(memberId)) {
       return client.emit(
         CHATTING_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
@@ -93,18 +103,14 @@ export class PlayerService {
       );
     }
 
-    // 룸 객체 정보 조회
-    const room = await this.roomService.getRoom(packet.roomId);
+    // 사용자가 룸에 접속한 상태라면 기존 룸에서 퇴장 처리를 한다.
+    await this.checkLeaveRoom(client, memberId);
 
-    // 룸 객체에 룸 입장 처리
-    // const { isEnterSucceed, errorCode } = await room.join(packet.clientId);
+    const response = new S_ENTER();
+    response.result = 'success';
+    client.emit(response.event, response.result);
 
-    // if (isEnterSucceed) {
-    //   client.data.sceneName = packet.sceneName;
-    //   client.data.roomId = redisRoomId;
-
-    //   client.join(redisRoomId);
-    // }
+    client.join(redisRoomId);
 
     // 룸에 사용자 정보 저장
     await this.redisClient.sadd(memberSetKey, memberId);
@@ -112,6 +118,12 @@ export class PlayerService {
     // 사용자의 현재 룸 정보 업데이트
     await this.redisClient.set(
       RedisKey.getStrMemberCurrentRoom(memberId),
+      redisRoomId,
+    );
+
+    await this.redisFunctionService.updateJson(
+      RedisKey.getStrMemberSocket(memberId),
+      'roomId',
       redisRoomId,
     );
 
@@ -366,5 +378,123 @@ export class PlayerService {
     const packet = data.packet;
 
     this.rootServer.getServer().to(roomId).emit(packatName, packet);
+  }
+
+  async getClient(client: Socket) {
+    // client의 룸 조회
+    const memberId = client.data.memberId;
+    const memberKey = RedisKey.getStrMemberCurrentRoom(memberId);
+    const redisRoomId = await this.redisClient.get(memberKey);
+
+    const playerIds = await this.redisClient.smembers(
+      RedisKey.getStrRoomPlayerList(redisRoomId),
+    );
+
+    const clientInfos = [];
+
+    for (const p of playerIds) {
+      const socketInfo = JSON.parse(
+        await this.redisClient.get(RedisKey.getStrMemberSocket(p)),
+      );
+
+      const client = {
+        clientId: socketInfo.clientId,
+        nickname: socketInfo.nickname,
+        stateMessage: socketInfo.stateMessage,
+      };
+
+      clientInfos.push(client);
+    }
+
+    client.emit(
+      PLAYER_SOCKET_S_MESSAGE.S_ADD_CLIENT,
+      JSON.stringify(clientInfos),
+    );
+  }
+
+  async getInstantiateObject(
+    server: Server,
+    client: Socket,
+    packet: C_BASE_INSTANTIATE_OBJECT,
+  ) {
+    const roomInfo = await this.getUserRoomId(client.data.memberId);
+
+    await this.gameObjectService.instantiateObject(
+      server,
+      client,
+      roomInfo.redisRoomId,
+      packet,
+    );
+  }
+
+  async getUserRoomId(memberId) {
+    // 사용자의 현재 룸 조회
+    const memberKey = RedisKey.getStrMemberCurrentRoom(memberId);
+    const redisRoomId = await this.redisClient.get(memberKey);
+
+    return { memberKey, redisRoomId };
+  }
+
+  // 사용자 퇴장 처리
+  async checkLeaveRoom(client: Socket, memberId: string) {
+    // 사용자의 현재 룸 조회
+    const { memberKey, redisRoomId } = await this.getUserRoomId(memberId);
+    if (redisRoomId) {
+      const roomIdArray = redisRoomId.split(':');
+      const roomId = roomIdArray[1];
+
+      if (roomId) {
+        const playerIds = await this.redisClient.smembers(
+          RedisKey.getStrRoomPlayerList(redisRoomId),
+        );
+
+        // 룸에 사용자가 본인 1명 뿐이라면 룸 삭제
+        if (playerIds.length === 1) {
+          await this.redisClient.del(redisRoomId);
+
+          const roomData = JSON.parse(
+            await this.redisClient.hget(RedisKey.getStrRooms(), redisRoomId),
+          );
+
+          await this.redisClient.hdel(RedisKey.getStrRooms(), redisRoomId);
+
+          await this.redisClient.srem(
+            RedisKey.getRoomsByType(roomData.type),
+            redisRoomId,
+          );
+
+          await this.natsService.publish(
+            NATS_EVENTS.DELETE_PLAYER_ROOM,
+            redisRoomId,
+          );
+        }
+
+        // 룸 사용자 리스트에서 사용자 정보 삭제
+        await this.redisClient.srem(
+          RedisKey.getStrRoomPlayerList(redisRoomId),
+          client.data.memberId,
+        );
+
+        await this.redisFunctionService.updateJson(
+          RedisKey.getStrMemberSocket(memberId),
+          'roomId',
+          '',
+        );
+
+        // 기존 룸에서 사용자 제거
+        await this.redisClient.del(memberKey);
+
+        client.leave(redisRoomId);
+
+        // 룸 퇴장 이벤트 발생
+        // await this.natsService.publish(
+        //   `${NATS_EVENTS.LEAVE_ROOM}:${client.data.memberId}`,
+        //   JSON.stringify({
+        //     memberId: client.data.memberId,
+        //     roomId: client.data.roomId,
+        //   }),
+        // );
+      }
+    }
   }
 }

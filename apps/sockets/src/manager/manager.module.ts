@@ -10,14 +10,21 @@ import { GatewayInitiService } from '../services/gateway-init.service';
 import { RedisLockService } from '../services/redis-lock.service';
 import { NatsService } from '../nats/nats.service';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { MorganInterceptor, MorganModule } from 'nest-morgan';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Member, SessionInfo]),
     AppModule,
     EntityModule,
+    MorganModule,
   ],
   providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: MorganInterceptor('combined'),
+    },
     ManagerGateway,
     ManagerService,
     TokenCheckService,

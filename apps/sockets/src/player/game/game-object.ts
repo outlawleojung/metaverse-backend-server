@@ -40,12 +40,14 @@ export class GameObject implements IGameObject {
     position: Position,
     rotation: Rotation,
     objectData: string,
+    ownerId: string,
   ) {
     this.objectId = objectId;
     this.prefabName = prefabName;
     this.position = position;
     this.rotation = rotation;
     this.objectData = objectData;
+    this.ownerId = ownerId;
   }
 
   setAnimations(animationId: string, animationValue: string): void {

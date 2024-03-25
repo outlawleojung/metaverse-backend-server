@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { GameObject } from './game-object';
 import {
   C_BASE_INSTANTIATE_OBJECT,
@@ -14,7 +14,11 @@ import {
   S_BASE_ADD_OBJECT,
 } from '../packets/packet';
 import { Position, Rotation } from '../packets/packet-interface';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
+import { PLAYER_SOCKET_S_MESSAGE, RedisKey } from '@libs/constants';
+import { RedisLockService } from '../../services/redis-lock.service';
+import { InjectRedis } from '@liaoliaots/nestjs-redis';
+import { Redis } from 'ioredis';
 
 @Injectable()
 export class GameObjectService {
@@ -22,20 +26,26 @@ export class GameObjectService {
   private gameObjects: Map<string, Map<number, GameObject>> = new Map();
   private interactions: Map<string, string> = new Map();
 
-  constructor() {}
+  constructor(
+    @InjectRedis() private readonly redisClient: Redis,
+    private readonly lockService: RedisLockService,
+  ) {}
 
-  instantiateObject(
+  async instantiateObject(
+    server: Server,
     client: Socket,
-    clientId: string,
     roomId: string,
     data: C_BASE_INSTANTIATE_OBJECT,
   ) {
-    const objectId = 0;
+    const clientId = client.data.clientId;
+
+    const objectId = await this.generateObjectId();
     const gameObject = new GameObject(
       objectId,
       data.prefabName,
       data.position,
       data.rotation,
+      data.objectData,
       clientId,
     );
 
@@ -65,11 +75,9 @@ export class GameObjectService {
         blend: 0,
       });
 
-      const { event, ...packatData } = addObjectPacket;
+      const { event, ...packetData } = addObjectPacket;
 
-      this.logger.debug(
-        `instantiateObject Broadcast : ${event} - ${packatData}`,
-      );
+      server.to(roomId).emit(event, packetData);
     }
   }
 
@@ -299,5 +307,23 @@ export class GameObjectService {
     );
 
     this.gameObjects.clear();
+  }
+
+  private async generateObjectId(): Promise<number> {
+    const lockKey = RedisKey.getStrRedisLockKey('objectId');
+    if (await this.lockService.tryLock(lockKey, 30000)) {
+      try {
+        const objectId = await this.redisClient.incr(
+          RedisKey.getStrObjectIdCounter(),
+        );
+        this.logger.debug(`Object Id 생성 ✅ ${objectId} `);
+        return objectId;
+      } catch (err) {
+        this.logger.error(`오브젝트 아이디 생성 오류 발생 ❌`, err);
+        throw new ForbiddenException('오브젝트 아이디 생성 오류 발생 ❌');
+      } finally {
+        await this.lockService.releaseLock(lockKey);
+      }
+    }
   }
 }

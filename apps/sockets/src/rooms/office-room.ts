@@ -18,6 +18,7 @@ export class OfficeRoom implements IRoomWithCode, IRoomWithOwner {
   roomCode: string;
 
   constructor(details: OfficeRoomDetails) {
+    this.type = RoomType.Office;
     Object.assign(this, details);
   }
 }

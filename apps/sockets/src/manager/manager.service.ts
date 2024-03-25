@@ -86,8 +86,10 @@ export class ManagerService {
     // 클라이언트 데이터 설정
     client.data.memberId = memberId;
     client.data.sessionId = sessionId;
-    client.data.jwtAccessToken = client.handshake.auth.jwtAccessToken;
+    client.data.jwtAccessToken = jwtAccessToken;
     client.data.nickname = member.nickname;
+    client.data.clientId = member.memberCode;
+    client.data.message = member.stateMessage;
     client.data.namespace = NAMESPACE.MANAGER;
 
     client.join(memberId);

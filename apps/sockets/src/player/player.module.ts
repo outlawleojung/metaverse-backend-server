@@ -15,6 +15,7 @@ import { ManagerService } from '../manager/manager.service';
 import { PlayerController } from './player.controller';
 import { RoomService } from '../room/room.service';
 import { RoomModule } from '../room/room.module';
+import { GameObjectService } from './game/game-object.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Member, SessionInfo]), RoomModule],
@@ -32,6 +33,7 @@ import { RoomModule } from '../room/room.module';
     ManagerGateway,
     ManagerService,
     RoomService,
+    GameObjectService,
   ],
 })
 export class PlayerModule {}

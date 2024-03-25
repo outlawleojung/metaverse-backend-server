@@ -9,6 +9,7 @@ import { SOCKET_S_GLOBAL } from '@libs/constants';
 interface JwtPayload {
   idx: string;
   nickname: string;
+  memberCode: string;
 }
 
 @Injectable()
@@ -32,7 +33,11 @@ export class TokenCheckService {
 
     this.logger.debug(`payload : ${payload.idx}, ${payload.nickname}`);
     if (payload) {
-      return { memberId: payload.idx, nickname: payload.nickname };
+      return {
+        memberId: payload.idx,
+        memberCode: payload.memberCode,
+        nickname: payload.nickname,
+      };
     }
 
     return null;

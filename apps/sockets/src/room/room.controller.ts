@@ -1,8 +1,17 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  UseInterceptors,
+} from '@nestjs/common';
 import { RoomService } from './room.service';
 import { GetRoomRequestDto } from './dto/get-room-request.dto';
 import { CreateRoomRequestDto } from './dto/create-room-request.dto';
+import { MorganInterceptor } from 'nest-morgan';
 
+@UseInterceptors(MorganInterceptor('combined'))
 @Controller('rooms')
 export class RoomController {
   constructor(private readonly roomService: RoomService) {}

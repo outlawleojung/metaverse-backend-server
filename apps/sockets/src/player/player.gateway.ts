@@ -16,6 +16,7 @@ import {
   NATS_EVENTS,
 } from '@libs/constants';
 import {
+  C_BASE_INSTANTIATE_OBJECT,
   C_BASE_SET_ANIMATION,
   C_BASE_SET_EMOJI,
   C_BASE_SET_TRANSFORM,
@@ -62,11 +63,19 @@ export class PlayerGateway {
   }
 
   async handleConnection(client: Socket) {
-    const jwtAccessToken = String(
-      Decrypt(client.handshake.auth.jwtAccessToken),
-    );
+    let jwtAccessToken;
+    let sessionId;
 
-    const sessionId = String(Decrypt(client.handshake.auth.sessionId));
+    if (client.handshake.auth) {
+      jwtAccessToken = String(Decrypt(client.handshake.auth.jwtAccessToken));
+      sessionId = String(Decrypt(client.handshake.auth.sessionId));
+    } else {
+      jwtAccessToken = String(Decrypt(client.handshake.headers.authorization));
+      sessionId = String(Decrypt(client.handshake.headers.cookie));
+    }
+
+    jwtAccessToken = String(Decrypt(client.handshake.headers.authorization));
+    sessionId = String(Decrypt(client.handshake.headers.cookie));
 
     await this.playerService.handleConnection(
       this.server,
@@ -81,11 +90,21 @@ export class PlayerGateway {
   }
 
   // 룸 입장
-  @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_ENTER_PLAYER_ROOM)
+  @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_ENTER)
   async enterChatRoom(client: Socket, packet: C_ENTER) {
-    const jwtAccessToken = String(
-      Decrypt(client.handshake.auth.jwtAccessToken),
-    );
+    // const jwtAccessToken = String(
+    //   Decrypt(client.handshake.auth.jwtAccessToken),
+    // );
+
+    let jwtAccessToken;
+
+    if (client.handshake.auth) {
+      jwtAccessToken = String(Decrypt(client.handshake.auth.jwtAccessToken));
+    } else {
+      jwtAccessToken = String(Decrypt(client.handshake.headers.authorization));
+    }
+
+    jwtAccessToken = String(Decrypt(client.handshake.headers.authorization));
 
     await this.playerService.joinRoom(client, jwtAccessToken, packet);
 
@@ -97,6 +116,21 @@ export class PlayerGateway {
     //   roomInfo?.roomName,
     //   roomInfo?.roomCode,
     // );
+  }
+
+  // 클라이언트 목록 요청
+  @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_GET_CLIENT)
+  async getClient(client: Socket) {
+    await this.playerService.getClient(client);
+  }
+
+  @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_BASE_INSTANTIATE_OBJECT)
+  async getInstantiateObject(
+    server: Server,
+    client: Socket,
+    packet: C_BASE_INSTANTIATE_OBJECT,
+  ) {
+    await this.playerService.getInstantiateObject(server, client, packet);
   }
 
   // 룸 퇴장 후 입장
