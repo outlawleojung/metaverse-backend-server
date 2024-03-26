@@ -1,13 +1,13 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { GameRoom } from '../rooms/game-room';
-import { MyRoom } from '../rooms/my-room';
+import { GameRoom } from './rooms/game-room';
+import { MyRoom } from './rooms/my-room';
 import { IRoom } from './room';
 import { RoomType } from './room-type';
 import { RoomService } from './room.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
 import { RedisKey } from '@libs/constants';
-import { OfficeRoom } from '../rooms/office-room';
+import { OfficeRoom } from './rooms/office-room';
 
 @Injectable()
 export class RoomFactory {

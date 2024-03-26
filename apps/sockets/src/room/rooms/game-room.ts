@@ -1,6 +1,6 @@
-import { IRoomWithOwner, IRoomWithPlaying } from '../room/room';
+import { IRoomWithOwner, IRoomWithPlaying } from '../room';
 
-import { RoomType } from '../room/room-type';
+import { RoomType } from '../room-type';
 
 export interface GameRoomRoomDetails {
   ownerId: string;

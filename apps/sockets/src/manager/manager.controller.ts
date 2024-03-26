@@ -1,7 +1,18 @@
-import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Post,
+  UseInterceptors,
+} from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ManagerService } from './manager.service';
+import { MorganInterceptor } from 'nest-morgan';
 
+@UseInterceptors(MorganInterceptor('combined'))
+@ApiTags('MANAGER - 매니저')
 @Controller('api/manager')
 export class ManagerController {
   constructor(private readonly managerService: ManagerService) {}

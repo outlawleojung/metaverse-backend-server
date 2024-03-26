@@ -35,7 +35,6 @@ import { RoomModule } from './room/room.module';
       isGlobal: true,
       envFilePath: `.${process.env.NODE_ENV}.env`,
     }),
-    // PrometheusModule.register(),
     TypeOrmModule.forFeature([Member, DataSource, SessionInfo]),
     ChatModule,
     ScreenBannerModule,
@@ -46,7 +45,7 @@ import { RoomModule } from './room/room.module';
     RoomModule,
     EntityModule,
     SchemaModule,
-    // EventModule,
+    EventModule,
   ],
   controllers: [AppController, ManagerController],
   providers: [

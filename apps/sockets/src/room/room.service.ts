@@ -13,7 +13,7 @@ import { Redis } from 'ioredis';
 import { RoomType } from './room-type';
 import { RedisKey } from '@libs/constants';
 import { RedisLockService } from '../services/redis-lock.service';
-import { MyRoom } from '../rooms/my-room';
+import { MyRoom } from './rooms/my-room';
 import { CreateRoomRequestDto } from './dto/create-room-request.dto';
 
 @Injectable()
@@ -26,48 +26,6 @@ export class RoomService {
     private readonly roomFactory: RoomFactory,
     private readonly lockService: RedisLockService,
   ) {}
-
-  // indexRoom(room: IRoom) {
-  //   switch (room.type) {
-  //     case RoomType.MyRoom:
-  //       const myRoom = room as MyRoom;
-  //       this.redisClient.set(
-  //         RedisKey.getStrMyRoom(myRoom.ownerId),
-  //         JSON.stringify(myRoom),
-  //       );
-  //       break;
-
-  //     case RoomType.Arz:
-  //       break;
-
-  //     case RoomType.Game:
-  //       break;
-
-  //     case RoomType.Festival:
-  //       break;
-
-  //     case RoomType.Conference:
-  //       break;
-
-  //     case RoomType.Vote:
-  //       break;
-
-  //     case RoomType.Store:
-  //       break;
-
-  //     case RoomType.Office:
-  //       break;
-
-  //     case RoomType.Busan:
-  //       break;
-
-  //     case RoomType.Hospital:
-  //       break;
-
-  //     default:
-  //       break;
-  //   }
-  // }
 
   async getRoom(roomId: string): Promise<IRoom> {
     const roomKey = RedisKey.getStrRooms();

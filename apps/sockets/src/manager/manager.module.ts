@@ -12,6 +12,7 @@ import { NatsService } from '../nats/nats.service';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MorganInterceptor, MorganModule } from 'nest-morgan';
+import { EventGateway } from '../event/event.gateway';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { MorganInterceptor, MorganModule } from 'nest-morgan';
     RedisLockService,
     NatsService,
     NatsMessageHandler,
+    EventGateway,
   ],
   exports: [ManagerGateway, ManagerService],
 })

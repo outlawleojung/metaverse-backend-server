@@ -1,9 +1,18 @@
-import { Controller, HttpStatus, Post, Body } from '@nestjs/common';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  Controller,
+  HttpStatus,
+  Post,
+  Body,
+  UseInterceptors,
+} from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OfficeGateway } from './office.gateway';
 import { OfficeWebService } from './office.web.service';
 import { OfficeDto } from './dto/office.dto';
+import { MorganInterceptor } from 'nest-morgan';
 
+@UseInterceptors(MorganInterceptor('combined'))
+@ApiTags('OFFICE - 오피스')
 @Controller('api/office')
 export class OfficeController {
   constructor(

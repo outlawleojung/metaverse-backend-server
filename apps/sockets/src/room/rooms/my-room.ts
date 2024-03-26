@@ -1,5 +1,5 @@
-import { IRoomWithOwner } from '../room/room';
-import { RoomType } from '../room/room-type';
+import { IRoomWithOwner } from '../room';
+import { RoomType } from '../room-type';
 
 export interface MyRoomDetails {
   roomId: string;
