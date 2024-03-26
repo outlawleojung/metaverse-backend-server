@@ -61,32 +61,27 @@ export class ManagerGateway
   //소켓 연결
   async handleConnection(client: Socket) {
     this.logger.debug('매니저 소켓 연결중.✅');
-    // const jwtAccessToken = String(
-    //   Decrypt(client.handshake.auth.jwtAccessToken),
-    // );
+    const jwtAccessToken = String(
+      Decrypt(client.handshake.auth.jwtAccessToken),
+    );
 
-    // const sessionId = String(Decrypt(client.handshake.auth.sessionId));
+    const sessionId = String(Decrypt(client.handshake.auth.sessionId));
 
-    // const jwtAccessToken = String(
-    //   Decrypt(client.handshake.headers.authorization),
-    // );
-    // const sessionId = String(Decrypt(client.handshake.headers.cookie));
+    this.managerService.handleConnection(
+      this.server,
+      client,
+      jwtAccessToken,
+      sessionId,
+    );
 
-    // this.managerService.handleConnection(
-    //   this.server,
-    //   client,
-    //   jwtAccessToken,
-    //   sessionId,
-    // );
-
-    // // 중복 로그인 알림 구독
-    // this.messageHandler.registerHandler(
-    //   `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${sessionId}`,
-    //   (sessionId) => {
-    //     // 서버에서 소켓 연결 제거
-    //     this.server.sockets.sockets.get(sessionId)?.disconnect();
-    //   },
-    // );
+    // 중복 로그인 알림 구독
+    this.messageHandler.registerHandler(
+      `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${sessionId}`,
+      (sessionId) => {
+        // 서버에서 소켓 연결 제거
+        this.server.sockets.sockets.get(sessionId)?.disconnect();
+      },
+    );
   }
 
   //소켓 해제
