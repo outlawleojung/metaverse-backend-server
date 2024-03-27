@@ -12,6 +12,7 @@ import {
   HUB_SOCKET_C_MESSAGE,
   HUB_SOCKET_S_MESSAGE,
   NATS_EVENTS,
+  PLAYER_SOCKET_C_MESSAGE,
   PLAYER_SOCKET_S_MESSAGE,
   RedisKey,
   SOCKET_S_GLOBAL,
@@ -23,6 +24,8 @@ import {
   C_BASE_SET_EMOJI,
   C_BASE_SET_TRANSFORM,
   C_ENTER,
+  S_BASE_SET_ANIMATION,
+  S_BASE_SET_TRANSFORM,
   S_ENTER,
 } from './packets/packet';
 import { GameObjectService } from './game/game-object.service';
@@ -148,11 +151,13 @@ export class PlayerService {
     // 사용자가 룸에 접속한 상태라면 기존 룸에서 퇴장 처리를 한다.
     await this.checkLeaveRoom(client, memberId);
 
+    // 입장 처리
+    client.data.redisRoomId = redisRoomId;
+    client.join(redisRoomId);
+
     const response = new S_ENTER();
     response.result = 'success';
     client.emit(response.event, response.result);
-
-    client.join(redisRoomId);
 
     // 룸에 사용자 정보 저장
     await this.redisClient.sadd(memberSetKey, memberId);
@@ -169,6 +174,32 @@ export class PlayerService {
       redisRoomId,
     );
 
+    // 현재 룸 구독 여부 체크
+    const isSubscribe = this.messageHandler.getSubscribe(
+      `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
+    );
+
+    if (!isSubscribe) {
+      // 현재 룸을 구독한다.
+      this.logger.debug('현재 룸 입장 구독 ✅ : ', redisRoomId);
+      this.messageHandler.registerHandler(
+        `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
+        async (message: string) => {
+          this.logger.debug('룸 구독 콜백 ✅');
+
+          const data = JSON.parse(message);
+
+          switch (data.packet.event) {
+            case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_TRANSFORM:
+              await this.setTransform(data);
+              break;
+            case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION:
+              await this.setAnimation(data);
+          }
+        },
+      );
+    }
+
     // 룸 입장 이벤트 발생
     this.logger.debug('동기화 서버 룸 입장 이벤트 발생 ✅ : ', redisRoomId);
     await this.messageHandler.publishHandler(
@@ -182,11 +213,12 @@ export class PlayerService {
 
   // 사용자 이동 동기화
   async baseSetTransform(client: Socket, packet: C_BASE_SET_TRANSFORM) {
-    const redisRoomId = RedisKey.getStrRoomId(client.data.roomId);
+    const redisRoomId = client.data.redisRoomId;
+
+    this.logger.debug('사용자 이동 동기화 이벤트 발행 ✅ : ', redisRoomId);
 
     const data = {
-      name: PLAYER_SOCKET_S_MESSAGE.S_BASE_SET_TRANSFORM,
-      roomId: client.data.roomId,
+      redisRoomId,
       packet,
     };
 
@@ -196,13 +228,35 @@ export class PlayerService {
     );
   }
 
+  private async setTransform(data) {
+    this.logger.debug('사용자 이동 동기화 실행 !! ✅', data);
+
+    const redisRoomId = data.redisRoomId;
+    const packet = data.packet as C_BASE_SET_TRANSFORM;
+
+    await this.gameObjectService.setTransform(
+      redisRoomId,
+      packet.objectId,
+      packet.position,
+      packet.rotation,
+    );
+
+    const response = new S_BASE_SET_TRANSFORM();
+    response.objectId = packet.objectId;
+    response.position = packet.position;
+    response.rotation = packet.rotation;
+
+    const { event, ...packetData } = response;
+
+    this.playerGateway.getServer().to(redisRoomId).emit(event, packetData);
+  }
+
   // 사용자 애니메이션 동기화
   async baseSetAnimation(client: Socket, packet: C_BASE_SET_ANIMATION) {
-    const redisRoomId = RedisKey.getStrRoomId(client.data.roomId);
+    const redisRoomId = client.data.redisRoomId;
 
     const data = {
-      name: PLAYER_SOCKET_S_MESSAGE.S_BASE_SET_ANIMATION,
-      roomId: client.data.roomId,
+      redisRoomId,
       packet,
     };
 
@@ -210,6 +264,29 @@ export class PlayerService {
       `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
       JSON.stringify(data),
     );
+  }
+
+  private async setAnimation(data) {
+    this.logger.debug('사용자 애니메이션 동기화 실행 !! ✅', data);
+
+    const redisRoomId = data.redisRoomId;
+    const packet = data.packet as C_BASE_SET_ANIMATION;
+
+    await this.gameObjectService.setAnimation(
+      redisRoomId,
+      packet.objectId,
+      packet.animationId,
+      packet.animation,
+    );
+
+    const response = new S_BASE_SET_ANIMATION();
+    response.objectId = packet.objectId;
+    response.animationId = packet.animationId;
+    response.animation = packet.animation;
+
+    const { event, ...packetData } = response;
+
+    this.playerGateway.getServer().to(redisRoomId).emit(event, packetData);
   }
 
   // 사용자 이모지 동기화
@@ -396,23 +473,6 @@ export class PlayerService {
       requestId,
       roomId: roomInfo.redisRoomId,
     });
-
-    // const lockKey = RedisKey.getStrObjectRedisLockKey('gameObject');
-    // if (await this.lockService.tryLock(lockKey, 30000)) {
-    //   try {
-    //     const gameObjects = await this.redisClient.get(
-    //       RedisKey.getStrGameObject(roomInfo.redisRoomId),
-    //     );
-
-    //     client.emit(PLAYER_SOCKET_S_MESSAGE.S_BASE_ADD_OBJECT, gameObjects);
-    //   } catch (err) {
-    //     this.logger.error(`게임오브젝트 조회 오류 발생 ❌`, err);
-    //     throw new ForbiddenException('게임오브젝트 조회 오류 발생 ❌');
-    //   } finally {
-    //     await this.lockService.releaseLock(lockKey);
-    //   }
-    // }
-    // await this.redisClient.del(RedisKey.getStrGameObject(roomInfo.redisRoomId));
   }
 
   async getGameObjectsForHub(data: any) {

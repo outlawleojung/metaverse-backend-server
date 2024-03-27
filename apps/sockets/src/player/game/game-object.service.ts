@@ -96,7 +96,7 @@ export class GameObjectService {
 
       server.to(roomId).emit(event, packetData);
 
-      console.log(this.gameObjects);
+      client.data.objectId = objectId;
     }
   }
 
@@ -136,20 +136,22 @@ export class GameObjectService {
   removeGameObject(roomId: string, clientId: string) {
     const roomGameObjects = this.gameObjects.get(roomId);
 
-    const deleteObjectIds: number[] = [];
-    for (const gameObject of roomGameObjects.values()) {
-      if (gameObject.ownerId === clientId) {
-        deleteObjectIds.push(gameObject.objectId);
+    if (roomGameObjects) {
+      const deleteObjectIds: number[] = [];
+      for (const gameObject of roomGameObjects.values()) {
+        if (gameObject.ownerId === clientId) {
+          deleteObjectIds.push(gameObject.objectId);
+        }
       }
-    }
 
-    this.logger.debug('게임 오브젝트 삭제 : ', deleteObjectIds);
-    deleteObjectIds.forEach((id) => roomGameObjects.delete(id));
+      this.logger.debug('게임 오브젝트 삭제 : ', deleteObjectIds);
+      deleteObjectIds.forEach((id) => roomGameObjects.delete(id));
 
-    {
-      const roomGameObjects = this.gameObjects.get(roomId);
-      if (roomGameObjects.size === 0) {
-        this.gameObjects.delete(roomId);
+      {
+        const roomGameObjects = this.gameObjects.get(roomId);
+        if (!roomGameObjects || roomGameObjects.size === 0) {
+          this.gameObjects.delete(roomId);
+        }
       }
     }
   }

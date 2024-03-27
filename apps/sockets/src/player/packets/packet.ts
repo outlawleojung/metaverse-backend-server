@@ -18,15 +18,15 @@ export interface PACKET {
 export class C_BASE_SET_TRANSFORM implements PACKET {
   event = PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_TRANSFORM;
   objectId: number;
-  Position: Position;
-  Rotation: Rotation;
+  position: Position;
+  rotation: Rotation;
 }
 
 export class S_BASE_SET_TRANSFORM implements PACKET {
   event = PLAYER_SOCKET_S_MESSAGE.S_BASE_SET_TRANSFORM;
   objectId: number;
-  Position: Position;
-  Rotation: Rotation;
+  position: Position;
+  rotation: Rotation;
 }
 
 export class C_BASE_SET_ANIMATION implements PACKET {
