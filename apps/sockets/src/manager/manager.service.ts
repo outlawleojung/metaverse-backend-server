@@ -128,6 +128,7 @@ export class ManagerService {
 
   // 접속 인원 알림
   async getCurrentUsers(data: any) {
+    console.log(data);
     const serverType = process.env.SERVER_TYPE;
     const currentUsers = await this.redisClient.keys('socket:*');
 

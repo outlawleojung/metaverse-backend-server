@@ -12,7 +12,6 @@ import { Server, Socket } from 'socket.io';
 import { Redis } from 'ioredis';
 import { ManagerService } from './manager.service';
 import { GatewayInitiService } from '../services/gateway-init.service';
-import { NatsService } from '../nats/nats.service';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
 import {
   CHATTING_SOCKET_C_GLOBAL,
@@ -36,7 +35,6 @@ export class ManagerGateway
     @InjectRedis() private readonly redisClient: Redis,
     private readonly managerService: ManagerService,
     private readonly gatewayInitService: GatewayInitiService,
-    private readonly natsService: NatsService,
     private readonly messageHandler: NatsMessageHandler,
   ) {}
   private readonly logger = new Logger(ManagerGateway.name);
@@ -61,16 +59,16 @@ export class ManagerGateway
   //소켓 연결
   async handleConnection(client: Socket) {
     this.logger.debug('매니저 소켓 연결중.✅');
-    // const jwtAccessToken = String(
-    //   Decrypt(client.handshake.auth.jwtAccessToken),
-    // );
-
-    // const sessionId = String(Decrypt(client.handshake.auth.sessionId));
-
     const jwtAccessToken = String(
-      Decrypt(client.handshake.headers.authorization),
+      Decrypt(client.handshake.auth.jwtAccessToken),
     );
-    const sessionId = String(Decrypt(client.handshake.headers.cookie));
+
+    const sessionId = String(Decrypt(client.handshake.auth.sessionId));
+
+    // const jwtAccessToken = String(
+    //   Decrypt(client.handshake.headers.authorization),
+    // );
+    // const sessionId = String(Decrypt(client.handshake.headers.cookie));
 
     this.managerService.handleConnection(
       this.server,

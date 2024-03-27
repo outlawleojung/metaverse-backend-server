@@ -1,8 +1,4 @@
 import {
-  PLAYER_SOCKET_S_MESSAGE,
-  HUB_SOCKET_S_MESSAGE,
-} from './../../../../libs/constants/src/index';
-import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -20,12 +16,7 @@ import {
 import { GatewayInitiService } from '../services/gateway-init.service';
 import { Server, Socket } from 'socket.io';
 import { Decrypt } from '@libs/common';
-import { NatsService } from '../nats/nats.service';
-import {
-  PLAYER_SOCKET_C_MESSAGE,
-  NAMESPACE,
-  NATS_EVENTS,
-} from '@libs/constants';
+import { PLAYER_SOCKET_C_MESSAGE, NAMESPACE } from '@libs/constants';
 import {
   C_BASE_INSTANTIATE_OBJECT,
   C_BASE_SET_ANIMATION,
@@ -33,12 +24,7 @@ import {
   C_BASE_SET_TRANSFORM,
   C_ENTER,
 } from './packets/packet';
-import { RoomService } from '../room/room.service';
-import { GameObjectService } from './game/game-object.service';
 import { WsExceptionFilter } from '../ws-exception.filter';
-import { NatsMessageHandler } from '../nats/nats-message.handler';
-import { GetGameObjectInfo } from './packets/packet-interface';
-import { GameObject } from './game/game-object';
 
 @WebSocketGateway({
   namespace: NAMESPACE.PLAYER,
@@ -61,17 +47,11 @@ export class PlayerGateway {
     return this.gatewayId;
   }
 
-  private gameObjects: Map<string, GameObject[]> = new Map();
-
   private readonly logger = new Logger(PlayerGateway.name);
   constructor(
     @Inject(forwardRef(() => PlayerService))
     private readonly playerService: PlayerService,
-    private readonly gameObjectService: GameObjectService,
-    private roomService: RoomService,
     private readonly gatewayInitService: GatewayInitiService,
-    private readonly messageHandler: NatsMessageHandler,
-    private readonly natsService: NatsService,
   ) {}
 
   async afterInit() {
@@ -88,52 +68,19 @@ export class PlayerGateway {
     this.gatewayId = `${NAMESPACE.PLAYER}:${uuidv4()}`;
 
     this.playerService.handleConnectionHub(this.gatewayId);
-
-    this.natsService.on(NATS_EVENTS.NATS_CONNECTED, async () => {
-      // 게임 오브젝트 조회 실행 구독
-      // this.logger.debug(`동기화 서버 게임 오브젝트 조회 실행 구독 ✅`);
-      // this.messageHandler.registerHandler(
-      //   NATS_EVENTS.REQ_GET_GAMEOBJECTS,
-      //   async (message) => {
-      //     this.logger.debug(
-      //       'NATS_EVENTS.REQ_GET_GAMEOBJECTS - message : ',
-      //       message,
-      //     );
-      //     const data: GetGameObjectInfo = JSON.parse(message);
-      //     await this.gameObjectService.getObjectsPublish(data);
-      //   },
-      // );
-      // // 게임 오브젝트 조회 데이터 취합
-      // this.messageHandler.registerHandler(
-      //   `${NATS_EVENTS.RES_GET_GAMEOBJECTS}:${this.gatewayId}`,
-      //   async (message) => {
-      //     const data = JSON.parse(message);
-      //     this.logger.debug('data: ', JSON.stringify(data));
-      //     const existingObjects = this.gameObjects.get(data.memberId) || [];
-      //     this.gameObjects.set(
-      //       data.memberId,
-      //       existingObjects.concat(data.gameObjects),
-      //     );
-      //     this.logger.debug(
-      //       'this.gameObjects: ',
-      //       JSON.stringify(this.gameObjects),
-      //     );
-      //   },
-      // );
-    });
   }
 
   async handleConnection(client: Socket) {
-    // const jwtAccessToken = String(
-    //   Decrypt(client.handshake.auth.jwtAccessToken),
-    // );
-    // const sessionId = String(Decrypt(client.handshake.auth.sessionId));
-
-    // console.log(jwtAccessToken);
     const jwtAccessToken = String(
-      Decrypt(client.handshake.headers.authorization),
+      Decrypt(client.handshake.auth.jwtAccessToken),
     );
-    const sessionId = String(Decrypt(client.handshake.headers.cookie));
+    const sessionId = String(Decrypt(client.handshake.auth.sessionId));
+
+    console.log(jwtAccessToken);
+    // const jwtAccessToken = String(
+    //   Decrypt(client.handshake.headers.authorization),
+    // );
+    // const sessionId = String(Decrypt(client.handshake.headers.cookie));
 
     await this.playerService.handleConnection(
       this.server,
@@ -150,13 +97,13 @@ export class PlayerGateway {
   // 룸 입장
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_ENTER)
   async enterChatRoom(client: Socket, packet: C_ENTER) {
-    // const jwtAccessToken = String(
-    //   Decrypt(client.handshake.auth.jwtAccessToken),
-    // );
-
     const jwtAccessToken = String(
-      Decrypt(client.handshake.headers.authorization),
+      Decrypt(client.handshake.auth.jwtAccessToken),
     );
+
+    // const jwtAccessToken = String(
+    //   Decrypt(client.handshake.headers.authorization),
+    // );
 
     await this.playerService.joinRoom(client, jwtAccessToken, packet);
   }
