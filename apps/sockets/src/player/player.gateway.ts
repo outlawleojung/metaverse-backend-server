@@ -71,16 +71,16 @@ export class PlayerGateway {
   }
 
   async handleConnection(client: Socket) {
-    const jwtAccessToken = String(
-      Decrypt(client.handshake.auth.jwtAccessToken),
-    );
-    const sessionId = String(Decrypt(client.handshake.auth.sessionId));
-
-    console.log(jwtAccessToken);
     // const jwtAccessToken = String(
-    //   Decrypt(client.handshake.headers.authorization),
+    //   Decrypt(client.handshake.auth.jwtAccessToken),
     // );
-    // const sessionId = String(Decrypt(client.handshake.headers.cookie));
+    // const sessionId = String(Decrypt(client.handshake.auth.sessionId));
+
+    // console.log(jwtAccessToken);
+    const jwtAccessToken = String(
+      Decrypt(client.handshake.headers.authorization),
+    );
+    const sessionId = String(Decrypt(client.handshake.headers.cookie));
 
     await this.playerService.handleConnection(
       this.server,
@@ -97,13 +97,13 @@ export class PlayerGateway {
   // 룸 입장
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_ENTER)
   async enterChatRoom(client: Socket, packet: C_ENTER) {
-    const jwtAccessToken = String(
-      Decrypt(client.handshake.auth.jwtAccessToken),
-    );
-
     // const jwtAccessToken = String(
-    //   Decrypt(client.handshake.headers.authorization),
+    //   Decrypt(client.handshake.auth.jwtAccessToken),
     // );
+
+    const jwtAccessToken = String(
+      Decrypt(client.handshake.headers.authorization),
+    );
 
     await this.playerService.joinRoom(client, jwtAccessToken, packet);
   }
