@@ -43,19 +43,20 @@ export class S_BASE_SET_ANIMATION implements PACKET {
   animation: string;
 }
 
-export class C_BASE_SET_EMOJI implements PACKET {
-  event = PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_EMOJI;
+export class C_BASE_SET_ANIMATION_ONCE implements PACKET {
+  event = PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION_ONCE;
   objectId: number;
   animationId: string;
   isLoop: boolean;
   blend: number;
 }
 
-export class S_BASE_SET_EMOJI implements PACKET {
-  event = PLAYER_SOCKET_S_MESSAGE.S_BASE_SET_EMOJI;
+export class S_BASE_SET_ANIMATION_ONCE implements PACKET {
+  event = PLAYER_SOCKET_S_MESSAGE.S_BASE_SET_ANIMATION_ONCE;
   objectId: number;
   animationId: string;
-  animation: string;
+  isLoop: boolean;
+  blend: number;
 }
 
 export class C_BASE_INSTANTIATE_OBJECT implements PACKET {
@@ -70,14 +71,6 @@ export class S_BASE_INSTANTIATE_OBJECT implements PACKET {
   event = PLAYER_SOCKET_S_MESSAGE.S_BASE_INSTANTIATE_OBJECT;
   success: boolean;
   objectId: number;
-}
-
-export class S_BASE_SET_ANIMATION_ONCE implements PACKET {
-  event = PLAYER_SOCKET_S_MESSAGE.S_BASE_SET_ANIMATION_ONCE;
-  objectId: number;
-  animationId: string;
-  isLoop: boolean;
-  blend: number;
 }
 
 export class S_INTERACTION_GET_ITEMS implements PACKET {

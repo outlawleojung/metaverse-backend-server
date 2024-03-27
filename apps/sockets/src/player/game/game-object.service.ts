@@ -18,18 +18,11 @@ import {
   S_BASE_SET_ANIMATION_ONCE,
   S_BASE_INSTANTIATE_OBJECT,
   S_BASE_ADD_OBJECT,
+  S_BASE_SET_TRANSFORM,
 } from '../packets/packet';
-import {
-  GetGameObjectInfo,
-  Position,
-  Rotation,
-} from '../packets/packet-interface';
+import { Position, Rotation } from '../packets/packet-interface';
 import { Server, Socket } from 'socket.io';
-import {
-  NATS_EVENTS,
-  PLAYER_SOCKET_S_MESSAGE,
-  RedisKey,
-} from '@libs/constants';
+import { RedisKey, SOCKET_S_GLOBAL } from '@libs/constants';
 import { RedisLockService } from '../../services/redis-lock.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
@@ -166,20 +159,34 @@ export class GameObjectService {
 
     if (!roomGameObjects) {
       // 오브젝트 없음.
-      return;
+      return {
+        event: SOCKET_S_GLOBAL.S_ERROR,
+        packetData: SOCKET_S_GLOBAL.S_ERROR,
+      };
     }
 
     const gameObject = roomGameObjects.get(objectId);
 
     if (!gameObject) {
       // 오브젝트 없음.
-      return;
+      return {
+        event: SOCKET_S_GLOBAL.S_ERROR,
+        packetData: SOCKET_S_GLOBAL.S_ERROR,
+      };
     }
 
     gameObject.setPosition(position);
     gameObject.setRotation(rotation);
 
     // 클라이언트에 변경 사항 전송 등의 추가 작업
+    const packet = new S_BASE_SET_TRANSFORM();
+    packet.objectId = objectId;
+    packet.position = position;
+    packet.rotation = rotation;
+
+    const { event, ...packetData } = packet;
+
+    return { event, packetData };
   }
 
   setAnimation(
@@ -192,14 +199,20 @@ export class GameObjectService {
 
     if (!roomGameObjects) {
       // 오브젝트 없음.
-      return;
+      return {
+        event: SOCKET_S_GLOBAL.S_ERROR,
+        packetData: SOCKET_S_GLOBAL.S_ERROR,
+      };
     }
 
     const gameObject = roomGameObjects.get(objectId);
 
     if (!gameObject) {
       // 오브젝트 없음.
-      return;
+      return {
+        event: SOCKET_S_GLOBAL.S_ERROR,
+        packetData: SOCKET_S_GLOBAL.S_ERROR,
+      };
     }
 
     gameObject.setAnimations(animationId, animationValue);
@@ -211,14 +224,13 @@ export class GameObjectService {
 
     const { event, ...packetData } = packet;
 
-    this.logger.debug(`setAnimation Broadcast : ${event} - ${packetData}`);
+    return { event, packetData };
   }
 
   setAnimationOnce(
     roomId: string,
     objectId: number,
     animationId: string,
-    animationValue: string,
     isLoop: boolean,
     blend: number,
   ) {
@@ -226,14 +238,20 @@ export class GameObjectService {
 
     if (!roomGameObjects) {
       // 오브젝트 없음.
-      return;
+      return {
+        event: SOCKET_S_GLOBAL.S_ERROR,
+        packetData: SOCKET_S_GLOBAL.S_ERROR,
+      };
     }
 
     const gameObject = roomGameObjects.get(objectId);
 
     if (!gameObject) {
       // 오브젝트 없음.
-      return;
+      return {
+        event: SOCKET_S_GLOBAL.S_ERROR,
+        packetData: SOCKET_S_GLOBAL.S_ERROR,
+      };
     }
 
     const packet = new S_BASE_SET_ANIMATION_ONCE();
@@ -244,7 +262,7 @@ export class GameObjectService {
 
     const { event, ...packetData } = packet;
 
-    this.logger.debug(`setAnimationOnce Broadcast : ${event} - ${packetData}`);
+    return { event, packetData };
   }
 
   getInteraction(roomId: string, client: Socket) {

@@ -21,11 +21,9 @@ import {
 import {
   C_BASE_INSTANTIATE_OBJECT,
   C_BASE_SET_ANIMATION,
-  C_BASE_SET_EMOJI,
+  C_BASE_SET_ANIMATION_ONCE,
   C_BASE_SET_TRANSFORM,
   C_ENTER,
-  S_BASE_SET_ANIMATION,
-  S_BASE_SET_TRANSFORM,
   S_ENTER,
 } from './packets/packet';
 import { GameObjectService } from './game/game-object.service';
@@ -234,21 +232,17 @@ export class PlayerService {
     const redisRoomId = data.redisRoomId;
     const packet = data.packet as C_BASE_SET_TRANSFORM;
 
-    await this.gameObjectService.setTransform(
+    const response = await this.gameObjectService.setTransform(
       redisRoomId,
       packet.objectId,
       packet.position,
       packet.rotation,
     );
 
-    const response = new S_BASE_SET_TRANSFORM();
-    response.objectId = packet.objectId;
-    response.position = packet.position;
-    response.rotation = packet.rotation;
-
-    const { event, ...packetData } = response;
-
-    this.playerGateway.getServer().to(redisRoomId).emit(event, packetData);
+    this.playerGateway
+      .getServer()
+      .to(redisRoomId)
+      .emit(response.event, response.packetData);
   }
 
   // 사용자 애니메이션 동기화
@@ -272,30 +266,27 @@ export class PlayerService {
     const redisRoomId = data.redisRoomId;
     const packet = data.packet as C_BASE_SET_ANIMATION;
 
-    await this.gameObjectService.setAnimation(
+    const response = await this.gameObjectService.setAnimation(
       redisRoomId,
       packet.objectId,
       packet.animationId,
       packet.animation,
     );
 
-    const response = new S_BASE_SET_ANIMATION();
-    response.objectId = packet.objectId;
-    response.animationId = packet.animationId;
-    response.animation = packet.animation;
-
-    const { event, ...packetData } = response;
-
-    this.playerGateway.getServer().to(redisRoomId).emit(event, packetData);
+    this.playerGateway
+      .getServer()
+      .to(redisRoomId)
+      .emit(response.event, response.packetData);
   }
 
-  // 사용자 이모지 동기화
-  async baseSetEmoji(client: Socket, packet: C_BASE_SET_EMOJI) {
-    const redisRoomId = RedisKey.getStrRoomId(client.data.roomId);
+  async baseSetAnimationOnce(
+    client: Socket,
+    packet: C_BASE_SET_ANIMATION_ONCE,
+  ) {
+    const redisRoomId = client.data.redisRoomId;
 
     const data = {
-      name: PLAYER_SOCKET_S_MESSAGE.S_BASE_SET_EMOJI,
-      roomId: client.data.roomId,
+      redisRoomId,
       packet,
     };
 
@@ -305,14 +296,24 @@ export class PlayerService {
     );
   }
 
-  // 동기화 룸 패킷 전송
-  async sendSyncPackets(message: string) {
-    const data = JSON.parse(message);
-    const roomId = data.roomId;
-    const packatName = data.name;
-    const packet = data.packet;
+  private async setAnimationOnce(data) {
+    this.logger.debug('사용자 이모지 동기화 실행 !! ✅', data);
 
-    // this.rootServer.getServer().to(roomId).emit(packatName, packet);
+    const redisRoomId = data.redisRoomId;
+    const packet = data.packet as C_BASE_SET_ANIMATION_ONCE;
+
+    const response = await this.gameObjectService.setAnimationOnce(
+      redisRoomId,
+      packet.objectId,
+      packet.animationId,
+      packet.isLoop,
+      packet.blend,
+    );
+
+    this.playerGateway
+      .getServer()
+      .to(redisRoomId)
+      .emit(response.event, response.packetData);
   }
 
   async getClient(client: Socket) {

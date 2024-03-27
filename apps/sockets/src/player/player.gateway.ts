@@ -20,7 +20,7 @@ import { PLAYER_SOCKET_C_MESSAGE, NAMESPACE } from '@libs/constants';
 import {
   C_BASE_INSTANTIATE_OBJECT,
   C_BASE_SET_ANIMATION,
-  C_BASE_SET_EMOJI,
+  C_BASE_SET_ANIMATION_ONCE,
   C_BASE_SET_TRANSFORM,
   C_ENTER,
 } from './packets/packet';
@@ -126,35 +126,16 @@ export class PlayerGateway {
   // 게임오브젝트 목록 조회
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_BASE_GET_OBJECT)
   async getGameObjects(client: Socket) {
-    this.logger.debug('C_BASE_GET_OBJECT : ', client.data.memberId);
-
-    // const payload: GetGameObjectInfo = {
-    //   memberId: client.data.memberId,
-    //   gatewayId: this.gatewayId,
-    // };
-    // await this.messageHandler.publishHandler(
-    //   NATS_EVENTS.REQ_GET_GAMEOBJECTS,
-    //   JSON.stringify(payload),
-    // );
-
-    // setTimeout(async () => {
-    //   const gameObjects: GameObject[] = this.gameObjects.get(
-    //     client.data.memberId,
-    //   );
-    //   console.log(
-    //     '#################################### gameObjects: ',
-    //     this.gameObjects,
-    //   );
-    //   client.emit(PLAYER_SOCKET_S_MESSAGE.S_BASE_ADD_OBJECT, gameObjects);
-    //   this.gameObjects.delete(client.data.memberId);
-    // }, 5000);
-
     await this.playerService.getObjects(client);
   }
 
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_TRANSFORM)
   async baseSetTransform(client: Socket, data: C_BASE_SET_TRANSFORM) {
     this.playerService.baseSetTransform(client, data);
+    this.logger.debug(
+      '플레이어 이동 동기화 클라이언트 데이터 : ',
+      JSON.stringify(client.data),
+    );
     this.logger.debug('플레이어 이동 동기화 데이터 : ', JSON.stringify(data));
   }
 
@@ -167,9 +148,9 @@ export class PlayerGateway {
     );
   }
 
-  @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_EMOJI)
-  async baseSetEmoji(client: Socket, data: C_BASE_SET_EMOJI) {
-    this.playerService.baseSetEmoji(client, data);
+  @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION_ONCE)
+  async baseSetEmoji(client: Socket, data: C_BASE_SET_ANIMATION_ONCE) {
+    this.playerService.baseSetAnimationOnce(client, data);
     this.logger.debug('플레이어 이모지 동기화 데이터 : ', JSON.stringify(data));
   }
 }
