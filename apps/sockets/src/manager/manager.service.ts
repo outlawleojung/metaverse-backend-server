@@ -42,6 +42,8 @@ export class ManagerService {
       sessionId,
     );
 
+    console.log('##################### client.data: ', client.data);
+
     if (!client.data.memberId) {
       client.emit(SOCKET_S_GLOBAL.S_DROP_PLAYER, 10002);
       client.disconnect();

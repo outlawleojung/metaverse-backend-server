@@ -65,10 +65,25 @@ export class ManagerGateway
 
     // const sessionId = String(Decrypt(client.handshake.auth.sessionId));
 
-    const jwtAccessToken = String(
-      Decrypt(client.handshake.headers.authorization),
-    );
-    const sessionId = String(Decrypt(client.handshake.headers.cookie));
+    // const jwtAccessToken = String(
+    //   Decrypt(client.handshake.headers.authorization),
+    // );
+    // const sessionId = String(Decrypt(client.handshake.headers.cookie));
+
+    let jwtAccessToken;
+    let sessionId;
+
+    if (!client.handshake.auth.jwtAccessToken) {
+      jwtAccessToken = Decrypt(client.handshake.headers.authorization);
+    } else {
+      jwtAccessToken = Decrypt(client.handshake.auth.jwtAccessToken);
+    }
+
+    if (!client.handshake.auth.sessionId) {
+      sessionId = String(Decrypt(client.handshake.headers.cookie));
+    } else {
+      sessionId = String(Decrypt(client.handshake.auth.sessionId));
+    }
 
     this.managerService.handleConnection(
       this.server,

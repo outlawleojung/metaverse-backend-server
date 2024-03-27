@@ -71,16 +71,31 @@ export class PlayerGateway {
   }
 
   async handleConnection(client: Socket) {
+    let jwtAccessToken;
+    let sessionId;
+
+    if (!client.handshake.auth.jwtAccessToken) {
+      jwtAccessToken = Decrypt(client.handshake.headers.authorization);
+    } else {
+      jwtAccessToken = Decrypt(client.handshake.auth.jwtAccessToken);
+    }
+
+    if (!client.handshake.auth.sessionId) {
+      sessionId = String(Decrypt(client.handshake.headers.cookie));
+    } else {
+      sessionId = String(Decrypt(client.handshake.auth.sessionId));
+    }
+
     // const jwtAccessToken = String(
     //   Decrypt(client.handshake.auth.jwtAccessToken),
     // );
     // const sessionId = String(Decrypt(client.handshake.auth.sessionId));
 
     // console.log(jwtAccessToken);
-    const jwtAccessToken = String(
-      Decrypt(client.handshake.headers.authorization),
-    );
-    const sessionId = String(Decrypt(client.handshake.headers.cookie));
+    // const jwtAccessToken = String(
+    //   Decrypt(client.handshake.headers.authorization),
+    // );
+    // const sessionId = String(Decrypt(client.handshake.headers.cookie));
 
     await this.playerService.handleConnection(
       this.server,
@@ -101,9 +116,17 @@ export class PlayerGateway {
     //   Decrypt(client.handshake.auth.jwtAccessToken),
     // );
 
-    const jwtAccessToken = String(
-      Decrypt(client.handshake.headers.authorization),
-    );
+    // const jwtAccessToken = String(
+    //   Decrypt(client.handshake.headers.authorization),
+    // );
+
+    let jwtAccessToken;
+
+    if (!client.handshake.auth.jwtAccessToken) {
+      jwtAccessToken = Decrypt(client.handshake.headers.authorization);
+    } else {
+      jwtAccessToken = Decrypt(client.handshake.auth.jwtAccessToken);
+    }
 
     await this.playerService.joinRoom(client, jwtAccessToken, packet);
   }
