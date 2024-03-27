@@ -32,3 +32,8 @@ export interface ClientInfo {
   nickname: string;
   stateMessage: string;
 }
+
+export interface GetGameObjectInfo {
+  memberId: string;
+  gatewayId: string;
+}

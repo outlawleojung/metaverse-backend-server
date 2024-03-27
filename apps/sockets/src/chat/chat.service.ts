@@ -126,7 +126,7 @@ export class ChatService {
       await this.redisClient.del(`${client.data.roomId}`);
 
       // 룸 구독 해제
-      await this.natsService.publish(
+      await this.messageHandler.publishHandler(
         NATS_EVENTS.DELETE_CHAT_ROOM,
         client.data.roomId,
       );
@@ -307,7 +307,7 @@ export class ChatService {
     });
     await worldChattingLogSave.save();
 
-    this.natsService.publish(
+    this.messageHandler.publishHandler(
       `${NATS_EVENTS.CHAT_ROOM}.${client.data.roomId}`,
       JSON.stringify(messageInfo),
     );
@@ -400,7 +400,7 @@ export class ChatService {
       sendMessageInfo,
     };
 
-    this.natsService.publish(
+    this.messageHandler.publishHandler(
       recvNickNameMember.memberId,
       JSON.stringify(sendMessages),
     );
@@ -630,7 +630,10 @@ export class ChatService {
     if (playerIds.length === 1) {
       await this.redisClient.del(roomId);
 
-      await this.natsService.publish(NATS_EVENTS.DELETE_CHAT_ROOM, roomId);
+      await this.messageHandler.publishHandler(
+        NATS_EVENTS.DELETE_CHAT_ROOM,
+        roomId,
+      );
     }
 
     // 룸 사용자 리스트에서 사용자 정보 삭제
@@ -667,7 +670,7 @@ export class ChatService {
     client.data.roomCode = '';
 
     // 룸 퇴장 이벤트 발생
-    await this.natsService.publish(
+    await this.messageHandler.publishHandler(
       `${NATS_EVENTS.LEAVE_ROOM}:${client.data.memberId}`,
       JSON.stringify({
         memberId: client.data.memberId,

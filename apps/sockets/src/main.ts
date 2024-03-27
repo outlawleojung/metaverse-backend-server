@@ -35,9 +35,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-  await app.listen(process.env.SOCKET_PORT);
+  await app.listen(process.env.SOCKET_SERVER);
 
-  console.log(`Application is running on: ${await app.getUrl()}`);
+  console.log(`Web Socket Server Is Running On: ${await app.getUrl()}`);
 }
-bootstrap();
-// AppClusterService.clusterize(bootstrap);
+// bootstrap();
+AppClusterService.clusterize(bootstrap);

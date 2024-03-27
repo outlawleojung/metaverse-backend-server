@@ -9,13 +9,13 @@ import { Repository } from 'typeorm';
 
 import { RedisFunctionService } from '@libs/redis';
 import axios from 'axios';
-import { NatsService } from '../nats/nats.service';
 import {
   NAMESPACE,
   NATS_EVENTS,
   RedisKey,
   SOCKET_S_GLOBAL,
 } from '@libs/constants';
+import { NatsMessageHandler } from '../nats/nats-message.handler';
 
 @Injectable()
 export class ManagerService {
@@ -25,7 +25,7 @@ export class ManagerService {
     private memberRepository: Repository<Member>,
     private readonly redisFunctionService: RedisFunctionService,
     private readonly tokenCheckService: TokenCheckService,
-    private natsService: NatsService,
+    private messageHandler: NatsMessageHandler,
   ) {}
   private readonly logger = new Logger(ManagerService.name);
 
@@ -67,7 +67,7 @@ export class ManagerService {
         .to(socketData.sessionId)
         .emit(SOCKET_S_GLOBAL.S_DROP_PLAYER, 10000);
 
-      this.natsService.publish(
+      this.messageHandler.publishHandler(
         `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${sessionId}`,
         socketData.sessionId,
       );

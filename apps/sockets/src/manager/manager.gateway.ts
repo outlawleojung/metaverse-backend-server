@@ -61,11 +61,16 @@ export class ManagerGateway
   //소켓 연결
   async handleConnection(client: Socket) {
     this.logger.debug('매니저 소켓 연결중.✅');
-    const jwtAccessToken = String(
-      Decrypt(client.handshake.auth.jwtAccessToken),
-    );
+    // const jwtAccessToken = String(
+    //   Decrypt(client.handshake.auth.jwtAccessToken),
+    // );
 
-    const sessionId = String(Decrypt(client.handshake.auth.sessionId));
+    // const sessionId = String(Decrypt(client.handshake.auth.sessionId));
+
+    const jwtAccessToken = String(
+      Decrypt(client.handshake.headers.authorization),
+    );
+    const sessionId = String(Decrypt(client.handshake.headers.cookie));
 
     this.managerService.handleConnection(
       this.server,

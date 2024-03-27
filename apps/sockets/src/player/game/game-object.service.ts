@@ -19,13 +19,23 @@ import {
   S_BASE_INSTANTIATE_OBJECT,
   S_BASE_ADD_OBJECT,
 } from '../packets/packet';
-import { Position, Rotation } from '../packets/packet-interface';
+import {
+  GetGameObjectInfo,
+  Position,
+  Rotation,
+} from '../packets/packet-interface';
 import { Server, Socket } from 'socket.io';
-import { PLAYER_SOCKET_S_MESSAGE, RedisKey } from '@libs/constants';
+import {
+  NATS_EVENTS,
+  PLAYER_SOCKET_S_MESSAGE,
+  RedisKey,
+} from '@libs/constants';
 import { RedisLockService } from '../../services/redis-lock.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
 import { PlayerService } from '../player.service';
+import { NatsMessageHandler } from '../../nats/nats-message.handler';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class GameObjectService {
@@ -38,6 +48,7 @@ export class GameObjectService {
     @Inject(forwardRef(() => PlayerService))
     private readonly playerService: PlayerService,
     private readonly lockService: RedisLockService,
+    private readonly messageHandler: NatsMessageHandler,
   ) {}
 
   async instantiateObject(
@@ -58,9 +69,16 @@ export class GameObjectService {
       clientId,
     );
 
-    const roomGameObjects = new Map();
-    roomGameObjects.set(objectId, gameObject);
-    this.gameObjects.set(roomId, roomGameObjects);
+    if (this.gameObjects.has(roomId)) {
+      const exGameObjects = this.gameObjects.get(roomId);
+
+      exGameObjects.set(objectId, gameObject);
+      this.gameObjects.set(roomId, exGameObjects);
+    } else {
+      const roomGameObjects = new Map();
+      roomGameObjects.set(objectId, gameObject);
+      this.gameObjects.set(roomId, roomGameObjects);
+    }
 
     {
       const packet = new S_BASE_INSTANTIATE_OBJECT();
@@ -82,24 +100,18 @@ export class GameObjectService {
     }
   }
 
-  async getObjects(client: Socket) {
-    const roomInfo = await this.playerService.getUserRoomId(
-      client.data.memberId,
-    );
-
-    const packet = new S_BASE_ADD_OBJECT();
-
-    const roomGameObjects = await this.gameObjects.get(roomInfo.redisRoomId);
+  // 게임 오브젝트 조회 ( Hub)
+  async getObjectsForHub(roomId: string) {
+    const gameObjects: GameObject[] = [];
+    const roomGameObjects = await this.gameObjects.get(roomId);
 
     if (roomGameObjects) {
       for (const gameObject of roomGameObjects.values()) {
-        packet.gameObjects.push(gameObject);
+        gameObjects.push(gameObject);
       }
     }
 
-    const { event, ...packetData } = packet;
-
-    client.emit(event, packetData);
+    return gameObjects;
   }
 
   setObjectData(roomId: string, objectId: number, data: string) {
@@ -119,6 +131,27 @@ export class GameObjectService {
     gameObject.objectData = data;
 
     // 클라이언트에 변경 사항 전송 등의 추가 작업
+  }
+
+  removeGameObject(roomId: string, clientId: string) {
+    const roomGameObjects = this.gameObjects.get(roomId);
+
+    const deleteObjectIds: number[] = [];
+    for (const gameObject of roomGameObjects.values()) {
+      if (gameObject.ownerId === clientId) {
+        deleteObjectIds.push(gameObject.objectId);
+      }
+    }
+
+    this.logger.debug('게임 오브젝트 삭제 : ', deleteObjectIds);
+    deleteObjectIds.forEach((id) => roomGameObjects.delete(id));
+
+    {
+      const roomGameObjects = this.gameObjects.get(roomId);
+      if (roomGameObjects.size === 0) {
+        this.gameObjects.delete(roomId);
+      }
+    }
   }
 
   setTransform(
@@ -342,5 +375,43 @@ export class GameObjectService {
         await this.lockService.releaseLock(lockKey);
       }
     }
+  }
+
+  @Cron('* * * * * *') // 매초 실행
+  async handleCron() {
+    // 변경된 GameObject 데이터가 있는지 확인
+    // this.updateRedisDataWithLock();
+    // 변경된 데이터가 있다면 Redis와 동기화
+    // 예시 로직: Redis에 저장된 데이터를 업데이트
+    // const gameObjects = this.getUpdatedGameObjects(); // 변경된 GameObjects를 가져오는 메서드
+    // if (gameObjects.length > 0) {
+    //   await this.redisClient.set('gameObjectsKey', JSON.stringify(gameObjects));
+    // }
+  }
+
+  async updateRedisDataWithLock() {
+    const lockKey = RedisKey.getStrObjectRedisLockKey('gameObject');
+    const maxRetries = 10; // 최대 재시도 횟수
+    const retryDelay = 1000; // 재시도 딜레이 (밀리초)
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      const isLocked = await this.lockService.tryLock(lockKey, 30000); // Lock 획득 시도, 30초간 유지
+      if (isLocked) {
+        try {
+          // Lock 획득 성공, Redis 데이터 업데이트 로직 수행
+          console.log('Redis 데이터 업데이트 시작');
+          // 여기에 Redis 업데이트 로직을 추가합니다.
+          return; // 업데이트 성공 후 함수 종료
+        } finally {
+          await this.lockService.releaseLock(lockKey); // 작업 완료 후 Lock 해제
+          console.log('Redis 데이터 업데이트 완료 및 Lock 해제');
+        }
+      } else {
+        console.log(`Lock 획득 실패, ${attempt + 1}번째 재시도...`);
+        await new Promise((resolve) => setTimeout(resolve, retryDelay)); // 재시도 딜레이
+      }
+    }
+
+    console.log('최대 재시도 횟수 초과, 데이터 업데이트 실패');
   }
 }

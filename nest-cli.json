@@ -126,6 +126,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/redis/tsconfig.lib.json"
       }
+    },
+    "socket-hub": {
+      "type": "application",
+      "root": "apps/socket-hub",
+      "entryFile": "main",
+      "sourceRoot": "apps/socket-hub/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/socket-hub/tsconfig.app.json"
+      }
     }
   }
 }

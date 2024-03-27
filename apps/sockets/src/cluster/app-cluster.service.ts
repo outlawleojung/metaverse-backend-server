@@ -3,7 +3,7 @@ import cluster from 'node:cluster';
 import * as os from 'os';
 import { Injectable } from '@nestjs/common';
 
-const numCPUs = os.cpus().length;
+const numCPUs = process.env.NODE_ENV === 'production' ? os.cpus().length : 4;
 
 @Injectable()
 export class AppClusterService {
@@ -11,9 +11,11 @@ export class AppClusterService {
 
   static async clusterize(callback: () => any): Promise<Promise<void>> {
     if (cluster.isPrimary) {
-      AppClusterService.logger.debug(`마스터 서버 시작 ${process.pid}`);
+      AppClusterService.logger.debug(
+        `마스터 서버 시작 ${process.pid} - core count : ${numCPUs}`,
+      );
 
-      for (let i = 0; i < 1; i++) {
+      for (let i = 0; i < numCPUs; i++) {
         cluster.fork();
       }
       cluster.on('exit', (worker, code, signal) => {

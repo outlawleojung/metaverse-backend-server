@@ -31,6 +31,7 @@ export class TokenCheckService {
       payload = decoded as JwtPayload;
     });
 
+    this.logger.debug(`clientJwt : ${clientJwt}`);
     this.logger.debug(`payload : ${payload.idx}, ${payload.nickname}`);
     if (payload) {
       return {

@@ -719,12 +719,14 @@ export const RedisKey = {
   getStrMemberSocket: (memberId: string): string => `socket:${memberId}`,
   getStrRedisLockKey: (gateway: string): string =>
     `lock:gateway:init:${gateway}`,
+  getStrObjectRedisLockKey: (data: string): string => `lock:object:${data}`,
   getStrOfficeReservRoomCode: (roomCode: string): string =>
     `officeReservation:${roomCode}`,
   getStrOfficeReservKey: (): string => `officeReservationRoomCode`,
   getStrRoomIdCounter: (): string => `roomIdCounter`,
   getStrObjectIdCounter: (): string => `objectIdCounter`,
   getStrMyRoom: (roomId): string => `myroom:${roomId}`,
+  getStrGameObject: (roomId): string => `gameObject:${roomId}`,
 };
 
 export const SOCKET_SERVER_ERROR_CODE_GLOBAL = Object.freeze({
@@ -870,6 +872,22 @@ export const NAMESPACE = Object.freeze({
   SCREEN_BANNER: 'screen-banner',
   MANAGER: 'manager',
 });
+
+export const HUB_SOCKET_C_MESSAGE = Object.freeze({
+  C_GET_GAMEOBJECTS: 'C_GET_GAMEOBJECTS', // 게임오브젝트 목록 조회 요청
+  C_SEND_GAMEOBJECTS: 'C_SEND_GAMEOBJECTS', // 게임오브젝트 목록 전송
+});
+
+export const HUB_SOCKET_S_MESSAGE = Object.freeze({
+  S_GET_GAMEOBJECTS: 'S_GET_GAMEOBJECTS', // 게임오브젝트 목록 조회 요청
+  S_GAMEOBJECTS_RESULT: 'S_GAMEOBJECTS_RESULT', // 게임오브젝트 목록 조회 요청의 최종 응답
+});
+
+// ROOM_NAME
+export const HUB_SOCKET_ROOM = Object.freeze({
+  GAMEOBJECT: 'GAMEOBJECT', // 게임오브젝트 조회 용도의 룸
+});
+
 // NATS
 
 export const NATS_URL = 'NATS_URL';
@@ -900,6 +918,9 @@ export const NATS_EVENTS = Object.freeze({
 
   NATS_CONNECTED: 'NATS_CONNECTED',
   DUPLICATE_LOGIN_USER: 'DUPLICATE_LOGIN_USER',
+
+  REQ_GET_GAMEOBJECTS: 'REQ_GET_GAMEOBJECTS',
+  RES_GET_GAMEOBJECTS: 'RES_GET_GAMEOBJECTS',
 });
 
 export const ROOM_TYPE = Object.freeze({

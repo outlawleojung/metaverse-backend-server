@@ -1,8 +1,13 @@
 import {
+  PLAYER_SOCKET_S_MESSAGE,
+  HUB_SOCKET_S_MESSAGE,
+} from './../../../../libs/constants/src/index';
+import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { v4 as uuidv4 } from 'uuid';
 import { PlayerService } from './player.service';
 import {
   Inject,
@@ -31,6 +36,9 @@ import {
 import { RoomService } from '../room/room.service';
 import { GameObjectService } from './game/game-object.service';
 import { WsExceptionFilter } from '../ws-exception.filter';
+import { NatsMessageHandler } from '../nats/nats-message.handler';
+import { GetGameObjectInfo } from './packets/packet-interface';
+import { GameObject } from './game/game-object';
 
 @WebSocketGateway({
   namespace: NAMESPACE.PLAYER,
@@ -47,6 +55,14 @@ export class PlayerGateway {
     return this.server;
   }
 
+  private gatewayId;
+
+  public getGatewayId(): string {
+    return this.gatewayId;
+  }
+
+  private gameObjects: Map<string, GameObject[]> = new Map();
+
   private readonly logger = new Logger(PlayerGateway.name);
   constructor(
     @Inject(forwardRef(() => PlayerService))
@@ -54,6 +70,7 @@ export class PlayerGateway {
     private readonly gameObjectService: GameObjectService,
     private roomService: RoomService,
     private readonly gatewayInitService: GatewayInitiService,
+    private readonly messageHandler: NatsMessageHandler,
     private readonly natsService: NatsService,
   ) {}
 
@@ -68,16 +85,56 @@ export class PlayerGateway {
       this.logger.debug(`동기화 서버 실행 ✅`);
     }
 
+    this.gatewayId = `${NAMESPACE.PLAYER}:${uuidv4()}`;
+
+    this.playerService.handleConnectionHub(this.gatewayId);
+
     this.natsService.on(NATS_EVENTS.NATS_CONNECTED, async () => {
-      // 룸 생성 구독
+      // 게임 오브젝트 조회 실행 구독
+      // this.logger.debug(`동기화 서버 게임 오브젝트 조회 실행 구독 ✅`);
+      // this.messageHandler.registerHandler(
+      //   NATS_EVENTS.REQ_GET_GAMEOBJECTS,
+      //   async (message) => {
+      //     this.logger.debug(
+      //       'NATS_EVENTS.REQ_GET_GAMEOBJECTS - message : ',
+      //       message,
+      //     );
+      //     const data: GetGameObjectInfo = JSON.parse(message);
+      //     await this.gameObjectService.getObjectsPublish(data);
+      //   },
+      // );
+      // // 게임 오브젝트 조회 데이터 취합
+      // this.messageHandler.registerHandler(
+      //   `${NATS_EVENTS.RES_GET_GAMEOBJECTS}:${this.gatewayId}`,
+      //   async (message) => {
+      //     const data = JSON.parse(message);
+      //     this.logger.debug('data: ', JSON.stringify(data));
+      //     const existingObjects = this.gameObjects.get(data.memberId) || [];
+      //     this.gameObjects.set(
+      //       data.memberId,
+      //       existingObjects.concat(data.gameObjects),
+      //     );
+      //     this.logger.debug(
+      //       'this.gameObjects: ',
+      //       JSON.stringify(this.gameObjects),
+      //     );
+      //   },
+      // );
     });
   }
 
   async handleConnection(client: Socket) {
+    // const jwtAccessToken = String(
+    //   Decrypt(client.handshake.auth.jwtAccessToken),
+    // );
+    // const sessionId = String(Decrypt(client.handshake.auth.sessionId));
+
+    // console.log(jwtAccessToken);
     const jwtAccessToken = String(
-      Decrypt(client.handshake.auth.jwtAccessToken),
+      Decrypt(client.handshake.headers.authorization),
     );
-    const sessionId = String(Decrypt(client.handshake.auth.sessionId));
+    const sessionId = String(Decrypt(client.handshake.headers.cookie));
+
     await this.playerService.handleConnection(
       this.server,
       client,
@@ -93,8 +150,12 @@ export class PlayerGateway {
   // 룸 입장
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_ENTER)
   async enterChatRoom(client: Socket, packet: C_ENTER) {
+    // const jwtAccessToken = String(
+    //   Decrypt(client.handshake.auth.jwtAccessToken),
+    // );
+
     const jwtAccessToken = String(
-      Decrypt(client.handshake.auth.jwtAccessToken),
+      Decrypt(client.handshake.headers.authorization),
     );
 
     await this.playerService.joinRoom(client, jwtAccessToken, packet);
@@ -106,6 +167,7 @@ export class PlayerGateway {
     await this.playerService.getClient(client);
   }
 
+  // 게임오브젝트 인스턴스 생성
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_BASE_INSTANTIATE_OBJECT)
   async getInstantiateObject(
     client: Socket,
@@ -114,10 +176,33 @@ export class PlayerGateway {
     await this.playerService.getInstantiateObject(this.server, client, packet);
   }
 
+  // 게임오브젝트 목록 조회
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_BASE_GET_OBJECT)
-  async getObject(client: Socket) {
+  async getGameObjects(client: Socket) {
     this.logger.debug('C_BASE_GET_OBJECT : ', client.data.memberId);
-    await this.gameObjectService.getObjects(client);
+
+    // const payload: GetGameObjectInfo = {
+    //   memberId: client.data.memberId,
+    //   gatewayId: this.gatewayId,
+    // };
+    // await this.messageHandler.publishHandler(
+    //   NATS_EVENTS.REQ_GET_GAMEOBJECTS,
+    //   JSON.stringify(payload),
+    // );
+
+    // setTimeout(async () => {
+    //   const gameObjects: GameObject[] = this.gameObjects.get(
+    //     client.data.memberId,
+    //   );
+    //   console.log(
+    //     '#################################### gameObjects: ',
+    //     this.gameObjects,
+    //   );
+    //   client.emit(PLAYER_SOCKET_S_MESSAGE.S_BASE_ADD_OBJECT, gameObjects);
+    //   this.gameObjects.delete(client.data.memberId);
+    // }, 5000);
+
+    await this.playerService.getObjects(client);
   }
 
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_TRANSFORM)
@@ -140,16 +225,4 @@ export class PlayerGateway {
     this.playerService.baseSetEmoji(client, data);
     this.logger.debug('플레이어 이모지 동기화 데이터 : ', JSON.stringify(data));
   }
-
-  // @SubscribeMessage('C_GET_ROOM')
-  // async getRoom(client: Socket) {
-  //   const rooms = await this.roomService.getRooms();
-  //   this.logger.debug('룸 리스트 : ', JSON.stringify(rooms));
-  // }
-
-  // @SubscribeMessage('C_CREATE_ROOM')
-  // async creatRoom(client: Socket) {
-  //   const rooms = await this.roomService.createRoom(RoomType.MyRoom);
-  //   this.logger.debug('룸 생성 : ', JSON.stringify(rooms));
-  // }
 }
