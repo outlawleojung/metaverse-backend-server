@@ -47,7 +47,7 @@ export class PlayerService {
   ) {}
 
   async handleConnectionHub(gatewayId: string) {
-    const hubUrl = `${process.env.HUB_URL}:${process.env.HUB_SERVER}`;
+    const hubUrl = `${process.env.HUB_URL}`;
     console.log(hubUrl);
     this.hubSocketClient = io(hubUrl, {
       query: {
