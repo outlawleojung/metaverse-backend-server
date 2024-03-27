@@ -60,19 +60,15 @@ export class ChatGateway {
   }
 
   async handleConnection(client: Socket) {
-    let jwtAccessToken;
-    let sessionId;
+    const jwtAccessToken = String(
+      Decrypt(client.handshake.auth.jwtAccessToken),
+    );
+    const sessionId = String(Decrypt(client.handshake.auth.sessionId));
 
-    if (client.handshake.auth) {
-      jwtAccessToken = String(Decrypt(client.handshake.auth.jwtAccessToken));
-      sessionId = String(Decrypt(client.handshake.auth.sessionId));
-    } else {
-      jwtAccessToken = String(Decrypt(client.handshake.headers.authorization));
-      sessionId = String(Decrypt(client.handshake.headers.cookie));
-    }
-
-    jwtAccessToken = String(Decrypt(client.handshake.headers.authorization));
-    sessionId = String(Decrypt(client.handshake.headers.cookie));
+    // const jwtAccessToken = String(
+    //   Decrypt(client.handshake.headers.authorization),
+    // );
+    // const sessionId = String(Decrypt(client.handshake.headers.cookie));
 
     await this.chatService.handleConnection(
       this.server,
