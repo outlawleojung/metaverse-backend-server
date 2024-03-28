@@ -76,8 +76,8 @@ export class PlayerService {
       (data) => {
         this.logger.debug('메인 소켓 서버로부터 게임오브젝트 요청 응답:', data);
 
-        const memberId = this.goReqMap.get(data.requestId);
-        const socket = this.socketMap.get(memberId);
+        const clientId = this.goReqMap.get(data.requestId);
+        const socket = this.socketMap.get(clientId);
         socket.emit(
           PLAYER_SOCKET_S_MESSAGE.S_BASE_ADD_OBJECT,
           data.gameObjects,
@@ -115,7 +115,7 @@ export class PlayerService {
     client.data.jwtAccessToken;
     client.data.clientId = memberInfo.memberCode;
 
-    this.socketMap.set(memberId, client);
+    this.socketMap.set(memberInfo.memberCode, client);
 
     this.logger.debug(
       `동기화 서버에 연결되었어요 ✅ : ${memberId} - sessionId : ${sessionId}`,
@@ -191,19 +191,7 @@ export class PlayerService {
       this.messageHandler.registerHandler(
         `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
         async (message: string) => {
-          this.logger.debug('룸 구독 콜백 ✅');
-
-          const data = JSON.parse(message);
-
-          switch (data.packet.event) {
-            case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_TRANSFORM:
-              await this.setTransform(data);
-              break;
-            case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION:
-              await this.setAnimation(data);
-            case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION_ONCE:
-              await this.setAnimationOnce(data);
-          }
+          this.roomSubscribeCallbackmessage(message);
         },
       );
     }
@@ -217,6 +205,31 @@ export class PlayerService {
         roomId: packet.roomId,
       }),
     );
+  }
+
+  async roomSubscribeCallbackmessage(message) {
+    this.logger.debug('룸 구독 콜백 ✅');
+    const data = JSON.parse(message);
+
+    switch (data.packet.event) {
+      case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_TRANSFORM:
+        await this.setTransform(data);
+        break;
+      case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION:
+        await this.setAnimation(data);
+        break;
+      case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION_ONCE:
+        await this.setAnimationOnce(data);
+        break;
+      case PLAYER_SOCKET_C_MESSAGE.C_BASE_INSTANTIATE_OBJECT:
+        await this.instantiateObject(data);
+        break;
+      case PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_SET_ITEM:
+        await this.setInteraction(data);
+        break;
+      case PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_REMOVE_ITEM:
+        await this.removeInteraction(data);
+    }
   }
 
   // 사용자 이동 동기화
@@ -358,39 +371,47 @@ export class PlayerService {
     );
   }
 
-  async getInstantiateObject(
-    server: Server,
+  async baseInstantiateObject(
     client: Socket,
     packet: C_BASE_INSTANTIATE_OBJECT,
   ) {
     const roomInfo = await this.getUserRoomId(client.data.memberId);
+    const redisRoomId = roomInfo.redisRoomId;
+    const clientId = client.data.clientId;
 
     if (!roomInfo.redisRoomId) {
       return client.emit(
-        SOCKET_S_GLOBAL.S_ERROR,
+        SOCKET_S_GLOBAL.ERROR,
         SOCKET_SERVER_ERROR_CODE_GLOBAL.NOT_IN_ROOM,
       );
     }
 
-    await this.gameObjectService.instantiateObject(
-      server,
-      client,
-      roomInfo.redisRoomId,
+    const data = {
+      redisRoomId,
       packet,
+      clientId,
+    };
+
+    this.messageHandler.publishHandler(
+      `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
+      JSON.stringify(data),
     );
   }
 
-  async setInteraction(client: Socket, data: C_INTERACTION_SET_ITEM) {
-    const roomInfo = await this.getUserRoomId(client.data.memberId);
-    const response = await this.gameObjectService.setInteraction(
-      roomInfo.redisRoomId,
-      client.data.clientId,
-      data.id,
-      data.state,
+  async instantiateObject(data) {
+    const redisRoomId = data.redisRoomId;
+    const clientId = data.clientId;
+    const packet = data.packet as C_BASE_INSTANTIATE_OBJECT;
+
+    const response = await this.gameObjectService.instantiateObject(
+      redisRoomId,
+      clientId,
+      packet,
     );
 
     if (response.clientPacket) {
-      client.emit(
+      const socket = this.socketMap.get(clientId);
+      socket.emit(
         response.clientPacket.event,
         response.clientPacket.packetData,
       );
@@ -399,7 +420,7 @@ export class PlayerService {
     if (response.broadcastPacket) {
       this.playerGateway
         .getServer()
-        .to(roomInfo.redisRoomId)
+        .to(redisRoomId)
         .emit(
           response.broadcastPacket.event,
           response.broadcastPacket.packetData,
@@ -407,18 +428,38 @@ export class PlayerService {
     }
   }
 
-  async removeInteraction(client: Socket, data: C_INTERACTION_REMOVE_ITEM) {
+  async baseSetInteraction(client: Socket, packet: C_INTERACTION_SET_ITEM) {
     const roomInfo = await this.getUserRoomId(client.data.memberId);
+    const redisRoomId = roomInfo.redisRoomId;
     const clientId = client.data.clientId;
 
-    const response = await this.gameObjectService.removeInteraction(
-      roomInfo.redisRoomId,
+    const data = {
+      redisRoomId,
+      packet,
       clientId,
-      data.id,
+    };
+
+    this.messageHandler.publishHandler(
+      `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
+      JSON.stringify(data),
+    );
+  }
+
+  private async setInteraction(data) {
+    const redisRoomId = data.redisRoomId;
+    const clientId = data.clientId;
+    const packet = data.packet as C_INTERACTION_SET_ITEM;
+
+    const response = await this.gameObjectService.setInteraction(
+      redisRoomId,
+      clientId,
+      packet.id,
+      packet.state,
     );
 
     if (response.clientPacket) {
-      client.emit(
+      const socket = this.socketMap.get(clientId);
+      socket.emit(
         response.clientPacket.event,
         response.clientPacket.packetData,
       );
@@ -427,7 +468,57 @@ export class PlayerService {
     if (response.broadcastPacket) {
       this.playerGateway
         .getServer()
-        .to(roomInfo.redisRoomId)
+        .to(redisRoomId)
+        .emit(
+          response.broadcastPacket.event,
+          response.broadcastPacket.packetData,
+        );
+    }
+  }
+
+  async baseRemoveInteraction(
+    client: Socket,
+    packet: C_INTERACTION_REMOVE_ITEM,
+  ) {
+    const roomInfo = await this.getUserRoomId(client.data.memberId);
+    const redisRoomId = roomInfo.redisRoomId;
+    const clientId = client.data.clientId;
+
+    const data = {
+      redisRoomId,
+      packet,
+      clientId,
+    };
+
+    this.messageHandler.publishHandler(
+      `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
+      JSON.stringify(data),
+    );
+  }
+
+  private async removeInteraction(data) {
+    const redisRoomId = data.redisRoomId;
+    const clientId = data.clientId;
+    const packet = data.packet as C_INTERACTION_REMOVE_ITEM;
+
+    const response = await this.gameObjectService.removeInteraction(
+      redisRoomId,
+      clientId,
+      packet.id,
+    );
+
+    if (response.clientPacket) {
+      const socket = this.socketMap.get(clientId);
+      socket.emit(
+        response.clientPacket.event,
+        response.clientPacket.packetData,
+      );
+    }
+
+    if (response.broadcastPacket) {
+      this.playerGateway
+        .getServer()
+        .to(redisRoomId)
         .emit(
           response.broadcastPacket.event,
           response.broadcastPacket.packetData,
@@ -541,7 +632,7 @@ export class PlayerService {
 
     // 요청 아이디를 발급 하고 해당 요청을 보낸 사용자 아이디와 함께 저장
     const requestId = uuidv4();
-    this.goReqMap.set(requestId, client.data.memberId);
+    this.goReqMap.set(requestId, client.data.clientId);
 
     // 허브 소켓에 게임오브젝트 목록을 요청 보낸다.
     this.hubSocketClient.emit(HUB_SOCKET_C_MESSAGE.C_GET_GAMEOBJECTS, {

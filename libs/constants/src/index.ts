@@ -756,7 +756,7 @@ export const SOCKET_SERVER_ERROR_CODE_GLOBAL = Object.freeze({
 });
 
 export const SOCKET_S_GLOBAL = Object.freeze({
-  S_ERROR: 'S_ERROR',
+  ERROR: 'ERROR',
   S_SYSTEM_MESSAGE: 'S_SYSTEM_MESSAGE', // 시스템 메시지
   S_DROP_PLAYER: 'S_DROP_PLAYER', // 플레이어 강제 퇴장
   S_PLAYER_CONNECTED: 'S_PLAYER_CONNECTED', // 플레이어 접속

@@ -98,7 +98,7 @@ export class PlayerGateway {
     client: Socket,
     packet: C_BASE_INSTANTIATE_OBJECT,
   ) {
-    await this.playerService.getInstantiateObject(this.server, client, packet);
+    await this.playerService.baseInstantiateObject(client, packet);
   }
 
   // 게임오브젝트 목록 조회
@@ -145,12 +145,12 @@ export class PlayerGateway {
   // 인터랙션 설정
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_SET_ITEM)
   async setInteraction(client: Socket, data: C_INTERACTION_SET_ITEM) {
-    await this.playerService.setInteraction(client, data);
+    await this.playerService.baseSetInteraction(client, data);
   }
 
   // 인터랙션 삭제
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_REMOVE_ITEM)
   async removeInteraction(client: Socket, data: C_INTERACTION_REMOVE_ITEM) {
-    await this.playerService.removeInteraction(client, data);
+    await this.playerService.baseRemoveInteraction(client, data);
   }
 }

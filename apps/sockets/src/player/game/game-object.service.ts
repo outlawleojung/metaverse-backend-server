@@ -45,13 +45,10 @@ export class GameObjectService {
   ) {}
 
   async instantiateObject(
-    server: Server,
-    client: Socket,
     roomId: string,
+    clientId: string,
     data: C_BASE_INSTANTIATE_OBJECT,
   ) {
-    const clientId = client.data.clientId;
-
     const objectId = await this.generateObjectId();
     const gameObject = new GameObject(
       objectId,
@@ -61,6 +58,8 @@ export class GameObjectService {
       data.objectData,
       clientId,
     );
+
+    const response: any = {};
 
     if (this.gameObjects.has(roomId)) {
       const exGameObjects = this.gameObjects.get(roomId);
@@ -79,19 +78,27 @@ export class GameObjectService {
       packet.success = true;
       packet.objectId = gameObject.objectId;
 
-      const { event, ...packatData } = packet;
-      client.emit(event, packatData);
+      const { event, ...packetData } = packet;
+
+      const packetInfo: PacketInfo = {
+        event,
+        packetData: packetData,
+      };
+      response.clientPacket = packetInfo;
     }
     {
       const addObjectPacket = new S_BASE_ADD_OBJECT();
       addObjectPacket.gameObjects.push(gameObject);
 
       const { event, ...packetData } = addObjectPacket;
-
-      server.to(roomId).emit(event, packetData);
-
-      client.data.objectId = objectId;
+      const packetInfo: PacketInfo = {
+        event,
+        packetData: packetData,
+      };
+      response.clientPacket = packetInfo;
     }
+    response.objectId = objectId;
+    return response;
   }
 
   // 게임 오브젝트 조회 ( Hub)
@@ -161,7 +168,7 @@ export class GameObjectService {
     if (!roomGameObjects) {
       // 오브젝트 없음.
       return {
-        event: SOCKET_S_GLOBAL.S_ERROR,
+        event: SOCKET_S_GLOBAL.ERROR,
         packetData: '오브젝트 없음',
       };
     }
@@ -171,7 +178,7 @@ export class GameObjectService {
     if (!gameObject) {
       // 오브젝트 없음.
       return {
-        event: SOCKET_S_GLOBAL.S_ERROR,
+        event: SOCKET_S_GLOBAL.ERROR,
         packetData: '오브젝트 없음',
       };
     }
@@ -201,7 +208,7 @@ export class GameObjectService {
     if (!roomGameObjects) {
       // 오브젝트 없음.
       return {
-        event: SOCKET_S_GLOBAL.S_ERROR,
+        event: SOCKET_S_GLOBAL.ERROR,
         packetData: '오브젝트 없음',
       };
     }
@@ -211,7 +218,7 @@ export class GameObjectService {
     if (!gameObject) {
       // 오브젝트 없음.
       return {
-        event: SOCKET_S_GLOBAL.S_ERROR,
+        event: SOCKET_S_GLOBAL.ERROR,
         packetData: '오브젝트 없음',
       };
     }
@@ -240,8 +247,8 @@ export class GameObjectService {
     if (!roomGameObjects) {
       // 오브젝트 없음.
       return {
-        event: SOCKET_S_GLOBAL.S_ERROR,
-        packetData: SOCKET_S_GLOBAL.S_ERROR,
+        event: SOCKET_S_GLOBAL.ERROR,
+        packetData: SOCKET_S_GLOBAL.ERROR,
       };
     }
 
@@ -250,8 +257,8 @@ export class GameObjectService {
     if (!gameObject) {
       // 오브젝트 없음.
       return {
-        event: SOCKET_S_GLOBAL.S_ERROR,
-        packetData: SOCKET_S_GLOBAL.S_ERROR,
+        event: SOCKET_S_GLOBAL.ERROR,
+        packetData: SOCKET_S_GLOBAL.ERROR,
       };
     }
 
