@@ -147,7 +147,7 @@ export class RoomService {
     return _rooms;
   }
 
-  async createRoom(req: CreateRoomRequestDto): Promise<IRoom> {
+  async createRoom(req: CreateRoomRequestDto) {
     const roomId = await this.generateRoomId();
 
     const redisRoomId = RedisKey.getStrRoomId(roomId);
@@ -175,7 +175,18 @@ export class RoomService {
       room.roomId,
     );
 
-    return room;
+    return {
+      type: room.type,
+      roomId: roomId,
+      sceneName: room.sceneName,
+      ownerId: req.ownerId,
+    };
+    // return {
+    //   type: room.type,
+    //   roomId: roomId,
+    //   sceneName: room.sceneName,
+    //   ownerId: room.ownerId,
+    // };
   }
 
   async removeRoom(roomId: string): Promise<void> {
