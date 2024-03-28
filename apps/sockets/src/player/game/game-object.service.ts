@@ -95,7 +95,7 @@ export class GameObjectService {
         event,
         packetData: packetData,
       };
-      response.clientPacket = packetInfo;
+      response.broadcast = packetInfo;
     }
     response.objectId = objectId;
     return response;
