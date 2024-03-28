@@ -3,6 +3,7 @@ import {
   BadRequestException,
   Catch,
   ExceptionFilter,
+  Logger,
 } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
@@ -13,6 +14,7 @@ export class WsExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToWs();
     const client = ctx.getClient<Socket>();
 
+    const logger = new Logger(WsExceptionFilter.name);
     let message: string | object = 'Internal server error';
     if (exception instanceof WsException) {
       message = exception.getError();
@@ -21,6 +23,8 @@ export class WsExceptionFilter implements ExceptionFilter {
       message = exception.getResponse();
     }
     // 클라이언트에 에러 메시지를 emit
+    logger.debug('!! ERROR !!');
+    logger.debug(message);
     client.emit('ERROR', { message });
   }
 }

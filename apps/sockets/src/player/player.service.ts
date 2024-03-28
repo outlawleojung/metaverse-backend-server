@@ -24,6 +24,8 @@ import {
   C_BASE_SET_ANIMATION_ONCE,
   C_BASE_SET_TRANSFORM,
   C_ENTER,
+  C_INTERACTION_REMOVE_ITEM,
+  C_INTERACTION_SET_ITEM,
   S_ENTER,
 } from './packets/packet';
 import { GameObjectService } from './game/game-object.service';
@@ -199,6 +201,8 @@ export class PlayerService {
               break;
             case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION:
               await this.setAnimation(data);
+            case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION_ONCE:
+              await this.setAnimationOnce(data);
           }
         },
       );
@@ -376,7 +380,69 @@ export class PlayerService {
     );
   }
 
-  async getInteration(client: Socket) {}
+  async setInteraction(client: Socket, data: C_INTERACTION_SET_ITEM) {
+    const roomInfo = await this.getUserRoomId(client.data.memberId);
+    const response = await this.gameObjectService.setInteraction(
+      roomInfo.redisRoomId,
+      client.data.clientId,
+      data.id,
+      data.state,
+    );
+
+    if (response.clientPacket) {
+      client.emit(
+        response.clientPacket.event,
+        response.clientPacket.packetData,
+      );
+    }
+
+    if (response.broadcastPacket) {
+      this.playerGateway
+        .getServer()
+        .to(roomInfo.redisRoomId)
+        .emit(
+          response.broadcastPacket.event,
+          response.broadcastPacket.packetData,
+        );
+    }
+  }
+
+  async removeInteraction(client: Socket, data: C_INTERACTION_REMOVE_ITEM) {
+    const roomInfo = await this.getUserRoomId(client.data.memberId);
+    const clientId = client.data.clientId;
+
+    const response = await this.gameObjectService.removeInteraction(
+      roomInfo.redisRoomId,
+      clientId,
+      data.id,
+    );
+
+    if (response.clientPacket) {
+      client.emit(
+        response.clientPacket.event,
+        response.clientPacket.packetData,
+      );
+    }
+
+    if (response.broadcastPacket) {
+      this.playerGateway
+        .getServer()
+        .to(roomInfo.redisRoomId)
+        .emit(
+          response.broadcastPacket.event,
+          response.broadcastPacket.packetData,
+        );
+    }
+  }
+
+  async getInteraction(client: Socket) {
+    const roomInfo = await this.getUserRoomId(client.data.memberId);
+    const response = await this.gameObjectService.getInteraction(
+      roomInfo.redisRoomId,
+    );
+
+    client.emit(response.event, JSON.stringify(response.packetData));
+  }
 
   async getUserRoomId(memberId) {
     // 사용자의 현재 룸 조회

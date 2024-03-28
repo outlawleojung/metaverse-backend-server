@@ -20,7 +20,7 @@ import {
   S_BASE_ADD_OBJECT,
   S_BASE_SET_TRANSFORM,
 } from '../packets/packet';
-import { Position, Rotation } from '../packets/packet-interface';
+import { PacketInfo, Position, Rotation } from '../packets/packet-interface';
 import { Server, Socket } from 'socket.io';
 import { RedisKey, SOCKET_S_GLOBAL } from '@libs/constants';
 import { RedisLockService } from '../../services/redis-lock.service';
@@ -161,7 +161,7 @@ export class GameObjectService {
       // 오브젝트 없음.
       return {
         event: SOCKET_S_GLOBAL.S_ERROR,
-        packetData: SOCKET_S_GLOBAL.S_ERROR,
+        packetData: '오브젝트 없음',
       };
     }
 
@@ -171,7 +171,7 @@ export class GameObjectService {
       // 오브젝트 없음.
       return {
         event: SOCKET_S_GLOBAL.S_ERROR,
-        packetData: SOCKET_S_GLOBAL.S_ERROR,
+        packetData: '오브젝트 없음',
       };
     }
 
@@ -201,7 +201,7 @@ export class GameObjectService {
       // 오브젝트 없음.
       return {
         event: SOCKET_S_GLOBAL.S_ERROR,
-        packetData: SOCKET_S_GLOBAL.S_ERROR,
+        packetData: '오브젝트 없음',
       };
     }
 
@@ -211,7 +211,7 @@ export class GameObjectService {
       // 오브젝트 없음.
       return {
         event: SOCKET_S_GLOBAL.S_ERROR,
-        packetData: SOCKET_S_GLOBAL.S_ERROR,
+        packetData: '오브젝트 없음',
       };
     }
 
@@ -265,7 +265,7 @@ export class GameObjectService {
     return { event, packetData };
   }
 
-  getInteraction(roomId: string, client: Socket) {
+  getInteraction(roomId: string) {
     const packet = new S_INTERACTION_GET_ITEMS();
     this.interactions.forEach((id) => {
       packet.items.push({ id, state: '' });
@@ -276,36 +276,47 @@ export class GameObjectService {
     this.logger.debug(
       `getInteraction - roomId: ${roomId} event: ${event} data: ${packetData}`,
     );
-    client.emit(event, packetData);
+    return { event, packetData };
   }
 
   setInteraction(
     roomId: string,
-    client: Socket,
+    clientId: string,
     interactionId: string,
     interactionData: string,
   ) {
     const packet = new S_INTERACTION_SET_ITEM();
+    const response: any = {};
 
     const interaction = this.interactions.get(interactionId);
-    if (interaction && interaction != client.data.clientId) {
+    if (interaction && interaction != clientId) {
       packet.success = false;
 
       const { event, ...packetData } = packet;
-      client.emit(event, packetData);
-      this.logger.debug(`setInteraction : ${event} - ${packetData}`);
+      // client.emit(event, packetData);
+      const packetInfo: PacketInfo = {
+        event,
+        packetData: packetData,
+      };
 
-      return;
+      this.logger.debug(`setInteraction : ${event} - ${packetData}`);
+      response.clientPacket = packetInfo;
+      return response;
     }
 
     packet.success = true;
 
-    this.interactions.set(interactionId, client.data.clientId);
+    this.interactions.set(interactionId, clientId);
 
     {
       const { event, ...packetData } = packet;
 
-      client.emit(event, packetData);
+      const packetInfo: PacketInfo = {
+        event,
+        packetData: packetData,
+      };
+
+      response.clientPacket = packetInfo;
     }
     {
       const packet = new S_INTERACTION_SET_ITEM_NOTICE();
@@ -313,28 +324,41 @@ export class GameObjectService {
       packet.state = interactionData;
 
       const { event, ...packetData } = packet;
+      const packetInfo: PacketInfo = {
+        event,
+        packetData: packetData,
+      };
+
+      response.broadcastPacket = packetInfo;
 
       this.logger.debug(
         `Interaction Broadcast - roomId: ${roomId} event: ${event} data: ${packetData}`,
       );
+
+      return response;
     }
   }
 
-  removeInteraction(roomId: string, client: Socket, interactionId: string) {
+  removeInteraction(roomId: string, clientId: string, interactionId: string) {
+    const response: any = {};
     {
       const packet = new S_INTERACTION_REMOVE_ITEM();
-
       const interaction = this.interactions.get(interactionId);
-      if (interaction && interaction != client.data.clientId) {
+      if (interaction && interaction != clientId) {
         packet.success = false;
 
         const { event, ...packetData } = packet;
-        client.emit(event, packetData);
+        const packetInfo: PacketInfo = {
+          event,
+          packetData: packetData,
+        };
+
         this.logger.debug(
           `removeInteraction - roomId: ${roomId} event: ${event} data: ${packetData}`,
         );
 
-        return;
+        response.clientPacket = packetInfo;
+        return response;
       }
 
       packet.success = true;
@@ -342,19 +366,30 @@ export class GameObjectService {
       this.interactions.delete(interactionId);
 
       const { event, ...packetData } = packet;
+      const packetInfo: PacketInfo = {
+        event,
+        packetData: packetData,
+      };
 
-      client.emit(event, packetData);
+      response.clientPacket = packetInfo;
     }
     {
       const packet = new S_INTERACTION_REMOVE_ITEM_NOTICE();
       packet.id = interactionId;
 
       const { event, ...packetData } = packet;
+      const packetInfo: PacketInfo = {
+        event,
+        packetData: packetData,
+      };
+      response.broadcastPacket = packetInfo;
 
       this.logger.debug(
         `removeInteraction - roomId: ${roomId} event: ${event} data: ${packetData}`,
       );
     }
+
+    return response;
   }
 
   clearObject(roomId: string) {

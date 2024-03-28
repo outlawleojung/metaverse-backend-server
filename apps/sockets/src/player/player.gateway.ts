@@ -23,6 +23,9 @@ import {
   C_BASE_SET_ANIMATION_ONCE,
   C_BASE_SET_TRANSFORM,
   C_ENTER,
+  C_INTERACTION_REMOVE_ITEM,
+  C_INTERACTION_SET_ITEM,
+  S_INTERACTION_REMOVE_ITEM,
 } from './packets/packet';
 import { WsExceptionFilter } from '../ws-exception.filter';
 
@@ -135,7 +138,19 @@ export class PlayerGateway {
   // 인터랙션 조회
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_GET_ITEMS)
   async getInteraction(client: Socket) {
-    await this.playerService.getInteration(client);
+    await this.playerService.getInteraction(client);
     // this.logger.debug('인터랙션 조회 : ', JSON.stringify(data));
+  }
+
+  // 인터랙션 설정
+  @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_SET_ITEM)
+  async setInteraction(client: Socket, data: C_INTERACTION_SET_ITEM) {
+    await this.playerService.setInteraction(client, data);
+  }
+
+  // 인터랙션 삭제
+  @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_REMOVE_ITEM)
+  async removeInteraction(client: Socket, data: C_INTERACTION_REMOVE_ITEM) {
+    await this.playerService.removeInteraction(client, data);
   }
 }

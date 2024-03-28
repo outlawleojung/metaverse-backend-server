@@ -37,3 +37,8 @@ export interface GetGameObjectInfo {
   memberId: string;
   gatewayId: string;
 }
+
+export interface PacketInfo {
+  event: string;
+  packetData: object;
+}
