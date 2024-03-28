@@ -73,6 +73,7 @@ export class GameObjectService {
       this.gameObjects.set(roomId, roomGameObjects);
     }
 
+    console.log('################ gameObjects :', this.gameObjects);
     {
       const packet = new S_BASE_INSTANTIATE_OBJECT();
       packet.success = true;
