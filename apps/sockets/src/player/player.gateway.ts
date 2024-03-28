@@ -66,43 +66,11 @@ export class PlayerGateway {
     }
 
     this.gatewayId = `${NAMESPACE.PLAYER}:${uuidv4()}`;
-
     this.playerService.handleConnectionHub(this.gatewayId);
   }
 
   async handleConnection(client: Socket) {
-    let jwtAccessToken;
-    let sessionId;
-
-    if (!client.handshake.auth.jwtAccessToken) {
-      jwtAccessToken = Decrypt(client.handshake.headers.authorization);
-    } else {
-      jwtAccessToken = Decrypt(client.handshake.auth.jwtAccessToken);
-    }
-
-    if (!client.handshake.auth.sessionId) {
-      sessionId = String(Decrypt(client.handshake.headers.cookie));
-    } else {
-      sessionId = String(Decrypt(client.handshake.auth.sessionId));
-    }
-
-    // const jwtAccessToken = String(
-    //   Decrypt(client.handshake.auth.jwtAccessToken),
-    // );
-    // const sessionId = String(Decrypt(client.handshake.auth.sessionId));
-
-    // console.log(jwtAccessToken);
-    // const jwtAccessToken = String(
-    //   Decrypt(client.handshake.headers.authorization),
-    // );
-    // const sessionId = String(Decrypt(client.handshake.headers.cookie));
-
-    await this.playerService.handleConnection(
-      this.server,
-      client,
-      jwtAccessToken,
-      sessionId,
-    );
+    await this.playerService.handleConnection(this.server, client);
   }
 
   async handleDisconnect(client: Socket) {
@@ -112,23 +80,7 @@ export class PlayerGateway {
   // 룸 입장
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_ENTER)
   async enterChatRoom(client: Socket, packet: C_ENTER) {
-    // const jwtAccessToken = String(
-    //   Decrypt(client.handshake.auth.jwtAccessToken),
-    // );
-
-    // const jwtAccessToken = String(
-    //   Decrypt(client.handshake.headers.authorization),
-    // );
-
-    let jwtAccessToken;
-
-    if (!client.handshake.auth.jwtAccessToken) {
-      jwtAccessToken = Decrypt(client.handshake.headers.authorization);
-    } else {
-      jwtAccessToken = Decrypt(client.handshake.auth.jwtAccessToken);
-    }
-
-    await this.playerService.joinRoom(client, jwtAccessToken, packet);
+    await this.playerService.joinRoom(client, packet);
   }
 
   // 클라이언트 목록 요청
@@ -152,9 +104,10 @@ export class PlayerGateway {
     await this.playerService.getObjects(client);
   }
 
+  // 이동 동기화
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_TRANSFORM)
   async baseSetTransform(client: Socket, data: C_BASE_SET_TRANSFORM) {
-    this.playerService.baseSetTransform(client, data);
+    await this.playerService.baseSetTransform(client, data);
     this.logger.debug(
       '플레이어 이동 동기화 클라이언트 데이터 : ',
       JSON.stringify(client.data),
@@ -162,18 +115,27 @@ export class PlayerGateway {
     this.logger.debug('플레이어 이동 동기화 데이터 : ', JSON.stringify(data));
   }
 
+  // 애니메이션 동기화
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION)
   async baseSetAnimation(client: Socket, data: C_BASE_SET_ANIMATION) {
-    this.playerService.baseSetAnimation(client, data);
+    await this.playerService.baseSetAnimation(client, data);
     this.logger.debug(
       '플레이어 애니메이션 동기화 데이터 : ',
       JSON.stringify(data),
     );
   }
 
+  // 이모지 동기화
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION_ONCE)
   async baseSetEmoji(client: Socket, data: C_BASE_SET_ANIMATION_ONCE) {
-    this.playerService.baseSetAnimationOnce(client, data);
+    await this.playerService.baseSetAnimationOnce(client, data);
     this.logger.debug('플레이어 이모지 동기화 데이터 : ', JSON.stringify(data));
+  }
+
+  // 인터랙션 조회
+  @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_GET_ITEMS)
+  async getInteraction(client: Socket) {
+    await this.playerService.getInteration(client);
+    // this.logger.debug('인터랙션 조회 : ', JSON.stringify(data));
   }
 }

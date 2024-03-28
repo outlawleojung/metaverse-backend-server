@@ -59,38 +59,10 @@ export class ManagerGateway
   //소켓 연결
   async handleConnection(client: Socket) {
     this.logger.debug('매니저 소켓 연결중.✅');
-    // const jwtAccessToken = String(
-    //   Decrypt(client.handshake.auth.jwtAccessToken),
-    // );
 
-    // const sessionId = String(Decrypt(client.handshake.auth.sessionId));
+    this.managerService.handleConnection(this.server, client);
 
-    // const jwtAccessToken = String(
-    //   Decrypt(client.handshake.headers.authorization),
-    // );
-    // const sessionId = String(Decrypt(client.handshake.headers.cookie));
-
-    let jwtAccessToken;
-    let sessionId;
-
-    if (!client.handshake.auth.jwtAccessToken) {
-      jwtAccessToken = Decrypt(client.handshake.headers.authorization);
-    } else {
-      jwtAccessToken = Decrypt(client.handshake.auth.jwtAccessToken);
-    }
-
-    if (!client.handshake.auth.sessionId) {
-      sessionId = String(Decrypt(client.handshake.headers.cookie));
-    } else {
-      sessionId = String(Decrypt(client.handshake.auth.sessionId));
-    }
-
-    this.managerService.handleConnection(
-      this.server,
-      client,
-      jwtAccessToken,
-      sessionId,
-    );
+    const sessionId = client.handshake.auth.sessionId;
 
     // 중복 로그인 알림 구독
     this.messageHandler.registerHandler(

@@ -30,19 +30,18 @@ export class ManagerService {
   private readonly logger = new Logger(ManagerService.name);
 
   //소켓 연결
-  async handleConnection(
-    server: Server,
-    client: Socket,
-    jwtAccessToken: string,
-    sessionId: string,
-  ) {
+  async handleConnection(server: Server, client: Socket) {
+    const authInfo =
+      await this.tokenCheckService.getJwtAccessTokenAndSessionId(client);
+
+    const jwtAccessToken = authInfo.jwtAccessToken;
+    const sessionId = authInfo.sessionId;
+
     await this.tokenCheckService.checkTokenSession(
       client,
-      jwtAccessToken,
-      sessionId,
+      authInfo.jwtAccessToken,
+      authInfo.sessionId,
     );
-
-    console.log('##################### client.data: ', client.data);
 
     if (!client.data.memberId) {
       client.emit(SOCKET_S_GLOBAL.S_DROP_PLAYER, 10002);

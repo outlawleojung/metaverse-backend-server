@@ -5,6 +5,7 @@ import { Member, SessionInfo } from '@libs/entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SOCKET_S_GLOBAL } from '@libs/constants';
+import { Decrypt } from '@libs/common';
 
 interface JwtPayload {
   idx: string;
@@ -31,7 +32,6 @@ export class TokenCheckService {
       payload = decoded as JwtPayload;
     });
 
-    this.logger.debug(`clientJwt : ${clientJwt}`);
     this.logger.debug(`payload : ${payload.idx}, ${payload.nickname}`);
     if (payload) {
       return {
@@ -52,9 +52,7 @@ export class TokenCheckService {
     //토큰 검증
     await jwt.verify(clientJwt, process.env.SECRET_KEY, (err, decoded) => {
       if (err) {
-        this.logger.debug(
-          '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ disconnect ######################',
-        );
+        this.logger.debug('err: ', JSON.stringify(err));
         client.disconnect();
         console.log('err : ' + err);
         return;
@@ -71,13 +69,29 @@ export class TokenCheckService {
 
     // 세션 아이디 검증
     if (sessionId !== sessionInfo.sessionId) {
-      this.logger.debug(
-        '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ disconnect ######################',
-      );
-      console.log('세션 아이디가 일치하지 않습니다.');
+      this.logger.debug('세션 아이디가 일치하지 않습니다.');
       client.emit(SOCKET_S_GLOBAL.S_DROP_PLAYER, 10001);
       client.disconnect();
       return;
     }
+  }
+
+  async getJwtAccessTokenAndSessionId(client: Socket) {
+    let jwtAccessToken;
+    let sessionId;
+
+    if (!client.handshake.auth.jwtAccessToken) {
+      jwtAccessToken = Decrypt(client.handshake.headers.authorization);
+    } else {
+      jwtAccessToken = Decrypt(client.handshake.auth.jwtAccessToken);
+    }
+
+    if (!client.handshake.auth.sessionId) {
+      sessionId = String(Decrypt(client.handshake.headers.cookie));
+    } else {
+      sessionId = String(Decrypt(client.handshake.auth.sessionId));
+    }
+
+    return { jwtAccessToken, sessionId };
   }
 }

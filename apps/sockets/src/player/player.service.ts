@@ -85,12 +85,13 @@ export class PlayerService {
   }
 
   // 소켓 연결
-  async handleConnection(
-    server: Server,
-    client: Socket,
-    jwtAccessToken: string,
-    sessionId: string,
-  ) {
+  async handleConnection(server: Server, client: Socket) {
+    const authInfo =
+      await this.tokenCheckService.getJwtAccessTokenAndSessionId(client);
+
+    const jwtAccessToken = authInfo.jwtAccessToken;
+    const sessionId = authInfo.sessionId;
+
     const memberInfo =
       await this.tokenCheckService.checkLoginToken(jwtAccessToken);
 
@@ -126,7 +127,12 @@ export class PlayerService {
     );
   }
 
-  async joinRoom(client: Socket, jwtAccessToken: string, packet: C_ENTER) {
+  async joinRoom(client: Socket, packet: C_ENTER) {
+    const authInfo =
+      await this.tokenCheckService.getJwtAccessTokenAndSessionId(client);
+
+    const jwtAccessToken = authInfo.jwtAccessToken;
+
     // 토큰을 검증하여 멤버 정보를 확인
     const memberInfo =
       await this.tokenCheckService.checkLoginToken(jwtAccessToken);
@@ -369,6 +375,8 @@ export class PlayerService {
       packet,
     );
   }
+
+  async getInteration(client: Socket) {}
 
   async getUserRoomId(memberId) {
     // 사용자의 현재 룸 조회
