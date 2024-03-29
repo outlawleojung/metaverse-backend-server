@@ -11,6 +11,8 @@ export class AppClusterService {
 
   static async clusterize(callback: () => any): Promise<Promise<void>> {
     if (cluster.isPrimary) {
+      cluster.schedulingPolicy = cluster.SCHED_RR;
+
       AppClusterService.logger.debug(
         `마스터 서버 시작 ${process.pid} - core count : ${numCPUs}`,
       );

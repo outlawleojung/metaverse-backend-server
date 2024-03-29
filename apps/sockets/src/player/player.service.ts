@@ -77,8 +77,6 @@ export class PlayerService {
     this.hubSocketClient.on(
       HUB_SOCKET_S_MESSAGE.S_GAMEOBJECTS_RESULT,
       (data) => {
-        this.logger.debug('메인 소켓 서버로부터 게임오브젝트 요청 응답:', data);
-
         const clientId = this.goReqMap.get(data.requestId);
         const socket = this.socketMap.get(clientId);
         if (socket) {
@@ -654,7 +652,7 @@ export class PlayerService {
     this.goReqMap.set(requestId, client.data.clientId);
 
     // 허브 소켓에 게임오브젝트 목록을 요청 보낸다.
-    this.hubSocketClient.emit(HUB_SOCKET_C_MESSAGE.C_GET_INTERACTIONS, {
+    this.hubSocketClient.emit(HUB_SOCKET_C_MESSAGE.C_GET_GAMEOBJECTS, {
       requestId,
       roomId: roomInfo.redisRoomId,
     });
