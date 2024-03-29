@@ -181,12 +181,6 @@ export class RoomService {
       sceneName: room.sceneName,
       ownerId: req.ownerId,
     };
-    // return {
-    //   type: room.type,
-    //   roomId: roomId,
-    //   sceneName: room.sceneName,
-    //   ownerId: room.ownerId,
-    // };
   }
 
   async removeRoom(roomId: string): Promise<void> {

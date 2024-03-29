@@ -139,7 +139,6 @@ export class PlayerGateway {
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_GET_ITEMS)
   async getInteraction(client: Socket) {
     await this.playerService.getInteraction(client);
-    // this.logger.debug('인터랙션 조회 : ', JSON.stringify(data));
   }
 
   // 인터랙션 설정

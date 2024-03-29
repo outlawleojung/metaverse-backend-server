@@ -53,4 +53,16 @@ export class HubGateway {
   async setGameObjects(client: Socket, packet: string) {
     await this.hubService.setGameObjects(client, packet);
   }
+
+  // 게이트웨이에서 Interaction 목록 요청
+  @SubscribeMessage(HUB_SOCKET_C_MESSAGE.C_GET_INTERACTIONS)
+  async getInteractions(client: Socket, packet: string) {
+    await this.hubService.getInteractions(client, packet);
+  }
+
+  // 게이트웨이에서 보낸 Interaction 목록
+  @SubscribeMessage(HUB_SOCKET_C_MESSAGE.C_SEND_INTERACTIONS)
+  async setInteractions(client: Socket, packet: string) {
+    await this.hubService.setInteractions(client, packet);
+  }
 }

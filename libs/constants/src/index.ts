@@ -738,6 +738,7 @@ export const SOCKET_SERVER_ERROR_CODE_GLOBAL = Object.freeze({
 
   ROOM_ALREADY_CONNECTED: 31000, // 방 입장시, 이미 접속중인 방 일때
   NOT_IN_ROOM: 31002, // 룸에 입장 하지 않았습니다.
+  NOT_EXIST_ROOM: 31004, // 룸이 없습니다.
 
   OFFICE_RESERVATION_SUCCESSFUL: 30000, // 회의실 입장 예약 대기 성공
   OFFICE_USER_NOT_EXIST: 30001, // 회의실 입장 예약시, 사용자가 존재하지 않을 경우
@@ -875,11 +876,15 @@ export const NAMESPACE = Object.freeze({
 export const HUB_SOCKET_C_MESSAGE = Object.freeze({
   C_GET_GAMEOBJECTS: 'C_GET_GAMEOBJECTS', // 게임오브젝트 목록 조회 요청
   C_SEND_GAMEOBJECTS: 'C_SEND_GAMEOBJECTS', // 게임오브젝트 목록 전송
+  C_GET_INTERACTIONS: 'C_GET_INTERACTIONS', // 인터랙션 목록 조회 요청
+  C_SEND_INTERACTIONS: 'C_SEND_INTERACTIONS', // 인터랙션 목록 전송
 });
 
 export const HUB_SOCKET_S_MESSAGE = Object.freeze({
   S_GET_GAMEOBJECTS: 'S_GET_GAMEOBJECTS', // 게임오브젝트 목록 조회 요청
   S_GAMEOBJECTS_RESULT: 'S_GAMEOBJECTS_RESULT', // 게임오브젝트 목록 조회 요청의 최종 응답
+  S_GET_INTERACTIONS: 'S_GET_INTERACTIONS', // 인터랙션 목록 조회 요청
+  S_INTERACTIONS_RESULT: 'S_INTERACTIONS_RESULT', // 게인터랙션 목록 조회 요청의 최종 응답
 });
 
 // ROOM_NAME

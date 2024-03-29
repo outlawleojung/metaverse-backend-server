@@ -9,6 +9,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsObject,
+  IsOptional,
   IsString,
 } from 'class-validator';
 export interface PACKET {
@@ -117,7 +118,7 @@ export class S_BASE_INSTANTIATE_OBJECT implements PACKET {
 
 export class S_INTERACTION_GET_ITEMS implements PACKET {
   event = PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_GET_ITEMS;
-  items: Item[];
+  items: string[];
 }
 
 export class C_INTERACTION_SET_ITEM implements PACKET {
@@ -128,8 +129,8 @@ export class C_INTERACTION_SET_ITEM implements PACKET {
   id: string;
 
   @IsString()
-  @IsNotEmpty()
-  state: string;
+  @IsOptional()
+  state: string | null;
 }
 
 export class C_INTERACTION_REMOVE_ITEM implements PACKET {

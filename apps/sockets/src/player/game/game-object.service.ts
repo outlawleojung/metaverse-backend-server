@@ -21,20 +21,18 @@ import {
   S_BASE_SET_TRANSFORM,
 } from '../packets/packet';
 import { PacketInfo, Position, Rotation } from '../packets/packet-interface';
-import { Server, Socket } from 'socket.io';
 import { RedisKey, SOCKET_S_GLOBAL } from '@libs/constants';
 import { RedisLockService } from '../../services/redis-lock.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
 import { PlayerService } from '../player.service';
 import { NatsMessageHandler } from '../../nats/nats-message.handler';
-import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class GameObjectService {
   private logger = new Logger(GameObjectService.name);
   private gameObjects: Map<string, Map<number, GameObject>> = new Map();
-  private interactions: Map<string, string> = new Map();
+  private interactions: Map<string, Map<string, string>> = new Map();
 
   constructor(
     @InjectRedis() private readonly redisClient: Redis,
@@ -95,7 +93,7 @@ export class GameObjectService {
         event,
         packetData: packetData,
       };
-      response.broadcast = packetInfo;
+      response.broadcastPacket = packetInfo;
     }
     response.objectId = objectId;
     return response;
@@ -115,6 +113,20 @@ export class GameObjectService {
     return gameObjects;
   }
 
+  // 인터랙션 조회 ( Hub)
+  async getInteractionForHub(roomId: string) {
+    const roomInteractions = await this.interactions.get(roomId);
+    const interactions: string[] = [];
+    if (roomInteractions) {
+      if (roomInteractions) {
+        for (const interaction of roomInteractions.keys()) {
+          interactions.push(interaction);
+        }
+      }
+    }
+    return interactions;
+  }
+
   setObjectData(roomId: string, objectId: number, data: string) {
     const roomGameObjects = this.gameObjects.get(roomId);
 
@@ -130,8 +142,6 @@ export class GameObjectService {
       return;
     }
     gameObject.objectData = data;
-
-    // 클라이언트에 변경 사항 전송 등의 추가 작업
   }
 
   removeGameObject(roomId: string, clientId: string) {
@@ -273,19 +283,18 @@ export class GameObjectService {
     return { event, packetData };
   }
 
-  getInteraction(roomId: string) {
-    const packet = new S_INTERACTION_GET_ITEMS();
-    this.interactions.forEach((id) => {
-      packet.items.push({ id, state: '' });
-    });
-
-    const { event, ...packetData } = packet;
-
-    this.logger.debug(
-      `getInteraction - roomId: ${roomId} event: ${event} data: ${packetData}`,
-    );
-    return { event, packetData };
-  }
+  // getInteraction(roomId: string) {
+  //   // const packet = new S_INTERACTION_GET_ITEMS();
+  //   // const interactions = this.interactions.get(roomId);
+  //   // interactions.forEach((id) => {
+  //   //   packet.items.push({ id, state: '' });
+  //   // });
+  //   // const { event, ...packetData } = packet;
+  //   // this.logger.debug(
+  //   //   `getInteraction - roomId: ${roomId} event: ${event} data: ${packetData}`,
+  //   // );
+  //   // return { event, packetData };
+  // }
 
   setInteraction(
     roomId: string,
@@ -293,28 +302,43 @@ export class GameObjectService {
     interactionId: string,
     interactionData: string,
   ) {
+    this.logger.debug('setInteraction 1');
     const packet = new S_INTERACTION_SET_ITEM();
     const response: any = {};
 
-    const interaction = this.interactions.get(interactionId);
-    if (interaction && interaction != clientId) {
-      packet.success = false;
+    this.logger.debug('roomId: ', roomId);
 
-      const { event, ...packetData } = packet;
-      // client.emit(event, packetData);
-      const packetInfo: PacketInfo = {
-        event,
-        packetData: packetData,
-      };
+    if (this.interactions.has(roomId)) {
+      const interactions = this.interactions.get(roomId);
 
-      this.logger.debug(`setInteraction : ${event} - ${packetData}`);
-      response.clientPacket = packetInfo;
-      return response;
+      if (interactions.has(interactionId)) {
+        const value = interactions.get(interactionId);
+
+        if (value !== clientId) {
+          packet.success = false;
+
+          const { event, ...packetData } = packet;
+
+          const packetInfo: PacketInfo = {
+            event,
+            packetData: packetData,
+          };
+
+          this.logger.debug(`setInteraction : ${event} - ${packetData}`);
+          response.clientPacket = packetInfo;
+          return response;
+        }
+      }
     }
 
     packet.success = true;
 
-    this.interactions.set(interactionId, clientId);
+    const exInteractions =
+      this.interactions.get(roomId) || new Map<string, string>();
+
+    exInteractions.set(interactionId, clientId);
+
+    this.interactions.set(roomId, exInteractions);
 
     {
       const { event, ...packetData } = packet;
@@ -325,6 +349,7 @@ export class GameObjectService {
       };
 
       response.clientPacket = packetInfo;
+      this.logger.debug('setInteraction 7');
     }
     {
       const packet = new S_INTERACTION_SET_ITEM_NOTICE();
@@ -337,6 +362,7 @@ export class GameObjectService {
         packetData: packetData,
       };
 
+      this.logger.debug('setInteraction 8');
       response.broadcastPacket = packetInfo;
 
       this.logger.debug(
@@ -351,7 +377,9 @@ export class GameObjectService {
     const response: any = {};
     {
       const packet = new S_INTERACTION_REMOVE_ITEM();
-      const interaction = this.interactions.get(interactionId);
+
+      const interactions = this.interactions.get(roomId);
+      const interaction = interactions.get(interactionId);
       if (interaction && interaction != clientId) {
         packet.success = false;
 
@@ -371,7 +399,8 @@ export class GameObjectService {
 
       packet.success = true;
 
-      this.interactions.delete(interactionId);
+      interactions.delete(interactionId);
+      this.interactions.set(roomId, interactions);
 
       const { event, ...packetData } = packet;
       const packetInfo: PacketInfo = {
@@ -438,43 +467,5 @@ export class GameObjectService {
         await this.lockService.releaseLock(lockKey);
       }
     }
-  }
-
-  @Cron('* * * * * *') // 매초 실행
-  async handleCron() {
-    // 변경된 GameObject 데이터가 있는지 확인
-    // this.updateRedisDataWithLock();
-    // 변경된 데이터가 있다면 Redis와 동기화
-    // 예시 로직: Redis에 저장된 데이터를 업데이트
-    // const gameObjects = this.getUpdatedGameObjects(); // 변경된 GameObjects를 가져오는 메서드
-    // if (gameObjects.length > 0) {
-    //   await this.redisClient.set('gameObjectsKey', JSON.stringify(gameObjects));
-    // }
-  }
-
-  async updateRedisDataWithLock() {
-    const lockKey = RedisKey.getStrObjectRedisLockKey('gameObject');
-    const maxRetries = 10; // 최대 재시도 횟수
-    const retryDelay = 1000; // 재시도 딜레이 (밀리초)
-
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      const isLocked = await this.lockService.tryLock(lockKey, 30000); // Lock 획득 시도, 30초간 유지
-      if (isLocked) {
-        try {
-          // Lock 획득 성공, Redis 데이터 업데이트 로직 수행
-          console.log('Redis 데이터 업데이트 시작');
-          // 여기에 Redis 업데이트 로직을 추가합니다.
-          return; // 업데이트 성공 후 함수 종료
-        } finally {
-          await this.lockService.releaseLock(lockKey); // 작업 완료 후 Lock 해제
-          console.log('Redis 데이터 업데이트 완료 및 Lock 해제');
-        }
-      } else {
-        console.log(`Lock 획득 실패, ${attempt + 1}번째 재시도...`);
-        await new Promise((resolve) => setTimeout(resolve, retryDelay)); // 재시도 딜레이
-      }
-    }
-
-    console.log('최대 재시도 횟수 초과, 데이터 업데이트 실패');
   }
 }

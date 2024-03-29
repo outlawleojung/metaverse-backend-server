@@ -6,7 +6,6 @@ import {
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { HubGateway } from './hub.gateway';
-import { request } from 'http';
 
 @Injectable()
 export class HubService {
@@ -25,6 +24,9 @@ export class HubService {
 
   // 요청한 게임 오브젝트 저장용
   private objects: Map<string, object[]> = new Map();
+
+  // 요청한 인터랙션 저장용
+  private interactions: Map<string, object[]> = new Map();
 
   // 요청에 따른 응답 체크 저장용
   private requests: Map<string, number> = new Map();
@@ -97,6 +99,56 @@ export class HubService {
       console.log('게임오브젝트 요청 응답:', this.objects.get(requestId));
 
       this.objects.delete(requestId);
+      this.requests.delete(requestId);
+      this.requestSocket.delete(requestId);
+    }
+  }
+
+  // 인터랙션 목록 조회 요청
+  async getInteractions(client: Socket, packet: any) {
+    console.log('getInteractions: ', JSON.stringify(packet));
+
+    this.requestSocket.set(packet.requestId, client);
+
+    this.hubGateway
+      .getServer()
+      .to(HUB_SOCKET_ROOM.GAMEOBJECT)
+      .emit(HUB_SOCKET_S_MESSAGE.S_GET_INTERACTIONS, packet);
+  }
+
+  // 게이트웨이에서 보내 온 인터랙션 목록
+  async setInteractions(client: Socket, packet: any) {
+    const requestId = packet.requestId;
+    const interactions = packet.interactions;
+
+    if (this.interactions.has(requestId)) {
+      const exInteractions = this.interactions.get(requestId);
+      exInteractions.push(...interactions);
+      this.interactions.set(requestId, exInteractions);
+    } else {
+      // requestId에 해당하는 항목이 맵에 없으면 새로운 항목을 추가
+      this.interactions.set(requestId, interactions);
+    }
+
+    if (this.requests.has(requestId)) {
+      let count = this.requests.get(requestId);
+      count += 1;
+      this.requests.set(requestId, count);
+    } else {
+      this.requests.set(requestId, 1);
+    }
+
+    // 모든 요청에 대한 응답이 다 왔다면
+    if (this.playerSocketMap.size === this.requests.get(requestId)) {
+      const socket = this.requestSocket.get(requestId);
+      socket.emit(HUB_SOCKET_S_MESSAGE.S_INTERACTIONS_RESULT, {
+        requestId,
+        interactions: this.interactions.get(requestId),
+      });
+
+      console.log('인터렉션 요청 응답:', this.interactions.get(requestId));
+
+      this.interactions.delete(requestId);
       this.requests.delete(requestId);
       this.requestSocket.delete(requestId);
     }
