@@ -1,9 +1,9 @@
-import { S_BASE_ADD_OBJECT } from '../packets/packet';
+import { S_BASE_ADD_OBJECT } from '../../packets/packet';
 import {
   GameObjectInfo,
   Position,
   Rotation,
-} from '../packets/packet-interface';
+} from '../../packets/packet-interface';
 
 export interface IGameObject {
   objectId: number;

@@ -63,7 +63,7 @@ export class BlockchainGateway
   //소켓 해제
   async handleDisconnect(client: Socket) {
     await this.redisClient.del(
-      RedisKey.getStrMemberSocket(client.data.memberId),
+      RedisKey.getStrMemberSocket(client.data.clientId),
     );
 
     this.logger.debug('disonnected', client.id);
@@ -71,10 +71,10 @@ export class BlockchainGateway
   }
 
   // 아바타 정보 새로고침
-  async avatarRefresh(memberId: string) {
-    console.log('recv : memberId : ' + memberId);
+  async avatarRefresh(memberId: string, clientId: string) {
+    console.log('recv : clientId : ' + clientId);
     const isConnected = await this.redisClient.get(
-      RedisKey.getStrMemberSocket(memberId),
+      RedisKey.getStrMemberSocket(clientId),
     );
 
     if (isConnected) {

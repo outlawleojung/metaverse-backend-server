@@ -82,12 +82,13 @@ export class ChatService {
     }
 
     const memberId = memberInfo.memberId;
+    const clientId = memberInfo.memberCode;
 
     // 클라이언트 데이터 설정
     client.data.memberId = memberId;
     client.data.sessionId = sessionId;
     client.data.jwtAccessToken = jwtAccessToken;
-    client.data.clientId = client.id;
+    client.data.clientId = clientId;
 
     // 나의 룸 구독을 추가한다.
     this.messageHandler.registerHandler(memberId, (message) => {

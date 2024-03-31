@@ -25,6 +25,7 @@ import { NatsService } from './nats/nats.service';
 import { NatsMessageHandler } from './nats/nats-message.handler';
 import { PlayerModule } from './player/player.module';
 import { RoomModule } from './room/room.module';
+import { MyRoomModule } from './my-room/my-room.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { RoomModule } from './room/room.module';
     EntityModule,
     SchemaModule,
     EventModule,
+    MyRoomModule,
   ],
   controllers: [AppController, ManagerController],
   providers: [

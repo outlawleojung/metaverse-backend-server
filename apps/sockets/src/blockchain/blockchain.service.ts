@@ -31,15 +31,16 @@ export class BlockchainService {
     }
 
     const memberId = memberInfo.memberId;
+    const clientId = memberInfo.memberCode;
 
     client.join(memberId);
-    client.join(client.handshake.auth.sessionId);
+    client.join(sessionId);
 
     // 클라이언트 데이터 설정
     client.data.memberId = memberId;
     client.data.sessionId = client.handshake.auth.sessionId;
     client.data.jwtAccessToken = client.handshake.auth.jwtAccessToken;
-    client.data.clientId = client.id;
+    client.data.clientId = clientId;
 
     this.logger.debug(
       `블록체인 서버에 연결되었어요 ✅  : ${memberId} - sessionId : ${sessionId}`,

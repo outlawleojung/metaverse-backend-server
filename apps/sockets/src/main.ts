@@ -39,5 +39,5 @@ async function bootstrap() {
 
   console.log(`Web Socket Server Is Running On: ${await app.getUrl()}`);
 }
-// bootstrap();
-AppClusterService.clusterize(bootstrap);
+bootstrap();
+// AppClusterService.clusterize(bootstrap);

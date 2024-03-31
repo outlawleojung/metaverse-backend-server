@@ -15,7 +15,6 @@ import {
 } from '@nestjs/common';
 import { GatewayInitiService } from '../services/gateway-init.service';
 import { Server, Socket } from 'socket.io';
-import { Decrypt } from '@libs/common';
 import { PLAYER_SOCKET_C_MESSAGE, NAMESPACE } from '@libs/constants';
 import {
   C_BASE_INSTANTIATE_OBJECT,
@@ -25,8 +24,7 @@ import {
   C_ENTER,
   C_INTERACTION_REMOVE_ITEM,
   C_INTERACTION_SET_ITEM,
-  S_INTERACTION_REMOVE_ITEM,
-} from './packets/packet';
+} from '../packets/packet';
 import { WsExceptionFilter } from '../ws-exception.filter';
 
 @WebSocketGateway({

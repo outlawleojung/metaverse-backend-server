@@ -153,12 +153,7 @@ export class RoomService {
     const redisRoomId = RedisKey.getStrRoomId(roomId);
     this.logger.debug('create Room : ', JSON.stringify({ req }));
 
-    const room = await this.roomFactory.createRoom(
-      req.roomType,
-      req.sceneName,
-      redisRoomId,
-      req.ownerId,
-    );
+    const room = await this.roomFactory.createRoom(redisRoomId, req);
 
     this.logger.debug('create Room : ', JSON.stringify({ room }));
 

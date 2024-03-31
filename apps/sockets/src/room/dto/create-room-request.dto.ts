@@ -12,6 +12,14 @@ export class CreateRoomRequestDto {
   roomCode: string | null;
 
   @ApiProperty({
+    example: '우리반',
+    description: '룸 이름',
+  })
+  @IsString()
+  @IsOptional()
+  roomName: string | null;
+
+  @ApiProperty({
     example: 'DFG4HJ56',
     description: '회원 코드',
   })
@@ -20,8 +28,16 @@ export class CreateRoomRequestDto {
   ownerId: string | null;
 
   @ApiProperty({
-    example: '닉네임이다',
+    example: '삼식이',
     description: '닉네임',
+  })
+  @IsString()
+  @IsOptional()
+  ownerNickname: string | null;
+
+  @ApiProperty({
+    example: 'MyRoom',
+    description: '룸 타입',
   })
   @IsEnum(RoomType)
   @IsOptional()
