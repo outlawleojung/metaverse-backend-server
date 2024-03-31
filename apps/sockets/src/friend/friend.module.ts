@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { FriendService } from './friend.service';
-import { FriendGateway } from './friend.gateway';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from '@libs/common';
 import { Member, MemberFriend, SessionInfo } from '@libs/entity';
@@ -19,7 +18,6 @@ import { NatsService } from '../nats/nats.service';
   ],
   providers: [
     FriendService,
-    FriendGateway,
     TokenCheckService,
     RedisFunctionService,
     GatewayInitiService,
@@ -27,5 +25,6 @@ import { NatsService } from '../nats/nats.service';
     NatsMessageHandler,
     NatsService,
   ],
+  exports: [FriendService],
 })
 export class FriendModule {}

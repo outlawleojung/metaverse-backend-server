@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ScreenBannerGateway } from './screen-banner.gateway';
 import { ScreenBannerService } from './screen-banner.service';
 import { RedisFunctionService } from '@libs/redis';
 import { TokenCheckService } from '../manager/auth/tocket-check.service';
@@ -30,7 +29,6 @@ import { NatsMessageHandler } from '../nats/nats-message.handler';
     ]),
   ],
   providers: [
-    ScreenBannerGateway,
     ScreenBannerService,
     TokenCheckService,
     RedisFunctionService,
@@ -39,6 +37,6 @@ import { NatsMessageHandler } from '../nats/nats-message.handler';
     RedisLockService,
     NatsMessageHandler,
   ],
-  exports: [ScreenBannerGateway, ScreenBannerService, NatsService],
+  exports: [ScreenBannerService],
 })
 export class ScreenBannerModule {}

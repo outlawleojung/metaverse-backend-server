@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ScreenBannerService } from './screen-banner.service';
+import { ScreenBannerService } from './_screen-banner.service';
 
 describe('ScreenBannerService', () => {
   let service: ScreenBannerService;

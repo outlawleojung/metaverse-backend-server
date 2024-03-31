@@ -6,7 +6,6 @@ import { TokenCheckService } from '../manager/auth/tocket-check.service';
 import { DataSource } from 'typeorm';
 import { OfficeService } from './office.service';
 import { OfficeController } from './office.controller';
-import { OfficeGateway } from './office.gateway';
 import { OfficeWebService } from './office.web.service';
 import { NatsService } from '../nats/nats.service';
 import { GatewayInitiService } from '../services/gateway-init.service';
@@ -25,7 +24,6 @@ import { NatsMessageHandler } from '../nats/nats-message.handler';
   providers: [
     OfficeService,
     OfficeWebService,
-    OfficeGateway,
     TokenCheckService,
     RedisFunctionService,
     NatsService,
@@ -34,6 +32,6 @@ import { NatsMessageHandler } from '../nats/nats-message.handler';
     NatsMessageHandler,
   ],
   controllers: [OfficeController],
-  exports: [OfficeGateway, OfficeService, OfficeWebService],
+  exports: [OfficeService, OfficeWebService],
 })
 export class OfficeModule {}

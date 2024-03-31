@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import { ChatGateway } from './chat.gateway';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Member, SessionInfo, MemberOfficeVisitLog } from '@libs/entity';
 import { DataSource } from 'typeorm';
@@ -59,7 +58,6 @@ import { NatsMessageHandler } from '../nats/nats-message.handler';
   ],
   providers: [
     ChatService,
-    ChatGateway,
     TokenCheckService,
     RedisFunctionService,
     NatsService,
@@ -67,6 +65,6 @@ import { NatsMessageHandler } from '../nats/nats-message.handler';
     RedisLockService,
     NatsMessageHandler,
   ],
-  exports: [ChatGateway, ChatService],
+  exports: [ChatService],
 })
 export class ChatModule {}

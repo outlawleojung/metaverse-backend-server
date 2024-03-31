@@ -23,7 +23,6 @@ import { NatsMessageHandler } from '../nats/nats-message.handler';
   ],
   controllers: [PlayerController],
   providers: [
-    PlayerGateway,
     PlayerService,
     GatewayInitiService,
     RedisLockService,
@@ -34,5 +33,6 @@ import { NatsMessageHandler } from '../nats/nats-message.handler';
     RoomService,
     GameObjectService,
   ],
+  exports: [PlayerService],
 })
 export class PlayerModule {}

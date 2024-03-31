@@ -18,6 +18,7 @@ import {
   NATS_EVENTS,
   SCREEN_BANNER_SOCKET_S_MESSAGE,
 } from '@libs/constants';
+import { RequestPayload } from '../packets/packet-interface';
 
 @Injectable()
 export class ScreenBannerService {
@@ -31,71 +32,24 @@ export class ScreenBannerService {
     private screenReservationRepository: Repository<ScreenReservation>,
     @InjectRepository(BannerReservation)
     private bannerReservationRepository: Repository<BannerReservation>,
-    @Inject(forwardRef(() => ScreenBannerGateway))
-    private screenBannerGateway: ScreenBannerGateway,
     private readonly tokenCheckService: TokenCheckService,
     private readonly messageHandler: NatsMessageHandler,
   ) {}
 
-  // 소켓 연결
-  async handleConnection(
-    server: Server,
-    client: Socket,
-    jwtAccessToken: string,
-    sessionId: string,
-  ) {
-    const memberInfo =
-      await this.tokenCheckService.checkLoginToken(jwtAccessToken);
-
-    // 해당 멤버가 존재하지 않을 경우 연결 종료
-    if (!memberInfo) {
-      client.disconnect();
-      return;
+  async handleRequestMessage(client: Socket, payload: RequestPayload) {
+    switch (payload.event) {
     }
-
-    const memberId = memberInfo.memberId;
-
-    client.join(memberId);
-    client.join(sessionId);
-    client.join(NAMESPACE.SCREEN_BANNER);
-
-    // 클라이언트 데이터 설정
-    client.data.memberId = memberId;
-    client.data.sessionId = sessionId;
-    client.data.jwtAccessToken = jwtAccessToken;
-    client.data.clientId = client.id;
-
-    this.logger.debug(
-      `스크린 배너 서버에 연결되었어요 ✅ : ${memberId} - sessionId : ${sessionId}`,
-    );
-
-    const bannerList = await this.getBannerList(
-      JSON.stringify({ type: 'SELECT' }),
-    );
-    const screenList = await this.getScreenList(
-      JSON.stringify({ type: 'SELECT' }),
-    );
-
-    client.emit(
-      SCREEN_BANNER_SOCKET_S_MESSAGE.S_SCREEN_LIST,
-      JSON.stringify(screenList),
-    );
-
-    client.emit(
-      SCREEN_BANNER_SOCKET_S_MESSAGE.S_BANNER_LIST,
-      JSON.stringify(bannerList),
-    );
   }
 
-  async registerSubscribe() {
+  async registerSubscribe(server: Server) {
     this.messageHandler.registerHandler(NATS_EVENTS.BANNER, async (message) => {
       this.logger.debug(`배너 구독 콜백 메세지 ✅ \n${message}`);
-      await this.bannerCallback(message);
+      await this.bannerCallback(server, message);
     });
 
     this.messageHandler.registerHandler(NATS_EVENTS.SCREEN, async (message) => {
       this.logger.debug(`스크린 구독 콜백 메세지 ✅ \n${message}`);
-      await this.screenCallback(message);
+      await this.screenCallback(server, message);
     });
   }
 
@@ -147,12 +101,11 @@ export class ScreenBannerService {
     }
   }
 
-  async screenCallback(message: string) {
+  async screenCallback(server: Server, message: string) {
     this.logger.debug(`스크린 구독 콜백 실행 ⚠ \n${message}`);
 
     const returnData = await this.getScreenList(message);
-    this.screenBannerGateway
-      .getServer()
+    server
       .to(NAMESPACE.SCREEN_BANNER)
       .emit(
         SCREEN_BANNER_SOCKET_S_MESSAGE.S_SCREEN_LIST,
@@ -209,12 +162,11 @@ export class ScreenBannerService {
     }
   }
 
-  async bannerCallback(message: string) {
+  async bannerCallback(server: Server, message: string) {
     this.logger.debug(`배너 구독 콜백 메세지 ☢ \n${message}`);
 
     const returnData = await this.getBannerList(message);
-    this.screenBannerGateway
-      .getServer()
+    server
       .to('screen-banner')
       .emit(
         SCREEN_BANNER_SOCKET_S_MESSAGE.S_BANNER_LIST,

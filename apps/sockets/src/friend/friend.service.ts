@@ -8,10 +8,12 @@ import { Server, Socket } from 'socket.io';
 import { TokenCheckService } from '../manager/auth/tocket-check.service';
 import { Repository } from 'typeorm';
 import {
+  FRIEND_SOCKET_C_MESSAGE,
   FRIEND_SOCKET_S_MESSAGE,
   RedisKey,
   SOCKET_SERVER_ERROR_CODE_GLOBAL,
 } from '@libs/constants';
+import { RequestPayload } from '../packets/packet-interface';
 
 @Injectable()
 export class FriendService {
@@ -25,37 +27,52 @@ export class FriendService {
     private memberFriendRepository: Repository<MemberFriend>,
   ) {}
 
-  // 소켓 연결
-  async handleConnection(
-    server: Server,
-    client: Socket,
-    jwtAccessToken: string,
-    sessionId: string,
-  ) {
-    const memberInfo =
-      await this.tokenCheckService.checkLoginToken(jwtAccessToken);
-
-    // 해당 멤버가 존재하지 않을 경우 연결 종료
-    if (!memberInfo) {
-      client.disconnect();
-      return;
+  async handleRequestMessage(client: Socket, payload: RequestPayload) {
+    switch (payload.event) {
+      case FRIEND_SOCKET_C_MESSAGE.C_FRIEND_LIST:
+        await this.getFriends(client);
+        break;
+      case FRIEND_SOCKET_C_MESSAGE.C_FRIEND_FOLLOW:
+        await this.friendsFollow(client, payload.data);
+        break;
+      case FRIEND_SOCKET_C_MESSAGE.C_FRIEND_BRING:
+        await this.friendsBring(client, payload.data);
+        break;
+      default:
+        break;
     }
-
-    const memberId = memberInfo.memberId;
-
-    client.join(memberId);
-    client.join(client.handshake.auth.sessionId);
-
-    // 클라이언트 데이터 설정
-    client.data.memberId = memberId;
-    client.data.sessionId = client.handshake.auth.sessionId;
-    client.data.jwtAccessToken = client.handshake.auth.jwtAccessToken;
-    client.data.clientId = client.id;
-
-    this.logger.debug(
-      `친구 서버에 연결되었어요 ✅ : ${memberId} - sessionId : ${sessionId}`,
-    );
   }
+  // // 소켓 연결
+  // async handleConnection(
+  //   server: Server,
+  //   client: Socket,
+  //   jwtAccessToken: string,
+  //   sessionId: string,
+  // ) {
+  //   const memberInfo =
+  //     await this.tokenCheckService.checkLoginToken(jwtAccessToken);
+
+  //   // 해당 멤버가 존재하지 않을 경우 연결 종료
+  //   if (!memberInfo) {
+  //     client.disconnect();
+  //     return;
+  //   }
+
+  //   const memberId = memberInfo.memberId;
+
+  //   client.join(memberId);
+  //   client.join(client.handshake.auth.sessionId);
+
+  //   // 클라이언트 데이터 설정
+  //   client.data.memberId = memberId;
+  //   client.data.sessionId = client.handshake.auth.sessionId;
+  //   client.data.jwtAccessToken = client.handshake.auth.jwtAccessToken;
+  //   client.data.clientId = client.id;
+
+  //   this.logger.debug(
+  //     `친구 서버에 연결되었어요 ✅ : ${memberId} - sessionId : ${sessionId}`,
+  //   );
+  // }
 
   async getFriends(client: Socket) {
     const memberId = client.data.memberId;
@@ -103,11 +120,11 @@ export class FriendService {
     }
   }
 
-  async friendsFollow(client: Socket, friendMemberId: string) {
+  async friendsFollow(client: Socket, data: { friendMemberId: any }) {
     // memberId가 존재하는지 확인
     const memberInfo = await this.memberRepository.findOne({
       where: {
-        memberId: friendMemberId,
+        memberId: data.friendMemberId,
       },
     });
 
@@ -125,7 +142,7 @@ export class FriendService {
     const memberFriendInfo = await this.memberFriendRepository.findOne({
       where: {
         memberId: client.data.memberId,
-        friendMemberId: friendMemberId,
+        friendMemberId: data.friendMemberId,
       },
     });
 
@@ -141,7 +158,7 @@ export class FriendService {
 
     //소켓 가져오기
     const socketInfo = await this.redisClient.get(
-      RedisKey.getStrMemberSocket(friendMemberId),
+      RedisKey.getStrMemberSocket(data.friendMemberId),
     );
 
     //존재 하지 않을 경우 오프라인

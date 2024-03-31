@@ -1,7 +1,7 @@
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { TokenCheckService } from '../manager/auth/tocket-check.service';
 import {
   C_MYROOM_END_EDIT,
@@ -20,19 +20,22 @@ import {
 } from '@libs/constants';
 import { RoomType } from '../room/room-type';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
-import { MyRoomGateway } from './my-room.gateway';
+import { RequestPayload } from '../packets/packet-interface';
 
 @Injectable()
 export class MyRoomService {
   constructor(
     @InjectRedis() private readonly redisClient: Redis,
-    @Inject(forwardRef(() => MyRoomGateway))
-    private readonly myRoomGateway: MyRoomGateway,
     private readonly tokenCheckService: TokenCheckService,
     private readonly messageHandler: NatsMessageHandler,
   ) {}
 
   private readonly logger = new Logger(MyRoomService.name);
+
+  private server: Server;
+  async setServer(server: Server) {
+    this.server = server;
+  }
 
   private socketMap = new Map();
   getSocket(clientId: string) {
@@ -41,47 +44,69 @@ export class MyRoomService {
     }
   }
 
-  // 소켓 연결
-  async handleConnection(client: Socket) {
-    const authInfo =
-      await this.tokenCheckService.getJwtAccessTokenAndSessionId(client);
-
-    const jwtAccessToken = authInfo.jwtAccessToken;
-    const sessionId = authInfo.sessionId;
-
-    const memberInfo =
-      await this.tokenCheckService.checkLoginToken(jwtAccessToken);
-
-    // 해당 멤버가 존재하지 않을 경우 연결 종료
-    if (!memberInfo) {
-      client.disconnect();
-      return;
+  async handleRequestMessage(client: Socket, payload: RequestPayload) {
+    switch (payload.event) {
+      case MY_ROOM_SOCKET_C_MESSAGE.C_MYROOM_GET_ROOMINFO:
+        await this.getRoomInfo(client);
+        break;
+      case MY_ROOM_SOCKET_C_MESSAGE.C_MYROOM_START_EDIT:
+        await this.startEdit(client);
+        break;
+      case MY_ROOM_SOCKET_C_MESSAGE.C_MYROOM_END_EDIT:
+        await this.endEdit(client, payload.data as C_MYROOM_END_EDIT);
+        break;
+      case MY_ROOM_SOCKET_C_MESSAGE.C_MYROOM_KICK:
+        await this.kick(client, payload.data as C_MYROOM_KICK);
+        break;
+      case MY_ROOM_SOCKET_C_MESSAGE.C_MYROOM_SHUTDOWN:
+        await this.shutDown(client, payload.data as C_MYROOM_SHUTDOWN);
+        break;
+      default:
+        break;
     }
-
-    console.log(memberInfo);
-    const memberId = memberInfo.memberId;
-
-    client.join(memberId);
-    client.join(sessionId);
-
-    // 클라이언트 데이터 설정
-    client.data.memberId = memberId;
-    client.data.sessionId = sessionId;
-    client.data.jwtAccessToken;
-    client.data.clientId = memberInfo.memberCode;
-
-    this.socketMap.set(memberInfo.memberCode, client);
-
-    this.logger.debug(
-      `마이룸 서버에 연결되었어요 ✅ : ${memberId} - sessionId : ${sessionId}`,
-    );
   }
 
-  async handleDisconnect(client: Socket) {
-    this.logger.debug(
-      `마이룸 서버가 해제되었어요 ❌ : ${client.data.memberId} `,
-    );
-  }
+  // // 소켓 연결
+  // async handleConnection(client: Socket) {
+  //   const authInfo =
+  //     await this.tokenCheckService.getJwtAccessTokenAndSessionId(client);
+
+  //   const jwtAccessToken = authInfo.jwtAccessToken;
+  //   const sessionId = authInfo.sessionId;
+
+  //   const memberInfo =
+  //     await this.tokenCheckService.checkLoginToken(jwtAccessToken);
+
+  //   // 해당 멤버가 존재하지 않을 경우 연결 종료
+  //   if (!memberInfo) {
+  //     client.disconnect();
+  //     return;
+  //   }
+
+  //   console.log(memberInfo);
+  //   const memberId = memberInfo.memberId;
+
+  //   client.join(memberId);
+  //   client.join(sessionId);
+
+  //   // 클라이언트 데이터 설정
+  //   client.data.memberId = memberId;
+  //   client.data.sessionId = sessionId;
+  //   client.data.jwtAccessToken;
+  //   client.data.clientId = memberInfo.memberCode;
+
+  //   this.socketMap.set(memberInfo.memberCode, client);
+
+  //   this.logger.debug(
+  //     `마이룸 서버에 연결되었어요 ✅ : ${memberId} - sessionId : ${sessionId}`,
+  //   );
+  // }
+
+  // async handleDisconnect(client: Socket) {
+  //   this.logger.debug(
+  //     `마이룸 서버가 해제되었어요 ❌ : ${client.data.memberId} `,
+  //   );
+  // }
 
   // 방 입장
   async joinRoom(message: string) {
@@ -116,10 +141,7 @@ export class MyRoomService {
             `${NATS_EVENTS.MY_ROOM}.${redisRoomId}`,
             async (message) => {
               const data = JSON.parse(message);
-              this.myRoomGateway
-                .getServer()
-                .to(redisRoomId)
-                .emit(data.event, data.message);
+              this.server.to(redisRoomId).emit(data.event, data.message);
             },
           );
 
@@ -256,6 +278,7 @@ export class MyRoomService {
       return client.emit(SOCKET_S_GLOBAL.ERROR, '마이룸 오너가 아닙니다.');
     }
 
+    console.log(packet);
     const _packet = new S_MYROOM_KICK();
 
     // const kickSocket = this.getSocket(packet.clientId);
@@ -274,7 +297,8 @@ export class MyRoomService {
     this.logger.debug('마이룸 편집 종료 이벤트 발행');
     this.messageHandler.publishHandler(
       `${NATS_EVENTS.MY_ROOM}.${redisRoomId}`,
-      JSON.stringify(response),
+      // JSON.stringify(response),
+      '',
     );
   }
 
@@ -313,7 +337,7 @@ export class MyRoomService {
   }
 
   async isRoomClient(clientId: string) {
-    const memberId = client.data.memberId;
+    const memberId = clientId;
     const memberKey = RedisKey.getStrMemberCurrentRoom(memberId);
     const redisRoomId = await this.redisClient.get(memberKey);
 

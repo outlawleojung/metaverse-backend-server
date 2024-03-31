@@ -2,7 +2,6 @@ import { RedisFunctionService } from '@libs/redis';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { Server, Socket } from 'socket.io';
-import { io } from 'socket.io-client';
 import { TokenCheckService } from '../manager/auth/tocket-check.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
@@ -10,7 +9,6 @@ import { NatsMessageHandler } from '../nats/nats-message.handler';
 import {
   CHATTING_SOCKET_S_MESSAGE,
   HUB_SOCKET_C_MESSAGE,
-  HUB_SOCKET_S_MESSAGE,
   NATS_EVENTS,
   PLAYER_SOCKET_C_MESSAGE,
   PLAYER_SOCKET_S_MESSAGE,
@@ -29,7 +27,7 @@ import {
   S_ENTER,
 } from '../packets/packet';
 import { GameObjectService } from './game/game-object.service';
-import { PlayerGateway } from './player.gateway';
+import { RequestPayload } from '../packets/packet-interface';
 
 @Injectable()
 export class PlayerService {
@@ -42,73 +40,136 @@ export class PlayerService {
     @InjectRedis() private readonly redisClient: Redis,
     @Inject(forwardRef(() => GameObjectService))
     private readonly gameObjectService: GameObjectService,
-    @Inject(forwardRef(() => PlayerGateway))
-    private readonly playerGateway: PlayerGateway,
     private readonly tokenCheckService: TokenCheckService,
     private readonly messageHandler: NatsMessageHandler,
     private readonly redisFunctionService: RedisFunctionService,
   ) {}
 
-  async handleConnectionHub(gatewayId: string) {
-    const hubUrl = `${process.env.HUB_URL}`;
-    console.log(hubUrl);
-    this.hubSocketClient = io(hubUrl, {
-      query: {
-        gatewayId,
-      },
-    });
-
-    this.hubSocketClient.on('connect', () => {
-      this.logger.debug('허브 소켓 서버에 연결됨');
-      // 필요한 룸에 조인하거나, 메시지 교환을 위한 이벤트 리스너 등록
-    });
-
-    // HUB SOCKET의 게임오브젝트 목록 요청
-    this.hubSocketClient.on(HUB_SOCKET_S_MESSAGE.S_GET_GAMEOBJECTS, (data) => {
-      this.logger.debug('메인 소켓 서버로부터 메시지 수신:', data);
-      // 여기서 데이터 처리 로직 구현
-      this.getGameObjectsForHub(data);
-    });
-
-    // HUB SOCKET 에서 온 게임오브젝트 목록 응답
-    this.hubSocketClient.on(
-      HUB_SOCKET_S_MESSAGE.S_GAMEOBJECTS_RESULT,
-      (data) => {
-        const clientId = this.goReqMap.get(data.requestId);
-        const socket = this.socketMap.get(clientId);
-        if (socket) {
-          socket.emit(
-            PLAYER_SOCKET_S_MESSAGE.S_BASE_ADD_OBJECT,
-            data.gameObjects,
-          );
-        }
-      },
-    );
-
-    // HUB SOCKET의 인터랙션 목록 요청
-    this.hubSocketClient.on(HUB_SOCKET_S_MESSAGE.S_GET_INTERACTIONS, (data) => {
-      this.logger.debug('메인 소켓 서버로부터 메시지 수신:', data);
-      // 여기서 데이터 처리 로직 구현
-      this.getInteractionForHub(data);
-    });
-
-    // HUB SOCKET 에서 온 인터랙션 목록 응답
-    this.hubSocketClient.on(
-      HUB_SOCKET_S_MESSAGE.S_INTERACTIONS_RESULT,
-      (data) => {
-        const clientId = this.goReqMap.get(data.requestId);
-
-        const socket = this.socketMap.get(clientId);
-
-        if (socket) {
-          socket.emit(
-            PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_GET_ITEMS,
-            data.interactions,
-          );
-        }
-      },
-    );
+  private server: Server;
+  async setServer(server: Server) {
+    this.server = server;
   }
+
+  private gatewayId: string;
+  async setGatewayId(gatewayId: string) {
+    this.gatewayId = gatewayId;
+  }
+
+  async handleRequestMessage(client: Socket, payload: RequestPayload) {
+    switch (payload.event) {
+      case PLAYER_SOCKET_C_MESSAGE.C_ENTER:
+        await this.joinRoom(client, payload.data as C_ENTER);
+        break;
+      case PLAYER_SOCKET_C_MESSAGE.C_GET_CLIENT:
+        await this.getClient(client);
+        break;
+      case PLAYER_SOCKET_C_MESSAGE.C_BASE_INSTANTIATE_OBJECT:
+        await this.baseInstantiateObject(
+          client,
+          payload.data as C_BASE_INSTANTIATE_OBJECT,
+        );
+        break;
+      case PLAYER_SOCKET_C_MESSAGE.C_BASE_GET_OBJECT:
+        await this.getObjects(client);
+        break;
+      case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_TRANSFORM:
+        await this.baseSetTransform(
+          client,
+          payload.data as C_BASE_SET_TRANSFORM,
+        );
+        break;
+      case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION:
+        await this.baseSetAnimation(
+          client,
+          payload.data as C_BASE_SET_ANIMATION,
+        );
+        break;
+      case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION_ONCE:
+        await this.baseSetAnimationOnce(
+          client,
+          payload.data as C_BASE_SET_ANIMATION_ONCE,
+        );
+        break;
+      case PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_GET_ITEMS:
+        await this.getInteraction(client);
+        break;
+      case PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_SET_ITEM:
+        await this.baseSetInteraction(
+          client,
+          payload.data as C_INTERACTION_SET_ITEM,
+        );
+        break;
+      case PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_REMOVE_ITEM:
+        await this.baseRemoveInteraction(
+          client,
+          payload.data as C_INTERACTION_REMOVE_ITEM,
+        );
+        break;
+      default:
+        break;
+    }
+  }
+
+  // async handleConnectionHub(gatewayId: string) {
+  //   const hubUrl = `${process.env.HUB_URL}`;
+  //   console.log(hubUrl);
+  //   this.hubSocketClient = io(hubUrl, {
+  //     query: {
+  //       gatewayId,
+  //     },
+  //   });
+
+  //   this.hubSocketClient.on('connect', () => {
+  //     this.logger.debug('허브 소켓 서버에 연결됨');
+  //     // 필요한 룸에 조인하거나, 메시지 교환을 위한 이벤트 리스너 등록
+  //   });
+
+  //   // HUB SOCKET의 게임오브젝트 목록 요청
+  //   this.hubSocketClient.on(HUB_SOCKET_S_MESSAGE.S_GET_GAMEOBJECTS, (data) => {
+  //     this.logger.debug('메인 소켓 서버로부터 메시지 수신:', data);
+  //     // 여기서 데이터 처리 로직 구현
+  //     this.getGameObjectsForHub(data);
+  //   });
+
+  //   // HUB SOCKET 에서 온 게임오브젝트 목록 응답
+  //   this.hubSocketClient.on(
+  //     HUB_SOCKET_S_MESSAGE.S_GAMEOBJECTS_RESULT,
+  //     (data) => {
+  //       const clientId = this.goReqMap.get(data.requestId);
+  //       const socket = this.socketMap.get(clientId);
+  //       if (socket) {
+  //         socket.emit(
+  //           PLAYER_SOCKET_S_MESSAGE.S_BASE_ADD_OBJECT,
+  //           data.gameObjects,
+  //         );
+  //       }
+  //     },
+  //   );
+
+  //   // HUB SOCKET의 인터랙션 목록 요청
+  //   this.hubSocketClient.on(HUB_SOCKET_S_MESSAGE.S_GET_INTERACTIONS, (data) => {
+  //     this.logger.debug('메인 소켓 서버로부터 메시지 수신:', data);
+  //     // 여기서 데이터 처리 로직 구현
+  //     this.getInteractionForHub(data);
+  //   });
+
+  //   // HUB SOCKET 에서 온 인터랙션 목록 응답
+  //   this.hubSocketClient.on(
+  //     HUB_SOCKET_S_MESSAGE.S_INTERACTIONS_RESULT,
+  //     (data) => {
+  //       const clientId = this.goReqMap.get(data.requestId);
+
+  //       const socket = this.socketMap.get(clientId);
+
+  //       if (socket) {
+  //         socket.emit(
+  //           PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_GET_ITEMS,
+  //           data.interactions,
+  //         );
+  //       }
+  //     },
+  //   );
+  // }
 
   // 소켓 연결
   async handleConnection(server: Server, client: Socket) {
@@ -336,10 +397,7 @@ export class PlayerService {
       packet.rotation,
     );
 
-    this.playerGateway
-      .getServer()
-      .to(redisRoomId)
-      .emit(response.event, response.packetData);
+    this.server.to(redisRoomId).emit(response.event, response.packetData);
   }
 
   // 사용자 애니메이션 동기화
@@ -370,10 +428,7 @@ export class PlayerService {
       packet.animation,
     );
 
-    this.playerGateway
-      .getServer()
-      .to(redisRoomId)
-      .emit(response.event, response.packetData);
+    this.server.to(redisRoomId).emit(response.event, response.packetData);
   }
 
   async baseSetAnimationOnce(
@@ -407,10 +462,7 @@ export class PlayerService {
       packet.blend,
     );
 
-    this.playerGateway
-      .getServer()
-      .to(redisRoomId)
-      .emit(response.event, response.packetData);
+    this.server.to(redisRoomId).emit(response.event, response.packetData);
   }
 
   async baseInstantiateObject(
@@ -449,10 +501,8 @@ export class PlayerService {
     this.logger.debug('instantiateObject broadcast');
 
     const redisRoomId = data.redisRoomId;
-    this.playerGateway
-      .getServer()
-      .to(redisRoomId)
-      .emit(data.packet.event, data.packet.packetData);
+
+    this.server.to(redisRoomId).emit(data.packet.event, data.packet.packetData);
   }
 
   async baseSetInteraction(client: Socket, packet: C_INTERACTION_SET_ITEM) {
@@ -492,10 +542,7 @@ export class PlayerService {
   private async setInteraction(data) {
     const redisRoomId = data.redisRoomId;
 
-    this.playerGateway
-      .getServer()
-      .to(redisRoomId)
-      .emit(data.packet.event, data.packet.packetData);
+    this.server.to(redisRoomId).emit(data.packet.event, data.packet.packetData);
   }
 
   async baseRemoveInteraction(
@@ -535,10 +582,7 @@ export class PlayerService {
   private async removeInteraction(data) {
     const redisRoomId = data.redisRoomId;
 
-    this.playerGateway
-      .getServer()
-      .to(redisRoomId)
-      .emit(data.packet.event, data.packet.packetData);
+    this.server.to(redisRoomId).emit(data.packet.event, data.packet.packetData);
   }
 
   async getUserRoomId(clientId) {
@@ -665,7 +709,7 @@ export class PlayerService {
 
     this.hubSocketClient.emit(HUB_SOCKET_C_MESSAGE.C_SEND_GAMEOBJECTS, {
       requestId,
-      gatewayId: this.playerGateway.getGatewayId(),
+      gatewayId: this.gatewayId,
       gameObjects,
     });
   }
@@ -692,7 +736,7 @@ export class PlayerService {
 
     this.hubSocketClient.emit(HUB_SOCKET_C_MESSAGE.C_SEND_INTERACTIONS, {
       requestId,
-      gatewayId: this.playerGateway.getGatewayId(),
+      gatewayId: this.gatewayId,
       interactions,
     });
   }

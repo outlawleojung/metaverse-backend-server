@@ -6,7 +6,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { OfficeGateway } from './office.gateway';
 import { OfficeWebService } from './office.web.service';
 import { OfficeDto } from './dto/office.dto';
 import { MorganInterceptor } from 'nest-morgan';
@@ -15,10 +14,7 @@ import { MorganInterceptor } from 'nest-morgan';
 @ApiTags('OFFICE - 오피스')
 @Controller('api/office')
 export class OfficeController {
-  constructor(
-    private readonly officeWebService: OfficeWebService,
-    private readonly officeGateway: OfficeGateway,
-  ) {}
+  constructor(private readonly officeWebService: OfficeWebService) {}
 
   @ApiOperation({ summary: '실시간 서버 회의실 방 생성 알림' })
   @ApiResponse({

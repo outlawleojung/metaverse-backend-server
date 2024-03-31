@@ -66,8 +66,8 @@ export class PlayerGateway {
       this.logger.debug(`동기화 서버 실행 ✅`);
     }
 
-    this.gatewayId = `${NAMESPACE.PLAYER}:${uuidv4()}`;
-    this.playerService.handleConnectionHub(this.gatewayId);
+    // this.gatewayId = `${NAMESPACE.PLAYER}:${uuidv4()}`;
+    // this.playerService.handleConnectionHub(this.gatewayId);
   }
 
   async handleConnection(client: Socket) {

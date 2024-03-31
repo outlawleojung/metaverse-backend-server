@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ManagerService } from './manager/manager.service';
-import { ManagerController } from './manager/manager.controller';
 import { ChatModule } from './chat/chat.module';
 import { ConfigModule } from '@nestjs/config';
 import { RedisModule } from '@liaoliaots/nestjs-redis';
@@ -38,23 +36,23 @@ import { MyRoomModule } from './my-room/my-room.module';
     }),
     TypeOrmModule.forFeature([Member, DataSource, SessionInfo]),
     ChatModule,
-    ScreenBannerModule,
-    OfficeModule,
-    FriendModule,
-    BlockchainModule,
-    PlayerModule,
-    RoomModule,
+    // ScreenBannerModule,
+    // OfficeModule,
+    // FriendModule,
+    // BlockchainModule,
+    // PlayerModule,
+    // RoomModule,
     EntityModule,
     SchemaModule,
-    EventModule,
-    MyRoomModule,
+    // EventModule,
+    // MyRoomModule,
   ],
-  controllers: [AppController, ManagerController],
+  controllers: [AppController],
   providers: [
     AppClusterService,
     AppService,
     TokenCheckService,
-    ManagerService,
+    // ManagerService,
     RedisFunctionService,
     RedisLockService,
     NatsService,

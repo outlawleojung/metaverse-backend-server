@@ -30,11 +30,10 @@ import {
 } from '../packets/packet';
 import { GameObjectService } from './game/game-object.service';
 import { PlayerGateway } from './player.gateway';
-import { RequestPayload } from '../packets/packet-interface';
 
 @Injectable()
-export class PlayerService_V2 {
-  private readonly logger = new Logger(PlayerService_V2.name);
+export class PlayerService_V3 {
+  private readonly logger = new Logger(PlayerService_V3.name);
   private hubSocketClient;
   private socketMap: Map<string, Socket> = new Map();
   private goReqMap: Map<string, string> = new Map();
@@ -49,65 +48,6 @@ export class PlayerService_V2 {
     private readonly messageHandler: NatsMessageHandler,
     private readonly redisFunctionService: RedisFunctionService,
   ) {}
-
-  async handleRequestMessage(
-    server: Server,
-    client: Socket,
-    payload: RequestPayload,
-  ) {
-    switch (payload.event) {
-      case PLAYER_SOCKET_C_MESSAGE.C_ENTER:
-        await this.joinRoom(client, payload.data as C_ENTER);
-        break;
-      case PLAYER_SOCKET_C_MESSAGE.C_GET_CLIENT:
-        await this.getClient(client);
-        break;
-      case PLAYER_SOCKET_C_MESSAGE.C_BASE_INSTANTIATE_OBJECT:
-        await this.baseInstantiateObject(
-          client,
-          payload.data as C_BASE_INSTANTIATE_OBJECT,
-        );
-        break;
-      case PLAYER_SOCKET_C_MESSAGE.C_BASE_GET_OBJECT:
-        await this.getObjects(client);
-        break;
-      case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_TRANSFORM:
-        await this.baseSetTransform(
-          client,
-          payload.data as C_BASE_SET_TRANSFORM,
-        );
-        break;
-      case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION:
-        await this.baseSetAnimation(
-          client,
-          payload.data as C_BASE_SET_ANIMATION,
-        );
-        break;
-      case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION_ONCE:
-        await this.baseSetAnimationOnce(
-          client,
-          payload.data as C_BASE_SET_ANIMATION_ONCE,
-        );
-        break;
-      case PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_GET_ITEMS:
-        await this.getInteraction(client);
-        break;
-      case PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_SET_ITEM:
-        await this.baseSetInteraction(
-          client,
-          payload.data as C_INTERACTION_SET_ITEM,
-        );
-        break;
-      case PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_REMOVE_ITEM:
-        await this.baseRemoveInteraction(
-          client,
-          payload.data as C_INTERACTION_REMOVE_ITEM,
-        );
-        break;
-      default:
-        break;
-    }
-  }
 
   async handleConnectionHub(gatewayId: string) {
     const hubUrl = `${process.env.HUB_URL}`;

@@ -3,47 +3,58 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { Server, Socket } from 'socket.io';
 import { TokenCheckService } from '../manager/auth/tocket-check.service';
-import { RedisLockService } from '../services/redis-lock.service';
+import { RedisKey } from '@libs/constants';
+import { InjectRepository } from '@nestjs/typeorm';
+import { MemberAvatarInfo, MemberAvatarPartsItemInven } from '@libs/entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class BlockchainService {
   private readonly logger = new Logger(BlockchainService.name);
   constructor(
     @InjectRedis() private readonly redisClient: Redis,
+    @InjectRepository(MemberAvatarPartsItemInven)
+    private memberAvatarPartsItemInvenRepository: Repository<MemberAvatarPartsItemInven>,
+    @InjectRepository(MemberAvatarInfo)
+    private mberAvatarInfoRepository: Repository<MemberAvatarInfo>,
     private readonly tokenCheckService: TokenCheckService,
-    private readonly lockService: RedisLockService,
   ) {}
 
-  // 소켓 연결
-  async handleConnection(
-    server: Server,
-    client: Socket,
-    jwtAccessToken: string,
-    sessionId: string,
-  ) {
-    const memberInfo =
-      await this.tokenCheckService.checkLoginToken(jwtAccessToken);
+  private server: Server;
+  async setServer(server: Server) {
+    this.server = server;
+  }
 
-    // 해당 멤버가 존재하지 않을 경우 연결 종료
-    if (!memberInfo) {
-      client.disconnect();
-      return;
-    }
-
-    const memberId = memberInfo.memberId;
-    const clientId = memberInfo.memberCode;
-
-    client.join(memberId);
-    client.join(sessionId);
-
-    // 클라이언트 데이터 설정
-    client.data.memberId = memberId;
-    client.data.sessionId = client.handshake.auth.sessionId;
-    client.data.jwtAccessToken = client.handshake.auth.jwtAccessToken;
-    client.data.clientId = clientId;
-
-    this.logger.debug(
-      `블록체인 서버에 연결되었어요 ✅  : ${memberId} - sessionId : ${sessionId}`,
+  // 아바타 정보 새로고침
+  async avatarRefresh(memberId: string) {
+    const isConnected = await this.redisClient.get(
+      RedisKey.getStrMemberSocket(memberId),
     );
+
+    if (isConnected) {
+      const memberAvatarInventory =
+        await this.memberAvatarPartsItemInvenRepository.find({
+          where: {
+            memberId: memberId,
+          },
+        });
+
+      const memberAvatarInfo = await this.mberAvatarInfoRepository.find({
+        where: {
+          memberId: memberId,
+        },
+      });
+
+      console.log('######### AVATAR ###########');
+
+      const avatarInfo = {
+        memberAvatarPartsItemInven: JSON.stringify(memberAvatarInventory),
+        memberAvatarInfo: JSON.stringify(memberAvatarInfo),
+      };
+
+      return await this.server
+        .to(memberId)
+        .emit('S_AvatarDataRefresh', JSON.stringify(avatarInfo));
+    }
   }
 }

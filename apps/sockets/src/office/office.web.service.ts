@@ -1,14 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { OfficeGateway } from './office.gateway';
 import { NATS_EVENTS } from '@libs/constants';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
 
 @Injectable()
 export class OfficeWebService {
-  constructor(
-    private readonly officeGateway: OfficeGateway,
-    private readonly messageHandler: NatsMessageHandler,
-  ) {}
+  constructor(private readonly messageHandler: NatsMessageHandler) {}
 
   // 실시간 서버 회의실 방 생성 알림 API
   async crreateOfficeRoom(roomCode: number) {

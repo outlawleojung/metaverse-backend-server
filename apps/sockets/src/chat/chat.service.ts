@@ -22,14 +22,15 @@ import { Member, MemberOfficeVisitLog } from '@libs/entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import moment from 'moment-timezone';
 import { NatsService } from '../nats/nats.service';
-import { ChatGateway } from './chat.gateway';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
 import {
+  CHATTING_SOCKET_C_MESSAGE,
   CHATTING_SOCKET_S_MESSAGE,
   NATS_EVENTS,
   RedisKey,
   SOCKET_SERVER_ERROR_CODE_GLOBAL,
 } from '@libs/constants';
+import { RequestPayload } from '../packets/packet-interface';
 
 @Injectable()
 export class ChatService {
@@ -51,8 +52,6 @@ export class ChatService {
     @InjectRepository(Member) private memberRepository: Repository<Member>,
     @InjectRepository(MemberOfficeVisitLog)
     private memberOfficeVisitLogRepository: Repository<MemberOfficeVisitLog>,
-    @Inject(forwardRef(() => ChatGateway))
-    private readonly chatGateway: ChatGateway,
     private readonly messageHandler: NatsMessageHandler,
     private readonly natsService: NatsService,
     private readonly tokenCheckService: TokenCheckService,
@@ -60,11 +59,31 @@ export class ChatService {
     private readonly commonService: CommonService,
   ) {}
 
+  private server: Server;
+  setServer(server: Server) {
+    this.server = server;
+  }
+
   private socketMap = new Map();
   getSocket(sessionId: string) {
     return this.socketMap.get(sessionId);
   }
 
+  async handleRequestMessage(client: Socket, payload: RequestPayload) {
+    switch (payload.event) {
+      case CHATTING_SOCKET_C_MESSAGE.C_SEND_MESSAGE:
+        await this.sendMessage(client, payload.data);
+        break;
+      case CHATTING_SOCKET_C_MESSAGE.C_SEND_DIRECT_MESSAGE:
+        await this.sendDirectMessage(client, payload);
+        break;
+      case CHATTING_SOCKET_C_MESSAGE.C_SEND_FRIEND_DIRECT_MESSAGE:
+        await this.sendFriendDirectMessage(client, payload.data);
+        break;
+      default:
+        break;
+    }
+  }
   // 소켓 연결
   async handleConnection(
     server: Server,
@@ -181,7 +200,7 @@ export class ChatService {
         await this.messageHandler.registerHandler(
           `${NATS_EVENTS.CHAT_ROOM}.${redisRoomId}`,
           async (message) => {
-            this.chatGateway.server
+            this.server
               .to(redisRoomId)
               .emit(CHATTING_SOCKET_S_MESSAGE.S_SEND_MESSAGE, message);
           },
@@ -265,14 +284,8 @@ export class ChatService {
   }
 
   // 메세지 보내기
-  async sendMessage(
-    client: Socket,
-    jwtAccessToken: string,
-    message: string,
-    roomCode: string,
-    roomName: string,
-    color: string,
-  ) {
+  async sendMessage(client: Socket, payload: any) {
+    const jwtAccessToken = client.data.jwtAccessToken;
     const memberInfo =
       await this.tokenCheckService.checkLoginToken(jwtAccessToken);
 
@@ -283,11 +296,11 @@ export class ChatService {
 
     const messageInfo = {
       sendNickName: memberInfo.nickname,
-      message: message,
-      color: color,
+      message: payload.message,
+      color: payload.color,
     };
 
-    client.data.roomCode = roomCode;
+    client.data.roomCode = payload.roomCode;
 
     const findMemberCode = await this.memberRepository.findOne({
       where: {
@@ -300,10 +313,10 @@ export class ChatService {
       memberId: memberInfo.memberId,
       memberCode: findMemberCode.memberCode,
       nickName: memberInfo.nickname,
-      roomCode: roomCode,
-      roomName: roomName, // 룸코드가 안넘어올 수 있어서 안될 수 있으니 테스트 해봐야함
+      roomCode: payload.roomCode,
+      roomName: payload.roomName, // 룸코드가 안넘어올 수 있어서 안될 수 있으니 테스트 해봐야함
       roomId: client.data.roomId,
-      chatMessage: message,
+      chatMessage: payload.message,
       kstCreatedAt: kstCreatedAt,
     });
     await worldChattingLogSave.save();
@@ -315,14 +328,7 @@ export class ChatService {
   }
 
   // 월드 귓속말 특정 소켓에만 메세지 전송
-  async sendDirectMessage(
-    client: Socket,
-    payload: {
-      recvNickName: string;
-      message: string;
-      color: string;
-    },
-  ) {
+  async sendDirectMessage(client: Socket, payload: any) {
     if (!payload.recvNickName) {
       return client.emit(
         CHATTING_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
@@ -474,17 +480,13 @@ export class ChatService {
   }
 
   // 친구에게 다이렉트 메세지 전송
-  async sendFriendDirectMessage(
-    client: Socket,
-    targetMemberId: any,
-    message: string,
-  ) {
+  async sendFriendDirectMessage(client: Socket, payload: any) {
     const memberId = client['data'].memberId;
 
     const messageId = uuidv4();
 
     const findChattingRoom = await this.createFriendChattingRoom.findOne({
-      $and: [{ memberIds: memberId }, { memberIds: targetMemberId }],
+      $and: [{ memberIds: memberId }, { memberIds: payload.targetMemberId }],
     });
 
     console.log('채팅 룸을 찾아볼게요');
@@ -493,7 +495,7 @@ export class ChatService {
     if (findChattingRoom === null) {
       const room = await this.createFriendDirectMessageRooms(
         client,
-        targetMemberId,
+        payload.targetMemberId,
       );
 
       console.log('룸 만든다~~~~~~~');
@@ -502,8 +504,8 @@ export class ChatService {
         messageId: messageId,
         roomId: room,
         memberId: memberId,
-        message: message,
-        unReadMembers: [targetMemberId],
+        message: payload.message,
+        unReadMembers: [payload.targetMemberId],
       });
       await newChatting.save();
     } else {
@@ -517,23 +519,23 @@ export class ChatService {
         messageId: messageId,
         roomId: roomId,
         memberId: memberId,
-        message: message,
-        unReadMembers: [targetMemberId],
+        message: payload.message,
+        unReadMembers: [payload.targetMemberId],
       });
       await newChatting.save();
     }
 
     client.emit(
       CHATTING_SOCKET_S_MESSAGE.S_SEND_FRIEND_DIRECT_MESSAGE,
-      `[DM]${targetMemberId}에게 보낸 메세지:${message}`,
+      `[DM]${payload.targetMemberId}에게 보낸 메세지:${payload.message}`,
     );
 
     // 특정 방에 접속해있는 특정 소켓에게만 메세지 전송
     client
-      .to(targetMemberId)
+      .to(payload.targetMemberId)
       .emit(
         CHATTING_SOCKET_S_MESSAGE.S_SEND_FRIEND_DIRECT_MESSAGE,
-        `[DM]${client['data'].memberId}가 보낸 메세지 :${message}`,
+        `[DM]${client['data'].memberId}가 보낸 메세지 :${payload.message}`,
       );
 
     console.log('저장했옹');

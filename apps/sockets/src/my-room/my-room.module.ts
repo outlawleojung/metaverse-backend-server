@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { MyRoomService } from './my-room.service';
-import { MyRoomGateway } from './my-room.gateway';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Member, SessionInfo } from '@libs/entity';
 import { RoomModule } from '../room/room.module';
@@ -13,7 +12,6 @@ import { GatewayInitiService } from '../services/gateway-init.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Member, SessionInfo]), RoomModule],
   providers: [
-    MyRoomGateway,
     MyRoomService,
     RedisLockService,
     TokenCheckService,
@@ -21,5 +19,6 @@ import { GatewayInitiService } from '../services/gateway-init.service';
     NatsMessageHandler,
     GatewayInitiService,
   ],
+  exports: [MyRoomService],
 })
 export class MyRoomModule {}

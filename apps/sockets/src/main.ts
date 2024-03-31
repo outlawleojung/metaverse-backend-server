@@ -1,14 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { ManagerModule } from './manager/manager.module';
+import { UnificationModule } from './manager/unification.module';
 import { AppClusterService } from './cluster/app-cluster.service';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import expressBasicAuth from 'express-basic-auth';
 import helmet from 'helmet';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(ManagerModule);
+  const app =
+    await NestFactory.create<NestExpressApplication>(UnificationModule);
 
   app.useStaticAssets(join(__dirname, '..', 'public'));
   app.setBaseViewsDir(join(__dirname, '..', 'views'));

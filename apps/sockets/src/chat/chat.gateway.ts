@@ -4,7 +4,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { ChatService } from './chat.service';
+import { ChatService_V2 } from './_chat.service';
 import { Inject, Logger, forwardRef } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { GatewayInitiService } from '../services/gateway-init.service';
@@ -27,8 +27,8 @@ export class ChatGateway {
   server: Server;
 
   constructor(
-    @Inject(forwardRef(() => ChatService))
-    private readonly chatService: ChatService,
+    @Inject(forwardRef(() => ChatService_V2))
+    private readonly chatService: ChatService_V2,
     private readonly gatewayInitService: GatewayInitiService,
     private readonly natsService: NatsService,
     private readonly messageHandler: NatsMessageHandler,

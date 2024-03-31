@@ -895,7 +895,7 @@ export const NAMESPACE = Object.freeze({
   PLAYER: 'player',
   MY_ROOM: 'my-room',
   SCREEN_BANNER: 'screen-banner',
-  MANAGER: 'manager',
+  UNIFICATION: 'UNIFICATION',
 });
 
 export const HUB_SOCKET_C_MESSAGE = Object.freeze({

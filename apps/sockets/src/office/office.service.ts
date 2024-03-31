@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Redis } from 'ioredis';
 import { Server, Socket } from 'socket.io';
 import {
+  OFFICE_SOCKET_C_MESSAGE,
   OFFICE_SOCKET_S_MESSAGE,
   RedisKey,
   SOCKET_SERVER_ERROR_CODE_GLOBAL,
@@ -13,6 +14,7 @@ import {
 import { TokenCheckService } from '../manager/auth/tocket-check.service';
 import { Repository } from 'typeorm';
 import { promisify } from 'util';
+import { RequestPayload } from '../packets/packet-interface';
 
 @Injectable()
 export class OfficeService {
@@ -25,44 +27,27 @@ export class OfficeService {
     private readonly redisFunctionService: RedisFunctionService,
   ) {}
 
-  // 소켓 연결
-  async handleConnection(
-    server: Server,
-    client: Socket,
-    jwtAccessToken: string,
-    sessionId: string,
-  ) {
-    const memberInfo =
-      await this.tokenCheckService.checkLoginToken(jwtAccessToken);
+  private server: Server;
+  async setServer(server: Server) {
+    this.server = server;
+  }
 
-    // 해당 멤버가 존재하지 않을 경우 연결 종료
-    if (!memberInfo) {
-      client.disconnect();
-      return;
+  async handleRequestMessage(client: Socket, payload: RequestPayload) {
+    switch (payload.event) {
+      case OFFICE_SOCKET_C_MESSAGE.C_OFFICE_QUEUE_REGISTER:
+        await this.officeQueueRegister(client, payload.data);
+        break;
+      case OFFICE_SOCKET_C_MESSAGE.C_OFFICE_QUEUE_EXIT:
+        await this.officeQueueExit(client);
+        break;
+      default:
+        break;
     }
-
-    const memberId = memberInfo.memberId;
-
-    client.join(memberId);
-    client.join(client.handshake.auth.sessionId);
-
-    // 클라이언트 데이터 설정
-    client.data.memberId = memberId;
-    client.data.sessionId = client.handshake.auth.sessionId;
-    client.data.jwtAccessToken = client.handshake.auth.jwtAccessToken;
-    client.data.clientId = client.id;
-
-    this.logger.debug(
-      `오피스 서버에 연결되었어요 ✅ : ${memberId} - sessionId : ${sessionId}`,
-    );
   }
 
   // 회의실 입장 예약하기
-  async officeQueueRegister(
-    client: Socket,
-    jwtAccessToken: string,
-    roomCode: string,
-  ) {
+  async officeQueueRegister(client: Socket, roomCode: string) {
+    const jwtAccessToken = client.data.jwtAccessToken;
     const memberInfo =
       await this.tokenCheckService.checkLoginToken(jwtAccessToken);
 

@@ -8,14 +8,14 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ManagerService } from './manager.service';
+import { UnificationService } from './unification.service';
 import { MorganInterceptor } from 'nest-morgan';
 
 @UseInterceptors(MorganInterceptor('combined'))
-@ApiTags('MANAGER - 매니저')
-@Controller('api/manager')
-export class ManagerController {
-  constructor(private readonly managerService: ManagerService) {}
+@ApiTags('Unification - 매니저')
+@Controller('api/Unification')
+export class UnificationController {
+  constructor(private readonly unificationService: UnificationService) {}
   @ApiOperation({ summary: '아즈메타 현재 접속자 수' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -23,7 +23,7 @@ export class ManagerController {
   })
   @Get('/currentUsers/:serverType')
   async createOfficeRoom(@Param('serverType') serverType: string) {
-    return await this.managerService.getCurrentUsers(serverType);
+    return await this.unificationService.getCurrentUsers(serverType);
   }
 
   @ApiOperation({ summary: '아즈메타 현재 접속자 수' })
@@ -34,6 +34,6 @@ export class ManagerController {
   @Post('/currentUsers')
   async postCureenUsers(@Body() data: any) {
     console.log(data);
-    return await this.managerService.getCurrentUsers(data);
+    return await this.unificationService.getCurrentUsers(data);
   }
 }

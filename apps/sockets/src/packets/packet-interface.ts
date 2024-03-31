@@ -1,7 +1,7 @@
 export interface RequestPayload {
   type: string;
   event: string;
-  data: object;
+  data: any;
 }
 
 export interface Position {
