@@ -80,7 +80,7 @@ export class PlayerGateway {
 
   // 룸 입장
   @SubscribeMessage(PLAYER_SOCKET_C_MESSAGE.C_ENTER)
-  async enterChatRoom(client: Socket, packet: C_ENTER) {
+  async enterRoom(client: Socket, packet: C_ENTER) {
     await this.playerService.joinRoom(client, packet);
   }
 

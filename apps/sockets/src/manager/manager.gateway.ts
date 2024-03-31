@@ -18,7 +18,14 @@ import {
   NAMESPACE,
   NATS_EVENTS,
   RedisKey,
+  SCREEN_BANNER_SOCKET_S_MESSAGE,
+  SOCKET_C_GLOBAL,
 } from '@libs/constants';
+import { PlayerService } from '../player/player.service';
+import { PlayerService_V2 } from '../player/player.service_v2';
+import { RequestPayload } from '../packets/packet-interface';
+import { ChatService_V2 } from '../chat/chat.service_v2';
+import { ScreenBannerService_V2 } from '../screen-banner/screen-banner.service_v2';
 
 @WebSocketGateway({
   // cors: {
@@ -35,6 +42,9 @@ export class ManagerGateway
     @InjectRedis() private readonly redisClient: Redis,
     private readonly managerService: ManagerService,
     private readonly gatewayInitService: GatewayInitiService,
+    private readonly playerService: PlayerService_V2,
+    private readonly chatService: ChatService_V2,
+    private readonly screenBannerService: ScreenBannerService_V2,
     private readonly messageHandler: NatsMessageHandler,
   ) {}
   private readonly logger = new Logger(ManagerGateway.name);
@@ -64,13 +74,35 @@ export class ManagerGateway
 
     const sessionId = client.handshake.auth.sessionId;
 
+    await this.initRegisterSubscribe(client);
+  }
+
+  async initRegisterSubscribe(client: Socket) {
     // 중복 로그인 알림 구독
     this.messageHandler.registerHandler(
-      `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${sessionId}`,
+      `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${client.handshake.auth.sessionId}`,
       (sessionId) => {
         // 서버에서 소켓 연결 제거
         this.server.sockets.sockets.get(sessionId)?.disconnect();
       },
+    );
+
+    // 스크린 배너 정보 보내기
+    const bannerList = await this.screenBannerService.getBannerList(
+      JSON.stringify({ type: 'SELECT' }),
+    );
+    const screenList = await this.screenBannerService.getScreenList(
+      JSON.stringify({ type: 'SELECT' }),
+    );
+
+    client.emit(
+      SCREEN_BANNER_SOCKET_S_MESSAGE.S_SCREEN_LIST,
+      JSON.stringify(screenList),
+    );
+
+    client.emit(
+      SCREEN_BANNER_SOCKET_S_MESSAGE.S_BANNER_LIST,
+      JSON.stringify(bannerList),
     );
   }
 
@@ -88,5 +120,34 @@ export class ManagerGateway
   @SubscribeMessage(CHATTING_SOCKET_C_GLOBAL.C_CHANGE_NICKNAME)
   async debugMessage(client: Socket) {
     return this.managerService.nicknameChange(client);
+  }
+
+  @SubscribeMessage(SOCKET_C_GLOBAL.C_REQUEST)
+  async enterChatRoom(client: Socket, payload: RequestPayload) {
+    switch (payload.type) {
+      case NAMESPACE.CHAT:
+        await this.chatService.handleRequestMessage(
+          this.server,
+          client,
+          payload,
+        );
+        break;
+      case NAMESPACE.PLAYER:
+        await this.playerService.handleRequestMessage(
+          this.server,
+          client,
+          payload,
+        );
+        break;
+      case NAMESPACE.SCREEN_BANNER:
+        await this.screenBannerService.handleRequestMessage(
+          this.server,
+          client,
+          payload,
+        );
+        break;
+      default:
+        break;
+    }
   }
 }

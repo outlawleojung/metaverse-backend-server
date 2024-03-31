@@ -756,6 +756,10 @@ export const SOCKET_SERVER_ERROR_CODE_GLOBAL = Object.freeze({
   FRIEND_BRING: 40011, // 친구 따라가기 취소 성공
 });
 
+export const SOCKET_C_GLOBAL = Object.freeze({
+  C_REQUEST: 'C_REQUEST', // 클라이언트 소켓 요청
+});
+
 export const SOCKET_S_GLOBAL = Object.freeze({
   ERROR: 'ERROR',
   S_SYSTEM_MESSAGE: 'S_SYSTEM_MESSAGE', // 시스템 메시지

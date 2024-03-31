@@ -1,3 +1,9 @@
+export interface RequestPayload {
+  type: string;
+  event: string;
+  data: object;
+}
+
 export interface Position {
   x: number;
   y: number;
