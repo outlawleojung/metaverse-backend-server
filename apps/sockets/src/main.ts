@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { UnificationModule } from './manager/unification.module';
+import { UnificationModule } from './unification/unification.module';
 import { AppClusterService } from './cluster/app-cluster.service';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import expressBasicAuth from 'express-basic-auth';

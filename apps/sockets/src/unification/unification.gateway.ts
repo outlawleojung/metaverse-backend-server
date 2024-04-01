@@ -31,6 +31,7 @@ import { MyRoomService } from '../my-room/my-room.service';
 import { FriendService } from '../friend/friend.service';
 import { BlockchainService } from '../blockchain/blockchain.service';
 import { OfficeService } from '../office/office.service';
+import { HubSocketService } from '../hub-socket/hub-socket.service';
 
 @WebSocketGateway({
   cors: {
@@ -54,6 +55,7 @@ export class UnificationGateway
     private readonly myRoomService: MyRoomService,
     private readonly blockchainService: BlockchainService,
     private readonly officeService: OfficeService,
+    private readonly socketService: HubSocketService,
     private readonly messageHandler: NatsMessageHandler,
   ) {}
   private readonly logger = new Logger(UnificationGateway.name);
@@ -81,14 +83,15 @@ export class UnificationGateway
     }
 
     this.gatewayId = `${NAMESPACE.PLAYER}:${uuidv4()}`;
-    this.unificationService.handleConnectionHub(this.gatewayId);
+    this.socketService.handleConnectionHub(this.gatewayId);
   }
 
   //소켓 연결
   async handleConnection(client: Socket) {
     this.logger.debug('Unification 소켓 연결중.✅');
 
-    this.unificationService.handleConnection(this.server, client);
+    await this.unificationService.handleConnection(this.server, client);
+    await this.socketService.handleConnection(client);
 
     await this.initRegisterSubscribe(client);
   }
@@ -148,6 +151,7 @@ export class UnificationGateway
 
   //소켓 해제
   async handleDisconnect(client: Socket) {
+    await this.playerService.checkLeaveRoom(client, client.data.memberId);
     await this.redisClient.del(
       RedisKey.getStrMemberSocket(client.data.memberId),
     );

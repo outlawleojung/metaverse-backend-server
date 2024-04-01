@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
-import { TokenCheckService } from '../manager/auth/tocket-check.service';
+import { TokenCheckService } from '../unification/auth/tocket-check.service';
 import { Server, Socket } from 'socket.io';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
@@ -9,9 +9,6 @@ import {
   ScreenReservation,
 } from '@libs/entity';
 import { Repository } from 'typeorm';
-import { ScreenBannerGateway } from './screen-banner.gateway';
-import { Redis } from 'ioredis';
-import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
 import {
   NAMESPACE,

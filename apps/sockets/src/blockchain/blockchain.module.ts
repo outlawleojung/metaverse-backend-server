@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BlockchainService } from './blockchain.service';
 import { BlockchainController } from './blockchain.controller';
-import { TokenCheckService } from '../manager/auth/tocket-check.service';
+import { TokenCheckService } from '../unification/auth/tocket-check.service';
 import { RedisFunctionService } from '@libs/redis';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
@@ -10,11 +10,8 @@ import {
   MemberAvatarPartsItemInven,
   SessionInfo,
 } from '@libs/entity';
-import { GatewayInitiService } from '../services/gateway-init.service';
-import { RedisLockService } from '../services/redis-lock.service';
 import { CommonModule } from '@libs/common';
-import { NatsMessageHandler } from '../nats/nats-message.handler';
-import { NatsService } from '../nats/nats.service';
+import { HubSocketModule } from '../hub-socket/hub-socket.module';
 
 @Module({
   imports: [
@@ -25,17 +22,9 @@ import { NatsService } from '../nats/nats.service';
       MemberAvatarInfo,
     ]),
     CommonModule,
+    HubSocketModule,
   ],
-  providers: [
-    BlockchainService,
-    TokenCheckService,
-    RedisFunctionService,
-    GatewayInitiService,
-    RedisLockService,
-    RedisLockService,
-    NatsMessageHandler,
-    NatsService,
-  ],
+  providers: [BlockchainService],
   controllers: [BlockchainController],
   exports: [BlockchainService],
 })

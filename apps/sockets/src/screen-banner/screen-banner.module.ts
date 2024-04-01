@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ScreenBannerService } from './screen-banner.service';
 import { RedisFunctionService } from '@libs/redis';
-import { TokenCheckService } from '../manager/auth/tocket-check.service';
+import { TokenCheckService } from '../unification/auth/tocket-check.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   BannerInfo,
@@ -16,6 +16,7 @@ import { NatsService } from '../nats/nats.service';
 import { GatewayInitiService } from '../services/gateway-init.service';
 import { RedisLockService } from '../services/redis-lock.service';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
+import { HubSocketModule } from '../hub-socket/hub-socket.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -27,16 +28,9 @@ import { NatsMessageHandler } from '../nats/nats-message.handler';
       ScreenReservation,
       BannerReservation,
     ]),
+    HubSocketModule,
   ],
-  providers: [
-    ScreenBannerService,
-    TokenCheckService,
-    RedisFunctionService,
-    NatsService,
-    GatewayInitiService,
-    RedisLockService,
-    NatsMessageHandler,
-  ],
+  providers: [ScreenBannerService],
   exports: [ScreenBannerService],
 })
 export class ScreenBannerModule {}

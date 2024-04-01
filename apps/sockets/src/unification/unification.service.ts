@@ -33,9 +33,6 @@ export class UnificationService {
     private messageHandler: NatsMessageHandler,
   ) {}
   private readonly logger = new Logger(UnificationService.name);
-  private hubSocketClient;
-  private socketMap: Map<string, Socket> = new Map();
-  private goReqMap: Map<string, string> = new Map();
 
   //소켓 연결
   async handleConnection(server: Server, client: Socket) {
@@ -117,95 +114,6 @@ export class UnificationService {
       SOCKET_S_GLOBAL.S_PLAYER_CONNECTED,
       JSON.stringify(client.data),
     );
-  }
-
-  async handleConnectionHub(gatewayId: string) {
-    const hubUrl = `${process.env.HUB_URL}`;
-    console.log(hubUrl);
-    this.hubSocketClient = io(hubUrl, {
-      query: {
-        gatewayId,
-      },
-    });
-
-    this.hubSocketClient.on('connect', () => {
-      this.logger.debug('허브 소켓 서버에 연결됨');
-      // 필요한 룸에 조인하거나, 메시지 교환을 위한 이벤트 리스너 등록
-    });
-
-    // HUB SOCKET의 게임오브젝트 목록 요청
-    this.hubSocketClient.on(HUB_SOCKET_S_MESSAGE.S_GET_GAMEOBJECTS, (data) => {
-      this.logger.debug('메인 소켓 서버로부터 메시지 수신:', data);
-      // 여기서 데이터 처리 로직 구현
-      this.getGameObjectsForHub(data);
-    });
-
-    // HUB SOCKET 에서 온 게임오브젝트 목록 응답
-    this.hubSocketClient.on(
-      HUB_SOCKET_S_MESSAGE.S_GAMEOBJECTS_RESULT,
-      (data) => {
-        const clientId = this.goReqMap.get(data.requestId);
-        const socket = this.socketMap.get(clientId);
-        if (socket) {
-          socket.emit(
-            PLAYER_SOCKET_S_MESSAGE.S_BASE_ADD_OBJECT,
-            data.gameObjects,
-          );
-        }
-      },
-    );
-
-    // HUB SOCKET의 인터랙션 목록 요청
-    this.hubSocketClient.on(HUB_SOCKET_S_MESSAGE.S_GET_INTERACTIONS, (data) => {
-      this.logger.debug('메인 소켓 서버로부터 메시지 수신:', data);
-      // 여기서 데이터 처리 로직 구현
-      this.getInteractionForHub(data);
-    });
-
-    // HUB SOCKET 에서 온 인터랙션 목록 응답
-    this.hubSocketClient.on(
-      HUB_SOCKET_S_MESSAGE.S_INTERACTIONS_RESULT,
-      (data) => {
-        const clientId = this.goReqMap.get(data.requestId);
-
-        const socket = this.socketMap.get(clientId);
-
-        if (socket) {
-          socket.emit(
-            PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_GET_ITEMS,
-            data.interactions,
-          );
-        }
-      },
-    );
-  }
-
-  // 허브 소켓으로 요청 보내기
-  async getGameObjectsForHub(data: any) {
-    const requestId = data.requestId;
-    const roomId = data.roomId;
-
-    const gameObjects = await this.gameObjectService.getObjectsForHub(roomId);
-
-    this.hubSocketClient.emit(HUB_SOCKET_C_MESSAGE.C_SEND_GAMEOBJECTS, {
-      requestId,
-      // gatewayId: .getGatewayId(),
-      gameObjects,
-    });
-  }
-
-  async getInteractionForHub(data: any) {
-    const requestId = data.requestId;
-    const roomId = data.roomId;
-
-    const interactions =
-      await this.gameObjectService.getInteractionForHub(roomId);
-
-    this.hubSocketClient.emit(HUB_SOCKET_C_MESSAGE.C_SEND_INTERACTIONS, {
-      requestId,
-      // gatewayId: .getGatewayId(),
-      interactions,
-    });
   }
 
   // 닉네임 변경 요청

@@ -2,7 +2,7 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Injectable, Logger } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { Server, Socket } from 'socket.io';
-import { TokenCheckService } from '../manager/auth/tocket-check.service';
+import { TokenCheckService } from '../unification/auth/tocket-check.service';
 import { RedisKey } from '@libs/constants';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MemberAvatarInfo, MemberAvatarPartsItemInven } from '@libs/entity';

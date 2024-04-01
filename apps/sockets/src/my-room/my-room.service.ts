@@ -2,7 +2,7 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { Server, Socket } from 'socket.io';
-import { TokenCheckService } from '../manager/auth/tocket-check.service';
+import { TokenCheckService } from '../unification/auth/tocket-check.service';
 import {
   C_MYROOM_END_EDIT,
   C_MYROOM_KICK,

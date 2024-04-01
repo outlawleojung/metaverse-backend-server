@@ -1,14 +1,12 @@
 import { RedisFunctionService } from '@libs/redis';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
 import { Server, Socket } from 'socket.io';
-import { TokenCheckService } from '../manager/auth/tocket-check.service';
+import { TokenCheckService } from '../unification/auth/tocket-check.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
 import {
   CHATTING_SOCKET_S_MESSAGE,
-  HUB_SOCKET_C_MESSAGE,
   NATS_EVENTS,
   PLAYER_SOCKET_C_MESSAGE,
   PLAYER_SOCKET_S_MESSAGE,
@@ -28,18 +26,17 @@ import {
 } from '../packets/packet';
 import { GameObjectService } from './game/game-object.service';
 import { RequestPayload } from '../packets/packet-interface';
+import { HubSocketService } from '../hub-socket/hub-socket.service';
 
 @Injectable()
 export class PlayerService {
   private readonly logger = new Logger(PlayerService.name);
-  private hubSocketClient;
-  private socketMap: Map<string, Socket> = new Map();
-  private goReqMap: Map<string, string> = new Map();
 
   constructor(
     @InjectRedis() private readonly redisClient: Redis,
     @Inject(forwardRef(() => GameObjectService))
     private readonly gameObjectService: GameObjectService,
+    private readonly socketService: HubSocketService,
     private readonly tokenCheckService: TokenCheckService,
     private readonly messageHandler: NatsMessageHandler,
     private readonly redisFunctionService: RedisFunctionService,
@@ -70,7 +67,7 @@ export class PlayerService {
         );
         break;
       case PLAYER_SOCKET_C_MESSAGE.C_BASE_GET_OBJECT:
-        await this.getObjects(client);
+        await this.socketService.getObjects(client);
         break;
       case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_TRANSFORM:
         await this.baseSetTransform(
@@ -91,7 +88,7 @@ export class PlayerService {
         );
         break;
       case PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_GET_ITEMS:
-        await this.getInteraction(client);
+        await this.socketService.getInteraction(client);
         break;
       case PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_SET_ITEM:
         await this.baseSetInteraction(
@@ -200,8 +197,6 @@ export class PlayerService {
     client.data.jwtAccessToken;
     client.data.clientId = memberInfo.memberCode;
 
-    this.socketMap.set(memberInfo.memberCode, client);
-
     this.logger.debug(
       `동기화 서버에 연결되었어요 ✅ : ${memberId} - sessionId : ${sessionId}`,
     );
@@ -271,12 +266,12 @@ export class PlayerService {
 
     // 사용자의 현재 룸 정보 업데이트
     await this.redisClient.set(
-      RedisKey.getStrMemberCurrentRoom(clientId),
+      RedisKey.getStrMemberCurrentRoom(memberId),
       redisRoomId,
     );
 
     await this.redisFunctionService.updateJson(
-      RedisKey.getStrMemberSocket(clientId),
+      RedisKey.getStrMemberSocket(memberId),
       'roomId',
       redisRoomId,
     );
@@ -469,7 +464,9 @@ export class PlayerService {
     client: Socket,
     packet: C_BASE_INSTANTIATE_OBJECT,
   ) {
-    const roomInfo = await this.getUserRoomId(client.data.memberId);
+    const roomInfo = await this.socketService.getUserRoomId(
+      client.data.memberId,
+    );
     const redisRoomId = roomInfo.redisRoomId;
     const clientId = client.data.clientId;
 
@@ -508,7 +505,9 @@ export class PlayerService {
   async baseSetInteraction(client: Socket, packet: C_INTERACTION_SET_ITEM) {
     this.logger.debug('baseSetInteraction');
 
-    const roomInfo = await this.getUserRoomId(client.data.memberId);
+    const roomInfo = await this.socketService.getUserRoomId(
+      client.data.memberId,
+    );
     const redisRoomId = roomInfo.redisRoomId;
     const clientId = client.data.clientId;
 
@@ -549,7 +548,9 @@ export class PlayerService {
     client: Socket,
     packet: C_INTERACTION_REMOVE_ITEM,
   ) {
-    const roomInfo = await this.getUserRoomId(client.data.memberId);
+    const roomInfo = await this.socketService.getUserRoomId(
+      client.data.memberId,
+    );
     const redisRoomId = roomInfo.redisRoomId;
     const clientId = client.data.clientId;
 
@@ -584,23 +585,11 @@ export class PlayerService {
 
     this.server.to(redisRoomId).emit(data.packet.event, data.packet.packetData);
   }
-
-  async getUserRoomId(clientId) {
-    // 사용자의 현재 룸 조회
-    const memberKey = RedisKey.getStrMemberCurrentRoom(clientId);
-    const redisRoomId = await this.redisClient.get(memberKey);
-
-    if (redisRoomId) {
-      return { memberKey, redisRoomId };
-    }
-
-    return { memberKey, redisRoomId: null };
-  }
-
   // 사용자 퇴장 처리
-  async checkLeaveRoom(client: Socket, clientId: string) {
+  async checkLeaveRoom(client: Socket, memberId: string) {
     // 사용자의 현재 룸 조회
-    const { memberKey, redisRoomId } = await this.getUserRoomId(clientId);
+    const { memberKey, redisRoomId } =
+      await this.socketService.getUserRoomId(memberId);
     console.log(
       '#################################  checkLeaveRoom redisRoomId : ',
       redisRoomId,
@@ -657,12 +646,6 @@ export class PlayerService {
           client.data.memberId,
         );
 
-        await this.redisFunctionService.updateJson(
-          RedisKey.getStrMemberSocket(clientId),
-          'roomId',
-          '',
-        );
-
         // 기존 룸에서 사용자 제거
         await this.redisClient.del(memberKey);
 
@@ -670,9 +653,9 @@ export class PlayerService {
 
         // 룸 퇴장 이벤트 발생
         await this.messageHandler.publishHandler(
-          `${NATS_EVENTS.LEAVE_ROOM}:${clientId}`,
+          `${NATS_EVENTS.LEAVE_ROOM}:${memberId}`,
           JSON.stringify({
-            clientId: clientId,
+            memberId: memberId,
             roomId: roomId,
           }),
         );
@@ -684,61 +667,6 @@ export class PlayerService {
         );
       }
     }
-  }
-
-  async getObjects(client: Socket) {
-    const roomInfo = await this.getUserRoomId(client.data.memberId);
-
-    // 요청 아이디를 발급 하고 해당 요청을 보낸 사용자 아이디와 함께 저장
-    const requestId = uuidv4();
-    this.goReqMap.set(requestId, client.data.clientId);
-
-    // 허브 소켓에 게임오브젝트 목록을 요청 보낸다.
-    this.hubSocketClient.emit(HUB_SOCKET_C_MESSAGE.C_GET_GAMEOBJECTS, {
-      requestId,
-      roomId: roomInfo.redisRoomId,
-    });
-  }
-
-  // 허브 소켓으로 요청 보내기
-  async getGameObjectsForHub(data: any) {
-    const requestId = data.requestId;
-    const roomId = data.roomId;
-
-    const gameObjects = await this.gameObjectService.getObjectsForHub(roomId);
-
-    this.hubSocketClient.emit(HUB_SOCKET_C_MESSAGE.C_SEND_GAMEOBJECTS, {
-      requestId,
-      gatewayId: this.gatewayId,
-      gameObjects,
-    });
-  }
-
-  async getInteraction(client: Socket) {
-    const roomInfo = await this.getUserRoomId(client.data.memberId);
-    // 요청 아이디를 발급 하고 해당 요청을 보낸 사용자 아이디와 함께 저장
-    const requestId = uuidv4();
-    this.goReqMap.set(requestId, client.data.clientId);
-
-    // 허브 소켓에 인터랙션 목록을 요청 보낸다.
-    this.hubSocketClient.emit(HUB_SOCKET_C_MESSAGE.C_GET_INTERACTIONS, {
-      requestId,
-      roomId: roomInfo.redisRoomId,
-    });
-  }
-
-  async getInteractionForHub(data: any) {
-    const requestId = data.requestId;
-    const roomId = data.roomId;
-
-    const interactions =
-      await this.gameObjectService.getInteractionForHub(roomId);
-
-    this.hubSocketClient.emit(HUB_SOCKET_C_MESSAGE.C_SEND_INTERACTIONS, {
-      requestId,
-      gatewayId: this.gatewayId,
-      interactions,
-    });
   }
 
   async publishJoinRoom(roomId) {}

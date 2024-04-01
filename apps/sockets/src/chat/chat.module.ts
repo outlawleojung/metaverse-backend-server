@@ -2,9 +2,6 @@ import { Module } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Member, SessionInfo, MemberOfficeVisitLog } from '@libs/entity';
-import { DataSource } from 'typeorm';
-import { TokenCheckService } from '../manager/auth/tocket-check.service';
-import { RedisFunctionService } from '@libs/redis';
 import {
   CreateFriendChattingSchema,
   OneOnOneChattingLogSchema,
@@ -15,19 +12,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CreateFriendChattingRoomSchema } from '@libs/mongodb';
 import { ChattingMemberInfoSchema } from '@libs/mongodb';
 import { CommonModule } from '@libs/common';
-import { NatsService } from '../nats/nats.service';
-import { GatewayInitiService } from '../services/gateway-init.service';
-import { RedisLockService } from '../services/redis-lock.service';
-import { NatsMessageHandler } from '../nats/nats-message.handler';
+import { HubSocketModule } from '../hub-socket/hub-socket.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Member,
-      DataSource,
-      SessionInfo,
-      MemberOfficeVisitLog,
-    ]),
+    TypeOrmModule.forFeature([Member, SessionInfo, MemberOfficeVisitLog]),
     MongooseModule.forFeature([
       {
         name: 'createFriendChatting',
@@ -55,16 +44,9 @@ import { NatsMessageHandler } from '../nats/nats-message.handler';
       },
     ]),
     CommonModule,
+    HubSocketModule,
   ],
-  providers: [
-    ChatService,
-    TokenCheckService,
-    RedisFunctionService,
-    NatsService,
-    GatewayInitiService,
-    RedisLockService,
-    NatsMessageHandler,
-  ],
+  providers: [ChatService],
   exports: [ChatService],
 })
 export class ChatModule {}

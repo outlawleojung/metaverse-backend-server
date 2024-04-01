@@ -11,7 +11,7 @@ import {
   RedisKey,
   SOCKET_SERVER_ERROR_CODE_GLOBAL,
 } from '@libs/constants';
-import { TokenCheckService } from '../manager/auth/tocket-check.service';
+import { TokenCheckService } from '../unification/auth/tocket-check.service';
 import { Repository } from 'typeorm';
 import { promisify } from 'util';
 import { RequestPayload } from '../packets/packet-interface';

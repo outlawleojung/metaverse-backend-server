@@ -4,7 +4,7 @@ import { Redis } from 'ioredis';
 import { Server, Socket } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 
-import { TokenCheckService } from '../manager/auth/tocket-check.service';
+import { TokenCheckService } from '../unification/auth/tocket-check.service';
 import { RedisFunctionService } from '@libs/redis';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';

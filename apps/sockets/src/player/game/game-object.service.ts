@@ -25,7 +25,6 @@ import { RedisKey, SOCKET_S_GLOBAL } from '@libs/constants';
 import { RedisLockService } from '../../services/redis-lock.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
-import { PlayerService } from '../player.service';
 import { NatsMessageHandler } from '../../nats/nats-message.handler';
 
 @Injectable()
@@ -36,8 +35,6 @@ export class GameObjectService {
 
   constructor(
     @InjectRedis() private readonly redisClient: Redis,
-    @Inject(forwardRef(() => PlayerService))
-    private readonly playerService: PlayerService,
     private readonly lockService: RedisLockService,
     private readonly messageHandler: NatsMessageHandler,
   ) {}

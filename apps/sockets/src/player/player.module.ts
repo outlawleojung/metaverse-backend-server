@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
 import { PlayerService } from './player.service';
-import { PlayerGateway } from './player.gateway';
 import { GatewayInitiService } from '../services/gateway-init.service';
 import { RedisLockService } from '../services/redis-lock.service';
-import { TokenCheckService } from '../manager/auth/tocket-check.service';
+import { TokenCheckService } from '../unification/auth/tocket-check.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Member, SessionInfo } from '@libs/entity';
 import { NatsService } from '../nats/nats.service';
@@ -12,27 +11,18 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { PlayerController } from './player.controller';
 import { RoomService } from '../room/room.service';
 import { RoomModule } from '../room/room.module';
-import { GameObjectService } from './game/game-object.service';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
+import { HubSocketModule } from '../hub-socket/hub-socket.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Member, SessionInfo]),
     ScheduleModule.forRoot(),
     RoomModule,
+    HubSocketModule,
   ],
   controllers: [PlayerController],
-  providers: [
-    PlayerService,
-    GatewayInitiService,
-    RedisLockService,
-    TokenCheckService,
-    NatsService,
-    NatsMessageHandler,
-    RedisFunctionService,
-    RoomService,
-    GameObjectService,
-  ],
+  providers: [PlayerService, RoomService],
   exports: [PlayerService],
 })
 export class PlayerModule {}
