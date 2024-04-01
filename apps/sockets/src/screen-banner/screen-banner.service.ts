@@ -34,7 +34,7 @@ export class ScreenBannerService {
   ) {}
 
   async handleRequestMessage(client: Socket, payload: RequestPayload) {
-    switch (payload.event) {
+    switch (payload.eventName) {
     }
   }
 

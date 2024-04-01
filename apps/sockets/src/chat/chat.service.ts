@@ -70,7 +70,7 @@ export class ChatService {
   }
 
   async handleRequestMessage(client: Socket, payload: RequestPayload) {
-    switch (payload.event) {
+    switch (payload.eventName) {
       case CHATTING_SOCKET_C_MESSAGE.C_SEND_MESSAGE:
         await this.sendMessage(client, payload.data);
         break;

@@ -53,7 +53,7 @@ export class PlayerService {
   }
 
   async handleRequestMessage(client: Socket, payload: RequestPayload) {
-    switch (payload.event) {
+    switch (payload.eventName) {
       case PLAYER_SOCKET_C_MESSAGE.C_ENTER:
         await this.joinRoom(client, payload.data as C_ENTER);
         break;

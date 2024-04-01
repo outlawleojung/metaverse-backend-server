@@ -1,6 +1,6 @@
 export interface RequestPayload {
   type: string;
-  event: string;
+  eventName: string;
   data: any;
 }
 

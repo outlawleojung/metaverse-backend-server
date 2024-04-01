@@ -45,7 +45,7 @@ export class MyRoomService {
   }
 
   async handleRequestMessage(client: Socket, payload: RequestPayload) {
-    switch (payload.event) {
+    switch (payload.eventName) {
       case MY_ROOM_SOCKET_C_MESSAGE.C_MYROOM_GET_ROOMINFO:
         await this.getRoomInfo(client);
         break;

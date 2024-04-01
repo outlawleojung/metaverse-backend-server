@@ -28,7 +28,7 @@ export class FriendService {
   ) {}
 
   async handleRequestMessage(client: Socket, payload: RequestPayload) {
-    switch (payload.event) {
+    switch (payload.eventName) {
       case FRIEND_SOCKET_C_MESSAGE.C_FRIEND_LIST:
         await this.getFriends(client);
         break;

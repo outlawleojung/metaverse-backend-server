@@ -33,7 +33,7 @@ export class OfficeService {
   }
 
   async handleRequestMessage(client: Socket, payload: RequestPayload) {
-    switch (payload.event) {
+    switch (payload.eventName) {
       case OFFICE_SOCKET_C_MESSAGE.C_OFFICE_QUEUE_REGISTER:
         await this.officeQueueRegister(client, payload.data);
         break;
