@@ -33,6 +33,7 @@ export class HubSocketService {
 
   async handleConnectionHub(gatewayId: string) {
     const hubUrl = `${process.env.HUB_URL}`;
+    console.log('@@@@@@@@@@@@@ hubSocket connection : ', hubUrl);
 
     this.hubSocketClient = io(hubUrl, {
       query: {

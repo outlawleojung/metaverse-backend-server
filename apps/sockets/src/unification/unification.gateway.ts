@@ -167,7 +167,9 @@ export class UnificationGateway
   }
 
   @SubscribeMessage(SOCKET_C_GLOBAL.C_REQUEST)
-  async enterChatRoom(client: Socket, payload: RequestPayload) {
+  async request(client: Socket, payload: RequestPayload) {
+    this.logger.debug('C_REQUEST');
+    console.log(payload);
     switch (payload.type) {
       case NAMESPACE.CHAT:
         await this.chatService.setServer(this.server);

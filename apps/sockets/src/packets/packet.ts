@@ -2,7 +2,7 @@ import {
   PLAYER_SOCKET_C_MESSAGE,
   PLAYER_SOCKET_S_MESSAGE,
 } from '@libs/constants';
-import { ClientInfo, Item, Position, Rotation } from './packet-interface';
+import { ClientInfo, Position, Rotation } from './packet-interface';
 import { GameObject } from '../player/game/game-object';
 import {
   IsBoolean,
@@ -13,11 +13,11 @@ import {
   IsString,
 } from 'class-validator';
 export interface PACKET {
-  event: string;
+  eventName: string;
 }
 
 export class C_BASE_SET_TRANSFORM implements PACKET {
-  event = PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_TRANSFORM;
+  eventName = PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_TRANSFORM;
 
   @IsNumber()
   @IsNotEmpty()
@@ -33,14 +33,14 @@ export class C_BASE_SET_TRANSFORM implements PACKET {
 }
 
 export class S_BASE_SET_TRANSFORM implements PACKET {
-  event = PLAYER_SOCKET_S_MESSAGE.S_BASE_SET_TRANSFORM;
+  eventName = PLAYER_SOCKET_S_MESSAGE.S_BASE_SET_TRANSFORM;
   objectId: number;
   position: Position;
   rotation: Rotation;
 }
 
 export class C_BASE_SET_ANIMATION implements PACKET {
-  event = PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION;
+  eventName = PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION;
 
   @IsNumber()
   @IsNotEmpty()
@@ -56,14 +56,14 @@ export class C_BASE_SET_ANIMATION implements PACKET {
 }
 
 export class S_BASE_SET_ANIMATION implements PACKET {
-  event = PLAYER_SOCKET_S_MESSAGE.S_BASE_SET_ANIMATION;
+  eventName = PLAYER_SOCKET_S_MESSAGE.S_BASE_SET_ANIMATION;
   objectId: number;
   animationId: string;
   animation: string;
 }
 
 export class C_BASE_SET_ANIMATION_ONCE implements PACKET {
-  event = PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION_ONCE;
+  eventName = PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION_ONCE;
 
   @IsNumber()
   @IsNotEmpty()
@@ -83,7 +83,7 @@ export class C_BASE_SET_ANIMATION_ONCE implements PACKET {
 }
 
 export class S_BASE_SET_ANIMATION_ONCE implements PACKET {
-  event = PLAYER_SOCKET_S_MESSAGE.S_BASE_SET_ANIMATION_ONCE;
+  eventName = PLAYER_SOCKET_S_MESSAGE.S_BASE_SET_ANIMATION_ONCE;
   objectId: number;
   animationId: string;
   isLoop: boolean;
@@ -91,7 +91,7 @@ export class S_BASE_SET_ANIMATION_ONCE implements PACKET {
 }
 
 export class C_BASE_INSTANTIATE_OBJECT implements PACKET {
-  event = PLAYER_SOCKET_C_MESSAGE.C_BASE_INSTANTIATE_OBJECT;
+  eventName = PLAYER_SOCKET_C_MESSAGE.C_BASE_INSTANTIATE_OBJECT;
 
   @IsString()
   @IsNotEmpty()
@@ -111,18 +111,18 @@ export class C_BASE_INSTANTIATE_OBJECT implements PACKET {
 }
 
 export class S_BASE_INSTANTIATE_OBJECT implements PACKET {
-  event = PLAYER_SOCKET_S_MESSAGE.S_BASE_INSTANTIATE_OBJECT;
+  eventName = PLAYER_SOCKET_S_MESSAGE.S_BASE_INSTANTIATE_OBJECT;
   success: boolean;
   objectId: number;
 }
 
 export class S_INTERACTION_GET_ITEMS implements PACKET {
-  event = PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_GET_ITEMS;
+  eventName = PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_GET_ITEMS;
   items: string[];
 }
 
 export class C_INTERACTION_SET_ITEM implements PACKET {
-  event = PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_SET_ITEM;
+  eventName = PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_SET_ITEM;
 
   @IsString()
   @IsNotEmpty()
@@ -134,7 +134,7 @@ export class C_INTERACTION_SET_ITEM implements PACKET {
 }
 
 export class C_INTERACTION_REMOVE_ITEM implements PACKET {
-  event = PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_REMOVE_ITEM;
+  eventName = PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_REMOVE_ITEM;
 
   @IsString()
   @IsNotEmpty()
@@ -142,49 +142,49 @@ export class C_INTERACTION_REMOVE_ITEM implements PACKET {
 }
 
 export class S_INTERACTION_SET_ITEM implements PACKET {
-  event = PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_SET_ITEM;
+  eventName = PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_SET_ITEM;
   success: boolean;
   id: string;
   state: string;
 }
 
 export class S_INTERACTION_SET_ITEM_NOTICE implements PACKET {
-  event = PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_SET_ITEM_NOTICE;
+  eventName = PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_SET_ITEM_NOTICE;
   id: string;
   state: string;
 }
 
 export class S_INTERACTION_REMOVE_ITEM implements PACKET {
-  event = PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_REMOVE_ITEM;
+  eventName = PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_REMOVE_ITEM;
   success: boolean;
 }
 
 export class S_INTERACTION_REMOVE_ITEM_NOTICE implements PACKET {
-  event = PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_REMOVE_ITEM_NOTICE;
+  eventName = PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_REMOVE_ITEM_NOTICE;
   id: string;
 }
 
 export class S_BASE_ADD_OBJECT implements PACKET {
-  event = PLAYER_SOCKET_S_MESSAGE.S_BASE_ADD_OBJECT;
+  eventName = PLAYER_SOCKET_S_MESSAGE.S_BASE_ADD_OBJECT;
   gameObjects: GameObject[] = [];
 }
 
 export class S_BASE_REMOVE_OBJECT implements PACKET {
-  event = PLAYER_SOCKET_S_MESSAGE.S_BASE_REMOVE_OBJECT;
+  eventName = PLAYER_SOCKET_S_MESSAGE.S_BASE_REMOVE_OBJECT;
   gameObjects: number[];
 }
 
 export class C_GET_CLIENT implements PACKET {
-  event = PLAYER_SOCKET_C_MESSAGE.C_GET_CLIENT;
+  eventName = PLAYER_SOCKET_C_MESSAGE.C_GET_CLIENT;
 }
 
 export class S_ADD_CLIENT implements PACKET {
-  event = PLAYER_SOCKET_S_MESSAGE.S_ADD_CLIENT;
+  eventName = PLAYER_SOCKET_S_MESSAGE.S_ADD_CLIENT;
   clientInfo: ClientInfo[];
 }
 
 export class C_ENTER implements PACKET {
-  event = PLAYER_SOCKET_C_MESSAGE.C_ENTER;
+  eventName = PLAYER_SOCKET_C_MESSAGE.C_ENTER;
 
   @IsString()
   @IsNotEmpty()
@@ -204,12 +204,12 @@ export class C_ENTER implements PACKET {
 }
 
 export class S_ENTER implements PACKET {
-  event = PLAYER_SOCKET_S_MESSAGE.S_ENTER;
+  eventName = PLAYER_SOCKET_S_MESSAGE.S_ENTER;
   result: string;
 }
 
 export class C_REENTER implements PACKET {
-  event = PLAYER_SOCKET_C_MESSAGE.C_REENTER;
+  eventName = PLAYER_SOCKET_C_MESSAGE.C_REENTER;
 
   @IsString()
   @IsNotEmpty()
@@ -217,10 +217,10 @@ export class C_REENTER implements PACKET {
 }
 
 export class S_REENTER implements PACKET {
-  event = PLAYER_SOCKET_S_MESSAGE.S_REENTER;
+  eventName = PLAYER_SOCKET_S_MESSAGE.S_REENTER;
   success: boolean;
 }
 
 export class C_BASE_GET_OBJECT implements PACKET {
-  event = PLAYER_SOCKET_C_MESSAGE.C_BASE_GET_OBJECT;
+  eventName = PLAYER_SOCKET_C_MESSAGE.C_BASE_GET_OBJECT;
 }

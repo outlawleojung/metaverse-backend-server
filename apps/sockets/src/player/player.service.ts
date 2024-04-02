@@ -22,6 +22,7 @@ import {
   C_ENTER,
   C_INTERACTION_REMOVE_ITEM,
   C_INTERACTION_SET_ITEM,
+  S_BASE_SET_TRANSFORM,
   S_ENTER,
 } from '../packets/packet';
 import { GameObjectService } from './game/game-object.service';
@@ -53,6 +54,8 @@ export class PlayerService {
   }
 
   async handleRequestMessage(client: Socket, payload: RequestPayload) {
+    this.logger.debug('handleRequestMessage');
+    console.log(payload);
     switch (payload.eventName) {
       case PLAYER_SOCKET_C_MESSAGE.C_ENTER:
         await this.joinRoom(client, payload.data as C_ENTER);
@@ -103,113 +106,15 @@ export class PlayerService {
         );
         break;
       default:
+        this.logger.debug('잘못된 요청 이벤트 입니다.');
+        console.log(payload);
         break;
     }
   }
 
-  // async handleConnectionHub(gatewayId: string) {
-  //   const hubUrl = `${process.env.HUB_URL}`;
-  //   console.log(hubUrl);
-  //   this.hubSocketClient = io(hubUrl, {
-  //     query: {
-  //       gatewayId,
-  //     },
-  //   });
-
-  //   this.hubSocketClient.on('connect', () => {
-  //     this.logger.debug('허브 소켓 서버에 연결됨');
-  //     // 필요한 룸에 조인하거나, 메시지 교환을 위한 이벤트 리스너 등록
-  //   });
-
-  //   // HUB SOCKET의 게임오브젝트 목록 요청
-  //   this.hubSocketClient.on(HUB_SOCKET_S_MESSAGE.S_GET_GAMEOBJECTS, (data) => {
-  //     this.logger.debug('메인 소켓 서버로부터 메시지 수신:', data);
-  //     // 여기서 데이터 처리 로직 구현
-  //     this.getGameObjectsForHub(data);
-  //   });
-
-  //   // HUB SOCKET 에서 온 게임오브젝트 목록 응답
-  //   this.hubSocketClient.on(
-  //     HUB_SOCKET_S_MESSAGE.S_GAMEOBJECTS_RESULT,
-  //     (data) => {
-  //       const clientId = this.goReqMap.get(data.requestId);
-  //       const socket = this.socketMap.get(clientId);
-  //       if (socket) {
-  //         socket.emit(
-  //           PLAYER_SOCKET_S_MESSAGE.S_BASE_ADD_OBJECT,
-  //           data.gameObjects,
-  //         );
-  //       }
-  //     },
-  //   );
-
-  //   // HUB SOCKET의 인터랙션 목록 요청
-  //   this.hubSocketClient.on(HUB_SOCKET_S_MESSAGE.S_GET_INTERACTIONS, (data) => {
-  //     this.logger.debug('메인 소켓 서버로부터 메시지 수신:', data);
-  //     // 여기서 데이터 처리 로직 구현
-  //     this.getInteractionForHub(data);
-  //   });
-
-  //   // HUB SOCKET 에서 온 인터랙션 목록 응답
-  //   this.hubSocketClient.on(
-  //     HUB_SOCKET_S_MESSAGE.S_INTERACTIONS_RESULT,
-  //     (data) => {
-  //       const clientId = this.goReqMap.get(data.requestId);
-
-  //       const socket = this.socketMap.get(clientId);
-
-  //       if (socket) {
-  //         socket.emit(
-  //           PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_GET_ITEMS,
-  //           data.interactions,
-  //         );
-  //       }
-  //     },
-  //   );
-  // }
-
-  // 소켓 연결
-  async handleConnection(server: Server, client: Socket) {
-    const authInfo =
-      await this.tokenCheckService.getJwtAccessTokenAndSessionId(client);
-
-    const jwtAccessToken = authInfo.jwtAccessToken;
-    const sessionId = authInfo.sessionId;
-
-    const memberInfo =
-      await this.tokenCheckService.checkLoginToken(jwtAccessToken);
-
-    // 해당 멤버가 존재하지 않을 경우 연결 종료
-    if (!memberInfo) {
-      client.disconnect();
-      return;
-    }
-
-    console.log(memberInfo);
-    const memberId = memberInfo.memberId;
-
-    client.join(memberId);
-    client.join(sessionId);
-
-    // 클라이언트 데이터 설정
-    client.data.memberId = memberId;
-    client.data.sessionId = sessionId;
-    client.data.jwtAccessToken;
-    client.data.clientId = memberInfo.memberCode;
-
-    this.logger.debug(
-      `동기화 서버에 연결되었어요 ✅ : ${memberId} - sessionId : ${sessionId}`,
-    );
-  }
-
-  async handleDisconnect(client: Socket) {
-    await this.checkLeaveRoom(client, client.data.clientId);
-    this.logger.debug(
-      `동기화 서버에 해제되었어요 ❌ : ${client.data.clientId} `,
-    );
-  }
-
   async joinRoom(client: Socket, packet: C_ENTER) {
+    this.logger.debug('join room');
+    console.log(packet);
     const authInfo =
       await this.tokenCheckService.getJwtAccessTokenAndSessionId(client);
 
@@ -220,7 +125,6 @@ export class PlayerService {
       await this.tokenCheckService.checkLoginToken(jwtAccessToken);
 
     const memberId = memberInfo.memberId;
-    const clientId = memberInfo.memberCode;
     const redisRoomId = RedisKey.getStrRoomId(packet.roomId);
 
     // 룸 존재 여부 확인
@@ -259,7 +163,9 @@ export class PlayerService {
 
     const response = new S_ENTER();
     response.result = 'success';
-    client.emit(response.event, response.result);
+    const { eventName, ...packetData } = response;
+
+    client.emit(eventName, packetData);
 
     // 룸에 사용자 정보 저장
     await this.redisClient.sadd(memberSetKey, memberId);
@@ -307,7 +213,8 @@ export class PlayerService {
     this.logger.debug('룸 구독 콜백 ✅');
     const data = JSON.parse(message);
 
-    switch (data.packet.event) {
+    switch (data.packet.eventName) {
+      // -- 브로드캐스팅을 위한 호출 --
       case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_TRANSFORM:
         await this.setTransform(data);
         break;
@@ -325,27 +232,40 @@ export class PlayerService {
       case PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_SET_ITEM_NOTICE:
         await this.setInteraction(data);
         break;
-      case PLAYER_SOCKET_C_MESSAGE.C_INTERACTION_REMOVE_ITEM:
+      // -- 브로드캐스팅을 위한 호출 --
+      case PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_REMOVE_ITEM_NOTICE:
         await this.removeInteraction(data);
+        break;
+      default:
+        this.logger.debug('잘못된 패킷 이벤트 입니다.');
+        console.log(data.packet);
+        break;
     }
   }
 
   async getClient(client: Socket) {
+    this.logger.debug('getClient');
     // client의 룸 조회
-    const clientId = client.data.clientId;
-    const memberKey = RedisKey.getStrMemberCurrentRoom(clientId);
+    const memberId = client.data.memberId;
+    console.log('clientId: ', memberId);
+
+    const memberKey = RedisKey.getStrMemberCurrentRoom(memberId);
+    console.log('memberKey: ', memberKey);
+
     const redisRoomId = await this.redisClient.get(memberKey);
+    console.log('redisRoomId: ', redisRoomId);
 
     const playerIds = await this.redisClient.smembers(
       RedisKey.getStrRoomPlayerList(redisRoomId),
     );
-
+    console.log('playerIds: ', playerIds);
     const clientInfos = [];
 
     for (const p of playerIds) {
       const socketInfo = JSON.parse(
         await this.redisClient.get(RedisKey.getStrMemberSocket(p)),
       );
+      console.log('socketInfo: ', socketInfo);
 
       const client = {
         clientId: socketInfo.clientId,
@@ -353,6 +273,7 @@ export class PlayerService {
         stateMessage: socketInfo.stateMessage,
       };
 
+      console.log('client: ', client);
       clientInfos.push(client);
     }
 
@@ -366,12 +287,17 @@ export class PlayerService {
   async baseSetTransform(client: Socket, packet: C_BASE_SET_TRANSFORM) {
     const redisRoomId = client.data.redisRoomId;
 
-    this.logger.debug('사용자 이동 동기화 이벤트 발행 ✅ : ', redisRoomId);
+    const response = new C_BASE_SET_TRANSFORM();
+    response.objectId = packet.objectId;
+    response.position = packet.position;
+    response.rotation = packet.rotation;
 
     const data = {
       redisRoomId,
-      packet,
+      packet: response,
     };
+
+    this.logger.debug('사용자 이동 동기화 이벤트 발행 ✅ : ', data);
 
     this.messageHandler.publishHandler(
       `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
@@ -392,16 +318,23 @@ export class PlayerService {
       packet.rotation,
     );
 
-    this.server.to(redisRoomId).emit(response.event, response.packetData);
+    console.log(response);
+
+    this.server.to(redisRoomId).emit(response.eventName, response.packetData);
   }
 
   // 사용자 애니메이션 동기화
   async baseSetAnimation(client: Socket, packet: C_BASE_SET_ANIMATION) {
     const redisRoomId = client.data.redisRoomId;
 
+    const response = new C_BASE_SET_ANIMATION();
+    response.objectId = packet.objectId;
+    response.animation = packet.animation;
+    response.animationId = packet.animationId;
+
     const data = {
       redisRoomId,
-      packet,
+      packet: response,
     };
 
     this.messageHandler.publishHandler(
@@ -423,7 +356,7 @@ export class PlayerService {
       packet.animation,
     );
 
-    this.server.to(redisRoomId).emit(response.event, response.packetData);
+    this.server.to(redisRoomId).emit(response.eventName, response.packetData);
   }
 
   async baseSetAnimationOnce(
@@ -457,7 +390,7 @@ export class PlayerService {
       packet.blend,
     );
 
-    this.server.to(redisRoomId).emit(response.event, response.packetData);
+    this.server.to(redisRoomId).emit(response.eventName, response.packetData);
   }
 
   async baseInstantiateObject(
@@ -478,7 +411,7 @@ export class PlayerService {
 
     if (response.clientPacket) {
       client.emit(
-        response.clientPacket.event,
+        response.clientPacket.eventName,
         response.clientPacket.packetData,
       );
     }
@@ -499,7 +432,9 @@ export class PlayerService {
 
     const redisRoomId = data.redisRoomId;
 
-    this.server.to(redisRoomId).emit(data.packet.event, data.packet.packetData);
+    this.server
+      .to(redisRoomId)
+      .emit(data.packet.eventName, data.packet.packetData);
   }
 
   async baseSetInteraction(client: Socket, packet: C_INTERACTION_SET_ITEM) {
@@ -520,7 +455,7 @@ export class PlayerService {
 
     if (response.clientPacket) {
       client.emit(
-        response.clientPacket.event,
+        response.clientPacket.eventName,
         response.clientPacket.packetData,
       );
     }
@@ -541,7 +476,9 @@ export class PlayerService {
   private async setInteraction(data) {
     const redisRoomId = data.redisRoomId;
 
-    this.server.to(redisRoomId).emit(data.packet.event, data.packet.packetData);
+    this.server
+      .to(redisRoomId)
+      .emit(data.packet.eventName, data.packet.packetData);
   }
 
   async baseRemoveInteraction(
@@ -562,7 +499,7 @@ export class PlayerService {
 
     if (response.clientPacket) {
       client.emit(
-        response.clientPacket.event,
+        response.clientPacket.eventName,
         response.clientPacket.packetData,
       );
     }
@@ -581,9 +518,12 @@ export class PlayerService {
   }
 
   private async removeInteraction(data) {
+    console.log(data);
     const redisRoomId = data.redisRoomId;
 
-    this.server.to(redisRoomId).emit(data.packet.event, data.packet.packetData);
+    this.server
+      .to(redisRoomId)
+      .emit(data.packet.eventName, data.packet.packetData);
   }
   // 사용자 퇴장 처리
   async checkLeaveRoom(client: Socket, memberId: string) {

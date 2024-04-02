@@ -45,6 +45,6 @@ export interface GetGameObjectInfo {
 }
 
 export interface PacketInfo {
-  event: string;
+  eventName: string;
   packetData: object;
 }

@@ -141,7 +141,7 @@ export class MyRoomService {
             `${NATS_EVENTS.MY_ROOM}.${redisRoomId}`,
             async (message) => {
               const data = JSON.parse(message);
-              this.server.to(redisRoomId).emit(data.event, data.message);
+              this.server.to(redisRoomId).emit(data.eventName, data.message);
             },
           );
 
@@ -208,8 +208,8 @@ export class MyRoomService {
     packet.isShutdown = roomData.isShutdown;
     packet.ownerAvatarInfo = roomData.ownerAvatarInfo;
 
-    const { event, ...packetData } = packet;
-    return client.emit(event, packetData);
+    const { eventName, ...packetData } = packet;
+    return client.emit(eventName, packetData);
   }
 
   async startEdit(client: Socket) {
@@ -252,10 +252,10 @@ export class MyRoomService {
     const _packet = new S_MYROOM_END_EDIT();
     _packet.isChanged = isChanged;
 
-    const { event, ...message } = _packet;
+    const { eventName, ...message } = _packet;
 
     const response = {
-      event,
+      eventName,
       message,
     };
 
@@ -285,14 +285,14 @@ export class MyRoomService {
     // if (!kickSocket) {
     //   _packet.success = false;
 
-    //   const { event, ...message } = _packet;
-    //   return client.emit(event, message);
+    //   const { eventName, ...message } = _packet;
+    //   return client.emit(eventName, message);
     // }
 
     _packet.success = true;
 
-    const { event, ...message } = _packet;
-    client.emit(event, message);
+    const { eventName, ...message } = _packet;
+    client.emit(eventName, message);
 
     this.logger.debug('마이룸 편집 종료 이벤트 발행');
     this.messageHandler.publishHandler(
