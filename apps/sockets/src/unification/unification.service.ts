@@ -109,7 +109,7 @@ export class UnificationService {
     client.data.jwtAccessToken = jwtAccessToken;
     client.data.nickname = member.nickname;
     client.data.clientId = member.memberCode;
-    client.data.message = member.stateMessage;
+    client.data.stateMessage = member.stateMessage;
 
     client.join(memberId);
     client.join(sessionId);
