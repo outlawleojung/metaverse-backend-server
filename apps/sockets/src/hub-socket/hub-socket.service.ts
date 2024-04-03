@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { GameObjectService } from '../player/game/game-object.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
+import { CustomSocket } from '../interfaces/custom-socket';
 
 @Injectable()
 export class HubSocketService {
@@ -26,7 +27,7 @@ export class HubSocketService {
   private hubSocketClient;
   private gatewayId;
 
-  async handleConnection(client: Socket) {
+  async handleConnection(client: CustomSocket) {
     console.log('@@@@@@@@@@@@@ client.data : ', client.data);
     this.socketMap.set(client.data.memberId, client);
   }
@@ -95,7 +96,7 @@ export class HubSocketService {
     );
   }
 
-  async getObjects(client: Socket) {
+  async getObjects(client: CustomSocket) {
     console.log('@@@@@@@@@@@@@@@@@@ getObjects 1 @@@@@@@@@@@@@@@@@@');
     const roomInfo = await this.getUserRoomId(client.data.memberId);
 
@@ -126,7 +127,7 @@ export class HubSocketService {
     });
   }
 
-  async getInteraction(client: Socket) {
+  async getInteraction(client: CustomSocket) {
     const roomInfo = await this.getUserRoomId(client.data.memberId);
     // 요청 아이디를 발급 하고 해당 요청을 보낸 사용자 아이디와 함께 저장
     const requestId = uuidv4();
@@ -155,9 +156,11 @@ export class HubSocketService {
 
   async getUserRoomId(memberId) {
     // 사용자의 현재 룸 조회
+    this.logger.debug('사용자의 현재 룸 조회 : ', memberId);
     const memberKey = RedisKey.getStrMemberCurrentRoom(memberId);
+    this.logger.debug('현재 룸 키 : ', memberKey);
     const redisRoomId = await this.redisClient.get(memberKey);
-
+    this.logger.debug('현재 룸 아이디 : ', redisRoomId);
     if (redisRoomId) {
       return { memberKey, redisRoomId };
     }

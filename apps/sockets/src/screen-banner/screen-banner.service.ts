@@ -16,6 +16,7 @@ import {
   SCREEN_BANNER_SOCKET_S_MESSAGE,
 } from '@libs/constants';
 import { RequestPayload } from '../packets/packet-interface';
+import { CustomSocket } from '../interfaces/custom-socket';
 
 @Injectable()
 export class ScreenBannerService {
@@ -33,7 +34,7 @@ export class ScreenBannerService {
     private readonly messageHandler: NatsMessageHandler,
   ) {}
 
-  async handleRequestMessage(client: Socket, payload: RequestPayload) {
+  async handleRequestMessage(client: CustomSocket, payload: RequestPayload) {
     switch (payload.eventName) {
     }
   }

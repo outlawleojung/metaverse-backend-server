@@ -7,9 +7,11 @@ import {
   C_MYROOM_END_EDIT,
   C_MYROOM_KICK,
   C_MYROOM_SHUTDOWN,
+  C_MYROOM_START_EDIT,
   S_MYROOM_END_EDIT,
   S_MYROOM_GET_ROOMINFO,
   S_MYROOM_KICK,
+  S_MYROOM_START_EDIT,
 } from '../packets/myroom-packet';
 import {
   MY_ROOM_SOCKET_C_MESSAGE,
@@ -21,12 +23,14 @@ import {
 import { RoomType } from '../room/room-type';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
 import { RequestPayload } from '../packets/packet-interface';
+import { ClientService } from '../services/client.service';
+import { CustomSocket } from '../interfaces/custom-socket';
 
 @Injectable()
 export class MyRoomService {
   constructor(
     @InjectRedis() private readonly redisClient: Redis,
-    private readonly tokenCheckService: TokenCheckService,
+    private readonly clientService: ClientService,
     private readonly messageHandler: NatsMessageHandler,
   ) {}
 
@@ -37,14 +41,7 @@ export class MyRoomService {
     this.server = server;
   }
 
-  private socketMap = new Map();
-  getSocket(clientId: string) {
-    if (this.socketMap.has(clientId)) {
-      return this.socketMap.get(clientId);
-    }
-  }
-
-  async handleRequestMessage(client: Socket, payload: RequestPayload) {
+  async handleRequestMessage(client: CustomSocket, payload: RequestPayload) {
     switch (payload.eventName) {
       case MY_ROOM_SOCKET_C_MESSAGE.C_MYROOM_GET_ROOMINFO:
         await this.getRoomInfo(client);
@@ -62,106 +59,21 @@ export class MyRoomService {
         await this.shutDown(client, payload.data as C_MYROOM_SHUTDOWN);
         break;
       default:
+        this.logger.debug('잘못된 패킷 입니다.');
+        client.emit(SOCKET_S_GLOBAL.ERROR, '잘못된 패킷 입니다.');
         break;
     }
   }
 
-  // // 소켓 연결
-  // async handleConnection(client: Socket) {
-  //   const authInfo =
-  //     await this.tokenCheckService.getJwtAccessTokenAndSessionId(client);
+  async roomSubscribeCallbackmessage(message) {
+    this.logger.debug('룸 구독 콜백 ✅');
+    const data = JSON.parse(message);
 
-  //   const jwtAccessToken = authInfo.jwtAccessToken;
-  //   const sessionId = authInfo.sessionId;
-
-  //   const memberInfo =
-  //     await this.tokenCheckService.checkLoginToken(jwtAccessToken);
-
-  //   // 해당 멤버가 존재하지 않을 경우 연결 종료
-  //   if (!memberInfo) {
-  //     client.disconnect();
-  //     return;
-  //   }
-
-  //   console.log(memberInfo);
-  //   const memberId = memberInfo.memberId;
-
-  //   client.join(memberId);
-  //   client.join(sessionId);
-
-  //   // 클라이언트 데이터 설정
-  //   client.data.memberId = memberId;
-  //   client.data.sessionId = sessionId;
-  //   client.data.jwtAccessToken;
-  //   client.data.clientId = memberInfo.memberCode;
-
-  //   this.socketMap.set(memberInfo.memberCode, client);
-
-  //   this.logger.debug(
-  //     `마이룸 서버에 연결되었어요 ✅ : ${memberId} - sessionId : ${sessionId}`,
-  //   );
-  // }
-
-  // async handleDisconnect(client: Socket) {
-  //   this.logger.debug(
-  //     `마이룸 서버가 해제되었어요 ❌ : ${client.data.memberId} `,
-  //   );
-  // }
-
-  // 방 입장
-  async joinRoom(message: string) {
-    const roomInfo = JSON.parse(message);
-    const roomId: string = roomInfo.roomId;
-    const redisRoomId = RedisKey.getStrRoomId(roomId);
-    const memberId = roomInfo.memberId;
-
-    const isMyRoom = await this.isMyRoom(redisRoomId);
-
-    if (isMyRoom) {
-      try {
-        const socketInfo = await this.redisClient.get(
-          RedisKey.getStrMemberSocket(memberId),
-        );
-
-        const socketData = JSON.parse(socketInfo);
-
-        const socket: Socket = await this.getSocket(socketData.clientId);
-
-        if (socket) {
-          socket.data.roomName = roomInfo?.roomName;
-          socket.data.roomCode = roomInfo?.roomCode;
-          socket.data.sceneName = roomInfo.sceneName;
-          socket.data.roomId = redisRoomId;
-          socket.join(redisRoomId);
-
-          this.logger.debug('마이룸 서버 룸 입장.🆗 : ', redisRoomId);
-
-          // 룸 구독
-          await this.messageHandler.registerHandler(
-            `${NATS_EVENTS.MY_ROOM}.${redisRoomId}`,
-            async (message) => {
-              const data = JSON.parse(message);
-              this.server.to(redisRoomId).emit(data.eventName, data.message);
-            },
-          );
-
-          // 룸에 퇴장 정보 구독
-          await this.messageHandler.registerHandler(
-            `${NATS_EVENTS.LEAVE_ROOM}:${memberId}`,
-            async (data) => {
-              // 룸 퇴장
-              // await this.leaveRoom(data);
-            },
-          );
-        }
-      } catch (error) {
-        this.logger.debug('마이룸 서버 룸 입장 실패.❌ : ', redisRoomId);
-        this.logger.debug({ error });
-      }
+    switch (data.packet.eventName) {
     }
   }
 
-  async getRoomInfo(client: Socket) {
+  async getRoomInfo(client: CustomSocket) {
     const memberId = client.data.memberId;
 
     // 사용자가 입장 한 룸 정보 가져오기
@@ -212,7 +124,7 @@ export class MyRoomService {
     return client.emit(eventName, packetData);
   }
 
-  async startEdit(client: Socket) {
+  async startEdit(client: CustomSocket) {
     const memberId = client.data.memberId;
     const memberKey = RedisKey.getStrMemberCurrentRoom(memberId);
     const redisRoomId = await this.redisClient.get(memberKey);
@@ -224,24 +136,25 @@ export class MyRoomService {
       return client.emit(SOCKET_S_GLOBAL.ERROR, '마이룸 오너가 아닙니다.');
     }
 
+    const packet = new C_MYROOM_START_EDIT();
+
     const response = {
-      event: MY_ROOM_SOCKET_S_MESSAGE.S_MYROOM_START_EDIT,
-      message: '',
+      redisRoomId: redisRoomId,
+      packet: packet,
     };
 
-    this.logger.debug('마이룸 편집 이벤트 발행');
+    this.logger.debug('마이룸 편집 이벤트 발행', redisRoomId);
     this.messageHandler.publishHandler(
-      `${NATS_EVENTS.MY_ROOM}.${redisRoomId}`,
+      `${NATS_EVENTS.MY_ROOM}:${redisRoomId}`,
       JSON.stringify(response),
     );
   }
 
-  async endEdit(client: Socket, packet: C_MYROOM_END_EDIT) {
+  async endEdit(client: CustomSocket, packet: C_MYROOM_END_EDIT) {
     const memberId = client.data.memberId;
     const memberKey = RedisKey.getStrMemberCurrentRoom(memberId);
     const redisRoomId = await this.redisClient.get(memberKey);
     const clientId = client.data.clientId;
-    const isChanged = packet.isChanged;
 
     const isOwner = await this.isMyRoomOwner(clientId, redisRoomId);
 
@@ -249,24 +162,62 @@ export class MyRoomService {
       return client.emit(SOCKET_S_GLOBAL.ERROR, '마이룸 오너가 아닙니다.');
     }
 
-    const _packet = new S_MYROOM_END_EDIT();
-    _packet.isChanged = isChanged;
+    const response = new C_MYROOM_END_EDIT();
+    response.isChanged = packet.isChanged;
 
-    const { eventName, ...message } = _packet;
-
-    const response = {
-      eventName,
-      message,
+    const data = {
+      redisRoomId,
+      packet: response,
     };
 
     this.logger.debug('마이룸 편집 종료 이벤트 발행');
     this.messageHandler.publishHandler(
-      `${NATS_EVENTS.MY_ROOM}.${redisRoomId}`,
-      JSON.stringify(response),
+      `${NATS_EVENTS.MY_ROOM}:${redisRoomId}`,
+      JSON.stringify(data),
     );
   }
 
-  async kick(client: Socket, packet: C_MYROOM_KICK) {
+  async broadcastStartEdit(data) {
+    const redisRoomId = data.redisRoomId;
+    const packet = new S_MYROOM_START_EDIT();
+    const { eventName } = packet;
+
+    this.server.to(redisRoomId).emit(eventName, {});
+  }
+
+  async broadcastEndEdit(data) {
+    const redisRoomId = data.redisRoomId;
+    const packet = new S_MYROOM_END_EDIT();
+    packet.isChanged = data.packet.isChanged;
+
+    const { eventName, ...packetData } = packet;
+
+    this.server.to(redisRoomId).emit(eventName, packetData);
+  }
+
+  async broadcastKick(data) {
+    const redisRoomId = data.redisRoomId;
+    const kickClientId = data.clientId;
+    const ownerClientId = data.ownerClientId;
+
+    const kickClient = await this.clientService.getSocket(kickClientId);
+    const ownerClient = await this.clientService.getSocket(ownerClientId);
+
+    const packet = new S_MYROOM_KICK();
+    if (!kickClient) {
+      packet.success = false;
+      const { eventName, ...packetData } = packet;
+      ownerClient.emit(eventName, packetData);
+    } else {
+      kickClient.leave(redisRoomId);
+
+      packet.success = true;
+      const { eventName, ...packetData } = packet;
+      ownerClient.emit(eventName, packetData);
+    }
+  }
+
+  async kick(client: CustomSocket, packet: C_MYROOM_KICK) {
     const memberId = client.data.memberId;
     const memberKey = RedisKey.getStrMemberCurrentRoom(memberId);
     const redisRoomId = await this.redisClient.get(memberKey);
@@ -278,31 +229,23 @@ export class MyRoomService {
       return client.emit(SOCKET_S_GLOBAL.ERROR, '마이룸 오너가 아닙니다.');
     }
 
-    console.log(packet);
-    const _packet = new S_MYROOM_KICK();
+    const response = new C_MYROOM_KICK();
+    response.clientId = packet.clientId;
 
-    // const kickSocket = this.getSocket(packet.clientId);
-    // if (!kickSocket) {
-    //   _packet.success = false;
+    const data = {
+      redisRoomId,
+      ownerClientId: clientId,
+      packet: response,
+    };
 
-    //   const { eventName, ...message } = _packet;
-    //   return client.emit(eventName, message);
-    // }
-
-    _packet.success = true;
-
-    const { eventName, ...message } = _packet;
-    client.emit(eventName, message);
-
-    this.logger.debug('마이룸 편집 종료 이벤트 발행');
+    this.logger.debug('마이룸 강제 퇴장 이벤트 발행');
     this.messageHandler.publishHandler(
-      `${NATS_EVENTS.MY_ROOM}.${redisRoomId}`,
-      // JSON.stringify(response),
-      '',
+      `${NATS_EVENTS.MY_ROOM}:${redisRoomId}`,
+      JSON.stringify(data),
     );
   }
 
-  async shutDown(client: Socket, packet: C_MYROOM_SHUTDOWN) {}
+  async shutDown(client: CustomSocket, packet: C_MYROOM_SHUTDOWN) {}
 
   async isMyRoom(roomId: string): Promise<boolean> {
     const myRoomInfos = await this.redisClient.smembers(
@@ -332,8 +275,6 @@ export class MyRoomService {
     if (roomData.ownerId === clientId) {
       return true;
     }
-
-    return false;
   }
 
   async isRoomClient(clientId: string) {

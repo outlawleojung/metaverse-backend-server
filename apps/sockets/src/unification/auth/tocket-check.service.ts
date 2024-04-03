@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SOCKET_S_GLOBAL } from '@libs/constants';
 import { Decrypt } from '@libs/common';
+import { CustomSocket } from '../../interfaces/custom-socket';
 
 interface JwtPayload {
   idx: string;
@@ -45,7 +46,7 @@ export class TokenCheckService {
   }
 
   async checkTokenSession(
-    client: Socket,
+    client: CustomSocket,
     clientJwt: string,
     sessionId: string,
   ) {
@@ -76,7 +77,7 @@ export class TokenCheckService {
     }
   }
 
-  async getJwtAccessTokenAndSessionId(client: Socket) {
+  async getJwtAccessTokenAndSessionId(client: CustomSocket) {
     let jwtAccessToken;
     let sessionId;
 

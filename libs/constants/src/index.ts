@@ -777,7 +777,7 @@ export const CHATTING_ROOM_ENTER = Object.freeze({
 });
 
 // Socket.IO Server -> Client Chatting Message Constants
-export const CHATTING_SOCKET_S_MESSAGE = Object.freeze({
+export const CHAT_SOCKET_S_MESSAGE = Object.freeze({
   S_SYSTEM_MESSAGE: 'S_SYSTEM_MESSAGE', // 시스템 메시지
   S_SEND_MESSAGE: 'S_SEND_MESSAGE', // 채팅 메시지 보내기
 
@@ -786,7 +786,7 @@ export const CHATTING_SOCKET_S_MESSAGE = Object.freeze({
 });
 
 // Socket.IO C_ -> S_ Chatting Message Constants
-export const CHATTING_SOCKET_C_MESSAGE = Object.freeze({
+export const CHAT_SOCKET_C_MESSAGE = Object.freeze({
   C_SEND_MESSAGE: 'C_SEND_MESSAGE', // 채팅 메시지 보내기
   C_RECEIVE_MESSAGE: 'C_RECEIVE_MESSAGE', // 채팅 메시지 받기
 
@@ -895,7 +895,7 @@ export const NAMESPACE = Object.freeze({
   PLAYER: 'player',
   MY_ROOM: 'my-room',
   SCREEN_BANNER: 'screen-banner',
-  UNIFICATION: 'UNIFICATION',
+  UNIFICATION: 'main',
 });
 
 export const HUB_SOCKET_C_MESSAGE = Object.freeze({

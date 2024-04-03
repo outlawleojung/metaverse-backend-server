@@ -15,6 +15,7 @@ import { TokenCheckService } from '../unification/auth/tocket-check.service';
 import { Repository } from 'typeorm';
 import { promisify } from 'util';
 import { RequestPayload } from '../packets/packet-interface';
+import { CustomSocket } from '../interfaces/custom-socket';
 
 @Injectable()
 export class OfficeService {
@@ -32,7 +33,7 @@ export class OfficeService {
     this.server = server;
   }
 
-  async handleRequestMessage(client: Socket, payload: RequestPayload) {
+  async handleRequestMessage(client: CustomSocket, payload: RequestPayload) {
     switch (payload.eventName) {
       case OFFICE_SOCKET_C_MESSAGE.C_OFFICE_QUEUE_REGISTER:
         await this.officeQueueRegister(client, payload.data);
@@ -46,7 +47,7 @@ export class OfficeService {
   }
 
   // 회의실 입장 예약하기
-  async officeQueueRegister(client: Socket, roomCode: string) {
+  async officeQueueRegister(client: CustomSocket, roomCode: string) {
     const jwtAccessToken = client.data.jwtAccessToken;
     const memberInfo =
       await this.tokenCheckService.checkLoginToken(jwtAccessToken);
@@ -126,7 +127,7 @@ export class OfficeService {
 
         // 회의실 대기방 접속 (채팅방이나 나머지는 roomId를 기준으로 접속되어서 roomCode로 별도 입장)
         client.join(roomCode);
-        client.data.officeRoomCode = roomCode;
+        client.data.roomCode = roomCode;
 
         // 인원수 다시 조회
         const officeReservationWaitingPlayer = await smembersAsync(
@@ -152,8 +153,8 @@ export class OfficeService {
     }
   }
 
-  async officeQueueExit(client: Socket) {
-    const roomCode = client.data.officeRoomCode;
+  async officeQueueExit(client: CustomSocket) {
+    const roomCode = client.data.roomCode;
     const memberId = client.data.memberId;
 
     if (roomCode) {

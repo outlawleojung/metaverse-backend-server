@@ -14,6 +14,7 @@ import {
   SOCKET_SERVER_ERROR_CODE_GLOBAL,
 } from '@libs/constants';
 import { RequestPayload } from '../packets/packet-interface';
+import { CustomSocket } from '../interfaces/custom-socket';
 
 @Injectable()
 export class FriendService {
@@ -27,7 +28,7 @@ export class FriendService {
     private memberFriendRepository: Repository<MemberFriend>,
   ) {}
 
-  async handleRequestMessage(client: Socket, payload: RequestPayload) {
+  async handleRequestMessage(client: CustomSocket, payload: RequestPayload) {
     switch (payload.eventName) {
       case FRIEND_SOCKET_C_MESSAGE.C_FRIEND_LIST:
         await this.getFriends(client);
@@ -45,7 +46,7 @@ export class FriendService {
   // // 소켓 연결
   // async handleConnection(
   //   server: Server,
-  //   client: Socket,
+  //   client: CustomSocket,
   //   jwtAccessToken: string,
   //   sessionId: string,
   // ) {
@@ -74,7 +75,7 @@ export class FriendService {
   //   );
   // }
 
-  async getFriends(client: Socket) {
+  async getFriends(client: CustomSocket) {
     const memberId = client.data.memberId;
     try {
       const friends = await this.memberFriendRepository
@@ -120,7 +121,7 @@ export class FriendService {
     }
   }
 
-  async friendsFollow(client: Socket, data: { friendMemberId: any }) {
+  async friendsFollow(client: CustomSocket, data: { friendMemberId: any }) {
     // memberId가 존재하는지 확인
     const memberInfo = await this.memberRepository.findOne({
       where: {
@@ -224,7 +225,7 @@ export class FriendService {
     }
   }
 
-  async friendsBring(client: Socket, friendMemberId: string) {
+  async friendsBring(client: CustomSocket, friendMemberId: string) {
     // memberId가 존재하는지 확인
     const friendMemberInfo = await this.memberRepository.findOne({
       where: {

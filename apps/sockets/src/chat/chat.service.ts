@@ -1,5 +1,5 @@
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
-import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { Server, Socket } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
@@ -24,13 +24,21 @@ import moment from 'moment-timezone';
 import { NatsService } from '../nats/nats.service';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
 import {
-  CHATTING_SOCKET_C_MESSAGE,
-  CHATTING_SOCKET_S_MESSAGE,
+  CHAT_SOCKET_C_MESSAGE,
+  CHAT_SOCKET_S_MESSAGE,
   NATS_EVENTS,
   RedisKey,
   SOCKET_SERVER_ERROR_CODE_GLOBAL,
+  SOCKET_S_GLOBAL,
 } from '@libs/constants';
 import { RequestPayload } from '../packets/packet-interface';
+import {
+  C_SEND_DIRECT_MESSAGE,
+  C_SEND_MESSAGE,
+  S_SEND_DIRECT_MESSAGE,
+  S_SEND_MESSAGE,
+} from '../packets/packet';
+import { CustomSocket } from '../interfaces/custom-socket';
 
 @Injectable()
 export class ChatService {
@@ -64,362 +72,262 @@ export class ChatService {
     this.server = server;
   }
 
-  private socketMap = new Map();
-  getSocket(sessionId: string) {
-    return this.socketMap.get(sessionId);
-  }
-
-  async handleRequestMessage(client: Socket, payload: RequestPayload) {
+  async handleRequestMessage(client: CustomSocket, payload: RequestPayload) {
     switch (payload.eventName) {
-      case CHATTING_SOCKET_C_MESSAGE.C_SEND_MESSAGE:
+      case CHAT_SOCKET_C_MESSAGE.C_SEND_MESSAGE:
         await this.sendMessage(client, payload.data);
         break;
-      case CHATTING_SOCKET_C_MESSAGE.C_SEND_DIRECT_MESSAGE:
-        await this.sendDirectMessage(client, payload);
+      case CHAT_SOCKET_C_MESSAGE.C_SEND_DIRECT_MESSAGE:
+        await this.sendDirectMessage(client, payload.data);
         break;
-      case CHATTING_SOCKET_C_MESSAGE.C_SEND_FRIEND_DIRECT_MESSAGE:
+      case CHAT_SOCKET_C_MESSAGE.C_SEND_FRIEND_DIRECT_MESSAGE:
         await this.sendFriendDirectMessage(client, payload.data);
         break;
       default:
+        this.logger.debug('잘못된 패킷 입니다.');
+        client.emit(SOCKET_S_GLOBAL.ERROR, '잘못된 패킷 입니다.');
         break;
     }
   }
-  // 소켓 연결
-  async handleConnection(
-    server: Server,
-    client: Socket,
-    jwtAccessToken: string,
-    sessionId: string,
-  ) {
-    const memberInfo =
-      await this.tokenCheckService.checkLoginToken(jwtAccessToken);
-
-    // 해당 멤버가 존재하지 않을 경우 연결 종료
-    if (!memberInfo) {
-      client.disconnect();
-      return;
-    }
-
-    const memberId = memberInfo.memberId;
-    const clientId = memberInfo.memberCode;
-
-    // 클라이언트 데이터 설정
-    client.data.memberId = memberId;
-    client.data.sessionId = sessionId;
-    client.data.jwtAccessToken = jwtAccessToken;
-    client.data.clientId = clientId;
-
-    // 나의 룸 구독을 추가한다.
-    this.messageHandler.registerHandler(memberId, (message) => {
-      const sendMessages = JSON.parse(message);
-
-      console.log('DM 이벤트 발생 ');
-      console.log(message);
-
-      client.emit(
-        CHATTING_SOCKET_S_MESSAGE.S_SEND_DIRECT_MESSAGE,
-        JSON.stringify(sendMessages.recvmessageInfo),
-      );
-    });
-
-    client.join(memberId);
-    client.join(sessionId);
-
-    this.socketMap.set(sessionId, client);
-
-    this.logger.debug(
-      `채팅 서버에 연결되었어요 ✅ : ${memberId} - sessionId : ${sessionId}`,
-    );
-  }
-
-  async handleDisconnect(client: Socket) {
-    this.logger.debug(`삭제 되는 RoomId :  ${client.data.roomId}`);
-    this.logger.debug(`삭제 되는 memberId :  ${client.data.memberId}`);
-
-    const playerIds = await this.redisClient.smembers(
-      RedisKey.getStrRoomPlayerList(client.data.roomId),
-    );
-
-    // 룸에 혼자 있었을 경우 룸 관련 데이터 모두 삭제
-    if (playerIds.length === 1) {
-      // 레디스 룸 데이터 삭제
-      await this.redisClient.del(`${client.data.roomId}`);
-
-      // 룸 구독 해제
-      await this.messageHandler.publishHandler(
-        NATS_EVENTS.DELETE_CHAT_ROOM,
-        client.data.roomId,
-      );
-    }
-    await this.redisClient.srem(
-      RedisKey.getStrRoomPlayerList(client.data.roomId),
-      client.data.memberId,
-    );
-
-    const memberKey = RedisKey.getStrMemberCurrentRoom(client.data.memberId);
-    await this.redisClient.del(memberKey);
-
-    // 구독 해제
-    this.messageHandler.removeHandler(client.data.memberId);
-
-    // 소켓 맵 정보에서 삭제
-    const entriesToRemove = [...this.socketMap.entries()].filter(
-      ([_, v]) => v.id === client.id,
-    );
-    entriesToRemove.forEach(([key]) => this.socketMap.delete(key));
-
-    this.logger.debug('채팅 소켓 연결 해제 ❌ : ' + client.id);
-  }
-
-  // 방 입장
-  async joinRoom(message: string) {
-    const roomInfo = JSON.parse(message);
-    const roomId: string = roomInfo.roomId;
-    const redisRoomId = RedisKey.getStrRoomId(roomId);
-    const memberId = roomInfo.memberId;
-
-    try {
-      const socketInfo = await this.redisClient.get(
-        RedisKey.getStrMemberSocket(memberId),
-      );
-
-      const socketData = JSON.parse(socketInfo);
-
-      const socket: Socket = await this.getSocket(socketData.sessionId);
-
-      if (socket) {
-        socket.data.roomName = roomInfo?.roomName;
-        socket.data.roomCode = roomInfo?.roomCode;
-        socket.data.sceneName = roomInfo.sceneName;
-        socket.data.roomId = redisRoomId;
-        socket.join(redisRoomId);
-
-        this.logger.debug('채팅 서버 룸 입장.🆗 : ', redisRoomId);
-
-        // 룸 구독
-        await this.messageHandler.registerHandler(
-          `${NATS_EVENTS.CHAT_ROOM}.${redisRoomId}`,
-          async (message) => {
-            this.server
-              .to(redisRoomId)
-              .emit(CHATTING_SOCKET_S_MESSAGE.S_SEND_MESSAGE, message);
-          },
-        );
-
-        // 룸에 퇴장 정보 구독
-        await this.messageHandler.registerHandler(
-          `${NATS_EVENTS.LEAVE_ROOM}:${memberId}`,
-          async (data) => {
-            // 룸 퇴장
-            await this.leaveRoom(data);
-          },
-        );
-      }
-
-      // MongoDB에 방 입장 로그 기록
-      const kstCreatedAt = moment
-        .tz('Asia/Seoul')
-        .format('YYYY-MM-DD HH:mm:ss');
-
-      const roomDataLogArr = new this.roomDataLog({
-        memberId: memberId,
-        nickName: roomInfo.nickname,
-        roomName: roomInfo.roomName,
-        roomCode: roomInfo.roomCode,
-        description: '입장',
-        kstCreatedAt,
-      });
-
-      await roomDataLogArr.save();
-
-      // TypeORM을 사용하여 MySQL에 방문 로그 저장
-      if (roomInfo.roomCode) {
-        const mysqlRoomDataLogArr = new MemberOfficeVisitLog();
-        mysqlRoomDataLogArr.memberId = memberId;
-        mysqlRoomDataLogArr.roomCode = roomInfo.roomCode;
-
-        await this.memberOfficeVisitLogRepository.save(mysqlRoomDataLogArr);
-      }
-    } catch (error) {
-      this.logger.debug('채팅 서버가 룸 입장 실패.❌ : ', redisRoomId);
-      this.logger.debug({ error });
-    }
-  }
-
-  // 방 퇴장
-  async leaveRoom(data: string) {
-    const roomInfo = JSON.parse(data);
-
-    const roomId = roomInfo.roomId;
-    const redisRoomId = RedisKey.getStrRoomId(roomId);
-
-    const memberId = roomInfo.memberId;
-
-    const socketInfo = await this.redisClient.get(
-      RedisKey.getStrMemberSocket(memberId),
-    );
-    const socketData = JSON.parse(socketInfo);
-
-    const socket: Socket = await this.getSocket(socketData.sessionId);
-
-    socket.leave(redisRoomId);
-
-    socket.data.roomName = '';
-    socket.data.roomCode = '';
-
-    this.logger.debug(`채팅 서버가 룸 퇴장. ❌ ${memberId} - ${redisRoomId}`);
-
-    const kstCreatedAt = moment.tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');
-    // 방 퇴장 로그 기록
-    const roomDataLogArr = await new this.roomDataLog({
-      memberId: socket.data.memberId,
-      nickName: socket.data.nickname,
-      roomName: socket.data.roomName,
-      roomCode: socket.data.roomCode,
-      description: '퇴장 ',
-      kstCreatedAt: kstCreatedAt,
-    });
-
-    await roomDataLogArr.save();
-  }
 
   // 메세지 보내기
-  async sendMessage(client: Socket, payload: any) {
-    const jwtAccessToken = client.data.jwtAccessToken;
-    const memberInfo =
-      await this.tokenCheckService.checkLoginToken(jwtAccessToken);
+  async sendMessage(client: CustomSocket, packet: C_SEND_MESSAGE) {
+    const nickname = client.data.nickname;
+    const memberId = client.data.memberId;
+    const clientId = client.data.clientId;
 
-    if (!memberInfo) {
-      client.disconnect();
-      return;
-    }
-
-    const messageInfo = {
-      sendNickName: memberInfo.nickname,
-      message: payload.message,
-      color: payload.color,
-    };
-
-    client.data.roomCode = payload.roomCode;
-
-    const findMemberCode = await this.memberRepository.findOne({
-      where: {
-        memberId: memberInfo.memberId,
-      },
-    });
+    client.data.roomCode = packet.roomCode || null;
 
     const kstCreatedAt = moment.tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');
     const worldChattingLogSave = await new this.worldChattingLog({
-      memberId: memberInfo.memberId,
-      memberCode: findMemberCode.memberCode,
-      nickName: memberInfo.nickname,
-      roomCode: payload.roomCode,
-      roomName: payload.roomName, // 룸코드가 안넘어올 수 있어서 안될 수 있으니 테스트 해봐야함
+      memberId: memberId,
+      memberCode: clientId,
+      nickName: nickname,
+      roomCode: packet.roomCode,
+      roomName: packet.roomName, // 룸코드가 안넘어올 수 있어서 안될 수 있으니 테스트 해봐야함
       roomId: client.data.roomId,
-      chatMessage: payload.message,
+      chatMessage: packet.message,
       kstCreatedAt: kstCreatedAt,
     });
     await worldChattingLogSave.save();
 
+    const request = new C_SEND_MESSAGE();
+    request.message = packet.message;
+    request.color = packet.color;
+    request.roomCode = packet.roomCode;
+    request.roomName = packet.roomName;
+
+    const data = {
+      redisRoomId: client.data.roomId,
+      sendNickname: nickname,
+      packet: request,
+    };
     this.messageHandler.publishHandler(
-      `${NATS_EVENTS.CHAT_ROOM}.${client.data.roomId}`,
-      JSON.stringify(messageInfo),
+      `${NATS_EVENTS.CHAT_ROOM}:${client.data.roomId}`,
+      JSON.stringify(data),
     );
   }
 
-  // 월드 귓속말 특정 소켓에만 메세지 전송
-  async sendDirectMessage(client: Socket, payload: any) {
-    if (!payload.recvNickName) {
+  async broadcastMessage(data) {
+    const redisRoomId = data.redisRoomId;
+    const packet = data.packet as C_SEND_MESSAGE;
+
+    const response = new S_SEND_MESSAGE();
+    response.message = packet.message;
+    response.sendNickname = response.color = packet.color;
+
+    const { eventName, ...packetData } = response;
+
+    this.server.to(redisRoomId).emit(eventName, packetData);
+  }
+
+  // 귓소말 보내기
+  async sendDirectMessage(client: CustomSocket, packet: C_SEND_DIRECT_MESSAGE) {
+    if (!packet.recvNickName) {
       return client.emit(
-        CHATTING_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
+        CHAT_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
         SOCKET_SERVER_ERROR_CODE_GLOBAL.DIRECT_MESSAGE_USER_NOT_FOUND,
       );
     }
 
-    const recvNickNameMember = await this.memberRepository.findOne({
+    const recvMember = await this.memberRepository.findOne({
       where: {
-        nickname: payload.recvNickName,
+        nickname: packet.recvNickName,
       },
     });
 
     // 귓속말 대상이 존재하지 않는 사용자일 경우
-    if (!recvNickNameMember) {
+    if (!recvMember) {
       return client.emit(
-        CHATTING_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
+        CHAT_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
         SOCKET_SERVER_ERROR_CODE_GLOBAL.DIRECT_MESSAGE_USER_NOT_FOUND,
       );
     }
 
     // 귓속말 대상이 현재 오프라인일 경우
     const targetSocket = await this.redisClient.get(
-      RedisKey.getStrMemberSocket(recvNickNameMember.memberId),
+      RedisKey.getStrMemberSocket(recvMember.memberId),
     );
 
-    const sendNickNameMember = await this.memberRepository.findOne({
+    if (!targetSocket) {
+      return client.emit(
+        CHAT_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
+        SOCKET_SERVER_ERROR_CODE_GLOBAL.DIRECT_MESSAGE_USER_NOT_CONNECTED,
+      );
+    }
+
+    const sendMember = await this.memberRepository.findOne({
       where: {
         memberId: client.data.memberId,
       },
     });
 
     // 본인에게 귓속말 보냈을 경우
-    if (sendNickNameMember.nickname == recvNickNameMember.nickname) {
+    if (sendMember.memberId == recvMember.memberId) {
       return client.emit(
-        CHATTING_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
+        CHAT_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
         SOCKET_SERVER_ERROR_CODE_GLOBAL.DIRECT_MESSAGE_SEND_ME,
-      );
-    }
-
-    // 귓속말 대상이 현재 오프라인일 경우
-    if (!targetSocket) {
-      return client.emit(
-        CHATTING_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
-        SOCKET_SERVER_ERROR_CODE_GLOBAL.DIRECT_MESSAGE_USER_NOT_CONNECTED,
       );
     }
 
     const kstCreatedAt = moment.tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');
     // mongodb 채팅 로그 저장
     const oneononeChattingLogSave = await new this.oneononeChattingLog({
-      sendMemberId: sendNickNameMember.memberId,
-      sendNickName: sendNickNameMember.nickname,
-      recvMemberId: recvNickNameMember.memberId,
-      recvNickName: recvNickNameMember.nickname,
-      chatMessage: payload.message,
+      sendMemberId: sendMember.memberId,
+      sendNickName: sendMember.nickname,
+      recvMemberId: recvMember.memberId,
+      recvNickName: recvMember.nickname,
+      chatMessage: packet.message,
       kstCreatedAt: kstCreatedAt,
     });
     await oneononeChattingLogSave.save();
 
-    const recvmessageInfo = {
-      sendNickName: sendNickNameMember.nickname,
-      recvNickName: recvNickNameMember.nickname,
-      message: payload.message,
-      color: payload.color,
-    };
+    const response = new S_SEND_DIRECT_MESSAGE();
+    response.recvNickname = sendMember.nickname;
+    response.sendNickname = recvMember.nickname;
+    response.message = packet.message;
+    response.color = packet.color;
 
-    const sendMessageInfo = {
-      recvNickName: recvNickNameMember.nickname,
-      message: payload.message,
-      color: payload.color,
-    };
+    const { eventName, ...packetData } = response;
+    client.emit(eventName, JSON.stringify(packetData));
 
-    const sendMessages = {
-      recvmessageInfo,
-      sendMessageInfo,
+    const data = {
+      recvMemberId: recvMember.memberId,
+      packet: response,
     };
-
     this.messageHandler.publishHandler(
-      recvNickNameMember.memberId,
-      JSON.stringify(sendMessages),
-    );
-
-    client.emit(
-      CHATTING_SOCKET_S_MESSAGE.S_SEND_DIRECT_MESSAGE,
-      JSON.stringify(sendMessageInfo),
+      recvMember.memberId,
+      JSON.stringify(data),
     );
   }
 
+  // 귓속말 대상자에게 전송
+  async sendToReceiverDirectMessage(message) {
+    const data = JSON.parse(message);
+    const recvMemberId = data.recvMemberId;
+    const packet = data.packet;
+
+    const { eventName, ...packetData } = packet;
+
+    this.server.to(recvMemberId).emit(eventName, packetData);
+  }
+
+  // // 월드 귓속말 특정 소켓에만 메세지 전송
+  // async sendDirectMessage(client: CustomSocket, payload: any) {
+  //   if (!payload.recvNickName) {
+  //     return client.emit(
+  //       CHAT_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
+  //       SOCKET_SERVER_ERROR_CODE_GLOBAL.DIRECT_MESSAGE_USER_NOT_FOUND,
+  //     );
+  //   }
+
+  //   const recvNickNameMember = await this.memberRepository.findOne({
+  //     where: {
+  //       nickname: payload.recvNickName,
+  //     },
+  //   });
+
+  //   // 귓속말 대상이 존재하지 않는 사용자일 경우
+  //   if (!recvNickNameMember) {
+  //     return client.emit(
+  //       CHAT_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
+  //       SOCKET_SERVER_ERROR_CODE_GLOBAL.DIRECT_MESSAGE_USER_NOT_FOUND,
+  //     );
+  //   }
+
+  //   // 귓속말 대상이 현재 오프라인일 경우
+  //   const targetSocket = await this.redisClient.get(
+  //     RedisKey.getStrMemberSocket(recvNickNameMember.memberId),
+  //   );
+
+  //   const sendNickNameMember = await this.memberRepository.findOne({
+  //     where: {
+  //       memberId: client.data.memberId,
+  //     },
+  //   });
+
+  //   // 본인에게 귓속말 보냈을 경우
+  //   if (sendNickNameMember.nickname == recvNickNameMember.nickname) {
+  //     return client.emit(
+  //       CHAT_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
+  //       SOCKET_SERVER_ERROR_CODE_GLOBAL.DIRECT_MESSAGE_SEND_ME,
+  //     );
+  //   }
+
+  //   // 귓속말 대상이 현재 오프라인일 경우
+  //   if (!targetSocket) {
+  //     return client.emit(
+  //       CHAT_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
+  //       SOCKET_SERVER_ERROR_CODE_GLOBAL.DIRECT_MESSAGE_USER_NOT_CONNECTED,
+  //     );
+  //   }
+
+  //   const kstCreatedAt = moment.tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');
+  //   // mongodb 채팅 로그 저장
+  //   const oneononeChattingLogSave = await new this.oneononeChattingLog({
+  //     sendMemberId: sendNickNameMember.memberId,
+  //     sendNickName: sendNickNameMember.nickname,
+  //     recvMemberId: recvNickNameMember.memberId,
+  //     recvNickName: recvNickNameMember.nickname,
+  //     chatMessage: payload.message,
+  //     kstCreatedAt: kstCreatedAt,
+  //   });
+  //   await oneononeChattingLogSave.save();
+
+  //   const recvmessageInfo = {
+  //     sendNickName: sendNickNameMember.nickname,
+  //     recvNickName: recvNickNameMember.nickname,
+  //     message: payload.message,
+  //     color: payload.color,
+  //   };
+
+  //   const sendMessageInfo = {
+  //     recvNickName: recvNickNameMember.nickname,
+  //     message: payload.message,
+  //     color: payload.color,
+  //   };
+
+  //   const sendMessages = {
+  //     recvmessageInfo,
+  //     sendMessageInfo,
+  //   };
+
+  //   this.messageHandler.publishHandler(
+  //     recvNickNameMember.memberId,
+  //     JSON.stringify(sendMessages),
+  //   );
+
+  //   client.emit(
+  //     CHAT_SOCKET_S_MESSAGE.S_SEND_DIRECT_MESSAGE,
+  //     JSON.stringify(sendMessageInfo),
+  //   );
+  // }
+
   // 친구 채팅 방 만들기
-  async createFriendDirectMessageRooms(client: Socket, targetMemberId: any) {
+  async createFriendDirectMessageRooms(
+    client: CustomSocket,
+    targetMemberId: any,
+  ) {
     const memberId = client['data'].memberId;
     const roomId = uuidv4();
 
@@ -480,7 +388,7 @@ export class ChatService {
   }
 
   // 친구에게 다이렉트 메세지 전송
-  async sendFriendDirectMessage(client: Socket, payload: any) {
+  async sendFriendDirectMessage(client: CustomSocket, payload: any) {
     const memberId = client['data'].memberId;
 
     const messageId = uuidv4();
@@ -526,7 +434,7 @@ export class ChatService {
     }
 
     client.emit(
-      CHATTING_SOCKET_S_MESSAGE.S_SEND_FRIEND_DIRECT_MESSAGE,
+      CHAT_SOCKET_S_MESSAGE.S_SEND_FRIEND_DIRECT_MESSAGE,
       `[DM]${payload.targetMemberId}에게 보낸 메세지:${payload.message}`,
     );
 
@@ -534,7 +442,7 @@ export class ChatService {
     client
       .to(payload.targetMemberId)
       .emit(
-        CHATTING_SOCKET_S_MESSAGE.S_SEND_FRIEND_DIRECT_MESSAGE,
+        CHAT_SOCKET_S_MESSAGE.S_SEND_FRIEND_DIRECT_MESSAGE,
         `[DM]${client['data'].memberId}가 보낸 메세지 :${payload.message}`,
       );
 
@@ -542,7 +450,7 @@ export class ChatService {
   }
 
   // 친구 채팅 매세지 리스트 가져오기
-  async getFriendDirectMessageList(client: Socket) {
+  async getFriendDirectMessageList(client: CustomSocket) {
     const memberId = client['data'].memberId;
 
     // 채팅방 목록
@@ -599,7 +507,7 @@ export class ChatService {
   }
 
   // 친구 다이렉트 매세지 가져오기
-  async getFriendDirectMessage(client: Socket, roomId: string) {
+  async getFriendDirectMessage(client: CustomSocket, roomId: string) {
     //테스트를 위해 임의로 DTO 상수 선언
     const paginationDto = {
       page: 1,
@@ -621,7 +529,7 @@ export class ChatService {
   }
 
   // 채팅 방 나가기
-  async exitChatRoom(client: Socket, roomId: string) {
+  async exitChatRoom(client: CustomSocket, roomId: string) {
     this.logger.debug('채팅 방 퇴장 이벤트 발생 : ' + roomId);
     const playerIds = await this.redisClient.smembers(
       RedisKey.getStrRoomPlayerList(roomId),
@@ -683,13 +591,13 @@ export class ChatService {
   }
 
   // 방 가져오기
-  async getChatRoom(client: Socket, roomId: string) {
+  async getChatRoom(client: CustomSocket, roomId: string) {
     if (
       !this.redisClient.get(roomId) ||
       this.redisClient.get(roomId) === undefined
     ) {
       return client.emit(
-        CHATTING_SOCKET_S_MESSAGE.S_SEND_MESSAGE,
+        CHAT_SOCKET_S_MESSAGE.S_SEND_MESSAGE,
         '알림 : 존재하지 않는 방입니다.',
       );
     }
@@ -700,7 +608,7 @@ export class ChatService {
   }
 
   // 접속중인 사용자 닉네임 리스트 가져오기
-  async getPlayerList(client: Socket) {
+  async getPlayerList(client: CustomSocket) {
     const playerList = await this.redisClient.keys('socket:*');
     const playerNickNameList = [];
 
@@ -712,14 +620,5 @@ export class ChatService {
     }
 
     client.emit('GetConnectedClientList', JSON.stringify(playerNickNameList));
-  }
-
-  // 방 삭제
-  async deleteChatRoom(roomId: string) {
-    // redis에서 방 삭제
-    await this.redisClient.del(roomId);
-
-    // 구독 해제
-    this.natsService.unsubscribe(roomId);
   }
 }

@@ -140,11 +140,11 @@ export class GameObjectService {
     gameObject.objectData = data;
   }
 
-  removeGameObject(roomId: string, clientId: string) {
+  removeGameObject(roomId: string, clientId: string): number[] {
     const roomGameObjects = this.gameObjects.get(roomId);
 
+    const deleteObjectIds: number[] = [];
     if (roomGameObjects) {
-      const deleteObjectIds: number[] = [];
       for (const gameObject of roomGameObjects.values()) {
         if (gameObject.ownerId === clientId) {
           deleteObjectIds.push(gameObject.objectId);
@@ -161,6 +161,8 @@ export class GameObjectService {
         }
       }
     }
+
+    return deleteObjectIds;
   }
 
   setTransform(
@@ -278,19 +280,6 @@ export class GameObjectService {
 
     return { eventName, packetData };
   }
-
-  // getInteraction(roomId: string) {
-  //   // const packet = new S_INTERACTION_GET_ITEMS();
-  //   // const interactions = this.interactions.get(roomId);
-  //   // interactions.forEach((id) => {
-  //   //   packet.items.push({ id, state: '' });
-  //   // });
-  //   // const { eventName, ...packetData } = packet;
-  //   // this.logger.debug(
-  //   //   `getInteraction - roomId: ${roomId} event: ${event} data: ${packetData}`,
-  //   // );
-  //   // return { eventName, packetData };
-  // }
 
   setInteraction(
     roomId: string,
@@ -423,6 +412,35 @@ export class GameObjectService {
     }
 
     return response;
+  }
+
+  // 해당 사용자의 모든 인터렉션 목록 삭제
+  removeInteractions(roomId: string, clientId: string) {
+    const interactions = this.interactions.get(roomId);
+
+    const interactionIds: string[] = [];
+
+    for (const [
+      interactionId,
+      interactioinClientId,
+    ] of interactions.entries()) {
+      if (interactioinClientId === clientId) {
+        interactionIds.push(interactionId);
+      }
+    }
+
+    {
+      const interactions = this.interactions.get(roomId);
+      interactionIds.forEach((interactionId) => {
+        if (interactions.has(interactionId)) {
+          interactions.delete(interactionId);
+        }
+      });
+
+      if (!interactions || interactions.size === 0) {
+        this.interactions.delete(roomId);
+      }
+    }
   }
 
   clearObject(roomId: string) {

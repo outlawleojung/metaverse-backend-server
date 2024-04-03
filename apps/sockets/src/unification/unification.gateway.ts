@@ -32,6 +32,7 @@ import { FriendService } from '../friend/friend.service';
 import { BlockchainService } from '../blockchain/blockchain.service';
 import { OfficeService } from '../office/office.service';
 import { HubSocketService } from '../hub-socket/hub-socket.service';
+import { CustomSocket } from '../interfaces/custom-socket';
 
 @WebSocketGateway({
   cors: {
@@ -87,7 +88,7 @@ export class UnificationGateway
   }
 
   //소켓 연결
-  async handleConnection(client: Socket) {
+  async handleConnection(client: CustomSocket) {
     this.logger.debug('Unification 소켓 연결중.✅');
 
     await this.unificationService.handleConnection(this.server, client);
@@ -96,7 +97,7 @@ export class UnificationGateway
     await this.initRegisterSubscribe(client);
   }
 
-  async initRegisterSubscribe(client: Socket) {
+  async initRegisterSubscribe(client: CustomSocket) {
     // 중복 로그인 알림 구독
     this.messageHandler.registerHandler(
       `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${client.handshake.auth.sessionId}`,
@@ -130,6 +131,13 @@ export class UnificationGateway
       },
     );
 
+    this.messageHandler.registerHandler(
+      client.data.memberId,
+      async (message) => {
+        await this.chatService.sendToReceiverDirectMessage(message);
+      },
+    );
+
     // 스크린 배너 정보 보내기
     const bannerList = await this.screenBannerService.getBannerList(
       JSON.stringify({ type: 'SELECT' }),
@@ -150,11 +158,8 @@ export class UnificationGateway
   }
 
   //소켓 해제
-  async handleDisconnect(client: Socket) {
-    await this.playerService.checkLeaveRoom(client, client.data.memberId);
-    await this.redisClient.del(
-      RedisKey.getStrMemberSocket(client.data.memberId),
-    );
+  async handleDisconnect(client: CustomSocket) {
+    await this.unificationService.handleDisconnect(client);
 
     this.logger.debug('disonnected', client.id);
     this.logger.debug(`${client.id} 소켓 연결 해제 ❌`);
@@ -162,15 +167,19 @@ export class UnificationGateway
 
   // 닉네임 변경 요청
   @SubscribeMessage(CHATTING_SOCKET_C_GLOBAL.C_CHANGE_NICKNAME)
-  async debugMessage(client: Socket) {
+  async debugMessage(client: CustomSocket) {
     return this.unificationService.nicknameChange(client);
   }
 
   @SubscribeMessage(SOCKET_C_GLOBAL.C_REQUEST)
-  async request(client: Socket, payload: RequestPayload) {
+  async request(client: CustomSocket, payload: RequestPayload) {
     this.logger.debug('C_REQUEST');
     console.log(payload);
     switch (payload.type) {
+      case NAMESPACE.UNIFICATION:
+        await this.unificationService.setServer(this.server);
+        await this.unificationService.handleRequestMessage(client, payload);
+        break;
       case NAMESPACE.CHAT:
         await this.chatService.setServer(this.server);
         await this.chatService.handleRequestMessage(client, payload);

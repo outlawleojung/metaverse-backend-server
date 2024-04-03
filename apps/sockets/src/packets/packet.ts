@@ -1,4 +1,6 @@
 import {
+  CHAT_SOCKET_C_MESSAGE,
+  CHAT_SOCKET_S_MESSAGE,
   PLAYER_SOCKET_C_MESSAGE,
   PLAYER_SOCKET_S_MESSAGE,
 } from '@libs/constants';
@@ -169,6 +171,10 @@ export class S_BASE_ADD_OBJECT implements PACKET {
   gameObjects: GameObject[] = [];
 }
 
+export class C_BASE_REMOVE_OBJECT implements PACKET {
+  eventName = PLAYER_SOCKET_C_MESSAGE.C_BASE_REMOVE_OBJECT;
+}
+
 export class S_BASE_REMOVE_OBJECT implements PACKET {
   eventName = PLAYER_SOCKET_S_MESSAGE.S_BASE_REMOVE_OBJECT;
   gameObjects: number[];
@@ -223,4 +229,65 @@ export class S_REENTER implements PACKET {
 
 export class C_BASE_GET_OBJECT implements PACKET {
   eventName = PLAYER_SOCKET_C_MESSAGE.C_BASE_GET_OBJECT;
+}
+
+export class C_SEND_MESSAGE implements PACKET {
+  eventName = CHAT_SOCKET_C_MESSAGE.C_SEND_MESSAGE;
+
+  @IsString()
+  @IsNotEmpty()
+  message: string;
+
+  @IsString()
+  @IsNotEmpty()
+  color: string;
+
+  @IsString()
+  @IsOptional()
+  roomCode: string | null;
+
+  @IsString()
+  @IsOptional()
+  roomName: string | null;
+}
+
+export class S_SEND_MESSAGE implements PACKET {
+  eventName = CHAT_SOCKET_S_MESSAGE.S_SEND_MESSAGE;
+
+  sendNickname: string;
+  message: string;
+  color: string;
+}
+
+export class C_SEND_DIRECT_MESSAGE implements PACKET {
+  eventName = CHAT_SOCKET_C_MESSAGE.C_SEND_DIRECT_MESSAGE;
+
+  @IsString()
+  @IsNotEmpty()
+  recvNickName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  message: string;
+
+  @IsString()
+  @IsNotEmpty()
+  color: string;
+
+  @IsString()
+  @IsOptional()
+  roomCode: string | null;
+
+  @IsString()
+  @IsOptional()
+  roomName: string | null;
+}
+
+export class S_SEND_DIRECT_MESSAGE implements PACKET {
+  eventName = CHAT_SOCKET_S_MESSAGE.S_SEND_DIRECT_MESSAGE;
+
+  sendNickname: string;
+  recvNickname: string;
+  message: string;
+  color: string;
 }

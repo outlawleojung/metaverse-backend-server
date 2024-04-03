@@ -17,6 +17,7 @@ import { RedisConfigService } from '../services/redis-config.service';
 import { ConfigModule } from '@nestjs/config';
 import { HubSocketModule } from '../hub-socket/hub-socket.module';
 import { SchemaModule } from '@libs/mongodb';
+import { SubscribeService } from '../nats/subscribe.service';
 
 @Module({
   imports: [
@@ -50,7 +51,8 @@ import { SchemaModule } from '@libs/mongodb';
     },
     UnificationGateway,
     UnificationService,
+    SubscribeService,
   ],
-  exports: [UnificationGateway, UnificationService],
+  exports: [UnificationGateway, UnificationService, SubscribeService],
 })
 export class UnificationModule {}

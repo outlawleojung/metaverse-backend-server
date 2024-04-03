@@ -9,6 +9,7 @@ import { RedisFunctionService } from '@libs/redis';
 import { GatewayInitiService } from '../services/gateway-init.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Member, MemberOfficeVisitLog, SessionInfo } from '@libs/entity';
+import { ClientService } from '../services/client.service';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { Member, MemberOfficeVisitLog, SessionInfo } from '@libs/entity';
     TokenCheckService,
     RedisFunctionService,
     GatewayInitiService,
+    ClientService,
   ],
   exports: [
     HubSocketService,
@@ -33,6 +35,7 @@ import { Member, MemberOfficeVisitLog, SessionInfo } from '@libs/entity';
     TokenCheckService,
     RedisFunctionService,
     GatewayInitiService,
+    ClientService,
   ],
 })
 export class HubSocketModule {}

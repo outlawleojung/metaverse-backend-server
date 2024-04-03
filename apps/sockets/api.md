@@ -28,6 +28,8 @@ emit.("C_REQUEST", payload);
   }
   ```
 
+# type : main
+
 ## 룸 입장하기
 
 룸에 참여하기 위한 요청.
@@ -58,6 +60,8 @@ emit.("C_REQUEST", payload);
   "result": "success"
 }
 ```
+
+# type : player
 
 ## 클라이언트 목록 요청
 
@@ -327,14 +331,14 @@ emit.("C_REQUEST", payload);
 
 ## 오브젝트 애니메이션 요청
 
-나의 오브젝트를 애니메이션을 위한 요청.
+나의 오브젝트 애니메이션 요청.
 
 ### 요청 정보
 
 | 항목      | 값                     |
 | --------- | ---------------------- |
 | type      | `player`               |
-| eventName | `C_BASE_SET_ANIMATION' |
+| eventName | `C_BASE_SET_ANIMATION` |
 
 ### 요청 데이터 구조
 
@@ -348,12 +352,134 @@ emit.("C_REQUEST", payload);
 
 ### 응답 정보
 
-- eventName : S_BASE_SET_TRANSFORM
+- eventName : S_BASE_SET_ANIMATION
 
 ```json
 {
   "objectId": 50,
   "animationId": "23",
   "animation": "animation"
+}
+```
+
+## 오브젝트 이모지 애니메이션 요청
+
+나의 오브젝트의 이모지 애니메이션 요청.
+
+### 요청 정보
+
+| 항목      | 값                          |
+| --------- | --------------------------- |
+| type      | `player`                    |
+| eventName | `C_BASE_SET_ANIMATION_ONCE` |
+
+### 요청 데이터 구조
+
+```json
+{
+  "objectId": number,
+  "animationId": string,
+  "isLoop": boolean,
+  "blend": number
+}
+```
+
+### 응답 정보
+
+- eventName : S_BASE_SET_ANIMATION_ONCE
+
+```json
+{
+  "objectId": 50,
+  "animationId": "23",
+  "isLoop": false,
+  "blend": 0
+}
+```
+
+# type : my-room
+
+## 마이룸 정보 요청
+
+내가 입장한 마이룸 정보 요청
+
+### 요청 정보
+
+| 항목      | 값                      |
+| --------- | ----------------------- |
+| type      | `my-room`               |
+| eventName | `C_MYROOM_GET_ROOMINFO` |
+
+### 요청 데이터 구조
+
+- 없음.
+
+### 응답 정보
+
+- eventName : S_MYROOM_GET_ROOMINFO
+
+```json
+{
+  "ownerId": "7TQ9VUL4TEWN",
+  "ownerNickname": "연봉협상가",
+  "isShutdown": false,
+  "ownerAvatarInfo": {
+    "1": 310002,
+    "2": 320010,
+    "3": 330015,
+    "6": 360001
+  }
+}
+```
+
+## 마이룸 편집 시작 요청
+
+나의 마이룸에 입장 후 마이룸 편집 요청
+
+### 요청 정보
+
+| 항목      | 값                    |
+| --------- | --------------------- |
+| type      | `my-room`             |
+| eventName | `C_MYROOM_START_EDIT` |
+
+### 요청 데이터 구조
+
+- 없음.
+
+### 응답 정보
+
+- eventName : S_MYROOM_START_EDIT
+
+```json
+{}
+```
+
+## 마이룸 편집 종료 요청
+
+나의 마이룸에 입장 후 마이룸 편집 요청
+
+### 요청 정보
+
+| 항목      | 값                  |
+| --------- | ------------------- |
+| type      | `my-room`           |
+| eventName | `C_MYROOM_END_EDIT` |
+
+### 요청 데이터 구조
+
+```json
+{
+  "isChanged": true
+}
+```
+
+### 응답 정보
+
+- eventName : S_MYROOM_END_EDIT
+
+```json
+{
+  "isChanged": true
 }
 ```
