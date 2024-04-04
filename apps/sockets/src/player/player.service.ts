@@ -20,6 +20,7 @@ import {
   C_INTERACTION_REMOVE_ITEM,
   C_INTERACTION_SET_ITEM,
   S_BASE_REMOVE_OBJECT,
+  S_LEAVE,
 } from '../packets/packet';
 import { GameObjectService } from './game/game-object.service';
 import { RequestPayload } from '../packets/packet-interface';
@@ -282,6 +283,8 @@ export class PlayerService {
     );
 
     if (response.clientPacket) {
+      client.data.objectId = response.clientPacket.packetData.objectId;
+
       client.emit(
         response.clientPacket.eventName,
         response.clientPacket.packetData,
@@ -441,5 +444,17 @@ export class PlayerService {
       .emit(data.packet.eventName, data.packet.packetData);
   }
 
-  async publishJoinRoom(roomId) {}
+  async exitRoom(data) {
+    console.log(data);
+    const redisRoomId = data.redisRoomId;
+
+    const packet = new S_LEAVE();
+    packet.clientId = data.packet.clientId;
+    packet.objectId = data.packet.objectId;
+    packet.interactionIds = data.packet.interactionIds;
+
+    const { eventName, ...packetData } = packet;
+
+    this.server.to(redisRoomId).emit(eventName, packetData);
+  }
 }

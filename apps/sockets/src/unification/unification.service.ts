@@ -20,7 +20,7 @@ import {
 import { NatsMessageHandler } from '../nats/nats-message.handler';
 import { GameObjectService } from '../player/game/game-object.service';
 import { RequestPayload } from '../packets/packet-interface';
-import { C_ENTER, S_ENTER } from '../packets/packet';
+import { C_ENTER, S_ENTER, S_LEAVE } from '../packets/packet';
 import { HubSocketService } from '../hub-socket/hub-socket.service';
 import { SubscribeService } from '../nats/subscribe.service';
 import { RoomType } from '../room/room-type';
@@ -170,15 +170,12 @@ export class UnificationService {
     const memberId = memberInfo.memberId;
     const redisRoomId = RedisKey.getStrRoomId(packet.roomId);
 
-    console.log('########## 룸 입장 memberId : ', memberInfo.memberId);
-
     // 룸 존재 여부 확인
-    console.log('################ redisRoomId : ', redisRoomId);
     const exRoom = await this.redisClient.hget(
       RedisKey.getStrRooms(),
       redisRoomId,
     );
-    console.log('################ exRoom : ', exRoom);
+
     if (!exRoom) {
       return client.emit(
         SOCKET_S_GLOBAL.ERROR,
@@ -363,15 +360,6 @@ export class UnificationService {
 
         client.leave(redisRoomId);
 
-        // 룸 퇴장 이벤트 발생
-        await this.messageHandler.publishHandler(
-          `${NATS_EVENTS.LEAVE_ROOM}:${memberId}`,
-          JSON.stringify({
-            memberId: memberId,
-            roomId: roomId,
-          }),
-        );
-
         // 게임 오브젝트 삭제
         await this.gameObjectService.removeGameObject(
           redisRoomId,
@@ -379,9 +367,25 @@ export class UnificationService {
         );
 
         // 인터렉션 삭제
-        await this.gameObjectService.removeGameObject(
+        const interactionIds = await this.gameObjectService.removeInteractions(
           redisRoomId,
           client.data.clientId,
+        );
+
+        const response = new S_LEAVE();
+        response.clientId = client.data.clientId;
+        response.objectId = client.data.objectId;
+        response.interactionIds = interactionIds;
+
+        const data = {
+          redisRoomId,
+          packet: response,
+        };
+
+        // 룸 퇴장 이벤트 발생
+        this.messageHandler.publishHandler(
+          `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
+          JSON.stringify(data),
         );
       }
     }

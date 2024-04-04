@@ -61,6 +61,29 @@ emit.("C_REQUEST", payload);
 }
 ```
 
+## 다른 사용자의 퇴장
+
+다른 사용자가 룸에서 퇴장 했을 때 응답
+
+### 요청 정보
+
+- 없음.
+
+### 요청 데이터 구조
+
+- 없음.
+
+### 응답 정보
+
+- eventName : S_LEAVE
+
+```json
+{
+  "ojbectId": "12",
+  "clientId": "DV3G5BQ2"
+}
+```
+
 # type : player
 
 ## 클라이언트 목록 요청
@@ -470,7 +493,7 @@ emit.("C_REQUEST", payload);
 
 ```json
 {
-  "isChanged": true
+  "isChanged": boolean
 }
 ```
 
@@ -481,5 +504,77 @@ emit.("C_REQUEST", payload);
 ```json
 {
   "isChanged": true
+}
+```
+
+# type : chat
+
+## 채팅 메세지 보내기 요청
+
+현재 룸에 채팅 메세지 보내기 요청
+
+### 요청 정보
+
+| 항목      | 값               |
+| --------- | ---------------- |
+| type      | `chat`           |
+| eventName | `C_SEND_MESSAGE` |
+
+### 요청 데이터 구조
+
+```json
+{
+  "message": string,
+  "color": string,
+  "roomCode": string,
+  "roomName": string
+}
+```
+
+### 응답 정보
+
+- eventName : S_SEND_MESSAGE
+
+```json
+{
+  "sendNickname": "한쏘주",
+  "color": "222, 111, 123",
+  "message": "메세지 내용 입니다."
+}
+```
+
+## DM 채팅 메세지 보내기 요청
+
+특정 사용자에게 채팅 메세지 보내기 요청
+
+### 요청 정보
+
+| 항목      | 값                      |
+| --------- | ----------------------- |
+| type      | `chat`                  |
+| eventName | `C_SEND_DIRECT_MESSAGE` |
+
+### 요청 데이터 구조
+
+```json
+{
+  "recvNickName": string,
+  "message": string,
+  "color": string,
+  "roomCode": string,
+  "roomName": string
+}
+```
+
+### 응답 정보
+
+- eventName : S_SEND_DIRECT_MESSAGE
+
+```json
+{
+  "sendNickname": "한쏘주",
+  "recvNickname": "연봉협상가",
+  "color": "222, 111, 123",
+  "message": "메세지 내용 입니다."
 }
 ```

@@ -291,3 +291,11 @@ export class S_SEND_DIRECT_MESSAGE implements PACKET {
   message: string;
   color: string;
 }
+
+export class S_LEAVE implements PACKET {
+  eventName = PLAYER_SOCKET_S_MESSAGE.S_LEAVE;
+
+  objectId: string;
+  clientId: string;
+  interactionIds: string[];
+}

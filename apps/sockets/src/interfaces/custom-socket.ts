@@ -3,6 +3,7 @@ import { Socket } from 'socket.io';
 interface SocketData {
   memberId: string;
   clientId: string;
+  objectId: string;
   jwtAccessToken: string;
   sessionId: string;
   nickname: string;

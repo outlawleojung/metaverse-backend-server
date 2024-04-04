@@ -49,6 +49,9 @@ export class SubscribeService {
       case PLAYER_SOCKET_C_MESSAGE.C_BASE_REMOVE_OBJECT:
         await this.playerService.removeGameObject(data);
         break;
+      case PLAYER_SOCKET_S_MESSAGE.S_LEAVE:
+        await this.playerService.exitRoom(data);
+        break;
       default:
         this.logger.debug('잘못된 패킷 이벤트 입니다.');
         console.log(data.packet);

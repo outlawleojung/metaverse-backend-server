@@ -351,7 +351,7 @@ export class GameObjectService {
       response.broadcastPacket = packetInfo;
 
       this.logger.debug(
-        `Interaction Broadcast - roomId: ${roomId} event: ${event} data: ${packetData}`,
+        `Interaction Broadcast - roomId: ${roomId} event: ${eventName} data: ${packetData}`,
       );
 
       return response;
@@ -415,32 +415,36 @@ export class GameObjectService {
   }
 
   // 해당 사용자의 모든 인터렉션 목록 삭제
-  removeInteractions(roomId: string, clientId: string) {
+  removeInteractions(roomId: string, clientId: string): string[] {
     const interactions = this.interactions.get(roomId);
 
     const interactionIds: string[] = [];
 
-    for (const [
-      interactionId,
-      interactioinClientId,
-    ] of interactions.entries()) {
-      if (interactioinClientId === clientId) {
-        interactionIds.push(interactionId);
-      }
-    }
-
-    {
-      const interactions = this.interactions.get(roomId);
-      interactionIds.forEach((interactionId) => {
-        if (interactions.has(interactionId)) {
-          interactions.delete(interactionId);
+    if (interactions) {
+      for (const [
+        interactionId,
+        interactioinClientId,
+      ] of interactions.entries()) {
+        if (interactioinClientId === clientId) {
+          interactionIds.push(interactionId);
         }
-      });
+      }
 
-      if (!interactions || interactions.size === 0) {
-        this.interactions.delete(roomId);
+      {
+        const interactions = this.interactions.get(roomId);
+        interactionIds.forEach((interactionId) => {
+          if (interactions.has(interactionId)) {
+            interactions.delete(interactionId);
+          }
+        });
+
+        if (!interactions || interactions.size === 0) {
+          this.interactions.delete(roomId);
+        }
       }
     }
+
+    return interactionIds;
   }
 
   clearObject(roomId: string) {
