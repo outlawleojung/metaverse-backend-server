@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { GameRoom } from './rooms/game-room';
 import { MyRoom } from './rooms/my-room';
 import { IRoom } from './room';
@@ -11,6 +11,7 @@ import { CreateRoomRequestDto } from './dto/create-room-request.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Member, MemberAvatarInfo } from '@libs/entity';
 import { Repository } from 'typeorm';
+import { MyRoomService } from '../my-room/my-room.service';
 
 interface OwnerData {
   ownerNickname: string;
@@ -24,9 +25,13 @@ export class RoomFactory {
     @InjectRepository(MemberAvatarInfo)
     private memberAvatarInfoRepository: Repository<MemberAvatarInfo>,
     @InjectRedis() private readonly redisClient: Redis,
+    private myRoomService: MyRoomService,
   ) {}
 
+  private readonly logger = new Logger(RoomFactory.name);
+
   async createRoom(roomId: string, data: CreateRoomRequestDto): Promise<IRoom> {
+    this.logger.debug('CREATE ROOM');
     switch (data.roomType) {
       case RoomType.Game:
       case RoomType.Arz:
@@ -42,13 +47,6 @@ export class RoomFactory {
           sceneName: data.sceneName,
         });
       case RoomType.MyRoom:
-        // 중복 검증
-        const exMyRoom = await this.redisClient.get(
-          RedisKey.getStrMyRoom(data.ownerId),
-        );
-        if (exMyRoom) {
-          return JSON.parse(exMyRoom) as MyRoom;
-        }
         const onwerData: OwnerData = await this.getOwnerInfo(data.ownerId);
 
         return new MyRoom({

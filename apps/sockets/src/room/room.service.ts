@@ -84,6 +84,8 @@ export class RoomService {
     const redisTypeRooms = await this.redisClient.smembers(
       RedisKey.getRoomsByType(type),
     );
+
+    console.log('####### redisTypeRooms : ', redisTypeRooms);
     const _rooms: IRoom[] = [];
 
     switch (type) {
@@ -150,6 +152,11 @@ export class RoomService {
   }
 
   async createRoom(req: CreateRoomRequestDto) {
+    const checkRoom = await this.getCheckRoom(req.roomType, req.ownerId);
+
+    if (checkRoom) {
+      return checkRoom;
+    }
     const roomId = await this.generateRoomId();
 
     const redisRoomId = RedisKey.getStrRoomId(roomId);
@@ -186,6 +193,102 @@ export class RoomService {
       RedisKey.getStrRooms(),
       RedisKey.getStrRoomId(roomId),
     );
+  }
+
+  async getCheckRoom(roomType: RoomType, ownerId: string) {
+    switch (roomType) {
+      case RoomType.MyRoom:
+        return await this.getMyRoom(ownerId);
+      case RoomType.Arz:
+        return await this.getArzRoom();
+      default:
+        break;
+    }
+  }
+
+  async getMyRoomId(ownerId: string): Promise<string> {
+    // MyRoom 타입의 모든 룸 ID 조회
+    const myRoomIds = await this.redisClient.smembers(
+      RedisKey.getRoomsByType(RoomType.MyRoom),
+    );
+
+    for (const roomId of myRoomIds) {
+      // 각 룸의 데이터 조회
+      const roomDataString = await this.redisClient.hget(
+        RedisKey.getStrRooms(),
+        roomId,
+      );
+
+      if (!roomDataString) continue; // 룸 데이터가 없는 경우 건너뛰기
+
+      // 룸 데이터에서 ownerId 확인
+      const roomData = JSON.parse(roomDataString);
+
+      if (roomData.ownerId === ownerId) {
+        return roomData.roomId;
+      }
+    }
+
+    return null;
+  }
+
+  async getMyRoom(ownerId: string) {
+    const myRoomId = await this.getMyRoomId(ownerId);
+
+    if (myRoomId) {
+      const roomDataString = await this.redisClient.hget(
+        RedisKey.getStrRooms(),
+        myRoomId,
+      );
+
+      const roomData = JSON.parse(roomDataString);
+
+      const roomId = roomData.roomId.split(':')[1];
+      return {
+        type: roomData.type,
+        roomId: roomId,
+        sceneName: roomData.sceneName,
+        ownerId: roomData.ownerId,
+      };
+    }
+
+    return null;
+  }
+
+  async getArzRoom() {
+    const arzRoomIds = await this.redisClient.smembers(
+      RedisKey.getRoomsByType(RoomType.Arz),
+    );
+
+    for (const roomId of arzRoomIds) {
+      const roomDataString = await this.redisClient.hget(
+        RedisKey.getStrRooms(),
+        roomId,
+      );
+
+      if (!roomDataString) continue; // 룸 데이터가 없는 경우 건너뛰기
+
+      // 룸 데이터에서 ownerId 확인
+      const roomData = JSON.parse(roomDataString);
+
+      if (roomData.roomId) {
+        const roomDataString = await this.redisClient.hget(
+          RedisKey.getStrRooms(),
+          roomData.roomId,
+        );
+
+        const _roomData = JSON.parse(roomDataString);
+
+        const roomId = _roomData.roomId.split(':')[1];
+        return {
+          type: roomData.type,
+          roomId: roomId,
+          sceneName: roomData.sceneName,
+        };
+      }
+    }
+
+    return null;
   }
 
   private async generateRoomId(): Promise<string> {

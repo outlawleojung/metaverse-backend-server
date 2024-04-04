@@ -1,8 +1,7 @@
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { Server, Socket } from 'socket.io';
-import { TokenCheckService } from '../unification/auth/tocket-check.service';
 import {
   C_BASE_SET_OBJECT_DATA,
   C_MYROOM_END_EDIT,
@@ -16,7 +15,6 @@ import {
 } from '../packets/myroom-packet';
 import {
   MY_ROOM_SOCKET_C_MESSAGE,
-  MY_ROOM_SOCKET_S_MESSAGE,
   NATS_EVENTS,
   RedisKey,
   SOCKET_S_GLOBAL,
