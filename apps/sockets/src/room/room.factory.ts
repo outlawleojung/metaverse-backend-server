@@ -1,9 +1,8 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { GameRoom } from './rooms/game-room';
 import { MyRoom } from './rooms/my-room';
 import { IRoom } from './room';
 import { RoomType } from './room-type';
-import { RoomService } from './room.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
 import { RedisKey } from '@libs/constants';
@@ -30,10 +29,16 @@ export class RoomFactory {
   async createRoom(roomId: string, data: CreateRoomRequestDto): Promise<IRoom> {
     switch (data.roomType) {
       case RoomType.Game:
+      case RoomType.Arz:
+      case RoomType.Conference:
+      case RoomType.Vote:
+      case RoomType.Store:
+      case RoomType.Office:
+      case RoomType.Busan:
+      case RoomType.Festival:
         return new GameRoom({
+          type: data.roomType,
           roomId,
-          roomName: data.roomName,
-          ownerId: data.ownerId,
           sceneName: data.sceneName,
         });
       case RoomType.MyRoom:

@@ -1,24 +1,19 @@
-import { IRoomWithOwner, IRoomWithPlaying } from '../room';
+import { IRoom } from '../room';
 
 import { RoomType } from '../room-type';
 
 export interface GameRoomRoomDetails {
-  ownerId: string;
+  type: RoomType;
   roomId: string;
-  roomName: string;
   sceneName: string;
 }
 
-export class GameRoom implements IRoomWithOwner, IRoomWithPlaying {
-  roomCode: string;
-  isPlaying: boolean;
-  ownerId: string;
+export class GameRoom implements IRoom {
   roomId: string;
   type: RoomType;
   sceneName: string;
 
   constructor(details: GameRoomRoomDetails) {
-    this.type = RoomType.Game;
     Object.assign(this, details);
   }
 }

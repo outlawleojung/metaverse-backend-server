@@ -95,16 +95,18 @@ export class RoomService {
       case RoomType.Store:
       case RoomType.Office:
       case RoomType.Busan:
-        for (const room of redisTypeRooms) {
-          const r = JSON.parse(room) as IRoom;
-          _rooms.push(r);
+        for (const [_, roomData] of Object.entries(redisRooms)) {
+          const r = JSON.parse(roomData) as IRoom;
+          if (r.type === type) {
+            _rooms.push(r);
+          }
         }
         break;
       case RoomType.MyRoom:
         if (req.ownerId) {
           for (const [_, roomData] of Object.entries(redisRooms)) {
             const r = JSON.parse(roomData) as IRoomWithOwner;
-            if (r.ownerId === req.ownerId) {
+            if (r.ownerId === req.ownerId && r.type === type) {
               _rooms.push(r);
             }
           }
