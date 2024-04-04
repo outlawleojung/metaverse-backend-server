@@ -155,6 +155,17 @@ export class UnificationGateway
       SCREEN_BANNER_SOCKET_S_MESSAGE.S_BANNER_LIST,
       JSON.stringify(bannerList),
     );
+
+    await this.setServer();
+  }
+
+  async setServer() {
+    await this.unificationService.setServer(this.server);
+    await this.chatService.setServer(this.server);
+    await this.playerService.setServer(this.server);
+    await this.myRoomService.setServer(this.server);
+    await this.officeService.setServer(this.server);
+    await this.friendService.setServer(this.server);
   }
 
   //소켓 해제
@@ -177,22 +188,18 @@ export class UnificationGateway
     console.log(payload);
     switch (payload.type) {
       case NAMESPACE.UNIFICATION:
-        await this.unificationService.setServer(this.server);
         await this.unificationService.handleRequestMessage(client, payload);
         break;
       case NAMESPACE.CHAT:
-        await this.chatService.setServer(this.server);
         await this.chatService.handleRequestMessage(client, payload);
         break;
       case NAMESPACE.PLAYER:
-        await this.playerService.setServer(this.server);
         await this.playerService.handleRequestMessage(client, payload);
         break;
       case NAMESPACE.SCREEN_BANNER:
         await this.screenBannerService.handleRequestMessage(client, payload);
         break;
       case NAMESPACE.MY_ROOM:
-        await this.myRoomService.setServer(this.server);
         await this.myRoomService.handleRequestMessage(client, payload);
         break;
       case NAMESPACE.FRIEND:
@@ -201,7 +208,6 @@ export class UnificationGateway
       case NAMESPACE.BLOCKCHAIN:
         await this.blockchainService.setServer(this.server);
       case NAMESPACE.OFFICE:
-        await this.officeService.setServer(this.server);
         await this.officeService.handleRequestMessage(client, payload);
       default:
         break;

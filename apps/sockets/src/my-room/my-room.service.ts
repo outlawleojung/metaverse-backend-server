@@ -4,6 +4,7 @@ import { Redis } from 'ioredis';
 import { Server, Socket } from 'socket.io';
 import { TokenCheckService } from '../unification/auth/tocket-check.service';
 import {
+  C_BASE_SET_OBJECT_DATA,
   C_MYROOM_END_EDIT,
   C_MYROOM_KICK,
   C_MYROOM_SHUTDOWN,
@@ -57,6 +58,12 @@ export class MyRoomService {
         break;
       case MY_ROOM_SOCKET_C_MESSAGE.C_MYROOM_SHUTDOWN:
         await this.shutDown(client, payload.data as C_MYROOM_SHUTDOWN);
+        break;
+      case MY_ROOM_SOCKET_C_MESSAGE.C_BASE_SET_OBJECT_DATA:
+        await this.updateAvatarInfo(
+          client,
+          payload.data as C_BASE_SET_OBJECT_DATA,
+        );
         break;
       default:
         this.logger.debug('잘못된 패킷 입니다.');
@@ -210,7 +217,6 @@ export class MyRoomService {
       ownerClient.emit(eventName, packetData);
     } else {
       kickClient.leave(redisRoomId);
-
       packet.success = true;
       const { eventName, ...packetData } = packet;
       ownerClient.emit(eventName, packetData);
@@ -246,6 +252,16 @@ export class MyRoomService {
   }
 
   async shutDown(client: CustomSocket, packet: C_MYROOM_SHUTDOWN) {}
+
+  async updateNickname(nickname: string) {}
+
+  async updateAvatarInfo(client: CustomSocket, packet: C_BASE_SET_OBJECT_DATA) {
+    const redisRoomId = client.data.roomId;
+
+    const data = new C_BASE_SET_OBJECT_DATA();
+    data.objectId = packet.objectId;
+    data.objectData = packet.objectData;
+  }
 
   async isMyRoom(roomId: string): Promise<boolean> {
     const myRoomInfos = await this.redisClient.smembers(

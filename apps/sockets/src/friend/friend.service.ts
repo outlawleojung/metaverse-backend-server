@@ -28,6 +28,11 @@ export class FriendService {
     private memberFriendRepository: Repository<MemberFriend>,
   ) {}
 
+  private server: Server;
+  async setServer(server: Server) {
+    this.server = server;
+  }
+
   async handleRequestMessage(client: CustomSocket, payload: RequestPayload) {
     switch (payload.eventName) {
       case FRIEND_SOCKET_C_MESSAGE.C_FRIEND_LIST:

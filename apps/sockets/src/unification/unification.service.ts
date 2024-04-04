@@ -374,7 +374,7 @@ export class UnificationService {
 
         const response = new S_LEAVE();
         response.clientId = client.data.clientId;
-        response.objectId = client.data.objectId;
+        response.objectId = client.data.objectId || null;
         response.interactionIds = interactionIds;
 
         const data = {

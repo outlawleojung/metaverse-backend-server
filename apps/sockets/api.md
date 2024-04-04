@@ -80,7 +80,8 @@ emit.("C_REQUEST", payload);
 ```json
 {
   "ojbectId": "12",
-  "clientId": "DV3G5BQ2"
+  "clientId": "DV3G5BQ2",
+  "interactionIds": ["x:120, y:40, z:20"]
 }
 ```
 
