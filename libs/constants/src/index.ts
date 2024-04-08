@@ -886,7 +886,15 @@ export const MY_ROOM_SOCKET_C_MESSAGE = Object.freeze({
   C_MYROOM_END_EDIT: 'C_MYROOM_END_EDIT',
   C_MYROOM_KICK: 'C_MYROOM_KICK',
   C_MYROOM_SHUTDOWN: 'C_MYROOM_SHUTDOWN',
+});
+
+export const COMMON_SOCKET_C_MESSAGE = Object.freeze({
   C_BASE_SET_OBJECT_DATA: 'C_BASE_SET_OBJECT_DATA',
+});
+
+export const COMMON_SOCKET_S_MESSAGE = Object.freeze({
+  S_BASE_SET_OBJECT_DATA: 'S_BASE_SET_OBJECT_DATA',
+  S_BASE_SET_OBJECT_DATA_NOTICE: 'S_BASE_SET_OBJECT_DATA_NOTICE',
 });
 
 export const NAMESPACE = Object.freeze({
@@ -898,6 +906,7 @@ export const NAMESPACE = Object.freeze({
   MY_ROOM: 'my-room',
   SCREEN_BANNER: 'screen-banner',
   UNIFICATION: 'main',
+  COMMON: 'common',
 });
 
 export const HUB_SOCKET_C_MESSAGE = Object.freeze({
@@ -942,6 +951,7 @@ export const NATS_EVENTS = Object.freeze({
   SCREEN: 'SCREEN',
   BANNER: 'BANNER',
 
+  COMMON_ROOM: 'COMMON_ROOM',
   CHAT_ROOM: 'CHAT_ROOM',
   CREATE_CHAT_ROOM: 'CREATE_CHAT_ROOM',
   DELETE_CHAT_ROOM: 'DELETE_CHAT_ROOM',

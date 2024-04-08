@@ -1,4 +1,6 @@
 import {
+  COMMON_SOCKET_C_MESSAGE,
+  COMMON_SOCKET_S_MESSAGE,
   MY_ROOM_SOCKET_C_MESSAGE,
   MY_ROOM_SOCKET_S_MESSAGE,
 } from '@libs/constants';
@@ -84,8 +86,21 @@ export class S_MYROOM_SHUTDOWN implements PACKET {
 }
 
 export class C_BASE_SET_OBJECT_DATA implements PACKET {
-  eventName = MY_ROOM_SOCKET_C_MESSAGE.C_BASE_SET_OBJECT_DATA;
+  eventName = COMMON_SOCKET_C_MESSAGE.C_BASE_SET_OBJECT_DATA;
 
   objectId: number;
   objectData: string;
+}
+
+export class S_BASE_SET_OBJECT_DATA_NOTICE implements PACKET {
+  eventName = COMMON_SOCKET_S_MESSAGE.S_BASE_SET_OBJECT_DATA_NOTICE;
+
+  objectId: number;
+  objectData: string;
+}
+
+export class S_BASE_SET_OBJECT_DATA implements PACKET {
+  eventName = COMMON_SOCKET_S_MESSAGE.S_BASE_SET_OBJECT_DATA;
+
+  success: boolean;
 }

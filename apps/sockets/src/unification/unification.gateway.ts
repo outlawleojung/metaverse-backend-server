@@ -21,6 +21,7 @@ import {
   RedisKey,
   SCREEN_BANNER_SOCKET_S_MESSAGE,
   SOCKET_C_GLOBAL,
+  SOCKET_S_GLOBAL,
   SOCKET_SERVER_ERROR_CODE_GLOBAL,
 } from '@libs/constants';
 import { PlayerService } from '../player/player.service';
@@ -33,6 +34,7 @@ import { BlockchainService } from '../blockchain/blockchain.service';
 import { OfficeService } from '../office/office.service';
 import { HubSocketService } from '../hub-socket/hub-socket.service';
 import { CustomSocket } from '../interfaces/custom-socket';
+import { CommonService } from '../common/common.service';
 
 @WebSocketGateway({
   cors: {
@@ -56,6 +58,7 @@ export class UnificationGateway
     private readonly myRoomService: MyRoomService,
     private readonly blockchainService: BlockchainService,
     private readonly officeService: OfficeService,
+    private readonly commonService: CommonService,
     private readonly socketService: HubSocketService,
     private readonly messageHandler: NatsMessageHandler,
   ) {}
@@ -85,6 +88,7 @@ export class UnificationGateway
 
     this.gatewayId = `${NAMESPACE.PLAYER}:${uuidv4()}`;
     this.socketService.handleConnectionHub(this.gatewayId);
+    await this.setServer();
   }
 
   //소켓 연결
@@ -155,8 +159,6 @@ export class UnificationGateway
       SCREEN_BANNER_SOCKET_S_MESSAGE.S_BANNER_LIST,
       JSON.stringify(bannerList),
     );
-
-    await this.setServer();
   }
 
   async setServer() {
@@ -166,6 +168,7 @@ export class UnificationGateway
     await this.myRoomService.setServer(this.server);
     await this.officeService.setServer(this.server);
     await this.friendService.setServer(this.server);
+    await this.commonService.setServer(this.server);
   }
 
   //소켓 해제
@@ -207,9 +210,16 @@ export class UnificationGateway
         break;
       case NAMESPACE.BLOCKCHAIN:
         await this.blockchainService.setServer(this.server);
+        break;
       case NAMESPACE.OFFICE:
         await this.officeService.handleRequestMessage(client, payload);
+        break;
+      case NAMESPACE.COMMON:
+        await this.commonService.handleRequestMessage(client, payload);
+        break;
       default:
+        this.logger.debug('잘못된 패킷 입니다.');
+        client.emit(SOCKET_S_GLOBAL.ERROR, '잘못된 패킷 입니다.');
         break;
     }
   }

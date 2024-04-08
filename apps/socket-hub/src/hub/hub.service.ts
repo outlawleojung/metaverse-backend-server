@@ -153,4 +153,21 @@ export class HubService {
       this.requestSocket.delete(requestId);
     }
   }
+
+  // 게이트웨이에서 보내 온 결과
+  async setIsExistsGameObject(client: Socket, packet: any) {
+    const requestId = packet.requestId;
+    const isExists = packet.isExists;
+
+    if (isExists) {
+      const socket = this.requestSocket.get(requestId);
+      socket.emit(HUB_SOCKET_S_MESSAGE.S_GAMEOBJECTS_RESULT, {
+        requestId,
+        isExists,
+      });
+
+      this.requests.delete(requestId);
+      this.requestSocket.delete(requestId);
+    }
+  }
 }

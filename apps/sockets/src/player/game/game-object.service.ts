@@ -65,8 +65,6 @@ export class GameObjectService {
       roomGameObjects.set(objectId, gameObject);
       this.gameObjects.set(roomId, roomGameObjects);
     }
-
-    console.log('################ gameObjects :', this.gameObjects);
     {
       const packet = new S_BASE_INSTANTIATE_OBJECT();
       packet.success = true;
@@ -121,6 +119,21 @@ export class GameObjectService {
       }
     }
     return interactions;
+  }
+
+  // 게임 오브젝트 존재 여부 조회
+  async getExistsGameObject(roomId: string, objectId: number) {
+    const roomGameObjects = await this.gameObjects.get(roomId);
+
+    if (roomGameObjects) {
+      for (const gameObjectId of roomGameObjects.keys()) {
+        if (gameObjectId === objectId) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   setObjectData(roomId: string, objectId: number, data: string) {

@@ -18,6 +18,7 @@ import { ConfigModule } from '@nestjs/config';
 import { HubSocketModule } from '../hub-socket/hub-socket.module';
 import { SchemaModule } from '@libs/mongodb';
 import { SubscribeService } from '../nats/subscribe.service';
+import { CommonModule } from '../common/common.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { SubscribeService } from '../nats/subscribe.service';
     FriendModule,
     BlockchainModule,
     OfficeModule,
+    CommonModule,
     EntityModule,
     SchemaModule,
     HubSocketModule,

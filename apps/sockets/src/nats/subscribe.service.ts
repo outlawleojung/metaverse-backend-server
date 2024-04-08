@@ -1,5 +1,7 @@
 import {
   CHAT_SOCKET_C_MESSAGE,
+  COMMON_SOCKET_C_MESSAGE,
+  COMMON_SOCKET_S_MESSAGE,
   MY_ROOM_SOCKET_C_MESSAGE,
   MY_ROOM_SOCKET_S_MESSAGE,
   PLAYER_SOCKET_C_MESSAGE,
@@ -9,6 +11,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PlayerService } from '../player/player.service';
 import { MyRoomService } from '../my-room/my-room.service';
 import { ChatService } from '../chat/chat.service';
+import { CommonService } from '../common/common.service';
 
 @Injectable()
 export class SubscribeService {
@@ -18,10 +21,11 @@ export class SubscribeService {
     private readonly playerService: PlayerService,
     private readonly myroomService: MyRoomService,
     private readonly chatService: ChatService,
+    private readonly commonService: CommonService,
   ) {}
 
   async roomSubscribePlayerCallbackmessage(message) {
-    this.logger.debug('룸 구독 동기화 콜백 ✅');
+    this.logger.debug('동기화룸 구독 동기화 콜백 ✅');
     const data = JSON.parse(message);
 
     switch (data.packet.eventName) {
@@ -93,6 +97,22 @@ export class SubscribeService {
         break;
       case CHAT_SOCKET_C_MESSAGE.C_SEND_FRIEND_DIRECT_MESSAGE:
         break;
+      default:
+        this.logger.debug('잘못된 마이룸 패킷 입니다.');
+        break;
+    }
+  }
+
+  async roomSubscribeCommonCallbackmessage(message) {
+    this.logger.debug('공용 룸 구독 콜백 ✅');
+    const data = JSON.parse(message);
+    console.log(data);
+
+    switch (data.packet.eventName) {
+      case COMMON_SOCKET_S_MESSAGE.S_BASE_SET_OBJECT_DATA_NOTICE:
+        await this.commonService.broadcastSetObjectData(data);
+        break;
+
       default:
         this.logger.debug('잘못된 마이룸 패킷 입니다.');
         break;

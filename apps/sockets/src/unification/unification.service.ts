@@ -283,6 +283,24 @@ export class UnificationService {
       }
     }
 
+    {
+      // 현재 공용 룸 구독 여부 체크
+      const isSubscribe = this.messageHandler.getSubscribe(
+        `${NATS_EVENTS.COMMON_ROOM}:${redisRoomId}`,
+      );
+
+      if (!isSubscribe) {
+        // 현재 룸을 구독한다.
+        this.logger.debug('현재 공용 룸 입장 구독 ✅ : ', redisRoomId);
+        this.messageHandler.registerHandler(
+          `${NATS_EVENTS.COMMON_ROOM}:${redisRoomId}`,
+          async (message: string) => {
+            this.subscribeService.roomSubscribeCommonCallbackmessage(message);
+          },
+        );
+      }
+    }
+
     // 룸 입장 이벤트 발생
     this.logger.debug('룸 입장 이벤트 발생 ✅ : ', redisRoomId);
     await this.messageHandler.publishHandler(

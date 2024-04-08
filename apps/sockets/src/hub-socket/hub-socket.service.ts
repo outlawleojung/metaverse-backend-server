@@ -63,10 +63,9 @@ export class HubSocketService {
         const socket = this.socketMap.get(memberId);
 
         if (socket) {
-          socket.emit(
-            PLAYER_SOCKET_S_MESSAGE.S_BASE_ADD_OBJECT,
-            data.gameObjects,
-          );
+          socket.emit(PLAYER_SOCKET_S_MESSAGE.S_BASE_ADD_OBJECT, {
+            gameObjects: data.gameObjects,
+          });
         }
       },
     );
@@ -97,8 +96,7 @@ export class HubSocketService {
   }
 
   async getObjects(client: CustomSocket) {
-    console.log('@@@@@@@@@@@@@@@@@@ getObjects 1 @@@@@@@@@@@@@@@@@@');
-    const roomInfo = await this.getUserRoomId(client.data.memberId);
+    const roomId = client.data.roomId;
 
     // 요청 아이디를 발급 하고 해당 요청을 보낸 사용자 아이디와 함께 저장
     const requestId = uuidv4();
@@ -107,19 +105,16 @@ export class HubSocketService {
     // 허브 소켓에 게임오브젝트 목록을 요청 보낸다.
     this.hubSocketClient.emit(HUB_SOCKET_C_MESSAGE.C_GET_GAMEOBJECTS, {
       requestId,
-      roomId: roomInfo.redisRoomId,
+      roomId,
     });
   }
 
-  // 허브 소켓으로 요청 보내기
+  // 허브 소켓으로 응답 보내기
   async getGameObjectsForHub(data: any) {
-    console.log('@@@@@@@@@@@@@@@@@@ getGameObjectsForHub 1 @@@@@@@@@@@@@@@@@@');
     const requestId = data.requestId;
     const roomId = data.roomId;
 
     const gameObjects = await this.gameObjectService.getObjectsForHub(roomId);
-
-    console.log('@@@@@@@@@@@@@@@@@@ getGameObjectsForHub 2 @@@@@@@@@@@@@@@@@@');
     this.hubSocketClient.emit(HUB_SOCKET_C_MESSAGE.C_SEND_GAMEOBJECTS, {
       requestId,
       gatewayId: this.gatewayId,

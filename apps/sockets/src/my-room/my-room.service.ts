@@ -57,12 +57,6 @@ export class MyRoomService {
       case MY_ROOM_SOCKET_C_MESSAGE.C_MYROOM_SHUTDOWN:
         await this.shutDown(client, payload.data as C_MYROOM_SHUTDOWN);
         break;
-      case MY_ROOM_SOCKET_C_MESSAGE.C_BASE_SET_OBJECT_DATA:
-        await this.updateAvatarInfo(
-          client,
-          payload.data as C_BASE_SET_OBJECT_DATA,
-        );
-        break;
       default:
         this.logger.debug('잘못된 패킷 입니다.');
         client.emit(SOCKET_S_GLOBAL.ERROR, '잘못된 패킷 입니다.');
@@ -259,20 +253,6 @@ export class MyRoomService {
     const data = new C_BASE_SET_OBJECT_DATA();
     data.objectId = packet.objectId;
     data.objectData = packet.objectData;
-  }
-
-  async isMyRoom(roomId: string): Promise<boolean> {
-    const myRoomInfos = await this.redisClient.smembers(
-      RedisKey.getRoomsByType(RoomType.MyRoom),
-    );
-
-    for (const myRoom of myRoomInfos) {
-      if (myRoom === roomId) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   async isMyRoomOwner(clientId: string, roomId: string): Promise<boolean> {
