@@ -18,6 +18,7 @@ import {
   C_BASE_SET_OBJECT_DATA,
   S_BASE_SET_OBJECT_DATA,
   S_BASE_SET_OBJECT_DATA_NOTICE,
+  S_MYROOM_GET_ROOMINFO,
 } from '../packets/myroom-packet';
 import { GameObjectService } from '../player/game/game-object.service';
 import { HubSocketService } from '../hub-socket/hub-socket.service';
@@ -68,8 +69,6 @@ export class CommonService {
       objectId,
     );
 
-    console.log('##################### isExists : ', isExists);
-
     const packet = new S_BASE_SET_OBJECT_DATA();
 
     if (!isExists) {
@@ -113,6 +112,41 @@ export class CommonService {
         console.log(roomData);
         if (roomData.ownerId === clientId) {
           console.log('마이룸의 주인이 요청한 변경');
+
+          const roomData = JSON.parse(
+            await this.redisClient.hget(RedisKey.getStrRooms(), roomId),
+          );
+
+          console.log('$$$$$$$$$$$$$$$ roomData: ', roomData);
+          console.log(
+            '$$$$$$$$$$$$$$$ payload.objectData: ',
+            payload.objectData,
+          );
+
+          const updateObjectData = JSON.parse(payload.objectData);
+          roomData.ownerAvatarInfo = updateObjectData;
+
+          await this.redisClient.hset(
+            RedisKey.getStrRooms(),
+            roomId,
+            JSON.stringify(roomData),
+          );
+
+          const packet = new S_MYROOM_GET_ROOMINFO();
+          packet.ownerId = roomData.ownerId;
+          packet.ownerNickname = roomData.ownerNickname;
+          packet.isShutdown = roomData.isShutdown;
+          packet.ownerAvatarInfo = roomData.ownerAvatarInfo;
+
+          const data = {
+            redisRoomId: roomId,
+            packet,
+          };
+
+          this.messageHandler.publishHandler(
+            `${NATS_EVENTS.COMMON_ROOM}:${roomId}`,
+            JSON.stringify(data),
+          );
         }
       }
     }
@@ -120,11 +154,14 @@ export class CommonService {
 
   async broadcastSetObjectData(data) {
     const redisRoomId = data.redisRoomId;
-    const packet = new S_BASE_SET_OBJECT_DATA_NOTICE();
-    packet.objectId = data.packet.objectId;
-    packet.objectData = data.packet.objectData;
+    const { eventName, ...packetData } = data.packet;
 
-    const { eventName, ...packetData } = packet;
+    this.server.to(redisRoomId).emit(eventName, packetData);
+  }
+
+  async broadcastMyRoomGetRoomInfo(data) {
+    const redisRoomId = data.redisRoomId;
+    const { eventName, ...packetData } = data.packet;
 
     this.server.to(redisRoomId).emit(eventName, packetData);
   }

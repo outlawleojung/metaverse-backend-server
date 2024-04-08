@@ -579,3 +579,66 @@ emit.("C_REQUEST", payload);
   "message": "메세지 내용 입니다."
 }
 ```
+
+# type : common
+
+## 아바타 오브젝트 변경
+
+.
+
+### 요청 정보
+
+| 항목      | 값                       |
+| --------- | ------------------------ |
+| type      | `common`                 |
+| eventName | `C_BASE_SET_OBJECT_DATA` |
+
+### 요청 데이터 구조
+
+```json
+{
+  "objectId": number,
+  "objectData" : string
+}
+```
+
+### 응답 정보
+
+- eventName : S_BASE_SET_OBJECT_DATA
+
+```json
+{
+  "success": true
+}
+```
+
+- eventName : S_BASE_SET_OBJECT_DATA_NOTICE
+
+```json
+{
+  "objectId": 334,
+  "objectData": {
+    "1": 310002,
+    "2": 320010,
+    "3": 330015,
+    "6": 360001
+  }
+}
+```
+
+- 해당 룸이 마이룸 이고 마이룸 owner가 변경 했을 경우
+- eventName : S_MYROOM_GET_ROOMINFO
+
+```json
+{
+  "ownerId": "7TQ9VUL4TEWN",
+  "ownerNickname": "연봉협상가",
+  "isShutdown": false,
+  "ownerAvatarInfo": {
+    "1": 310002,
+    "2": 320010,
+    "3": 330015,
+    "6": 360001
+  }
+}
+```

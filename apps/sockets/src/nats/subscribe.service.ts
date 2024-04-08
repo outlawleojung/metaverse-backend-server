@@ -57,7 +57,7 @@ export class SubscribeService {
         await this.playerService.exitRoom(data);
         break;
       default:
-        this.logger.debug('잘못된 패킷 이벤트 입니다.');
+        this.logger.debug('잘못된 동기화룸 패킷 입니다.');
         console.log(data.packet);
         break;
     }
@@ -98,7 +98,7 @@ export class SubscribeService {
       case CHAT_SOCKET_C_MESSAGE.C_SEND_FRIEND_DIRECT_MESSAGE:
         break;
       default:
-        this.logger.debug('잘못된 마이룸 패킷 입니다.');
+        this.logger.debug('잘못된 채팅 패킷 입니다.');
         break;
     }
   }
@@ -112,9 +112,11 @@ export class SubscribeService {
       case COMMON_SOCKET_S_MESSAGE.S_BASE_SET_OBJECT_DATA_NOTICE:
         await this.commonService.broadcastSetObjectData(data);
         break;
-
+      case MY_ROOM_SOCKET_S_MESSAGE.S_MYROOM_GET_ROOMINFO:
+        await this.commonService.broadcastMyRoomGetRoomInfo(data);
+        break;
       default:
-        this.logger.debug('잘못된 마이룸 패킷 입니다.');
+        this.logger.debug('잘못된 공용 패킷 입니다.');
         break;
     }
   }
