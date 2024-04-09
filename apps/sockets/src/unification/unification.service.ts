@@ -18,7 +18,7 @@ import {
   SOCKET_S_GLOBAL,
 } from '@libs/constants';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
-import { GameObjectService } from '../player/game/game-object.service';
+import { GameObjectService } from '../game/game-object.service';
 import { RequestPayload } from '../packets/packet-interface';
 import { C_ENTER, S_ENTER, S_LEAVE } from '../packets/packet';
 import { HubSocketService } from '../hub-socket/hub-socket.service';

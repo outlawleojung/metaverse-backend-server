@@ -8,7 +8,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { io } from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
-import { GameObjectService } from '../player/game/game-object.service';
+import { GameObjectService } from '../game/game-object.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
 import { CustomSocket } from '../interfaces/custom-socket';

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { HubSocketService } from './hub-socket.service';
-import { GameObjectService } from '../player/game/game-object.service';
+import { GameObjectService } from '../game/game-object.service';
 import { RedisLockService } from '../services/redis-lock.service';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
 import { NatsService } from '../nats/nats.service';

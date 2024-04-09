@@ -14,7 +14,9 @@ import { UnificationService } from './unification.service';
 import { GatewayInitiService } from '../services/gateway-init.service';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
 import {
+  CHAT_SOCKET_S_MESSAGE,
   CHATTING_SOCKET_C_GLOBAL,
+  FRIEND_SOCKET_S_MESSAGE,
   NAMESPACE,
   NATS_EVENTS,
   OFFICE_SOCKET_S_MESSAGE,
@@ -135,10 +137,25 @@ export class UnificationGateway
       },
     );
 
+    // 사용자 전용 룸 구독
     this.messageHandler.registerHandler(
       client.data.memberId,
       async (message) => {
-        await this.chatService.sendToReceiverDirectMessage(message);
+        this.logger.debug('사용자 전용 룸 구독 💠');
+
+        const data = JSON.parse(message);
+        switch (data.packet.eventName) {
+          case CHAT_SOCKET_S_MESSAGE.S_SEND_DIRECT_MESSAGE:
+            await this.chatService.sendToReceiverDirectMessage(message);
+            break;
+          case FRIEND_SOCKET_S_MESSAGE.S_FRIEND_BRING:
+            await this.friendService.sendTofriendsBring(message);
+            break;
+          default:
+            this.logger.debug('사용자 전용 룸 구독 잘못된 패킷 입니다.');
+            client.emit(SOCKET_S_GLOBAL.ERROR, '잘못된 패킷 입니다.');
+            break;
+        }
       },
     );
 

@@ -1,7 +1,5 @@
-import { RedisFunctionService } from '@libs/redis';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
-import { Server, Socket } from 'socket.io';
-import { TokenCheckService } from '../unification/auth/tocket-check.service';
+import { Server } from 'socket.io';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
@@ -22,7 +20,7 @@ import {
   S_BASE_REMOVE_OBJECT,
   S_LEAVE,
 } from '../packets/packet';
-import { GameObjectService } from './game/game-object.service';
+import { GameObjectService } from '../game/game-object.service';
 import { RequestPayload } from '../packets/packet-interface';
 import { HubSocketService } from '../hub-socket/hub-socket.service';
 import { CustomSocket } from '../interfaces/custom-socket';
@@ -36,9 +34,7 @@ export class PlayerService {
     @Inject(forwardRef(() => GameObjectService))
     private readonly gameObjectService: GameObjectService,
     private readonly socketService: HubSocketService,
-    private readonly tokenCheckService: TokenCheckService,
     private readonly messageHandler: NatsMessageHandler,
-    private readonly redisFunctionService: RedisFunctionService,
   ) {}
 
   private server: Server;

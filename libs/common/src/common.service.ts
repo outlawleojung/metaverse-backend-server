@@ -579,6 +579,34 @@ export class CommonService {
     return null;
   }
 
+  // 아바타 정보 조회
+  async getMemberAvatarInfos(memberCode: string) {
+    const member = await this.dataSource.getRepository(Member).findOne({
+      where: {
+        memberCode: memberCode,
+      },
+    });
+
+    if (member) {
+      const avatarInfos = await this.dataSource
+        .getRepository(MemberAvatarInfo)
+        .find({
+          select: ['avatarPartsType', 'itemId'],
+          where: {
+            memberId: member.memberId,
+          },
+        });
+
+      const avatarList: any = {};
+      for (const avatar of avatarInfos) {
+        avatarList[avatar.avatarPartsType] = avatar.itemId;
+      }
+      return avatarList;
+    }
+
+    return null;
+  }
+
   async GetMemberFrameImages(memberId: string) {
     const frameImages = await this.dataSource
       .getRepository(MemberFrameImage)

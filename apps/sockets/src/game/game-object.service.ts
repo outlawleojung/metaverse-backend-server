@@ -1,10 +1,4 @@
-import {
-  ForbiddenException,
-  forwardRef,
-  Inject,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { GameObject } from './game-object';
 import {
   C_BASE_INSTANTIATE_OBJECT,
@@ -18,13 +12,13 @@ import {
   S_BASE_INSTANTIATE_OBJECT,
   S_BASE_ADD_OBJECT,
   S_BASE_SET_TRANSFORM,
-} from '../../packets/packet';
-import { PacketInfo, Position, Rotation } from '../../packets/packet-interface';
+} from '../packets/packet';
+import { PacketInfo, Position, Rotation } from '../packets/packet-interface';
 import { RedisKey, SOCKET_S_GLOBAL } from '@libs/constants';
-import { RedisLockService } from '../../services/redis-lock.service';
+import { RedisLockService } from '../services/redis-lock.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
-import { NatsMessageHandler } from '../../nats/nats-message.handler';
+import { NatsMessageHandler } from '../nats/nats-message.handler';
 
 @Injectable()
 export class GameObjectService {

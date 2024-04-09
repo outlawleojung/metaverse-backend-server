@@ -5,7 +5,7 @@ import {
   PLAYER_SOCKET_S_MESSAGE,
 } from '@libs/constants';
 import { ClientInfo, Position, Rotation } from './packet-interface';
-import { GameObject } from '../player/game/game-object';
+import { GameObject } from '../game/game-object';
 import {
   IsBoolean,
   IsNotEmpty,

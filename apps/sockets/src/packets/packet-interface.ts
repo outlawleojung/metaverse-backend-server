@@ -48,3 +48,15 @@ export interface PacketInfo {
   eventName: string;
   packetData: object;
 }
+
+export interface FriendInfo {
+  friendMemberId: string;
+  friendMemberCode: string;
+  friendNickname: string;
+  friendMessage: string;
+  createdAt: string;
+  bookmark: number;
+  bookmarkedAt: string;
+  avatarInfos: string;
+  isOnline: boolean;
+}

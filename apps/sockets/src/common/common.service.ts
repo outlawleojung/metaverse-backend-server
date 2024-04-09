@@ -8,7 +8,6 @@ import { CustomSocket } from '../interfaces/custom-socket';
 import { PacketInfo, RequestPayload } from '../packets/packet-interface';
 import {
   COMMON_SOCKET_C_MESSAGE,
-  COMMON_SOCKET_S_MESSAGE,
   NATS_EVENTS,
   RedisKey,
   SOCKET_S_GLOBAL,
@@ -20,7 +19,7 @@ import {
   S_BASE_SET_OBJECT_DATA_NOTICE,
   S_MYROOM_GET_ROOMINFO,
 } from '../packets/myroom-packet';
-import { GameObjectService } from '../player/game/game-object.service';
+import { GameObjectService } from '../game/game-object.service';
 import { HubSocketService } from '../hub-socket/hub-socket.service';
 
 @Injectable()
@@ -115,12 +114,6 @@ export class CommonService {
 
           const roomData = JSON.parse(
             await this.redisClient.hget(RedisKey.getStrRooms(), roomId),
-          );
-
-          console.log('$$$$$$$$$$$$$$$ roomData: ', roomData);
-          console.log(
-            '$$$$$$$$$$$$$$$ payload.objectData: ',
-            payload.objectData,
           );
 
           const updateObjectData = JSON.parse(payload.objectData);
