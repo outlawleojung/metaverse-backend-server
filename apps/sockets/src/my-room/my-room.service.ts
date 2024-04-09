@@ -65,7 +65,7 @@ export class MyRoomService {
   }
 
   async roomSubscribeCallbackmessage(message) {
-    this.logger.debug('룸 구독 콜백 ✅');
+    this.logger.debug('마이룸 구독 콜백 ✅');
     const data = JSON.parse(message);
 
     switch (data.packet.eventName) {
@@ -120,7 +120,7 @@ export class MyRoomService {
     packet.ownerAvatarInfo = roomData.ownerAvatarInfo;
 
     const { eventName, ...packetData } = packet;
-    return client.emit(eventName, packetData);
+    return client.emit(eventName, JSON.stringify(packetData));
   }
 
   async startEdit(client: CustomSocket) {
@@ -181,7 +181,7 @@ export class MyRoomService {
     const packet = new S_MYROOM_START_EDIT();
     const { eventName } = packet;
 
-    this.server.to(redisRoomId).emit(eventName, {});
+    this.server.to(redisRoomId).emit(eventName, '');
   }
 
   async broadcastEndEdit(data) {
@@ -191,7 +191,7 @@ export class MyRoomService {
 
     const { eventName, ...packetData } = packet;
 
-    this.server.to(redisRoomId).emit(eventName, packetData);
+    this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
   }
 
   async broadcastKick(data) {
@@ -206,12 +206,12 @@ export class MyRoomService {
     if (!kickClient) {
       packet.success = false;
       const { eventName, ...packetData } = packet;
-      ownerClient.emit(eventName, packetData);
+      ownerClient.emit(eventName, JSON.stringify(packetData));
     } else {
       kickClient.leave(redisRoomId);
       packet.success = true;
       const { eventName, ...packetData } = packet;
-      ownerClient.emit(eventName, packetData);
+      ownerClient.emit(eventName, JSON.stringify(packetData));
     }
   }
 

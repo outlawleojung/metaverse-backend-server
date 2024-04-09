@@ -74,13 +74,13 @@ export class CommonService {
       packet.success = false;
       const { eventName, ...packetData } = packet;
 
-      return client.emit(eventName, packetData);
+      return client.emit(eventName, JSON.stringify(packetData));
     } else {
       {
         packet.success = true;
         const { eventName, ...packetData } = packet;
 
-        client.emit(eventName, packetData);
+        client.emit(eventName, JSON.stringify(packetData));
       }
       {
         const packet = new S_BASE_SET_OBJECT_DATA_NOTICE();
@@ -149,14 +149,14 @@ export class CommonService {
     const redisRoomId = data.redisRoomId;
     const { eventName, ...packetData } = data.packet;
 
-    this.server.to(redisRoomId).emit(eventName, packetData);
+    this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
   }
 
   async broadcastMyRoomGetRoomInfo(data) {
     const redisRoomId = data.redisRoomId;
     const { eventName, ...packetData } = data.packet;
 
-    this.server.to(redisRoomId).emit(eventName, packetData);
+    this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
   }
 
   async isMyRoom(roomId: string): Promise<boolean> {

@@ -183,7 +183,9 @@ export class PlayerService {
 
     console.log(response);
 
-    this.server.to(redisRoomId).emit(response.eventName, response.packetData);
+    this.server
+      .to(redisRoomId)
+      .emit(response.eventName, JSON.stringify(response.packetData));
   }
 
   // 사용자 애니메이션 동기화
@@ -219,7 +221,9 @@ export class PlayerService {
       packet.animation,
     );
 
-    this.server.to(redisRoomId).emit(response.eventName, response.packetData);
+    this.server
+      .to(redisRoomId)
+      .emit(response.eventName, JSON.stringify(response.packetData));
   }
 
   async baseSetAnimationOnce(
@@ -259,7 +263,9 @@ export class PlayerService {
       packet.blend,
     );
 
-    this.server.to(redisRoomId).emit(response.eventName, response.packetData);
+    this.server
+      .to(redisRoomId)
+      .emit(response.eventName, JSON.stringify(response.packetData));
   }
 
   async baseInstantiateObject(
@@ -283,7 +289,7 @@ export class PlayerService {
 
       client.emit(
         response.clientPacket.eventName,
-        response.clientPacket.packetData,
+        JSON.stringify(response.clientPacket.packetData),
       );
     }
 
@@ -305,7 +311,7 @@ export class PlayerService {
 
     this.server
       .to(redisRoomId)
-      .emit(data.packet.eventName, data.packet.packetData);
+      .emit(data.packet.eventName, JSON.stringify(data.packet.packetData));
   }
 
   async baseRemoveGameObject(client: CustomSocket) {
@@ -345,7 +351,7 @@ export class PlayerService {
 
     if (packetData.gameObjects.length <= 0) return;
 
-    this.server.to(redisRoomId).emit(eventName, packetData);
+    this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
   }
 
   async baseSetInteraction(
@@ -370,7 +376,7 @@ export class PlayerService {
     if (response.clientPacket) {
       client.emit(
         response.clientPacket.eventName,
-        response.clientPacket.packetData,
+        JSON.stringify(response.clientPacket.packetData),
       );
     }
 
@@ -392,7 +398,7 @@ export class PlayerService {
 
     this.server
       .to(redisRoomId)
-      .emit(data.packet.eventName, data.packet.packetData);
+      .emit(data.packet.eventName, JSON.stringify(data.packet.packetData));
   }
 
   async baseRemoveInteraction(
@@ -414,7 +420,7 @@ export class PlayerService {
     if (response.clientPacket) {
       client.emit(
         response.clientPacket.eventName,
-        response.clientPacket.packetData,
+        JSON.stringify(response.clientPacket.packetData),
       );
     }
 
@@ -437,7 +443,7 @@ export class PlayerService {
 
     this.server
       .to(redisRoomId)
-      .emit(data.packet.eventName, data.packet.packetData);
+      .emit(data.packet.eventName, JSON.stringify(data.packet.packetData));
   }
 
   async exitRoom(data) {
@@ -451,7 +457,7 @@ export class PlayerService {
 
     const { eventName, ...packetData } = packet;
 
-    this.server.to(redisRoomId).emit(eventName, packetData);
+    this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
   }
 
   async addClient(data) {

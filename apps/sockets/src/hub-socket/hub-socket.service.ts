@@ -63,9 +63,12 @@ export class HubSocketService {
         const socket = this.socketMap.get(memberId);
 
         if (socket) {
-          socket.emit(PLAYER_SOCKET_S_MESSAGE.S_BASE_ADD_OBJECT, {
-            gameObjects: data.gameObjects,
-          });
+          socket.emit(
+            PLAYER_SOCKET_S_MESSAGE.S_BASE_ADD_OBJECT,
+            JSON.stringify({
+              gameObjects: data.gameObjects,
+            }),
+          );
         }
       },
     );
@@ -88,7 +91,7 @@ export class HubSocketService {
         if (socket) {
           socket.emit(
             PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_GET_ITEMS,
-            data.interactions,
+            JSON.stringify(data.interactions),
           );
         }
       },

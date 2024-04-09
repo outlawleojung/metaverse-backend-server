@@ -113,7 +113,7 @@ export class FriendService {
       packet.friends = enhancedFriends;
       const { eventName, ...packetData } = packet;
 
-      return client.emit(eventName, packetData);
+      return client.emit(eventName, JSON.stringify(packetData));
     } catch (err) {
       console.log(err);
     }
@@ -134,7 +134,7 @@ export class FriendService {
       packet.code = SOCKET_SERVER_ERROR_CODE_GLOBAL.FRIEND_NOT_EXIST;
       const { eventName, ...packetData } = packet;
 
-      return client.emit(eventName, packetData);
+      return client.emit(eventName, JSON.stringify(packetData));
     }
 
     // 이미 친구인지 확인
@@ -150,7 +150,7 @@ export class FriendService {
       packet.code = SOCKET_SERVER_ERROR_CODE_GLOBAL.FRIEND_NOT_FRIEND;
       const { eventName, ...packetData } = packet;
 
-      return client.emit(eventName, packetData);
+      return client.emit(eventName, JSON.stringify(packetData));
     }
 
     //소켓 가져오기
@@ -163,7 +163,7 @@ export class FriendService {
       packet.code = SOCKET_SERVER_ERROR_CODE_GLOBAL.FRIEND_IS_OFFLINE;
       const { eventName, ...packetData } = packet;
 
-      return client.emit(eventName, packetData);
+      return client.emit(eventName, JSON.stringify(packetData));
     } else {
       {
         // 입장할 수 없을 경우
@@ -189,13 +189,13 @@ export class FriendService {
           JSON.parse(socketInfo).sceneName === 'Scene_Room_Meeting_Office' &&
           JSON.parse(socketInfo).sceneName === 'Scene_Room_Consulting'
         ) {
-          return client.emit(eventName, packetData);
+          return client.emit(eventName, JSON.stringify(packetData));
         }
 
         // 마이룸일 경우 권한 검사
         if (JSON.parse(socketInfo).sceneName === 'Scene_Room_MyRoom') {
           if (memberInfo.myRoomStateType === 4) {
-            return client.emit(eventName, packetData);
+            return client.emit(eventName, JSON.stringify(packetData));
           }
         }
       }
@@ -210,7 +210,7 @@ export class FriendService {
 
         const { eventName, ...packetData } = packet;
 
-        return client.emit(eventName, packetData);
+        return client.emit(eventName, JSON.stringify(packetData));
       }
     }
   }
@@ -236,7 +236,7 @@ export class FriendService {
       packet.code = SOCKET_SERVER_ERROR_CODE_GLOBAL.FRIEND_NOT_EXIST;
       const { eventName, ...packetData } = packet;
 
-      return client.emit(eventName, packetData);
+      return client.emit(eventName, JSON.stringify(packetData));
     }
 
     // 이미 친구인지 확인
@@ -252,7 +252,7 @@ export class FriendService {
       packet.code = SOCKET_SERVER_ERROR_CODE_GLOBAL.FRIEND_NOT_FRIEND;
       const { eventName, ...packetData } = packet;
 
-      return client.emit(eventName, packetData);
+      return client.emit(eventName, JSON.stringify(packetData));
     }
 
     //소켓 가져오기
@@ -270,7 +270,7 @@ export class FriendService {
       packet.code = SOCKET_SERVER_ERROR_CODE_GLOBAL.FRIEND_IS_OFFLINE;
       const { eventName, ...packetData } = packet;
 
-      return client.emit(eventName, packetData);
+      return client.emit(eventName, JSON.stringify(packetData));
     } else {
       {
         // 입장할 수 없을 경우
@@ -296,13 +296,13 @@ export class FriendService {
           JSON.parse(socketInfo).sceneName === 'Scene_Room_Meeting_Office' &&
           JSON.parse(socketInfo).sceneName === 'Scene_Room_Consulting'
         ) {
-          return client.emit(eventName, packetData);
+          return client.emit(eventName, JSON.stringify(packetData));
         }
 
         // 마이룸일 경우 권한 검사
         if (JSON.parse(socketInfo).sceneName === 'Scene_Room_MyRoom') {
           if (memberInfo.myRoomStateType === 4) {
-            return client.emit(eventName, packetData);
+            return client.emit(eventName, JSON.stringify(packetData));
           }
         }
       }
@@ -332,6 +332,6 @@ export class FriendService {
 
     const { eventName, ...packetData } = data.packet;
 
-    this.server.to(friendMemberId).emit(eventName, packetData);
+    this.server.to(friendMemberId).emit(eventName, JSON.stringify(packetData));
   }
 }

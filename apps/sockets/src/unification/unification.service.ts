@@ -222,7 +222,7 @@ export class UnificationService {
     response.result = 'success';
     const { eventName, ...packetData } = response;
 
-    client.emit(eventName, packetData);
+    client.emit(eventName, JSON.stringify(packetData));
 
     await this.registerSubcribe(client.data.memberId, redisRoomId);
 
