@@ -186,7 +186,7 @@ export class C_GET_CLIENT implements PACKET {
 
 export class S_ADD_CLIENT implements PACKET {
   eventName = PLAYER_SOCKET_S_MESSAGE.S_ADD_CLIENT;
-  clientInfo: ClientInfo[];
+  clientInfos: ClientInfo[];
 }
 
 export class C_ENTER implements PACKET {

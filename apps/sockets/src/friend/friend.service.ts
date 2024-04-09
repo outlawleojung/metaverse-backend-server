@@ -264,6 +264,7 @@ export class FriendService {
     const socketInfo = await this.redisClient.get(
       RedisKey.getStrMemberSocket(client.data.memberId),
     );
+
     //존재 하지 않을 경우 오프라인
     if (!friendSocketInfo) {
       packet.code = SOCKET_SERVER_ERROR_CODE_GLOBAL.FRIEND_IS_OFFLINE;

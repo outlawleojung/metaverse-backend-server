@@ -19,8 +19,8 @@ import {
 } from '@libs/constants';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
 import { GameObjectService } from '../game/game-object.service';
-import { RequestPayload } from '../packets/packet-interface';
-import { C_ENTER, S_ENTER, S_LEAVE } from '../packets/packet';
+import { ClientInfo, RequestPayload } from '../packets/packet-interface';
+import { C_ENTER, S_ADD_CLIENT, S_ENTER, S_LEAVE } from '../packets/packet';
 import { HubSocketService } from '../hub-socket/hub-socket.service';
 import { SubscribeService } from '../nats/subscribe.service';
 import { RoomType } from '../room/room-type';
@@ -225,12 +225,32 @@ export class UnificationService {
     client.emit(eventName, packetData);
 
     await this.registerSubcribe(client.data.memberId, redisRoomId);
+
+    const clientInfos: ClientInfo[] = [];
+    clientInfos.push({
+      clientId: client.data.clientId,
+      nickname: client.data.nickname,
+      stateMessage: client.data.stateMessage,
+    });
+
+    const broadcastPacket = new S_ADD_CLIENT();
+    broadcastPacket.clientInfos = clientInfos;
+
+    const broadcastData = {
+      redisRoomId,
+      packet: broadcastPacket,
+    };
+
+    await this.messageHandler.publishHandler(
+      `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
+      JSON.stringify(broadcastData),
+    );
   }
 
   async registerSubcribe(memberId: string, redisRoomId: string) {
     // 현재 동기화 룸 구독 여부 체크
     {
-      const isSubscribe = this.messageHandler.getSubscribe(
+      const isSubscribe = await this.messageHandler.getSubscribe(
         `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
       );
 
@@ -240,6 +260,9 @@ export class UnificationService {
         this.messageHandler.registerHandler(
           `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
           async (message: string) => {
+            this.logger.debug('현재 동기화 룸 구독 콜백 ✅ : ');
+            console.log(message);
+
             this.subscribeService.roomSubscribePlayerCallbackmessage(message);
           },
         );
@@ -247,7 +270,7 @@ export class UnificationService {
     }
     {
       // 현재 채팅 룸 구독 여부 체크
-      const isSubscribe = this.messageHandler.getSubscribe(
+      const isSubscribe = await this.messageHandler.getSubscribe(
         `${NATS_EVENTS.CHAT_ROOM}:${redisRoomId}`,
       );
 
@@ -267,7 +290,7 @@ export class UnificationService {
 
     if (roomType === RoomType.MyRoom) {
       // 현재 룸 동기화 구독 여부 체크
-      const isSubscribe = this.messageHandler.getSubscribe(
+      const isSubscribe = await this.messageHandler.getSubscribe(
         `${NATS_EVENTS.MY_ROOM}:${redisRoomId}`,
       );
 
@@ -285,7 +308,7 @@ export class UnificationService {
 
     {
       // 현재 공용 룸 구독 여부 체크
-      const isSubscribe = this.messageHandler.getSubscribe(
+      const isSubscribe = await this.messageHandler.getSubscribe(
         `${NATS_EVENTS.COMMON_ROOM}:${redisRoomId}`,
       );
 

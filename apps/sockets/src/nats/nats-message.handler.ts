@@ -36,7 +36,7 @@ export class NatsMessageHandler {
     await this.natsService.publish(subject, message);
   }
 
-  getSubscribe(subject): boolean {
-    return this.subscribedSubjects.has(subject);
+  async getSubscribe(subject): Promise<boolean> {
+    return await this.subscribedSubjects.has(subject);
   }
 }

@@ -55,6 +55,9 @@ export class SubscribeService {
       case PLAYER_SOCKET_S_MESSAGE.S_LEAVE:
         await this.playerService.exitRoom(data);
         break;
+      case PLAYER_SOCKET_S_MESSAGE.S_ADD_CLIENT:
+        await this.playerService.addClient(data);
+        break;
       default:
         this.logger.debug('잘못된 동기화룸 패킷 입니다.');
         console.log(data.packet);

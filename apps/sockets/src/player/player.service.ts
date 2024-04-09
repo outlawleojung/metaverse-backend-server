@@ -453,4 +453,10 @@ export class PlayerService {
 
     this.server.to(redisRoomId).emit(eventName, packetData);
   }
+
+  async addClient(data) {
+    const redisRoomId = data.redisRoomId;
+    const { eventName, ...packetData } = data.packet;
+    this.server.to(redisRoomId).emit(eventName, packetData);
+  }
 }
