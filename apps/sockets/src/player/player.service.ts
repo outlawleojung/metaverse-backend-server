@@ -48,8 +48,6 @@ export class PlayerService {
   }
 
   async handleRequestMessage(client: CustomSocket, payload: RequestPayload) {
-    this.logger.debug('handleRequestMessage');
-    console.log(payload);
     switch (payload.eventName) {
       case PLAYER_SOCKET_C_MESSAGE.C_GET_CLIENT:
         await this.getClient(client);
@@ -107,28 +105,23 @@ export class PlayerService {
   }
 
   async getClient(client: CustomSocket) {
-    this.logger.debug('getClient');
     // client의 룸 조회
     const memberId = client.data.memberId;
-    console.log('clientId: ', memberId);
 
     const memberKey = RedisKey.getStrMemberCurrentRoom(memberId);
-    console.log('memberKey: ', memberKey);
 
     const redisRoomId = await this.redisClient.get(memberKey);
-    console.log('redisRoomId: ', redisRoomId);
 
     const playerIds = await this.redisClient.smembers(
       RedisKey.getStrRoomPlayerList(redisRoomId),
     );
-    console.log('playerIds: ', playerIds);
+
     const clientInfos = [];
 
     for (const p of playerIds) {
       const socketInfo = JSON.parse(
         await this.redisClient.get(RedisKey.getStrMemberSocket(p)),
       );
-      console.log('socketInfo: ', socketInfo);
 
       const client = {
         clientId: socketInfo.clientId,
@@ -136,7 +129,6 @@ export class PlayerService {
         stateMessage: socketInfo.stateMessage,
       };
 
-      console.log('client: ', client);
       clientInfos.push(client);
     }
 
@@ -160,8 +152,6 @@ export class PlayerService {
       packet: response,
     };
 
-    this.logger.debug('사용자 이동 동기화 이벤트 발행 ✅ : ', data);
-
     this.messageHandler.publishHandler(
       `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
       JSON.stringify(data),
@@ -169,8 +159,6 @@ export class PlayerService {
   }
 
   async setTransform(data) {
-    this.logger.debug('사용자 이동 동기화 실행 !! ✅', data);
-
     const redisRoomId = data.redisRoomId;
     const packet = data.packet as C_BASE_SET_TRANSFORM;
 
@@ -209,8 +197,6 @@ export class PlayerService {
   }
 
   async setAnimation(data) {
-    this.logger.debug('사용자 애니메이션 동기화 실행 !! ✅', data);
-
     const redisRoomId = data.redisRoomId;
     const packet = data.packet as C_BASE_SET_ANIMATION;
 
@@ -250,8 +236,6 @@ export class PlayerService {
   }
 
   async setAnimationOnce(data) {
-    this.logger.debug('사용자 이모지 동기화 실행 !! ✅', data);
-
     const redisRoomId = data.redisRoomId;
     const packet = data.packet as C_BASE_SET_ANIMATION_ONCE;
 
@@ -305,8 +289,6 @@ export class PlayerService {
   }
 
   async instantiateObject(data) {
-    this.logger.debug('instantiateObject broadcast');
-
     const redisRoomId = data.redisRoomId;
 
     this.server
@@ -358,8 +340,6 @@ export class PlayerService {
     client: CustomSocket,
     packet: C_INTERACTION_SET_ITEM,
   ) {
-    this.logger.debug('baseSetInteraction');
-
     const roomInfo = await this.socketService.getUserRoomId(
       client.data.memberId,
     );
