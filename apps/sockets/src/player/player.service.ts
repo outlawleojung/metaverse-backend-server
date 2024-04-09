@@ -142,7 +142,7 @@ export class PlayerService {
 
     client.emit(
       PLAYER_SOCKET_S_MESSAGE.S_ADD_CLIENT,
-      JSON.stringify(clientInfos),
+      JSON.stringify({ clientInfos }),
     );
   }
 
