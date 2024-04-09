@@ -21,15 +21,14 @@ export class HubSocketService {
   ) {}
 
   private readonly logger = new Logger(HubSocketService.name);
-  private socketMap: Map<string, Socket> = new Map();
+  private socketMap: Map<string, CustomSocket> = new Map();
   private goReqMap: Map<string, string> = new Map();
 
   private hubSocketClient;
   private gatewayId;
 
   async handleConnection(client: CustomSocket) {
-    console.log('@@@@@@@@@@@@@ client.data : ', client.data);
-    this.socketMap.set(client.data.memberId, client);
+    await this.socketMap.set(client.data.memberId, client);
   }
 
   async handleConnectionHub(gatewayId: string) {
@@ -60,6 +59,7 @@ export class HubSocketService {
       (data) => {
         this.logger.debug('메인 소켓 서버로부터 게임오브젝트 목록 응답:', data);
         const memberId = this.goReqMap.get(data.requestId);
+        console.log(this.socketMap);
         const socket = this.socketMap.get(memberId);
 
         if (socket) {
@@ -84,8 +84,11 @@ export class HubSocketService {
     this.hubSocketClient.on(
       HUB_SOCKET_S_MESSAGE.S_INTERACTIONS_RESULT,
       (data) => {
+        this.logger.debug(
+          '메인 소켓 서버로부터 인터랙션 목록 응답 수신:',
+          data,
+        );
         const memberId = this.goReqMap.get(data.requestId);
-
         const socket = this.socketMap.get(memberId);
 
         if (socket) {
@@ -129,7 +132,7 @@ export class HubSocketService {
     const roomInfo = await this.getUserRoomId(client.data.memberId);
     // 요청 아이디를 발급 하고 해당 요청을 보낸 사용자 아이디와 함께 저장
     const requestId = uuidv4();
-    this.goReqMap.set(requestId, client.data.clientId);
+    this.goReqMap.set(requestId, client.data.memberId);
 
     // 허브 소켓에 인터랙션 목록을 요청 보낸다.
     this.hubSocketClient.emit(HUB_SOCKET_C_MESSAGE.C_GET_INTERACTIONS, {
