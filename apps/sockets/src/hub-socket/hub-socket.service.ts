@@ -92,9 +92,13 @@ export class HubSocketService {
         const socket = this.socketMap.get(memberId);
 
         if (socket) {
+          const items = {
+            items: data.interactions,
+          };
+
           socket.emit(
             PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_GET_ITEMS,
-            JSON.stringify(data.interactions),
+            JSON.stringify(items),
           );
         }
       },
