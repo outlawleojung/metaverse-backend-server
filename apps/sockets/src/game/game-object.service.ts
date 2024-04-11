@@ -209,9 +209,7 @@ export class GameObjectService {
         packet.position = position;
         packet.rotation = rotation;
 
-        const { eventName, ...packetData } = packet;
-
-        return { eventName, packetData };
+        return packet;
       } else {
         console.log('gameObject 없음');
       }
@@ -255,9 +253,7 @@ export class GameObjectService {
         packet.animationId = animationId;
         packet.animation = animationValue;
 
-        const { eventName, ...packetData } = packet;
-
-        return { eventName, packetData };
+        return packet;
       }
     }
   }
@@ -297,9 +293,7 @@ export class GameObjectService {
         packet.isLoop = isLoop;
         packet.blend = blend;
 
-        const { eventName, ...packetData } = packet;
-
-        return { eventName, packetData };
+        return packet;
       }
     }
   }
