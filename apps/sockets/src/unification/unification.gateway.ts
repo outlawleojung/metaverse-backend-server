@@ -204,8 +204,6 @@ export class UnificationGateway
 
   @SubscribeMessage(SOCKET_C_GLOBAL.C_REQUEST)
   async request(client: CustomSocket, payload: RequestPayload) {
-    this.logger.debug('C_REQUEST');
-    console.log(payload);
     switch (payload.type) {
       case NAMESPACE.UNIFICATION:
         await this.unificationService.handleRequestMessage(client, payload);
@@ -235,8 +233,9 @@ export class UnificationGateway
         await this.commonService.handleRequestMessage(client, payload);
         break;
       default:
-        this.logger.debug('잘못된 패킷 입니다.');
-        client.emit(SOCKET_S_GLOBAL.ERROR, '잘못된 패킷 입니다.');
+        this.logger.debug('잘못된 type의 패킷 입니다.');
+        console.log(payload);
+        client.emit(SOCKET_S_GLOBAL.ERROR, '잘못된 type의 패킷 입니다.');
         break;
     }
   }

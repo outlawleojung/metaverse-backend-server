@@ -104,12 +104,10 @@ export class GameObjectService {
   // 인터랙션 조회 ( Hub)
   async getInteractionForHub(roomId: string) {
     const roomInteractions = await this.interactions.get(roomId);
-    const interactions: string[] = [];
+    const interactions: object[] = [];
     if (roomInteractions) {
-      if (roomInteractions) {
-        for (const interaction of roomInteractions.keys()) {
-          interactions.push(interaction);
-        }
+      for (const interaction of roomInteractions.keys()) {
+        interactions.push({ id: interaction });
       }
     }
     return interactions;

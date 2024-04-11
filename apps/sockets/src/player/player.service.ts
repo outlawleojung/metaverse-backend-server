@@ -99,7 +99,7 @@ export class PlayerService {
         await this.baseRemoveGameObject(client);
         break;
       default:
-        this.logger.debug('잘못된 요청 이벤트 입니다.');
+        this.logger.debug('잘못된 player 요청 이벤트 입니다.');
         console.log(payload);
         break;
     }
