@@ -60,3 +60,23 @@ export interface FriendInfo {
   avatarInfos: string;
   isOnline: boolean;
 }
+
+export interface AddWaitingClient {
+  isObserver: boolean;
+  clientId: string;
+  nickname: string;
+}
+
+export interface RemoveWaitingClient {
+  isObserver: boolean;
+  clientId: string;
+}
+
+export interface OfficeUserInfo {
+  clientId: string;
+  screenPermission: boolean;
+  chatPermission: boolean;
+  voicePermission: boolean;
+  videoPermission: boolean;
+  authority: number;
+}

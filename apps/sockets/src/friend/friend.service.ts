@@ -22,7 +22,7 @@ import {
   S_FRIEND_BRING,
   S_FRIEND_FOLLOW,
   S_FRIEND_LIST,
-} from '../packets/friend-packet copy';
+} from '../packets/friend-packet';
 
 @Injectable()
 export class FriendService {

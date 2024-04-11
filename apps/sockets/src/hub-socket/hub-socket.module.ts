@@ -8,12 +8,23 @@ import { TokenCheckService } from '../unification/auth/tocket-check.service';
 import { RedisFunctionService } from '@libs/redis';
 import { GatewayInitiService } from '../services/gateway-init.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Member, MemberOfficeVisitLog, SessionInfo } from '@libs/entity';
+import {
+  JumpingMatchingLevel,
+  Member,
+  MemberOfficeVisitLog,
+  SessionInfo,
+} from '@libs/entity';
 import { ClientService } from '../services/client.service';
+import { GameData } from '../game/game-data';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Member, SessionInfo, MemberOfficeVisitLog]),
+    TypeOrmModule.forFeature([
+      Member,
+      SessionInfo,
+      MemberOfficeVisitLog,
+      JumpingMatchingLevel,
+    ]),
   ],
   providers: [
     HubSocketService,
@@ -25,6 +36,7 @@ import { ClientService } from '../services/client.service';
     RedisFunctionService,
     GatewayInitiService,
     ClientService,
+    GameData,
   ],
   exports: [
     HubSocketService,
@@ -36,6 +48,7 @@ import { ClientService } from '../services/client.service';
     RedisFunctionService,
     GatewayInitiService,
     ClientService,
+    GameData,
   ],
 })
 export class HubSocketModule {}
