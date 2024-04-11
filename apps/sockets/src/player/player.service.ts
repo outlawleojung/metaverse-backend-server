@@ -164,9 +164,8 @@ export class PlayerService {
   async setTransform(data) {
     const redisRoomId = data.redisRoomId;
     const packet = data.packet as S_BASE_SET_TRANSFORM;
-    console.log('packet: ', packet);
+
     const { eventName, ...packetData } = packet;
-    console.log('packetData: ', packetData);
 
     this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
   }
