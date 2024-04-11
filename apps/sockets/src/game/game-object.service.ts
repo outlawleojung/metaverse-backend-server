@@ -178,7 +178,13 @@ export class GameObjectService {
     position: Position,
     rotation: Rotation,
   ) {
+    this.logger.debug('setTransform');
+    console.log('roomId: ', roomId);
+    console.log('objectId: ', objectId);
+    console.log('position: ', position);
+
     const roomGameObjects = this.gameObjects.get(roomId);
+    console.log('roomGameObjects: ', roomGameObjects);
 
     if (!roomGameObjects) {
       // 오브젝트 없음.
@@ -189,6 +195,7 @@ export class GameObjectService {
     }
 
     const gameObject = roomGameObjects.get(objectId);
+    console.log('gameObject: ', gameObject);
 
     if (!gameObject) {
       // 오브젝트 없음.
