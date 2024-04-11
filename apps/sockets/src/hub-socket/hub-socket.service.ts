@@ -59,7 +59,7 @@ export class HubSocketService {
       (data) => {
         this.logger.debug('메인 소켓 서버로부터 게임오브젝트 목록 응답:', data);
         const memberId = this.goReqMap.get(data.requestId);
-        console.log(this.socketMap);
+
         const socket = this.socketMap.get(memberId);
 
         if (socket) {

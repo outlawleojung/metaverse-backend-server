@@ -178,13 +178,7 @@ export class GameObjectService {
     position: Position,
     rotation: Rotation,
   ) {
-    this.logger.debug('setTransform');
-    console.log('roomId: ', roomId);
-    console.log('objectId: ', objectId);
-    console.log('position: ', position);
-
     const roomGameObjects = this.gameObjects.get(roomId);
-    console.log('roomGameObjects: ', roomGameObjects);
 
     if (!roomGameObjects) {
       // 오브젝트 없음.
@@ -195,7 +189,6 @@ export class GameObjectService {
     }
 
     const gameObject = roomGameObjects.get(objectId);
-    console.log('gameObject: ', gameObject);
 
     if (!gameObject) {
       // 오브젝트 없음.
@@ -429,10 +422,10 @@ export class GameObjectService {
   }
 
   // 해당 사용자의 모든 인터렉션 목록 삭제
-  removeInteractions(roomId: string, clientId: string): string[] {
+  removeInteractions(roomId: string, clientId: string): string {
     const interactions = this.interactions.get(roomId);
 
-    const interactionIds: string[] = [];
+    let _interactionId: string;
 
     if (interactions) {
       for (const [
@@ -440,17 +433,16 @@ export class GameObjectService {
         interactioinClientId,
       ] of interactions.entries()) {
         if (interactioinClientId === clientId) {
-          interactionIds.push(interactionId);
+          _interactionId = interactionId;
         }
       }
 
       {
         const interactions = this.interactions.get(roomId);
-        interactionIds.forEach((interactionId) => {
-          if (interactions.has(interactionId)) {
-            interactions.delete(interactionId);
-          }
-        });
+
+        if (interactions.has(_interactionId)) {
+          interactions.delete(_interactionId);
+        }
 
         if (!interactions || interactions.size === 0) {
           this.interactions.delete(roomId);
@@ -458,7 +450,7 @@ export class GameObjectService {
       }
     }
 
-    return interactionIds;
+    return _interactionId;
   }
 
   clearObject(roomId: string) {

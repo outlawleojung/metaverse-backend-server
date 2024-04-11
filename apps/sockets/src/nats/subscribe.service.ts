@@ -24,7 +24,6 @@ export class SubscribeService {
   ) {}
 
   async roomSubscribePlayerCallbackmessage(message) {
-    this.logger.debug('동기화룸 구독 동기화 콜백 ✅');
     const data = JSON.parse(message);
 
     switch (data.packet.eventName) {

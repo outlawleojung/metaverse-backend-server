@@ -260,9 +260,6 @@ export class UnificationService {
         this.messageHandler.registerHandler(
           `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
           async (message: string) => {
-            this.logger.debug('현재 동기화 룸 구독 콜백 ✅ : ');
-            console.log(message);
-
             this.subscribeService.roomSubscribePlayerCallbackmessage(message);
           },
         );
@@ -408,7 +405,7 @@ export class UnificationService {
         );
 
         // 인터렉션 삭제
-        const interactionIds = await this.gameObjectService.removeInteractions(
+        const interactionId = await this.gameObjectService.removeInteractions(
           redisRoomId,
           client.data.clientId,
         );
@@ -416,7 +413,7 @@ export class UnificationService {
         const response = new S_LEAVE();
         response.clientId = client.data.clientId;
         response.objectId = client.data.objectId || null;
-        response.interactionIds = interactionIds;
+        response.interactionId = interactionId;
 
         const data = {
           redisRoomId,

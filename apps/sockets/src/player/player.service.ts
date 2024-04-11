@@ -433,7 +433,7 @@ export class PlayerService {
     const packet = new S_LEAVE();
     packet.clientId = data.packet.clientId;
     packet.objectId = data.packet.objectId;
-    packet.interactionIds = data.packet.interactionIds;
+    packet.interactionId = data.packet.interactionId;
 
     const { eventName, ...packetData } = packet;
 
