@@ -178,38 +178,42 @@ export class GameObjectService {
     position: Position,
     rotation: Rotation,
   ) {
-    const roomGameObjects = this.gameObjects.get(roomId);
+    if (this.gameObjects.has(roomId)) {
+      const roomGameObjects = this.gameObjects.get(roomId);
 
-    if (!roomGameObjects) {
-      // 오브젝트 없음.
-      return {
-        event: SOCKET_S_GLOBAL.ERROR,
-        packetData: `roomGameObjects roomId: ${roomId}- 오브젝트 없음`,
-      };
+      if (!roomGameObjects) {
+        // 오브젝트 없음.
+        return {
+          event: SOCKET_S_GLOBAL.ERROR,
+          packetData: `roomGameObjects roomId: ${roomId}- 오브젝트 없음`,
+        };
+      }
+
+      if (roomGameObjects.has(objectId)) {
+        const gameObject = roomGameObjects.get(objectId);
+
+        if (!gameObject) {
+          // 오브젝트 없음.
+          return {
+            event: SOCKET_S_GLOBAL.ERROR,
+            packetData: `gameObject objectId: ${objectId}- 오브젝트 없음`,
+          };
+        }
+
+        gameObject.setPosition(position);
+        gameObject.setRotation(rotation);
+
+        // 클라이언트에 변경 사항 전송 등의 추가 작업
+        const packet = new S_BASE_SET_TRANSFORM();
+        packet.objectId = objectId;
+        packet.position = position;
+        packet.rotation = rotation;
+
+        const { eventName, ...packetData } = packet;
+
+        return { eventName, packetData };
+      }
     }
-
-    const gameObject = roomGameObjects.get(objectId);
-
-    if (!gameObject) {
-      // 오브젝트 없음.
-      return {
-        event: SOCKET_S_GLOBAL.ERROR,
-        packetData: `gameObject objectId: ${objectId}- 오브젝트 없음`,
-      };
-    }
-
-    gameObject.setPosition(position);
-    gameObject.setRotation(rotation);
-
-    // 클라이언트에 변경 사항 전송 등의 추가 작업
-    const packet = new S_BASE_SET_TRANSFORM();
-    packet.objectId = objectId;
-    packet.position = position;
-    packet.rotation = rotation;
-
-    const { eventName, ...packetData } = packet;
-
-    return { eventName, packetData };
   }
 
   setAnimation(
@@ -218,36 +222,40 @@ export class GameObjectService {
     animationId: string,
     animationValue: string,
   ) {
-    const roomGameObjects = this.gameObjects.get(roomId);
+    if (this.gameObjects.has(roomId)) {
+      const roomGameObjects = this.gameObjects.get(roomId);
 
-    if (!roomGameObjects) {
-      // 오브젝트 없음.
-      return {
-        event: SOCKET_S_GLOBAL.ERROR,
-        packetData: `roomGameObjects roomId: ${roomId}- 오브젝트 없음`,
-      };
+      if (!roomGameObjects) {
+        // 오브젝트 없음.
+        return {
+          event: SOCKET_S_GLOBAL.ERROR,
+          packetData: `roomGameObjects roomId: ${roomId}- 오브젝트 없음`,
+        };
+      }
+
+      if (roomGameObjects.has(objectId)) {
+        const gameObject = roomGameObjects.get(objectId);
+
+        if (!gameObject) {
+          // 오브젝트 없음.
+          return {
+            event: SOCKET_S_GLOBAL.ERROR,
+            packetData: `gameObject objectId: ${objectId}- 오브젝트 없음`,
+          };
+        }
+
+        gameObject.setAnimations(animationId, animationValue);
+
+        const packet = new S_BASE_SET_ANIMATION();
+        packet.objectId = objectId;
+        packet.animationId = animationId;
+        packet.animation = animationValue;
+
+        const { eventName, ...packetData } = packet;
+
+        return { eventName, packetData };
+      }
     }
-
-    const gameObject = roomGameObjects.get(objectId);
-
-    if (!gameObject) {
-      // 오브젝트 없음.
-      return {
-        event: SOCKET_S_GLOBAL.ERROR,
-        packetData: `gameObject objectId: ${objectId}- 오브젝트 없음`,
-      };
-    }
-
-    gameObject.setAnimations(animationId, animationValue);
-
-    const packet = new S_BASE_SET_ANIMATION();
-    packet.objectId = objectId;
-    packet.animationId = animationId;
-    packet.animation = animationValue;
-
-    const { eventName, ...packetData } = packet;
-
-    return { eventName, packetData };
   }
 
   setAnimationOnce(
@@ -257,35 +265,39 @@ export class GameObjectService {
     isLoop: boolean,
     blend: number,
   ) {
-    const roomGameObjects = this.gameObjects.get(roomId);
+    if (this.gameObjects.has(roomId)) {
+      const roomGameObjects = this.gameObjects.get(roomId);
 
-    if (!roomGameObjects) {
-      // 오브젝트 없음.
-      return {
-        event: SOCKET_S_GLOBAL.ERROR,
-        packetData: SOCKET_S_GLOBAL.ERROR,
-      };
+      if (!roomGameObjects) {
+        // 오브젝트 없음.
+        return {
+          event: SOCKET_S_GLOBAL.ERROR,
+          packetData: SOCKET_S_GLOBAL.ERROR,
+        };
+      }
+
+      if (roomGameObjects.has(objectId)) {
+        const gameObject = roomGameObjects.get(objectId);
+
+        if (!gameObject) {
+          // 오브젝트 없음.
+          return {
+            event: SOCKET_S_GLOBAL.ERROR,
+            packetData: SOCKET_S_GLOBAL.ERROR,
+          };
+        }
+
+        const packet = new S_BASE_SET_ANIMATION_ONCE();
+        packet.objectId = objectId;
+        packet.animationId = animationId;
+        packet.isLoop = isLoop;
+        packet.blend = blend;
+
+        const { eventName, ...packetData } = packet;
+
+        return { eventName, packetData };
+      }
     }
-
-    const gameObject = roomGameObjects.get(objectId);
-
-    if (!gameObject) {
-      // 오브젝트 없음.
-      return {
-        event: SOCKET_S_GLOBAL.ERROR,
-        packetData: SOCKET_S_GLOBAL.ERROR,
-      };
-    }
-
-    const packet = new S_BASE_SET_ANIMATION_ONCE();
-    packet.objectId = objectId;
-    packet.animationId = animationId;
-    packet.isLoop = isLoop;
-    packet.blend = blend;
-
-    const { eventName, ...packetData } = packet;
-
-    return { eventName, packetData };
   }
 
   setInteraction(
