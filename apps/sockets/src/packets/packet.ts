@@ -297,5 +297,5 @@ export class S_LEAVE implements PACKET {
 
   objectId: string;
   clientId: string;
-  interactionIds: string[];
+  interactionId: string;
 }
