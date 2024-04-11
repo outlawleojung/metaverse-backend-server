@@ -316,7 +316,7 @@ export class GameObjectService {
             packetData: packetData,
           };
 
-          this.logger.debug(`setInteraction : ${event} - ${packetData}`);
+          this.logger.debug(`setInteraction : ${eventName} - ${packetData}`);
           response.clientPacket = packetInfo;
           return response;
         }
@@ -382,7 +382,7 @@ export class GameObjectService {
         };
 
         this.logger.debug(
-          `removeInteraction - roomId: ${roomId} event: ${event} data: ${packetData}`,
+          `removeInteraction - roomId: ${roomId} event: ${eventName} data: ${packetData}`,
         );
 
         response.clientPacket = packetInfo;
@@ -414,7 +414,7 @@ export class GameObjectService {
       response.broadcastPacket = packetInfo;
 
       this.logger.debug(
-        `removeInteraction - roomId: ${roomId} event: ${event} data: ${packetData}`,
+        `removeInteraction - roomId: ${roomId} event: ${eventName} data: ${packetData}`,
       );
     }
 
@@ -470,7 +470,7 @@ export class GameObjectService {
 
     const { eventName, ...packetData } = packet;
     this.logger.debug(
-      `Remove GameObject Broadcast - roomId: ${roomId} event: ${event} data: ${packetData}`,
+      `Remove GameObject Broadcast - roomId: ${roomId} event: ${eventName} data: ${packetData}`,
     );
 
     this.gameObjects.clear();
