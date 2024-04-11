@@ -14,7 +14,7 @@ import {
   S_BASE_SET_TRANSFORM,
 } from '../packets/packet';
 import { PacketInfo, Position, Rotation } from '../packets/packet-interface';
-import { RedisKey, SOCKET_S_GLOBAL } from '@libs/constants';
+import { NATS_EVENTS, RedisKey, SOCKET_S_GLOBAL } from '@libs/constants';
 import { RedisLockService } from '../services/redis-lock.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
@@ -302,7 +302,6 @@ export class GameObjectService {
     interactionId: string,
     interactionData: string,
   ) {
-    this.logger.debug('setInteraction 1');
     const packet = new S_INTERACTION_SET_ITEM();
     const response: any = {};
 
@@ -349,7 +348,6 @@ export class GameObjectService {
       };
 
       response.clientPacket = packetInfo;
-      this.logger.debug('setInteraction 7');
     }
     {
       const packet = new S_INTERACTION_SET_ITEM_NOTICE();
@@ -362,12 +360,7 @@ export class GameObjectService {
         packetData: packetData,
       };
 
-      this.logger.debug('setInteraction 8');
       response.broadcastPacket = packetInfo;
-
-      this.logger.debug(
-        `Interaction Broadcast - roomId: ${roomId} event: ${eventName} data: ${packetData}`,
-      );
 
       return response;
     }
@@ -388,10 +381,6 @@ export class GameObjectService {
           eventName,
           packetData: packetData,
         };
-
-        this.logger.debug(
-          `removeInteraction - roomId: ${roomId} event: ${eventName} data: ${packetData}`,
-        );
 
         response.clientPacket = packetInfo;
         return response;
@@ -420,10 +409,6 @@ export class GameObjectService {
         packetData: packetData,
       };
       response.broadcastPacket = packetInfo;
-
-      this.logger.debug(
-        `removeInteraction - roomId: ${roomId} event: ${eventName} data: ${packetData}`,
-      );
     }
 
     return response;
@@ -475,9 +460,14 @@ export class GameObjectService {
       packet.gameObjects.push(key);
     }
 
-    const { eventName, ...packetData } = packet;
-    this.logger.debug(
-      `Remove GameObject Broadcast - roomId: ${roomId} event: ${eventName} data: ${packetData}`,
+    const data = {
+      redisRoomId: roomId,
+      packet,
+    };
+
+    this.messageHandler.publishHandler(
+      `${NATS_EVENTS.SYNC_ROOM}:${roomId}`,
+      JSON.stringify(data),
     );
 
     this.gameObjects.clear();
