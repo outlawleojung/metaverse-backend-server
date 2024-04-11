@@ -1,3 +1,4 @@
+import { S_BASE_SET_TRANSFORM } from './../packets/packet';
 import {
   CHAT_SOCKET_C_MESSAGE,
   COMMON_SOCKET_S_MESSAGE,
@@ -27,13 +28,13 @@ export class SubscribeService {
     const data = JSON.parse(message);
 
     switch (data.packet.eventName) {
-      case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_TRANSFORM:
+      case PLAYER_SOCKET_S_MESSAGE.S_BASE_SET_TRANSFORM:
         await this.playerService.setTransform(data);
         break;
-      case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION:
+      case PLAYER_SOCKET_S_MESSAGE.S_BASE_SET_ANIMATION:
         await this.playerService.setAnimation(data);
         break;
-      case PLAYER_SOCKET_C_MESSAGE.C_BASE_SET_ANIMATION_ONCE:
+      case PLAYER_SOCKET_S_MESSAGE.S_BASE_SET_ANIMATION_ONCE:
         await this.playerService.setAnimationOnce(data);
         break;
       // -- 브로드캐스팅을 위한 호출 --

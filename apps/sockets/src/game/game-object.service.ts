@@ -212,7 +212,11 @@ export class GameObjectService {
         const { eventName, ...packetData } = packet;
 
         return { eventName, packetData };
+      } else {
+        console.log('gameObject 없음');
       }
+    } else {
+      console.log('roomGameObjects 없음');
     }
   }
 

@@ -18,6 +18,7 @@ import {
   C_INTERACTION_REMOVE_ITEM,
   C_INTERACTION_SET_ITEM,
   S_BASE_REMOVE_OBJECT,
+  S_BASE_SET_TRANSFORM,
   S_LEAVE,
 } from '../packets/packet';
 import { GameObjectService } from '../game/game-object.service';
@@ -142,10 +143,12 @@ export class PlayerService {
   async baseSetTransform(client: CustomSocket, packet: C_BASE_SET_TRANSFORM) {
     const redisRoomId = client.data.roomId;
 
-    const response = new C_BASE_SET_TRANSFORM();
-    response.objectId = packet.objectId;
-    response.position = packet.position;
-    response.rotation = packet.rotation;
+    const response = await this.gameObjectService.setTransform(
+      redisRoomId,
+      packet.objectId,
+      packet.position,
+      packet.rotation,
+    );
 
     const data = {
       redisRoomId,
@@ -160,30 +163,23 @@ export class PlayerService {
 
   async setTransform(data) {
     const redisRoomId = data.redisRoomId;
-    const packet = data.packet as C_BASE_SET_TRANSFORM;
+    const packet = data.packet as S_BASE_SET_TRANSFORM;
 
-    const response = await this.gameObjectService.setTransform(
-      redisRoomId,
-      packet.objectId,
-      packet.position,
-      packet.rotation,
-    );
+    const { eventName, ...packetData } = packet;
 
-    console.log(response);
-
-    this.server
-      .to(redisRoomId)
-      .emit(response.eventName, JSON.stringify(response.packetData));
+    this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
   }
 
   // 사용자 애니메이션 동기화
   async baseSetAnimation(client: CustomSocket, packet: C_BASE_SET_ANIMATION) {
     const redisRoomId = client.data.roomId;
 
-    const response = new C_BASE_SET_ANIMATION();
-    response.objectId = packet.objectId;
-    response.animation = packet.animation;
-    response.animationId = packet.animationId;
+    const response = await this.gameObjectService.setAnimation(
+      redisRoomId,
+      packet.objectId,
+      packet.animationId,
+      packet.animation,
+    );
 
     const data = {
       redisRoomId,
@@ -200,16 +196,9 @@ export class PlayerService {
     const redisRoomId = data.redisRoomId;
     const packet = data.packet as C_BASE_SET_ANIMATION;
 
-    const response = await this.gameObjectService.setAnimation(
-      redisRoomId,
-      packet.objectId,
-      packet.animationId,
-      packet.animation,
-    );
+    const { eventName, ...packetData } = packet;
 
-    this.server
-      .to(redisRoomId)
-      .emit(response.eventName, JSON.stringify(response.packetData));
+    this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
   }
 
   async baseSetAnimationOnce(
@@ -218,11 +207,13 @@ export class PlayerService {
   ) {
     const redisRoomId = client.data.roomId;
 
-    const response = new C_BASE_SET_ANIMATION_ONCE();
-    response.objectId = packet.objectId;
-    response.animationId = packet.animationId;
-    response.isLoop = packet.isLoop;
-    response.blend = packet.blend;
+    const response = await this.gameObjectService.setAnimationOnce(
+      redisRoomId,
+      packet.objectId,
+      packet.animationId,
+      packet.isLoop,
+      packet.blend,
+    );
 
     const data = {
       redisRoomId,
@@ -239,27 +230,16 @@ export class PlayerService {
     const redisRoomId = data.redisRoomId;
     const packet = data.packet as C_BASE_SET_ANIMATION_ONCE;
 
-    const response = await this.gameObjectService.setAnimationOnce(
-      redisRoomId,
-      packet.objectId,
-      packet.animationId,
-      packet.isLoop,
-      packet.blend,
-    );
+    const { eventName, ...packetData } = packet;
 
-    this.server
-      .to(redisRoomId)
-      .emit(response.eventName, JSON.stringify(response.packetData));
+    this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
   }
 
   async baseInstantiateObject(
     client: CustomSocket,
     packet: C_BASE_INSTANTIATE_OBJECT,
   ) {
-    const roomInfo = await this.socketService.getUserRoomId(
-      client.data.memberId,
-    );
-    const redisRoomId = roomInfo.redisRoomId;
+    const redisRoomId = client.data.roomId;
     const clientId = client.data.clientId;
 
     const response = await this.gameObjectService.instantiateObject(
@@ -278,7 +258,7 @@ export class PlayerService {
     }
 
     const data = {
-      redisRoomId: roomInfo.redisRoomId,
+      redisRoomId,
       packet: response.broadcastPacket,
     };
 
@@ -308,12 +288,12 @@ export class PlayerService {
       clientId,
     );
 
-    const packet = new C_BASE_REMOVE_OBJECT();
+    const packet = new S_BASE_REMOVE_OBJECT();
+    packet.gameObjects = gameObjectIds;
 
     const data = {
       redisRoomId,
       packet,
-      gameObjectIds,
     };
 
     this.messageHandler.publishHandler(
@@ -323,11 +303,9 @@ export class PlayerService {
   }
 
   async removeGameObject(data) {
-    console.log(data);
     const redisRoomId = data.redisRoomId;
 
-    const packet = new S_BASE_REMOVE_OBJECT();
-    packet.gameObjects = data.gameObjectIds;
+    const packet = data.packet;
 
     const { eventName, ...packetData } = packet;
 
@@ -340,10 +318,7 @@ export class PlayerService {
     client: CustomSocket,
     packet: C_INTERACTION_SET_ITEM,
   ) {
-    const roomInfo = await this.socketService.getUserRoomId(
-      client.data.memberId,
-    );
-    const redisRoomId = roomInfo.redisRoomId;
+    const redisRoomId = client.data.roomId;
     const clientId = client.data.clientId;
 
     const response = await this.gameObjectService.setInteraction(
@@ -362,7 +337,7 @@ export class PlayerService {
 
     if (response.broadcastPacket) {
       const data = {
-        redisRoomId: roomInfo.redisRoomId,
+        redisRoomId,
         packet: response.broadcastPacket,
       };
 
@@ -385,10 +360,7 @@ export class PlayerService {
     client: CustomSocket,
     packet: C_INTERACTION_REMOVE_ITEM,
   ) {
-    const roomInfo = await this.socketService.getUserRoomId(
-      client.data.memberId,
-    );
-    const redisRoomId = roomInfo.redisRoomId;
+    const redisRoomId = client.data.roomId;
     const clientId = client.data.clientId;
 
     const response = await this.gameObjectService.removeInteraction(
@@ -406,7 +378,7 @@ export class PlayerService {
 
     if (response.broadcastPacket) {
       const data = {
-        redisRoomId: roomInfo.redisRoomId,
+        redisRoomId,
         packet: response.broadcastPacket,
       };
 
