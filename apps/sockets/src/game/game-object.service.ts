@@ -184,7 +184,7 @@ export class GameObjectService {
       // 오브젝트 없음.
       return {
         event: SOCKET_S_GLOBAL.ERROR,
-        packetData: '오브젝트 없음',
+        packetData: `roomGameObjects roomId: ${roomId}- 오브젝트 없음`,
       };
     }
 
@@ -194,7 +194,7 @@ export class GameObjectService {
       // 오브젝트 없음.
       return {
         event: SOCKET_S_GLOBAL.ERROR,
-        packetData: '오브젝트 없음',
+        packetData: `gameObject objectId: ${objectId}- 오브젝트 없음`,
       };
     }
 
@@ -224,7 +224,7 @@ export class GameObjectService {
       // 오브젝트 없음.
       return {
         event: SOCKET_S_GLOBAL.ERROR,
-        packetData: '오브젝트 없음',
+        packetData: `roomGameObjects roomId: ${roomId}- 오브젝트 없음`,
       };
     }
 
@@ -234,7 +234,7 @@ export class GameObjectService {
       // 오브젝트 없음.
       return {
         event: SOCKET_S_GLOBAL.ERROR,
-        packetData: '오브젝트 없음',
+        packetData: `gameObject objectId: ${objectId}- 오브젝트 없음`,
       };
     }
 
