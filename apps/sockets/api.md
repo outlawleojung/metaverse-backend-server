@@ -559,7 +559,7 @@ emit.("C_REQUEST", payload);
 
 ```json
 {
-  "recvNickName": string,
+  "recvNickname": string,
   "message": string,
   "color": string,
   "roomCode": string,

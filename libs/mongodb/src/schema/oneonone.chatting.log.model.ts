@@ -5,7 +5,7 @@ export const OneOnOneChattingLogSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    sendNickName: {
+    sendNickname: {
       type: String,
       required: true,
     },
@@ -13,7 +13,7 @@ export const OneOnOneChattingLogSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    recvNickName: {
+    recvNickname: {
       type: String,
       required: true,
     },
@@ -31,8 +31,8 @@ export const OneOnOneChattingLogSchema = new mongoose.Schema(
 export interface OneOnOneChattingLog extends mongoose.Document {
   _id: string;
   sendMemberId: string;
-  sendNickName: string;
+  sendNickname: string;
   recvMemberId: string;
-  recvNickName: string;
+  recvNickname: string;
   chatMessage: string;
 }

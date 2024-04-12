@@ -188,7 +188,7 @@ export class ChatService {
     // mongodb 채팅 로그 저장
     const oneononeChattingLogSave = await new this.oneononeChattingLog({
       sendMemberId: sendMember.memberId,
-      sendNickName: sendMember.nickname,
+      sendNickname: sendMember.nickname,
       recvMemberId: recvMember.memberId,
       recvNickname: recvMember.nickname,
       chatMessage: packet.message,
@@ -197,8 +197,8 @@ export class ChatService {
     await oneononeChattingLogSave.save();
 
     const response = new S_SEND_DIRECT_MESSAGE();
-    response.recvNickname = sendMember.nickname;
-    response.sendNickname = recvMember.nickname;
+    response.sendNickname = sendMember.nickname;
+    response.recvNickname = recvMember.nickname;
     response.message = packet.message;
     response.color = packet.color;
 
