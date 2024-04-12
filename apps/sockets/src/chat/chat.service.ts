@@ -111,15 +111,13 @@ export class ChatService {
     });
     await worldChattingLogSave.save();
 
-    const request = new C_SEND_MESSAGE();
+    const request = new S_SEND_MESSAGE();
     request.message = packet.message;
     request.color = packet.color;
-    request.roomCode = packet.roomCode;
-    request.roomName = packet.roomName;
+    request.sendNickname = nickname;
 
     const data = {
       redisRoomId: client.data.roomId,
-      sendNickname: nickname,
       packet: request,
     };
     this.messageHandler.publishHandler(
@@ -130,13 +128,9 @@ export class ChatService {
 
   async broadcastMessage(data) {
     const redisRoomId = data.redisRoomId;
-    const packet = data.packet as C_SEND_MESSAGE;
+    const packet = data.packet;
 
-    const response = new S_SEND_MESSAGE();
-    response.message = packet.message;
-    response.sendNickname = response.sendNickname;
-
-    const { eventName, ...packetData } = response;
+    const { eventName, ...packetData } = packet;
 
     this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
   }

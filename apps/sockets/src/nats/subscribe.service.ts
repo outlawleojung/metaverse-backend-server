@@ -1,6 +1,7 @@
 import { S_BASE_SET_TRANSFORM } from './../packets/packet';
 import {
   CHAT_SOCKET_C_MESSAGE,
+  CHAT_SOCKET_S_MESSAGE,
   COMMON_SOCKET_S_MESSAGE,
   MY_ROOM_SOCKET_C_MESSAGE,
   MY_ROOM_SOCKET_S_MESSAGE,
@@ -92,7 +93,7 @@ export class SubscribeService {
     console.log(data);
 
     switch (data.packet.eventName) {
-      case CHAT_SOCKET_C_MESSAGE.C_SEND_MESSAGE:
+      case CHAT_SOCKET_S_MESSAGE.S_SEND_MESSAGE:
         await this.chatService.broadcastMessage(data);
         break;
       case CHAT_SOCKET_C_MESSAGE.C_SEND_DIRECT_MESSAGE:
