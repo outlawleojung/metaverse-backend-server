@@ -156,7 +156,7 @@ export class UnificationService {
   }
 
   async joinRoom(client: CustomSocket, packet: C_ENTER) {
-    this.logger.debug('join room');
+    this.logger.debug('💚💚 Join Room 💚💚');
     console.log(packet);
     const authInfo =
       await this.tokenCheckService.getJwtAccessTokenAndSessionId(client);
@@ -169,12 +169,15 @@ export class UnificationService {
 
     const memberId = memberInfo.memberId;
     const redisRoomId = RedisKey.getStrRoomId(packet.roomId);
+    this.logger.debug('Join Room redisRoomId : ', redisRoomId);
 
     // 룸 존재 여부 확인
     const exRoom = await this.redisClient.hget(
       RedisKey.getStrRooms(),
       redisRoomId,
     );
+
+    this.logger.debug('Join Room exRoom : ', exRoom);
 
     if (!exRoom) {
       return client.emit(
@@ -186,6 +189,9 @@ export class UnificationService {
     // 사용자키로 룸에 속해 있는지 조회
     const memberSetKey = RedisKey.getStrRoomPlayerList(redisRoomId);
     const members = await this.redisClient.smembers(memberSetKey);
+
+    this.logger.debug('Join Room memberSetKey : ', memberSetKey);
+    this.logger.debug('Join Room members : ', members);
 
     // 사용자가 현재 룸에 이미 입장 하고 있는 상태라면
     if (members && members.includes(memberId)) {
@@ -202,6 +208,7 @@ export class UnificationService {
     // 입장 처리
     client.data.roomId = redisRoomId;
     client.join(redisRoomId);
+    this.logger.debug('Join Room 입장 완료');
 
     // 룸에 사용자 정보 저장
     await this.redisClient.sadd(memberSetKey, memberId);
@@ -241,6 +248,11 @@ export class UnificationService {
       packet: broadcastPacket,
     };
 
+    console.log(
+      '##################### NATS_EVENTS.SYNC_ROOM joinRoom: ',
+      broadcastData,
+    );
+    console.log('##################### clientId : ', client.data.clientId);
     await this.messageHandler.publishHandler(
       `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
       JSON.stringify(broadcastData),
@@ -322,21 +334,23 @@ export class UnificationService {
     }
 
     // 룸 입장 이벤트 발생
-    this.logger.debug('룸 입장 이벤트 발생 ✅ : ', redisRoomId);
-    await this.messageHandler.publishHandler(
-      `${NATS_EVENTS.JOIN_ROOM}`,
-      JSON.stringify({
-        memberId: memberId,
-        roomId: redisRoomId,
-      }),
-    );
+    // this.logger.debug('룸 입장 이벤트 발생 ✅ : ', redisRoomId);
+    // await this.messageHandler.publishHandler(
+    //   `${NATS_EVENTS.JOIN_ROOM}`,
+    //   JSON.stringify({
+    //     memberId: memberId,
+    //     roomId: redisRoomId,
+    //   }),
+    // );
   }
 
   // 사용자 퇴장 처리
   async checkLeaveRoom(client: CustomSocket, memberId: string) {
     // 사용자의 현재 룸 조회
-    const { memberKey, redisRoomId } =
-      await this.socketService.getUserRoomId(memberId);
+
+    const memberKey = RedisKey.getStrMemberCurrentRoom(memberId);
+    const redisRoomId = client.data.roomId;
+
     console.log(
       '#################################  checkLeaveRoom redisRoomId : ',
       redisRoomId,
@@ -420,6 +434,11 @@ export class UnificationService {
           packet: response,
         };
 
+        console.log(
+          '##################### NATS_EVENTS.SYNC_ROOM checkLeaveRoom: ',
+          data,
+        );
+        console.log('##################### clientId : ', client.data.clientId);
         // 룸 퇴장 이벤트 발생
         this.messageHandler.publishHandler(
           `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,

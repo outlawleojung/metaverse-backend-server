@@ -150,15 +150,17 @@ export class PlayerService {
       packet.rotation,
     );
 
-    const data = {
-      redisRoomId,
-      packet: response,
-    };
+    if (response) {
+      const data = {
+        redisRoomId,
+        packet: response,
+      };
 
-    this.messageHandler.publishHandler(
-      `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
-      JSON.stringify(data),
-    );
+      this.messageHandler.publishHandler(
+        `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
+        JSON.stringify(data),
+      );
+    }
   }
 
   async setTransform(data) {
@@ -181,15 +183,17 @@ export class PlayerService {
       packet.animation,
     );
 
-    const data = {
-      redisRoomId,
-      packet: response,
-    };
+    if (response) {
+      const data = {
+        redisRoomId,
+        packet: response,
+      };
 
-    this.messageHandler.publishHandler(
-      `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
-      JSON.stringify(data),
-    );
+      this.messageHandler.publishHandler(
+        `${NATS_EVENTS.SYNC_ROOM}`,
+        JSON.stringify(data),
+      );
+    }
   }
 
   async setAnimation(data) {
@@ -215,15 +219,17 @@ export class PlayerService {
       packet.blend,
     );
 
-    const data = {
-      redisRoomId,
-      packet: response,
-    };
+    if (response) {
+      const data = {
+        redisRoomId,
+        packet: response,
+      };
 
-    this.messageHandler.publishHandler(
-      `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
-      JSON.stringify(data),
-    );
+      this.messageHandler.publishHandler(
+        `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
+        JSON.stringify(data),
+      );
+    }
   }
 
   async setAnimationOnce(data) {
@@ -248,24 +254,26 @@ export class PlayerService {
       packet,
     );
 
-    if (response.clientPacket) {
-      client.data.objectId = response.clientPacket.packetData.objectId;
+    if (response) {
+      if (response.clientPacket) {
+        client.data.objectId = response.clientPacket.packetData.objectId;
 
-      client.emit(
-        response.clientPacket.eventName,
-        JSON.stringify(response.clientPacket.packetData),
+        client.emit(
+          response.clientPacket.eventName,
+          JSON.stringify(response.clientPacket.packetData),
+        );
+      }
+
+      const data = {
+        redisRoomId,
+        packet: response.broadcastPacket,
+      };
+
+      this.messageHandler.publishHandler(
+        `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
+        JSON.stringify(data),
       );
     }
-
-    const data = {
-      redisRoomId,
-      packet: response.broadcastPacket,
-    };
-
-    this.messageHandler.publishHandler(
-      `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
-      JSON.stringify(data),
-    );
   }
 
   async instantiateObject(data) {
@@ -278,10 +286,8 @@ export class PlayerService {
 
   async baseRemoveGameObject(client: CustomSocket) {
     // 사용자의 현재 룸 조회
-    const memberId = client.data.memberId;
     const clientId = client.data.clientId;
-
-    const { redisRoomId } = await this.socketService.getUserRoomId(memberId);
+    const redisRoomId = client.data.roomId;
 
     const gameObjectIds = await this.gameObjectService.removeGameObject(
       redisRoomId,
