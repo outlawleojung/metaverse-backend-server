@@ -137,6 +137,7 @@ export class ChatService {
 
   // 귓소말 보내기
   async sendDirectMessage(client: CustomSocket, packet: C_SEND_DIRECT_MESSAGE) {
+    console.log('sendDirectMessage : ', packet);
     if (!packet.recvNickName) {
       return client.emit(
         CHAT_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
