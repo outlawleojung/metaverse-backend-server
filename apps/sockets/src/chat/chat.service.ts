@@ -151,6 +151,8 @@ export class ChatService {
       },
     });
 
+    console.log('recvMember : ', recvMember);
+
     // 귓속말 대상이 존재하지 않는 사용자일 경우
     if (!recvMember) {
       return client.emit(
@@ -164,6 +166,8 @@ export class ChatService {
       RedisKey.getStrMemberSocket(recvMember.memberId),
     );
 
+    console.log('targetSocket : ', targetSocket);
+
     if (!targetSocket) {
       return client.emit(
         CHAT_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
@@ -176,6 +180,8 @@ export class ChatService {
         memberId: client.data.memberId,
       },
     });
+
+    console.log('sendMember : ', sendMember);
 
     // 본인에게 귓속말 보냈을 경우
     if (sendMember.memberId == recvMember.memberId) {
