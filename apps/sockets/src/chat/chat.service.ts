@@ -138,7 +138,7 @@ export class ChatService {
 
     const { eventName, ...packetData } = response;
 
-    this.server.to(redisRoomId).emit(eventName, packetData);
+    this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
   }
 
   // 귓소말 보내기
@@ -229,7 +229,7 @@ export class ChatService {
 
     const { eventName, ...packetData } = packet;
 
-    this.server.to(recvMemberId).emit(eventName, packetData);
+    this.server.to(recvMemberId).emit(eventName, JSON.stringify(packetData));
   }
 
   // // 월드 귓속말 특정 소켓에만 메세지 전송
