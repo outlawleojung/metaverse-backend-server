@@ -264,7 +264,7 @@ export class C_SEND_DIRECT_MESSAGE implements PACKET {
 
   @IsString()
   @IsNotEmpty()
-  recvNickName: string;
+  recvNickname: string;
 
   @IsString()
   @IsNotEmpty()

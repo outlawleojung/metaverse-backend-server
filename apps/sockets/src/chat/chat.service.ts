@@ -137,9 +137,7 @@ export class ChatService {
 
   // 귓소말 보내기
   async sendDirectMessage(client: CustomSocket, packet: C_SEND_DIRECT_MESSAGE) {
-    console.log('sendDirectMessage : ', packet);
-    console.log('packet.recvNickName : ', packet.recvNickName);
-    if (!packet.recvNickName) {
+    if (!packet.recvNickname) {
       return client.emit(
         CHAT_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
         SOCKET_SERVER_ERROR_CODE_GLOBAL.DIRECT_MESSAGE_USER_NOT_FOUND,
@@ -148,11 +146,9 @@ export class ChatService {
 
     const recvMember = await this.memberRepository.findOne({
       where: {
-        nickname: packet.recvNickName,
+        nickname: packet.recvNickname,
       },
     });
-
-    console.log('recvMember : ', recvMember);
 
     // 귓속말 대상이 존재하지 않는 사용자일 경우
     if (!recvMember) {
@@ -167,8 +163,6 @@ export class ChatService {
       RedisKey.getStrMemberSocket(recvMember.memberId),
     );
 
-    console.log('targetSocket : ', targetSocket);
-
     if (!targetSocket) {
       return client.emit(
         CHAT_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
@@ -181,8 +175,6 @@ export class ChatService {
         memberId: client.data.memberId,
       },
     });
-
-    console.log('sendMember : ', sendMember);
 
     // 본인에게 귓속말 보냈을 경우
     if (sendMember.memberId == recvMember.memberId) {
@@ -198,7 +190,7 @@ export class ChatService {
       sendMemberId: sendMember.memberId,
       sendNickName: sendMember.nickname,
       recvMemberId: recvMember.memberId,
-      recvNickName: recvMember.nickname,
+      recvNickname: recvMember.nickname,
       chatMessage: packet.message,
       kstCreatedAt: kstCreatedAt,
     });
