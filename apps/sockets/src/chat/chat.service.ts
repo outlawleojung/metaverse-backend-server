@@ -134,7 +134,7 @@ export class ChatService {
 
     const response = new S_SEND_MESSAGE();
     response.message = packet.message;
-    response.sendNickname = response.color = packet.color;
+    response.sendNickname = response.sendNickname;
 
     const { eventName, ...packetData } = response;
 
