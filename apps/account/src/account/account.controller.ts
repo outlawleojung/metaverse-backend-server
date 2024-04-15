@@ -46,6 +46,8 @@ import {
 } from '@libs/common';
 import { AlreadyLinkedAccountResponseDto } from './dto/response/already.linked.account.response.dto';
 import { AuthEmailErrorResponseDto } from './dto/response/auth.email.error.response.dto';
+import { RegisterDto } from './dto/request/register.dto';
+import { LoginResponseDto } from './dto/response/login.response';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('ACCOUNT - 계정')
@@ -92,6 +94,10 @@ export class AccountController {
    * @param rawToken
    * @returns { accessToken, refreshToken}
    */
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: LoginResponseDto,
+  })
   @Post('login/email')
   @UseGuards(BasicTokenGuard)
   async loginEmail(@Headers('authorization') rawToken: string) {
@@ -108,16 +114,16 @@ export class AccountController {
    * @param regPathType
    * @returns { accessToken, refreshToken}
    */
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: LoginResponseDto,
+  })
   @Post('register/email')
-  async registerEmail(
-    @Body('email') email: string,
-    @Body('password') password: string,
-    @Body('regPathType') regPathType: number,
-  ) {
+  async registerEmail(@Body() data: RegisterDto) {
     return await this.authService.registerWithEmail({
-      accountToken: email,
-      password,
-      regPathType,
+      accountToken: data.email,
+      password: data.password,
+      regPathType: data.regPathType,
     });
   }
 
