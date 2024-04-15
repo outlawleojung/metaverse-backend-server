@@ -1,9 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
-import cookieParser from 'cookie-parser';
-import session from 'express-session';
-import passport from 'passport';
 
 import { HttpExceptionFilter } from './httpException.filter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -41,21 +38,21 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.use(cookieParser());
-  app.use(
-    session({
-      resave: false,
-      saveUninitialized: false,
-      secret: process.env.COOKIE_SECRET,
-      cookie: {
-        httpOnly: true,
-        secure: false,
-      },
-    }),
-  );
+  // app.use(cookieParser());
+  // app.use(
+  //   session({
+  //     resave: false,
+  //     saveUninitialized: false,
+  //     secret: process.env.COOKIE_SECRET,
+  //     cookie: {
+  //       httpOnly: true,
+  //       secure: false,
+  //     },
+  //   }),
+  // );
 
-  app.use(passport.initialize());
-  app.use(passport.session());
+  // app.use(passport.initialize());
+  // app.use(passport.session());
 
   app.setBaseViewsDir(join(__dirname, '..', 'src', 'views'));
 

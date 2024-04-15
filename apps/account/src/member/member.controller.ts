@@ -1,5 +1,5 @@
 import { UpdateProfileResponseDto } from './dto/response/update.profile.response.dto';
-import { AccessTokenGuard, JwtGuard, MemberDeco } from '@libs/common';
+import { AccessTokenGuard, MemberDeco } from '@libs/common';
 import { MemberService } from './member.service';
 import {
   Body,

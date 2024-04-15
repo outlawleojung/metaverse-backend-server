@@ -40,7 +40,6 @@ import { LinkedAccountResponseDto } from './dto/response/linked.account.response
 import {
   AuthService,
   BasicTokenGuard,
-  JwtGuard,
   MemberDeco,
   RefreshTokenGuard,
 } from '@libs/common';
@@ -150,109 +149,6 @@ export class AccountController {
     const token = this.authService.extractTokenFromHeader(rawToken, true);
     return await this.authService.autoLogin(token);
   }
-
-  //////////////////////
-
-  // // 계정 생성
-  // @ApiResponse({
-  //   status: HttpStatus.FORBIDDEN,
-  //   type: ErrorDto,
-  //   description: 'Error',
-  // })
-  // @ApiResponse({
-  //   status: HttpStatus.OK,
-  //   type: SignUpResponseDto,
-  // })
-  // @ApiOperation({ summary: '자체 계정 생성' })
-  // @Post('create')
-  // async createMember(@Body() memberData: SignMemberDto) {
-  //   return await this.accountService.createMember(memberData);
-  // }
-
-  // //로그인
-  // @ApiOperation({ summary: '자체 로그인' })
-  // @ApiResponse({
-  //   status: HttpStatus.FORBIDDEN,
-  //   type: ErrorDto,
-  //   description: 'Error',
-  // })
-  // @ApiResponse({
-  //   status: HttpStatus.OK,
-  //   type: AzmetaLoginResponseDto,
-  // })
-  // @Post('arzmetaLogin')
-  // async login(@Body() memberData: ArzmetaLogInMemberDto) {
-  //   return await this.accountService.arzmetaLogin(memberData);
-  // }
-
-  // // 소셜 로그인
-  // @ApiOperation({ summary: '소셜 로그인 및 계정 생성' })
-  // @ApiResponse({
-  //   status: HttpStatus.FORBIDDEN,
-  //   type: ErrorDto,
-  //   description: 'Error',
-  // })
-  // @ApiResponse({
-  //   status: HttpStatus.OK,
-  //   type: SocialLoginResponseDto,
-  // })
-  // @Post('socialLogin')
-  // async socialLogin(@Body() memberData: LogInMemberDto) {
-  //   return await this.accountService.socialLogin(memberData);
-  // }
-
-  // // 로그인 연동
-  // @ApiOperation({ summary: '계정 연동 하기' })
-  // @ApiResponse({
-  //   status: HttpStatus.OK,
-  //   type: LinkedAccountResponseDto,
-  // })
-  // @ApiResponse({
-  //   status: HttpStatus.FORBIDDEN,
-  //   type: AlreadyLinkedAccountResponseDto,
-  // })
-  // @UseGuards(JwtGuard)
-  // @Post('linkedAccount')
-  // async linkedAccount(
-  //   @MemberDeco('memberId') memberId: string,
-  //   @Body() data: LinkedAccountDto,
-  // ) {
-  //   return await this.accountService.linkedAccount(memberId, data);
-  // }
-
-  // // 로그인 해제
-  // @ApiOperation({ summary: '계정 연동 해제' })
-  // @ApiResponse({
-  //   status: HttpStatus.OK,
-  //   type: LinkedAccountResponseDto,
-  // })
-  // @UseGuards(JwtGuard)
-  // @Delete('releaseLinkedAccount/:providerType')
-  // async releaseLinkedAccount(
-  //   @Headers() headers,
-  //   @Param('providerType') providerType: number,
-  // ) {
-  //   return await this.accountService.releaseLinkedAccount(
-  //     headers.memberId,
-  //     providerType,
-  //   );
-  // }
-
-  // // 로그인 유효성 검증
-  // @ApiResponse({
-  //   status: HttpStatus.FORBIDDEN,
-  //   type: ErrorDto,
-  //   description: 'Error',
-  // })
-  // @ApiResponse({
-  //   status: HttpStatus.OK,
-  //   type: LoginAuthResponseDto,
-  // })
-  // @ApiOperation({ summary: '로그인 유효성 검증' })
-  // @Post('loginAuth')
-  // async loginAuth(@Body() loginAuthDto: LoginAuthDto) {
-  //   return await this.accountService.loginAuth(loginAuthDto);
-  // }
 
   // 이메일 인증 번호 받기
   @ApiResponse({
