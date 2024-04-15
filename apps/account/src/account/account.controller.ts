@@ -129,7 +129,11 @@ export class AccountController {
     });
   }
 
-  // 자동 로그인
+  /**
+   * 자동 로그인
+   * @param rawToken
+   * @returns
+   */
   @ApiResponse({
     status: HttpStatus.FORBIDDEN,
     type: ErrorDto,
@@ -137,7 +141,7 @@ export class AccountController {
   })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: AutoLoginResponseDto,
+    type: LoginResponseDto,
   })
   @ApiOperation({ summary: '자동 로그인' })
   @UseGuards(RefreshTokenGuard)
