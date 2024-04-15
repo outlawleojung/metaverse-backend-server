@@ -94,7 +94,7 @@ export class AuthService {
     }
   }
 
-  rotateToken(token: string, isRefreshToken: boolean) {
+  async rotateToken(token: string, isRefreshToken: boolean) {
     try {
       const decoded = this.jwtService.verify(token, {
         secret: process.env.SECRET_KEY,
@@ -104,6 +104,19 @@ export class AuthService {
         throw new UnauthorizedException(
           '토큰 재발급은 Refresh 토큰으로만 가능합니다.',
         );
+      }
+
+      // 데이터베이스에 있는 토큰과 비교
+      const member = await this.memberRepository.findOne({
+        where: {
+          memberId: decoded.sub,
+        },
+      });
+
+      const validToken = await bcryptjs.compareSync(token, member.refreshToken);
+      console.log('validToken: ', validToken);
+      if (!validToken) {
+        throw new UnauthorizedException('Refresh 토큰이 유효하지 않습니다.');
       }
 
       return this.signToken(
@@ -118,18 +131,57 @@ export class AuthService {
     }
   }
 
-  loginMember(member: Pick<Member, 'memberId' | 'nickname' | 'email'>) {
+  async saveRefreshToken(token) {
+    const result = this.verifyToken(token);
+
+    // 토큰 암호화 설정
+    const hashedRefreshToken = await bcryptjs.hash(token, 12);
+
+    try {
+      await this.memberRepository.update(
+        { memberId: result.sub },
+        { refreshToken: hashedRefreshToken },
+      );
+    } catch (e) {
+      console.log(e.toString());
+      throw new ForbiddenException('Refresh 토큰 DB 저장 실패');
+    }
+  }
+
+  async loginMember(member: Pick<Member, 'memberId' | 'nickname' | 'email'>) {
+    const refreshToken = this.signToken(member, true);
+
+    await this.saveRefreshToken(refreshToken);
     return {
       accessToken: this.signToken(member, false),
-      refreshToken: this.signToken(member, true),
+      refreshToken,
     };
+  }
+
+  async validRefreshToken(token: string) {
+    const result = this.verifyToken(token);
+
+    const member = await this.memberRepository.findOne({
+      select: ['memberId', 'memberCode', 'nickname', 'email', 'refreshToken'],
+      where: {
+        memberId: result.sub,
+      },
+    });
+
+    const validToken = await bcryptjs.compareSync(token, member.refreshToken);
+
+    if (!validToken) {
+      throw new UnauthorizedException('Refresh 토큰이 유효하지 않습니다.');
+    }
+
+    return member;
   }
 
   async authenticateWithEmailAndPassword(
     memberAccount: Pick<MemberAccount, 'accountToken' | 'password'>,
   ) {
     const email = memberAccount.accountToken;
-    const exMember = await this.commonService.getMemberByEmail(email);
+    const exMember = await this.commonService.getMemberAccountByEmail(email);
 
     if (!exMember) {
       throw new HttpException(
@@ -167,12 +219,17 @@ export class AuthService {
     return member;
   }
 
+  async autoLogin(token: string) {
+    const member = await this.validRefreshToken(token);
+    return await this.loginMember(member);
+  }
+
   async loginWithEmail(
     memberAccount: Pick<MemberAccount, 'accountToken' | 'password'>,
   ) {
     const exMember = await this.authenticateWithEmailAndPassword(memberAccount);
 
-    return this.loginMember(exMember);
+    return await this.loginMember(exMember);
   }
 
   // 자체 계정 생성

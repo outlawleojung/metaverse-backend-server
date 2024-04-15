@@ -823,8 +823,25 @@ export class CommonService {
     }
   }
 
-  async getMemberByEmail(email: string): Promise<MemberAccount> {
-    return this.memberAccountRepository.findOne({
+  async getMemberByEmail(email: string): Promise<Member> {
+    const memberAccount = await this.memberAccountRepository.findOne({
+      where: {
+        providerType: PROVIDER_TYPE.ARZMETA,
+        accountToken: email,
+      },
+    });
+
+    return await this.memberRepository.findOne({
+      select: ['memberId', 'memberCode', 'nickname', 'email'],
+      where: {
+        memberId: memberAccount.memberId,
+      },
+    });
+  }
+
+  async getMemberAccountByEmail(email: string): Promise<MemberAccount> {
+    return await this.memberAccountRepository.findOne({
+      select: ['memberId', 'password'],
       where: {
         providerType: PROVIDER_TYPE.ARZMETA,
         accountToken: email,

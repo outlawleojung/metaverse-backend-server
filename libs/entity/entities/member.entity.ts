@@ -90,6 +90,9 @@ export class Member {
   @Column('int', { name: 'firstProviderType', default: () => "'1'" })
   firstProviderType: number;
 
+  @Column('varchar', { name: 'refreshToken', nullable: true })
+  refreshToken: string;
+
   @Column('int', { name: 'regPathType' })
   regPathType: number;
 

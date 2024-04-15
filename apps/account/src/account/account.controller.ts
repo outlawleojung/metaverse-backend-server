@@ -65,11 +65,11 @@ export class AccountController {
    */
   @Post('token/access')
   @UseGuards(RefreshTokenGuard)
-  createTokenAccess(@Headers('authorization') rawToken: string) {
+  async createTokenAccess(@Headers('authorization') rawToken: string) {
     console.log('token : ', rawToken);
     const token = this.authService.extractTokenFromHeader(rawToken, true);
 
-    const accessToken = this.authService.rotateToken(token, false);
+    const accessToken = await this.authService.rotateToken(token, false);
 
     return { accessToken };
   }
@@ -81,10 +81,12 @@ export class AccountController {
    */
   @Post('token/refresh')
   @UseGuards(RefreshTokenGuard)
-  createTokenRefresh(@Headers('authorization') rawToken: string) {
+  async createTokenRefresh(@Headers('authorization') rawToken: string) {
     const token = this.authService.extractTokenFromHeader(rawToken, true);
 
-    const refreshToken = this.authService.rotateToken(token, true);
+    const refreshToken = await this.authService.rotateToken(token, true);
+
+    await this.authService.saveRefreshToken(refreshToken);
 
     return { refreshToken };
   }
@@ -125,6 +127,24 @@ export class AccountController {
       password: data.password,
       regPathType: data.regPathType,
     });
+  }
+
+  // 자동 로그인
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    type: ErrorDto,
+    description: 'Error',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: AutoLoginResponseDto,
+  })
+  @ApiOperation({ summary: '자동 로그인' })
+  @UseGuards(RefreshTokenGuard)
+  @Post('login/autoLogin')
+  async autoLogin(@Headers('authorization') rawToken: string) {
+    const token = this.authService.extractTokenFromHeader(rawToken, true);
+    return await this.authService.autoLogin(token);
   }
 
   //////////////////////
@@ -229,22 +249,6 @@ export class AccountController {
   // async loginAuth(@Body() loginAuthDto: LoginAuthDto) {
   //   return await this.accountService.loginAuth(loginAuthDto);
   // }
-
-  // 자동 로그인
-  @ApiResponse({
-    status: HttpStatus.FORBIDDEN,
-    type: ErrorDto,
-    description: 'Error',
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: AutoLoginResponseDto,
-  })
-  @ApiOperation({ summary: '자동 로그인' })
-  @Post('autoLogin')
-  async autoLogin(@Body() autoLoginDto: AutoLoginDto) {
-    return await this.accountService.autoLogin(autoLoginDto);
-  }
 
   // 이메일 인증 번호 받기
   @ApiResponse({
