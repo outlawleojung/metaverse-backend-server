@@ -1,8 +1,7 @@
-import { GetCommonDto } from '../../../dto/get.common.dto';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class FindFriendDto extends GetCommonDto {
+export class FindFriendDto {
   @ApiProperty({
     example: '{memeberCode} or {nickanme}',
     description: '친구 식별자',

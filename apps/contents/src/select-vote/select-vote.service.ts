@@ -1,9 +1,4 @@
-import {
-  ERRORCODE,
-  ERROR_MESSAGE,
-  VOTE_RESULT_EXPOSURE_TYPE,
-  VOTE_RESULT_TYPE,
-} from '@libs/constants';
+import { ERRORCODE, ERROR_MESSAGE, VOTE_RESULT_TYPE } from '@libs/constants';
 import {
   KtmfEventEmailInfo,
   MemberSelectVoteInfo,
@@ -19,7 +14,6 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GetCommonDto } from '../dto/get.common.dto';
 import { DataSource, LessThan, MoreThan, Repository } from 'typeorm';
 import { DoVoteDto } from './dto/req/do.vote.dto';
 import { HttpStatusCode } from 'axios';
@@ -39,7 +33,7 @@ export class SelectVoteService {
   private readonly logger = new Logger(SelectVoteService.name);
 
   // 투표 목록 보여주기
-  async getSelectVote(data: GetCommonDto) {
+  async getSelectVote(memberId: string) {
     const selectVoteInfo = await this.selectVoteInfoRepository
       .createQueryBuilder('s')
       .select([
@@ -78,7 +72,7 @@ export class SelectVoteService {
       select: ['itemNum'],
       where: {
         voteId: selectVoteInfo.id,
-        memberId: data.memberId,
+        memberId,
       },
     });
 
@@ -106,7 +100,7 @@ export class SelectVoteService {
         'like',
         'like.memberId = :memberId AND like.voteId = v.voteId',
         {
-          memberId: data.memberId,
+          memberId,
         },
       )
       .where('v.voteId = :voteId', { voteId: selectVoteInfo.id })
@@ -127,7 +121,7 @@ export class SelectVoteService {
   }
 
   // 투표 하기
-  async doVote(data: DoVoteDto) {
+  async doVote(memberId: string, data: DoVoteDto) {
     const voteInfo = await this.selectVoteInfoRepository.findOne({
       where: {
         id: data.voteId,
@@ -163,7 +157,7 @@ export class SelectVoteService {
     const myVoteCount = await this.memberSelectVoteInfoRepository.count({
       where: {
         voteId: voteInfo.id,
-        memberId: data.memberId,
+        memberId,
       },
     });
 
@@ -184,7 +178,7 @@ export class SelectVoteService {
       where: {
         voteId: data.voteId,
         itemNum: data.itemNum,
-        memberId: data.memberId,
+        memberId,
       },
     });
 
@@ -200,7 +194,7 @@ export class SelectVoteService {
     }
 
     const memberSelectVote = new MemberSelectVoteInfo();
-    memberSelectVote.memberId = data.memberId;
+    memberSelectVote.memberId = memberId;
     memberSelectVote.voteId = data.voteId;
     memberSelectVote.itemNum = data.itemNum;
 
@@ -219,7 +213,7 @@ export class SelectVoteService {
         select: ['itemNum'],
         where: {
           voteId: data.voteId,
-          memberId: data.memberId,
+          memberId,
         },
       });
 
@@ -243,7 +237,7 @@ export class SelectVoteService {
   }
 
   // 좋아요
-  async doLike(data: DoVoteDto) {
+  async doLike(memberId: string, data: DoVoteDto) {
     const voteInfo = await this.selectVoteInfoRepository.findOne({
       where: {
         id: data.voteId,
@@ -281,14 +275,14 @@ export class SelectVoteService {
         .getRepository(MemberSelectVoteLike)
         .findOne({
           where: {
-            memberId: data.memberId,
+            memberId,
             voteId: data.voteId,
             itemNum: data.itemNum,
           },
         });
 
       const like = new MemberSelectVoteLike();
-      like.memberId = data.memberId;
+      like.memberId = memberId;
       like.voteId = data.voteId;
       like.itemNum = data.itemNum;
 

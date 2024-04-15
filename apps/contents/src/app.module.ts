@@ -9,10 +9,12 @@ import { FriendService } from './friend/friend.service';
 import { Module } from '@nestjs/common';
 import {
   AzureBlobService,
-  JwtGuard,
   JwtAuthModule,
   SessionModule,
   CommonService,
+  AuthService,
+  JwtService,
+  CommonModule,
 } from '@libs/common';
 import { FriendController } from './friend/friend.controller';
 import { FriendModule } from './friend/friend.module';
@@ -27,6 +29,8 @@ import {
   MemberMyRoomInfo,
   StartInventory,
   MemberWalletInfo,
+  MemberAccount,
+  EmailConfirm,
 } from '@libs/entity';
 import { AppController } from './app.controller';
 import { OfficeController } from './office/office.controller';
@@ -62,11 +66,13 @@ import { CsafModule } from './csaf/csaf.module';
   imports: [
     TypeOrmModule.forFeature([
       Member,
+      MemberAccount,
       MemberMyRoomInfo,
       MemberFurnitureItemInven,
       StartInventory,
       MemberAvatarPartsItemInven,
       MemberWalletInfo,
+      EmailConfirm,
     ]),
     MongooseModule.forFeature([
       { name: 'createOffice', schema: CreateOfficeSchema },
@@ -98,6 +104,7 @@ import { CsafModule } from './csaf/csaf.module';
     StartInventory,
     NftModule,
     CsafModule,
+    CommonModule,
   ],
   controllers: [
     AppController,
@@ -117,7 +124,6 @@ import { CsafModule } from './csaf/csaf.module';
       useClass: MorganInterceptor('combined'),
     },
     AppService,
-    JwtGuard,
     AzureBlobService,
     OfficeLogService,
     ImageAnalysisService,

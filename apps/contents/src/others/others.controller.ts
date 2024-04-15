@@ -12,9 +12,8 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MorganInterceptor } from 'nest-morgan';
 import { OthersService } from './others.service';
-import { JwtGuard } from '@libs/common';
 import { GetOthersResponsesDto } from './dto/get.others.response.dto';
-import { GetCommonDto } from '../dto/get.common.dto';
+import { AccessTokenGuard } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('OTHERS - 타인 정보')
@@ -27,7 +26,7 @@ export class OthersController {
     status: HttpStatus.OK,
     type: GetOthersResponsesDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('memberInfo')
   async getOthersMemberInfo(
     @Query('type') type: number,

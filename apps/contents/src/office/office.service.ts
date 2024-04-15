@@ -18,15 +18,11 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, QueryRunner } from 'typeorm';
-import { GetCommonDto } from '../dto/get.common.dto';
-import {
-  AzureBlobService,
-  JwtService,
-  StartedUnixTimestamp,
-} from '@libs/common';
+import { AzureBlobService, JwtService } from '@libs/common';
 import { BOOLEAN, ERRORCODE, ERROR_MESSAGE } from '@libs/constants';
 import { CreateWaitDto } from './dto/request/create.wait.dto';
 import dayjs from 'dayjs';
+import { CheckRoomCodePassword } from './dto/request/check.roomcode.password.dto';
 
 @Injectable()
 export class OfficeService {
@@ -64,7 +60,7 @@ export class OfficeService {
   }
 
   // 룸 정보 조회
-  async getRoomInfo(data: GetCommonDto, roomCode: string) {
+  async getRoomInfo(roomCode: string) {
     const officeRoomInfo = await this.dataSource.query(
       `SELECT 
       name AS roomName, 
@@ -111,11 +107,11 @@ export class OfficeService {
   }
 
   // 룸 코드 패스워드 확인
-  async checkRoomCodePassword(roomCode: string, password: string) {
+  async checkRoomCodePassword(data: CheckRoomCodePassword) {
     const office = await this.memberOfficeReservdRepository.findOne({
       where: {
-        roomCode: roomCode,
-        password: password,
+        roomCode: data.roomCode,
+        password: data.password,
       },
     });
 
@@ -136,7 +132,7 @@ export class OfficeService {
   }
 
   // 나의 예약 목록 조회
-  async getReservInfo(data: GetCommonDto) {
+  async getReservInfo(memberId: string) {
     const info = await this.dataSource.query(
       `SELECT 
       name AS roomName, 
@@ -163,7 +159,7 @@ export class OfficeService {
       FROM memberOfficeReservationInfo mr 
       INNER JOIN member member ON member.memberId = mr.memberId 
       WHERE mr.memberId = ? and modeType <> 5`,
-      [data.memberId],
+      [memberId],
     );
 
     return {
@@ -174,7 +170,7 @@ export class OfficeService {
   }
 
   // 나의 대기 목록 조회
-  async getWaitInfo(data: GetCommonDto) {
+  async getWaitInfo(memberId: string) {
     const info = await this.dataSource.query(
       `SELECT mr.name AS roomName, 
       mr.roomCode as roomCode,
@@ -199,7 +195,7 @@ export class OfficeService {
         FROM memberOfficeReservationWaitingInfo mw INNER JOIN memberOfficeReservationInfo mr ON mw.reservationId = mr.id
         INNER JOIN member member ON member.memberId = mr.memberId 
         WHERE mw.memberId = ? and modeType <> 5`,
-      [data.memberId],
+      [memberId],
     );
 
     return {
@@ -210,7 +206,7 @@ export class OfficeService {
   }
 
   // 오피스 대기 하기
-  async waitOfficeReserv(data: CreateWaitDto) {
+  async waitOfficeReserv(memberId: string, data: CreateWaitDto) {
     console.log(data);
     const reservationInfo = await this.memberOfficeReservdRepository.findOne({
       where: {
@@ -228,7 +224,7 @@ export class OfficeService {
       );
     }
 
-    if (reservationInfo.memberId === data.memberId) {
+    if (reservationInfo.memberId === memberId) {
       throw new HttpException(
         {
           error: ERRORCODE.NET_E_OFFICE_CREATE_ME,
@@ -245,7 +241,7 @@ export class OfficeService {
     try {
       const waitingReservation = new MemberOfficeReservationWaitingInfo();
       waitingReservation.reservationId = reservationInfo.id;
-      waitingReservation.memberId = data.memberId;
+      waitingReservation.memberId = memberId;
 
       await queryRunner.manager.save(waitingReservation);
       await queryRunner.commitTransaction();
@@ -270,11 +266,11 @@ export class OfficeService {
   }
 
   // 오피스 예약 취소
-  async deleteReservation(data: GetCommonDto, roomCode: string) {
+  async deleteReservation(memberId: string, roomCode: string) {
     const exReserv = await this.memberOfficeReservdRepository.findOne({
       where: {
-        roomCode: roomCode,
-        memberId: data.memberId,
+        roomCode,
+        memberId,
       },
     });
 
@@ -304,7 +300,7 @@ export class OfficeService {
       await queryRunner.commitTransaction();
 
       return {
-        roomCode: roomCode,
+        roomCode,
         error: ERRORCODE.NET_E_SUCCESS,
         message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
       };
@@ -324,10 +320,10 @@ export class OfficeService {
   }
 
   // 오피스 대기 취소
-  async deleteWaiting(data: GetCommonDto, roomCode: string) {
+  async deleteWaiting(memberId: string, roomCode: string) {
     const exReserv = await this.memberOfficeReservdRepository.findOne({
       where: {
-        roomCode: roomCode,
+        roomCode,
       },
     });
 
@@ -344,7 +340,7 @@ export class OfficeService {
     const exWait = await this.memberOfficeReservWaitInfoRepository.findOne({
       where: {
         reservationId: exReserv.id,
-        memberId: data.memberId,
+        memberId,
       },
     });
 

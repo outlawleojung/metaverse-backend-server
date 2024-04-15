@@ -1,8 +1,7 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString, ValidateIf } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { GetCommonDto } from '../../../dto/get.common.dto';
 
-export class UpdateFileboxDto extends GetCommonDto {
+export class UpdateFileboxDto {
   @ApiProperty({
     example: 1,
     description: '파일함 타입',

@@ -1,11 +1,8 @@
-import { GetCommonDto } from '../../../dto/get.common.dto';
-import { MemberMyRoomInfo } from '@libs/entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsNumber,
   IsNotEmpty,
-  ValidateIf,
   IsArray,
   ValidateNested,
   IsOptional,
@@ -101,7 +98,7 @@ export class UpdateMyRoomData extends DeleteMyRoomData {
   rotation: number | null;
 }
 
-export class CreateMyRoomDto extends GetCommonDto {
+export class CreateMyRoomDto {
   @ApiProperty({
     type: CreateMyRoomData,
     isArray: true,

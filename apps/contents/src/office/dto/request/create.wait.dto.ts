@@ -1,8 +1,7 @@
-import { GetCommonDto } from '../../../dto/get.common.dto';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateWaitDto extends GetCommonDto {
+export class CreateWaitDto {
   @ApiProperty({
     example: '1259348245',
     description: '룸 코드',

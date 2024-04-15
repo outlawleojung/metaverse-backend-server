@@ -1,8 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { GetCommonDto } from '../../../dto/get.common.dto';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class DoVoteDto extends GetCommonDto {
+export class DoVoteDto {
   @ApiProperty({
     example: 134,
     description: '투표 아이디',

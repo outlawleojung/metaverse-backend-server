@@ -22,7 +22,6 @@ import {
 } from '@nestjs/swagger';
 import { MorganInterceptor } from 'nest-morgan';
 import { CsafService } from './csaf.service';
-import { JwtGuard } from '@libs/common';
 import { CreateBannerDto, CreateScreenDto } from './dto/req/create.media.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateFileboxDto } from './dto/req/create.filebox.dto';
@@ -38,6 +37,7 @@ import {
   ResCreateBannerDto,
   ResCreateScreenDto,
 } from './dto/res/res.create.media.dto';
+import { AccessTokenGuard, MemberDeco } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('CSAF - 유학박람회')
@@ -53,7 +53,7 @@ export class CsafController {
   }
 
   @ApiOperation({ summary: '부스 목록 조회' })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @ApiResponse({
     status: HttpStatus.OK,
     type: ResponseBoothsDto,
@@ -64,7 +64,7 @@ export class CsafController {
   }
 
   @ApiOperation({ summary: '부스 항목 조회' })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @ApiResponse({
     status: HttpStatus.OK,
     type: ResGetBoothDto,
@@ -75,7 +75,7 @@ export class CsafController {
   }
 
   @ApiOperation({ summary: '부스 이름 검색 조회' })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @ApiResponse({
     status: HttpStatus.OK,
     type: ResponseBoothsDto,
@@ -90,7 +90,7 @@ export class CsafController {
     status: HttpStatus.OK,
     type: ResponseCreatBoothDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @UseInterceptors(FileInterceptor('image'))
   @Post('booth')
   async createBooth(
@@ -106,7 +106,7 @@ export class CsafController {
     status: HttpStatus.OK,
     type: ResponseCreatBoothDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @UseInterceptors(FileInterceptor('image'))
   @Put('booth/:boothId')
   async updateBooth(
@@ -124,20 +124,23 @@ export class CsafController {
   }
 
   @ApiOperation({ summary: '부스 삭제' })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Delete('booth/:boothId')
-  async deleteBooth(@Headers() headers, @Param('boothId') boothId: number) {
-    return await this.csafService.deleteBooth(headers.memberId, boothId);
+  async deleteBooth(
+    @MemberDeco('memberId') memberId: string,
+    @Param('boothId') boothId: number,
+  ) {
+    return await this.csafService.deleteBooth(memberId, boothId);
   }
 
   @ApiOperation({ summary: '행사 입장' })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @ApiResponse({
     status: HttpStatus.OK,
   })
   @Post('event')
-  async boothEnter(@Headers() headers) {
-    return await this.csafService.evnetEnter(headers.memberId);
+  async boothEnter(@MemberDeco('memberId') memberId: string) {
+    return await this.csafService.evnetEnter(memberId);
   }
 
   @ApiOperation({ summary: '부스 배너 등록' })
@@ -145,19 +148,15 @@ export class CsafController {
     status: HttpStatus.OK,
     type: ResCreateBannerDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @UseInterceptors(FileInterceptor('image'))
   @Post('banner')
   async createBoothBanner(
     @UploadedFile() file: Express.Multer.File,
-    @Headers() headers,
+    @MemberDeco('memberId') memberId: string,
     @Body() data: CreateBannerDto,
   ) {
-    return await this.csafService.createBoothBanner(
-      file,
-      headers.memberId,
-      data,
-    );
+    return await this.csafService.createBoothBanner(file, memberId, data);
   }
 
   @ApiOperation({ summary: '부스 스크린 등록' })
@@ -165,19 +164,15 @@ export class CsafController {
     status: HttpStatus.OK,
     type: ResCreateScreenDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @UseInterceptors(FileInterceptor('image'))
   @Post('screen')
   async createBoothScreen(
     @UploadedFile() file: Express.Multer.File,
-    @Headers() headers,
+    @MemberDeco('memberId') memberId: string,
     @Body() data: CreateScreenDto,
   ) {
-    return await this.csafService.createBoothScreen(
-      file,
-      headers.memberId,
-      data,
-    );
+    return await this.csafService.createBoothScreen(file, memberId, data);
   }
 
   @ApiOperation({ summary: '부스 배너 편집' })
@@ -185,19 +180,19 @@ export class CsafController {
     status: HttpStatus.OK,
     type: ResCreateBannerDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @UseInterceptors(FileInterceptor('image'))
   @Put('banner/:boothId/:bannerId')
   async updateBoothBanner(
     @UploadedFile() file: Express.Multer.File,
-    @Headers() headers,
+    @MemberDeco('memberId') memberId: string,
     @Body() data: UpdateMediaDto,
     @Param('boothId') boothId: number,
     @Param('bannerId') bannerId: number,
   ) {
     return await this.csafService.updateBoothBanner(
       file,
-      headers.memberId,
+      memberId,
       boothId,
       bannerId,
       data,
@@ -209,19 +204,19 @@ export class CsafController {
     status: HttpStatus.OK,
     type: ResCreateScreenDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @UseInterceptors(FileInterceptor('image'))
   @Put('screen/:boothId/:screenId')
   async updateBoothScreen(
     @UploadedFile() file: Express.Multer.File,
-    @Headers() headers,
+    @MemberDeco('memberId') memberId: string,
     @Body() data: UpdateMediaDto,
     @Param('boothId') boothId: number,
     @Param('screenId') screenId: number,
   ) {
     return await this.csafService.updateBoothScreen(
       file,
-      headers.memberId,
+      memberId,
       boothId,
       screenId,
       data,
@@ -229,30 +224,30 @@ export class CsafController {
   }
 
   @ApiOperation({ summary: '부스 배너 삭제' })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Delete('banner/:boothId/:bannerId')
   async deleteBoothBanner(
-    @Headers() headers,
+    @MemberDeco('memberId') memberId: string,
     @Param('boothId') boothId: number,
     @Param('bannerId') bannerId: number,
   ) {
     return await this.csafService.deleteBoothBanner(
-      headers.memberId,
+      memberId,
       boothId,
       bannerId,
     );
   }
 
   @ApiOperation({ summary: '부스 스크린 삭제' })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Delete('screen/:boothId/:screenId')
   async deleteBoothScreen(
-    @Headers() headers,
+    @MemberDeco('memberId') memberId: string,
     @Param('boothId') boothId: number,
     @Param('screenId') screenId: number,
   ) {
     return await this.csafService.deleteBoothScreen(
-      headers.memberId,
+      memberId,
       boothId,
       screenId,
     );
@@ -273,10 +268,13 @@ export class CsafController {
     status: HttpStatus.OK,
     type: FileBoxInfo,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('filebox')
-  async createFilebox(@Body() data: CreateFileboxDto) {
-    return await this.csafService.createFilebox(data);
+  async createFilebox(
+    @MemberDeco('memberId') memberId: string,
+    @Body() data: CreateFileboxDto,
+  ) {
+    return await this.csafService.createFilebox(memberId, data);
   }
 
   @ApiOperation({ summary: '파일함 편집' })
@@ -284,31 +282,33 @@ export class CsafController {
     status: HttpStatus.OK,
     type: FileBoxInfo,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Put('filebox/:boothId/:fileId')
   async updateFilebox(
     @Body() data: UpdateFileboxDto,
+    @MemberDeco('memberId') memberId: string,
     @Param('boothId') boothId: number,
     @Param('fileId') fileId: number,
   ) {
-    return await this.csafService.updateFilebox(boothId, fileId, data);
+    return await this.csafService.updateFilebox(
+      memberId,
+      boothId,
+      fileId,
+      data,
+    );
   }
 
   @ApiOperation({ summary: '파일함 삭제' })
   @ApiResponse({
     status: HttpStatus.OK,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Delete('filebox/:boothId/:fileId')
   async deleteFilebox(
-    @Headers() headers,
+    @MemberDeco('memberId') memberId: string,
     @Param('boothId') boothId: number,
     @Param('fileId') fileId: number,
   ) {
-    return await this.csafService.deleteFilebox(
-      headers.memberId,
-      boothId,
-      fileId,
-    );
+    return await this.csafService.deleteFilebox(memberId, boothId, fileId);
   }
 }

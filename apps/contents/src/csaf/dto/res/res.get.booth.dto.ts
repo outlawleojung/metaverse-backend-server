@@ -1,6 +1,13 @@
-import { IsArray, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, ValidateIf } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+  ValidateIf,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { GetCommonDto } from '../../../dto/get.common.dto';
 import { ResponseCreatBoothDto } from './res.create.booth.dto';
 
 export class MediaInfo {

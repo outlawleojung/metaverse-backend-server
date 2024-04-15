@@ -12,11 +12,9 @@ import {
   HttpException,
   HttpStatus,
   Logger,
-  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Not, In, Repository } from 'typeorm';
-import { GetCommonDto } from '../dto/get.common.dto';
 import { CommonService } from '@libs/common';
 import {
   ERRORCODE,
@@ -42,8 +40,7 @@ export class FriendService {
     @Inject(DataSource) private dataSource: DataSource,
   ) {}
 
-  async getFriends(request: GetCommonDto) {
-    const memberId = request.memberId;
+  async getFriends(memberId: string) {
     try {
       const friends = await this.memberFriendRepository
         .createQueryBuilder('mf')
@@ -85,8 +82,7 @@ export class FriendService {
   }
 
   // 친구 요청 하기
-  async requestFriend(data: FindFriendDto): Promise<any> {
-    const memberId = data.memberId;
+  async requestFriend(memberId: string, data: FindFriendDto): Promise<any> {
     const requestType = data.requestType;
     const friendId = data.friendId;
 
@@ -120,7 +116,7 @@ export class FriendService {
     }
 
     // 자기 자신은 친구로 추가 할 수 없음.
-    if (exFrnd.memberId === data.memberId) {
+    if (exFrnd.memberId === memberId) {
       throw new HttpException(
         {
           error: ERRORCODE.NET_E_CANNOT_REQUEST_MYSELF,
@@ -297,8 +293,8 @@ export class FriendService {
   }
 
   // 친구 요청 목록 조회
-  async getRequestFriends(data: GetCommonDto) {
-    const rquestMemberId = data.memberId;
+  async getRequestFriends(memberId: string) {
+    const rquestMemberId = memberId;
     try {
       const friends = await this.friendRequestRepository
         .createQueryBuilder('fq')
@@ -337,8 +333,8 @@ export class FriendService {
   }
 
   // 친구 요청 받은 목록 조회
-  async receiveRequestFriends(data: GetCommonDto) {
-    const receivedMemberId = data.memberId;
+  async receiveRequestFriends(memberId: string) {
+    const receivedMemberId = memberId;
     try {
       const friends = await this.dataSource.manager.query(
         `SELECT 
@@ -379,9 +375,7 @@ export class FriendService {
   }
 
   // 친구 수락 하기
-  async acceptFriend(data: GetCommonDto, friendMemeberCode: string) {
-    const memberId = data.memberId;
-
+  async acceptFriend(memberId: string, friendMemeberCode: string) {
     const exMember = await this.memberRepository.findOne({
       where: {
         memberCode: friendMemeberCode,
@@ -418,7 +412,7 @@ export class FriendService {
     // 친구 여부 확인
     const friend = await this.memberFriendRepository.findOne({
       where: {
-        memberId: memberId,
+        memberId,
         friendMemberId: exMember.memberId,
       },
     });
@@ -444,7 +438,7 @@ export class FriendService {
     // 내 친구 수 확인
     const myFrined = await this.memberFriendRepository.count({
       where: {
-        memberId: data.memberId,
+        memberId,
       },
     });
 
@@ -524,7 +518,7 @@ export class FriendService {
   }
 
   // 친구 요청 취소 하기
-  async cancelRequestFriend(data: GetCommonDto, friendMemeberCode: string) {
+  async cancelRequestFriend(memberId: string, friendMemeberCode: string) {
     // 요청 받은 친구 확인
     const exFrnd = await this.memberRepository.findOne({
       where: {
@@ -546,7 +540,7 @@ export class FriendService {
     // 나의 요청 확인 하기
     const requestFriend = await this.friendRequestRepository.findOne({
       where: {
-        requestMemberId: data.memberId,
+        requestMemberId: memberId,
         receivedMemberId: exFrnd.memberId,
       },
     });
@@ -567,7 +561,7 @@ export class FriendService {
 
     try {
       await queryRunner.manager.delete(FriendRequest, {
-        requestMemberId: data.memberId,
+        requestMemberId: memberId,
         receivedMemberId: exFrnd.memberId,
       });
 
@@ -593,7 +587,7 @@ export class FriendService {
   }
 
   // 친구 요청 거절 하기
-  async refusalRequestFriend(data: GetCommonDto, friendMemeberCode: string) {
+  async refusalRequestFriend(memberId: string, friendMemeberCode: string) {
     // 요청한 친구 확인
     const exFrnd = await this.memberRepository.findOne({
       where: {
@@ -616,7 +610,7 @@ export class FriendService {
     const requestFriend = await this.friendRequestRepository.findOne({
       where: {
         requestMemberId: exFrnd.memberId,
-        receivedMemberId: data.memberId,
+        receivedMemberId: memberId,
       },
     });
 
@@ -637,7 +631,7 @@ export class FriendService {
     try {
       await queryRunner.manager.delete(FriendRequest, {
         requestMemberId: exFrnd.memberId,
-        receivedMemberId: data.memberId,
+        receivedMemberId: memberId,
       });
 
       await queryRunner.commitTransaction();
@@ -662,10 +656,10 @@ export class FriendService {
   }
 
   // 친구 차단 하기
-  async blockFriend(data: CommonFriendDto) {
+  async blockFriend(memberId: string, data: CommonFriendDto) {
     // 사용자 존재 여부 확인
     const me = await this.memberRepository.findOne({
-      where: { memberId: data.memberId },
+      where: { memberId },
     });
 
     if (me.memberCode === data.friendMemeberCode) {
@@ -699,7 +693,7 @@ export class FriendService {
     // 차단 여부 확인
     const preBlock = await this.blockMemberRepository.findOne({
       where: {
-        memberId: data.memberId,
+        memberId,
         blockMemberId: exFrnd.memberId,
       },
     });
@@ -722,18 +716,18 @@ export class FriendService {
     try {
       // 친구 상태 해제
       await queryRunner.manager.delete(MemberFriend, {
-        memberId: data.memberId,
+        memberId,
         friendMemberId: exFrnd.memberId,
       });
 
       await queryRunner.manager.delete(MemberFriend, {
         memberId: exFrnd.memberId,
-        friendMemberId: data.memberId,
+        friendMemberId: memberId,
       });
 
       // 차단 목록에 등록
       const blockMember = new BlockMember();
-      blockMember.memberId = data.memberId;
+      blockMember.memberId = memberId;
       blockMember.blockMemberId = exFrnd.memberId;
 
       await queryRunner.manager.getRepository(BlockMember).save(blockMember);
@@ -760,7 +754,7 @@ export class FriendService {
   }
 
   // 친구 삭제
-  async deleteFriend(data: GetCommonDto, friendMemeberCode: string) {
+  async deleteFriend(memberId: string, friendMemeberCode: string) {
     // 요청한 친구 확인
     const exFrnd = await this.memberRepository.findOne({
       where: {
@@ -782,7 +776,7 @@ export class FriendService {
     // 친구 여부 확인 하기
     const memberFriend = await this.memberFriendRepository.findOne({
       where: {
-        memberId: data.memberId,
+        memberId,
         friendMemberId: exFrnd.memberId,
       },
     });
@@ -803,13 +797,13 @@ export class FriendService {
 
     try {
       await queryRunner.manager.delete(MemberFriend, {
-        memberId: data.memberId,
+        memberId,
         friendMemberId: exFrnd.memberId,
       });
 
       await queryRunner.manager.delete(MemberFriend, {
         memberId: exFrnd.memberId,
-        friendMemberId: data.memberId,
+        friendMemberId: memberId,
       });
 
       await queryRunner.commitTransaction();
@@ -834,7 +828,7 @@ export class FriendService {
   }
 
   // 친구 차단 해제 하기
-  async releaseBlockFriend(data: GetCommonDto, friendMemeberCode: string) {
+  async releaseBlockFriend(memberId: string, friendMemeberCode: string) {
     // 차단 친구 확인
     const exFrnd = await this.memberRepository.findOne({
       where: {
@@ -855,7 +849,7 @@ export class FriendService {
 
     const blockMember = await this.blockMemberRepository.findOne({
       where: {
-        memberId: data.memberId,
+        memberId,
         blockMemberId: exFrnd.memberId,
       },
     });
@@ -877,7 +871,7 @@ export class FriendService {
 
     try {
       await queryRunner.manager.delete(BlockMember, {
-        memberId: data.memberId,
+        memberId,
         blockMemberId: exFrnd.memberId,
       });
 
@@ -903,7 +897,7 @@ export class FriendService {
   }
 
   // 친구 차단 목록 조회
-  async getBlockFriends(data: GetCommonDto) {
+  async getBlockFriends(memberId: string) {
     const blockMembers = await this.blockMemberRepository
       .createQueryBuilder('b')
       .select([
@@ -912,7 +906,7 @@ export class FriendService {
         'm.stateMessage as stateMessage',
       ])
       .innerJoin('member', 'm', 'm.memberId = b.blockMemberId')
-      .where('b.memberid=:memberId', { memberId: data.memberId })
+      .where('b.memberid=:memberId', { memberId })
       .getRawMany();
 
     for (const f of blockMembers) {
@@ -930,7 +924,7 @@ export class FriendService {
   }
 
   // 친구 조회
-  async findFriend(data: GetCommonDto, requestType: number, friendId: string) {
+  async findFriend(requestType: number, friendId: string) {
     // 해당 친구의 존재 여부 확인
     const m = await this.memberRepository
       .createQueryBuilder('m')
@@ -984,7 +978,7 @@ export class FriendService {
   }
 
   // 친구 즐겨찾기
-  async bookmark(data: CommonFriendDto) {
+  async bookmark(memberId: string, data: CommonFriendDto) {
     // 즐겨찾기 친구 확인
     const exFrnd = await this.memberRepository.findOne({
       where: {
@@ -1006,7 +1000,7 @@ export class FriendService {
     // 친구 여부 확인
     const memberFriend = await this.memberFriendRepository.findOne({
       where: {
-        memberId: data.memberId,
+        memberId,
         friendMemberId: exFrnd.memberId,
       },
     });
@@ -1023,7 +1017,7 @@ export class FriendService {
     }
 
     const newMemberFriend = new MemberFriend();
-    newMemberFriend.memberId = data.memberId;
+    newMemberFriend.memberId = memberId;
     newMemberFriend.friendMemberId = exFrnd.memberId;
     newMemberFriend.bookmark = memberFriend.bookmark === 1 ? 0 : 1;
     newMemberFriend.bookmarkedAt =

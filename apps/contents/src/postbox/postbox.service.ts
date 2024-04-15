@@ -24,7 +24,6 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
-import { GetCommonDto } from '../dto/get.common.dto';
 import { DataSource, QueryRunner, Repository } from 'typeorm';
 
 @Injectable()
@@ -48,9 +47,7 @@ export class PostboxService {
 
   private readonly logger = new Logger(PostboxService.name);
 
-  async getPostboxes(data: GetCommonDto) {
-    const memberId = data.memberId;
-
+  async getPostboxes(memberId: string) {
     const today = dayjs(); // 현재 시간을 가져옴
 
     try {
@@ -435,7 +432,7 @@ export class PostboxService {
     try {
       if (itemType === ITEM_TYPE.INTERIOR) {
         for (let index = 0; index < count; index++) {
-          const num = await this.commonService.GetFurnitureItemNum(
+          const num = await this.commonService.getFurnitureItemNum(
             queryRunner,
             memberId,
           );

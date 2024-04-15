@@ -1,8 +1,7 @@
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { GetCommonDto } from '../../../dto/get.common.dto';
 
-export class CreateFileboxDto extends GetCommonDto {
+export class CreateFileboxDto {
   @ApiProperty({
     example: 234112,
     description: '부스 아이디',

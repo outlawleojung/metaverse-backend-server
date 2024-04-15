@@ -25,10 +25,10 @@ export class AdContentsService {
     @Inject(DataSource) private dataSource: DataSource,
   ) {}
 
-  async adContentsReward(data: AdContentsRewardDto) {
+  async adContentsReward(memberId: string, data: AdContentsRewardDto) {
     const memberAdContents = await this.memberAdContentsRepository.findOne({
       where: {
-        memberId: data.memberId,
+        memberId,
         contentsId: data.contentsId,
       },
     });
@@ -55,16 +55,16 @@ export class AdContentsService {
 
     try {
       // 보상 획득
-      await this.commonService.AddMemberMoney(
+      await this.commonService.addMemberMoney(
         queryRunner,
-        data.memberId,
+        memberId,
         adContents.moneyType,
         adContents.reward,
       );
 
       // 보상 획득 완료 처리
       const newMemberAdContents = new MemberAdContents();
-      newMemberAdContents.memberId = data.memberId;
+      newMemberAdContents.memberId = memberId;
       newMemberAdContents.contentsId = data.contentsId;
 
       await queryRunner.manager

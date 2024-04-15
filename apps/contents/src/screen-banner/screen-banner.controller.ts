@@ -1,8 +1,6 @@
 import {
-  Body,
   Controller,
   Get,
-  Post,
   HttpStatus,
   Logger,
   UseGuards,
@@ -12,9 +10,8 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MorganInterceptor } from 'nest-morgan';
 import { ScreenBannerService } from './screen-banner.service';
 import { GetScreenBannerConstantsResponseDto } from './dto/res/get.constants.response.dto';
-import { CreateScreenReservationDTO } from './dto/req/create.screen.dto';
 import { GetScreenResponseDto } from './dto/res/get.screen.response.dto';
-import { JwtGuard } from '@libs/common';
+import { AccessTokenGuard } from '@libs/common';
 
 @ApiTags('SCREEN-BANNER - 스크린 & 배너')
 @UseInterceptors(MorganInterceptor('combined'))
@@ -29,7 +26,7 @@ export class ScreenBannerController {
     isArray: true,
     type: GetScreenBannerConstantsResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('constant')
   async getConstant() {
     return await this.screenBannerService.getConstants();
@@ -41,7 +38,7 @@ export class ScreenBannerController {
     isArray: true,
     type: GetScreenResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('getScreen')
   async getScreenReservations() {
     return await this.screenBannerService.getScreenReservation();

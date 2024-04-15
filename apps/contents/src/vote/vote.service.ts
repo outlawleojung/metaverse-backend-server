@@ -5,11 +5,10 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { GetCommonDto } from '../dto/get.common.dto';
 import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MemberVoteInfo, VoteInfo, VoteInfoExample } from '@libs/entity';
-import dayjs from 'dayjs';
+
 import {
   ERRORCODE,
   ERROR_MESSAGE,
@@ -32,7 +31,7 @@ export class VoteService {
 
   private readonly logger = new Logger(VoteService.name);
 
-  async getVotes(req: GetCommonDto) {
+  async getVotes(memberId: string) {
     const voteInfo = await this.voteInfoRepository
       .createQueryBuilder('voteInfo')
       .select([
@@ -92,7 +91,7 @@ export class VoteService {
         // 투표 기록 조회
         const memberVoteInfo = await this.memberVoteInfoRepository.findOne({
           where: {
-            memberId: req.memberId,
+            memberId,
             voteId: voteInfo.id,
           },
         });
@@ -151,12 +150,10 @@ export class VoteService {
   }
 
   // 투표 하기
-  async DoVote(req: DoVoteDto) {
-    this.logger.debug({ req: req });
-
+  async DoVote(memberId: string, data: DoVoteDto) {
     const voteInfo = await this.voteInfoRepository.findOne({
       where: {
-        id: req.voteId,
+        id: data.voteId,
       },
     });
 
@@ -187,7 +184,7 @@ export class VoteService {
     // 투표 응답 보기 갯수
     const examCount = await this.voteInfoExampleRepository.count({
       where: {
-        voteId: req.voteId,
+        voteId: data.voteId,
       },
     });
 
@@ -195,9 +192,9 @@ export class VoteService {
     const voteResType = voteInfo.resType;
 
     if (
-      (voteResType === VOTE_RES_TYPE.SINGLE && req.response.length > 1) ||
+      (voteResType === VOTE_RES_TYPE.SINGLE && data.response.length > 1) ||
       (voteResType === VOTE_RES_TYPE.MULTIPLE &&
-        req.response.length > examCount - 1)
+        data.response.length > examCount - 1)
     ) {
       throw new HttpException(
         {
@@ -219,8 +216,8 @@ export class VoteService {
 
     const memberVoteInfo = await this.memberVoteInfoRepository.find({
       where: {
-        voteId: req.voteId,
-        memberId: req.memberId,
+        voteId: data.voteId,
+        memberId,
       },
     });
 
@@ -242,18 +239,18 @@ export class VoteService {
     try {
       // 기존 응답이 있다면 삭제
       await queryRunner.manager.delete(MemberVoteInfo, {
-        memberId: req.memberId,
-        voteId: req.voteId,
+        memberId,
+        voteId: data.voteId,
       });
 
       // 응답 기록 하기
-      for (let index = 0; index < req.response.length; index++) {
-        const responseNum = req.response[index];
+      for (let index = 0; index < data.response.length; index++) {
+        const responseNum = data.response[index];
 
         // 응답이 맞는지 검증
         const voteInfoExam = await this.voteInfoExampleRepository.findOne({
           where: {
-            voteId: req.voteId,
+            voteId: data.voteId,
             num: responseNum,
           },
         });
@@ -270,8 +267,8 @@ export class VoteService {
 
         // 응답 추가
         const memberVoteInfo = new MemberVoteInfo();
-        memberVoteInfo.voteId = req.voteId;
-        memberVoteInfo.memberId = req.memberId;
+        memberVoteInfo.voteId = data.voteId;
+        memberVoteInfo.memberId = memberId;
         memberVoteInfo.num = responseNum;
 
         await queryRunner.manager

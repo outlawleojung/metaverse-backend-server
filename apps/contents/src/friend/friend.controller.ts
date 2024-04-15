@@ -1,8 +1,6 @@
 import { CommonFriendDto } from './dto/request/common.friend.dto';
 import { GetReceivedFriendsResponseDto } from './dto/response/get.received.friends.response.dto';
 import { GetFriendResponseDto } from './dto/response/get.friends.response.dto';
-import { GetCommonDto } from '../dto/get.common.dto';
-import { JwtGuard } from '@libs/common';
 import { FriendService } from './friend.service';
 import {
   Body,
@@ -16,12 +14,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import {
-  ApiOperation,
-  ApiProperty,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MorganInterceptor } from 'nest-morgan';
 import { SuccessDto } from '../dto/success.response.dto';
 import { FindFriendResponseDto } from './dto/response/find.friend.response.dto';
@@ -29,6 +22,7 @@ import { BlockMembersResponseDto } from './dto/response/block.members.response.d
 import { FindFriendDto } from './dto/request/find.friend.dto';
 import { BookmarkResponseDto } from './dto/response/bookmark.response.dto';
 import { GetFriendRoomIdResponseDto } from './dto/response/get.friend.roomid.response.dto';
+import { AccessTokenGuard, MemberDeco } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('FRIEND - 친구')
@@ -42,10 +36,10 @@ export class FriendController {
     status: HttpStatus.OK,
     type: GetFriendResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get()
-  async getFriends(@Body() data: GetCommonDto) {
-    return await this.friendService.getFriends(data);
+  async getFriends(@MemberDeco('memberId') memberId: string) {
+    return await this.friendService.getFriends(memberId);
   }
 
   // 친구 요청 하기
@@ -54,10 +48,13 @@ export class FriendController {
     status: HttpStatus.OK,
     type: SuccessDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('/requestFriend')
-  async requestFriend(@Body() data: FindFriendDto) {
-    return await this.friendService.requestFriend(data);
+  async requestFriend(
+    @MemberDeco('memberId') memberId: string,
+    @Body() data: FindFriendDto,
+  ) {
+    return await this.friendService.requestFriend(memberId, data);
   }
 
   // 친구 요청 목록 조회
@@ -66,10 +63,10 @@ export class FriendController {
     status: HttpStatus.OK,
     type: GetReceivedFriendsResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('/getRequestFriends')
-  async getRequestFriends(@Body() data: GetCommonDto) {
-    return await this.friendService.getRequestFriends(data);
+  async getRequestFriends(@MemberDeco('memberId') memberId: string) {
+    return await this.friendService.getRequestFriends(memberId);
   }
 
   // 친구 요청 받은 목록 조회
@@ -78,10 +75,10 @@ export class FriendController {
     status: HttpStatus.OK,
     type: GetReceivedFriendsResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('/receiveRequestFriends')
-  async receiveRequestFriends(@Body() data: GetCommonDto) {
-    return await this.friendService.receiveRequestFriends(data);
+  async receiveRequestFriends(@MemberDeco('memberId') memberId: string) {
+    return await this.friendService.receiveRequestFriends(memberId);
   }
 
   // 친구 수락 하기
@@ -90,13 +87,13 @@ export class FriendController {
     status: HttpStatus.OK,
     type: SuccessDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Put('/acceptFriend/:friendMemeberCode')
   async acceptFriend(
-    @Body() data: GetCommonDto,
+    @MemberDeco('memberId') memberId: string,
     @Param('friendMemeberCode') friendMemeberCode: string,
   ) {
-    return await this.friendService.acceptFriend(data, friendMemeberCode);
+    return await this.friendService.acceptFriend(memberId, friendMemeberCode);
   }
 
   // 친구 요청 취소 하기
@@ -105,14 +102,14 @@ export class FriendController {
     status: HttpStatus.OK,
     type: SuccessDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Put('/cancelRequestFriend/:friendMemeberCode')
   async cancelRequestFriend(
-    @Body() data: GetCommonDto,
+    @MemberDeco('memberId') memberId: string,
     @Param('friendMemeberCode') friendMemeberCode: string,
   ) {
     return await this.friendService.cancelRequestFriend(
-      data,
+      memberId,
       friendMemeberCode,
     );
   }
@@ -123,13 +120,13 @@ export class FriendController {
     status: HttpStatus.OK,
     type: SuccessDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Put('/refusalRequestFriend/:friendMemeberCode')
   async refusalRequestFriend(
-    @Body() data: GetCommonDto,
+    @MemberDeco('memberId') memberId: string,
     @Param('friendMemeberCode') friendMemeberCode: string,
   ) {
-    return this.friendService.refusalRequestFriend(data, friendMemeberCode);
+    return this.friendService.refusalRequestFriend(memberId, friendMemeberCode);
   }
 
   // 친구 차단 하기
@@ -138,10 +135,13 @@ export class FriendController {
     status: HttpStatus.OK,
     type: SuccessDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('/blockFriend')
-  async blockFriend(@Body() data: CommonFriendDto) {
-    return this.friendService.blockFriend(data);
+  async blockFriend(
+    @MemberDeco('memberId') memberId: string,
+    @Body() data: CommonFriendDto,
+  ) {
+    return this.friendService.blockFriend(memberId, data);
   }
 
   // 친구 삭제
@@ -150,13 +150,13 @@ export class FriendController {
     status: HttpStatus.OK,
     type: SuccessDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Delete('/deleteFriend/:friendMemeberCode')
   async deleteFriend(
-    @Body() data: GetCommonDto,
+    @MemberDeco('memberId') memberId: string,
     @Param('friendMemeberCode') friendMemeberCode: string,
   ) {
-    return this.friendService.deleteFriend(data, friendMemeberCode);
+    return this.friendService.deleteFriend(memberId, friendMemeberCode);
   }
 
   // 친구 차단 해제 하기
@@ -165,13 +165,13 @@ export class FriendController {
     status: HttpStatus.OK,
     type: SuccessDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Put('/releaseBlockFriend/:friendMemeberCode')
   async releaseBlockFriend(
-    @Body() data: GetCommonDto,
+    @MemberDeco('memberId') memberId: string,
     @Param('friendMemeberCode') friendMemeberCode: string,
   ) {
-    return this.friendService.releaseBlockFriend(data, friendMemeberCode);
+    return this.friendService.releaseBlockFriend(memberId, friendMemeberCode);
   }
 
   // 친구 차단 목록 조회
@@ -180,10 +180,10 @@ export class FriendController {
     status: HttpStatus.OK,
     type: BlockMembersResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('/getBlockFriends')
-  async getBlockFriends(@Body() data: GetCommonDto) {
-    return this.friendService.getBlockFriends(data);
+  async getBlockFriends(@MemberDeco('memberId') memberId: string) {
+    return this.friendService.getBlockFriends(memberId);
   }
 
   // 친구 조회
@@ -192,14 +192,13 @@ export class FriendController {
     status: HttpStatus.OK,
     type: FindFriendResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('/findFriend/:requestType/:friendId')
   async findFriend(
-    @Body() data: GetCommonDto,
     @Param('requestType') requestType: number,
     @Param('friendId') friendId: string,
   ) {
-    return this.friendService.findFriend(data, requestType, friendId);
+    return this.friendService.findFriend(requestType, friendId);
   }
 
   // 친구 즐겨찾기
@@ -208,10 +207,13 @@ export class FriendController {
     status: HttpStatus.OK,
     type: BookmarkResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('/bookmark')
-  async bookmark(@Body() data: CommonFriendDto) {
-    return this.friendService.bookmark(data);
+  async bookmark(
+    @MemberDeco('memberId') memberId: string,
+    @Body() data: CommonFriendDto,
+  ) {
+    return this.friendService.bookmark(memberId, data);
   }
 
   // 친구 조회
@@ -220,7 +222,7 @@ export class FriendController {
     status: HttpStatus.OK,
     type: GetFriendRoomIdResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('/findRoomId/:friendMemeberCode')
   async findRoomId(@Param('friendMemeberCode') friendMemeberCode: string) {
     return this.friendService.findRoomId(friendMemeberCode);

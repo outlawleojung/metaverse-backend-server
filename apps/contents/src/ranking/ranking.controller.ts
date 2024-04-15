@@ -1,5 +1,3 @@
-import { GetCommonDto } from '../dto/get.common.dto';
-import { JwtGuard } from '@libs/common';
 import {
   Body,
   Controller,
@@ -15,6 +13,7 @@ import { RankingService } from './ranking.service';
 import { GetAllMyRankingResponseDto } from './dto/get.all.my.ranking.response.dto';
 import { GetAllRankingResponseDto } from './dto/get.all.ranking.response.dto';
 import { CreateRankingDto } from './dto/create.ranking.dto';
+import { AccessTokenGuard, MemberDeco } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('RANKING - 랭킹')
@@ -27,10 +26,13 @@ export class RankingController {
     status: HttpStatus.OK,
     type: GetAllMyRankingResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post()
-  async createRanking(@Body() data: CreateRankingDto) {
-    return await this.rankingService.crreateRanking(data.memberId, data.score);
+  async createRanking(
+    @MemberDeco('memberId') memberId: string,
+    @Body() data: CreateRankingDto,
+  ) {
+    return await this.rankingService.crreateRanking(memberId, data);
   }
 
   @ApiOperation({ summary: '전체 랭킹, 나의 기록 모두 조회' })
@@ -38,10 +40,10 @@ export class RankingController {
     status: HttpStatus.OK,
     type: GetAllMyRankingResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('allMyRanking')
-  async getAllMyRanking(@Body() data: GetCommonDto) {
-    return await this.rankingService.getAllMyRanking(data.memberId);
+  async getAllMyRanking(@MemberDeco('memberId') memberId: string) {
+    return await this.rankingService.getAllMyRanking(memberId);
   }
 
   @ApiOperation({ summary: '전체 랭킹만 조회' })
@@ -49,9 +51,9 @@ export class RankingController {
     status: HttpStatus.OK,
     type: GetAllRankingResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('allRanking')
-  async getAllRanking(data: GetCommonDto) {
+  async getAllRanking() {
     return await this.rankingService.getAllRanking();
   }
 
@@ -60,9 +62,9 @@ export class RankingController {
     status: HttpStatus.OK,
     type: GetAllMyRankingResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('myRanking')
-  async getMyRanking(@Body() data: GetCommonDto) {
-    return await this.rankingService.getMyRanking(data.memberId);
+  async getMyRanking(@MemberDeco('memberId') memberId: string) {
+    return await this.rankingService.getMyRanking(memberId);
   }
 }

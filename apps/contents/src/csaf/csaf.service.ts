@@ -1174,14 +1174,14 @@ export class CsafService {
   }
 
   // 파일함 등록
-  async createFilebox(data: CreateFileboxDto) {
+  async createFilebox(memberId: string, data: CreateFileboxDto) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
       // 등록한 사용자가 해당 부스의 관리자인지 확인
-      await this.isCurrentBoothAdmin(data.boothId, data.memberId);
+      await this.isCurrentBoothAdmin(data.boothId, memberId);
 
       const newFilebox = new BoothFileBoxInfo();
       newFilebox.boothId = data.boothId;
@@ -1234,14 +1234,19 @@ export class CsafService {
   }
 
   // 파일함 편집
-  async updateFilebox(boothId: number, fileId: number, data: UpdateFileboxDto) {
+  async updateFilebox(
+    memberId: string,
+    boothId: number,
+    fileId: number,
+    data: UpdateFileboxDto,
+  ) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
       // 등록한 사용자가 해당 부스의 관리자인지 확인
-      await this.isCurrentBoothAdmin(boothId, data.memberId);
+      await this.isCurrentBoothAdmin(boothId, memberId);
 
       // 파일함 파일 확인
       const file = await this.dataSource

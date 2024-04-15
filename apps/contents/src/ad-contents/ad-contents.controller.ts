@@ -10,10 +10,9 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MorganInterceptor } from 'nest-morgan';
 import { AdContentsService } from './ad-contents.service';
-import { JwtGuard } from '@libs/common';
-import { GetCommonDto } from '../dto/get.common.dto';
 import { AdContentsRewardDto } from './dto/req/ad.contents.reward.dto';
 import { AdContentsRewardResponseDto } from './dto/res/ad.contents.reward.res.dto';
+import { AccessTokenGuard, MemberDeco } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('AD-CONTENTS - 광고 컨텐츠')
@@ -27,9 +26,12 @@ export class AdContentsController {
     status: HttpStatus.OK,
     type: AdContentsRewardResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post()
-  async adContentsReward(@Body() data: AdContentsRewardDto) {
-    return await this.adContentsService.adContentsReward(data);
+  async adContentsReward(
+    @MemberDeco('memberId') memberId: string,
+    @Body() data: AdContentsRewardDto,
+  ) {
+    return await this.adContentsService.adContentsReward(memberId, data);
   }
 }

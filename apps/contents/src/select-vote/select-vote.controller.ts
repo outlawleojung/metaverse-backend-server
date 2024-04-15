@@ -10,13 +10,12 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MorganInterceptor } from 'nest-morgan';
 import { SelectVoteService } from './select-vote.service';
-import { JwtGuard } from '@libs/common';
-import { GetCommonDto } from '../dto/get.common.dto';
 import { GetSelectVoteInfoResponseDto } from './dto/res/get.select.vote.info.dto';
 import { DoVoteDto } from './dto/req/do.vote.dto';
 import { GetSelectVoteResultResponseDto } from './dto/res/get.select.vote.result.dto';
 import { DoVoteInfoResponseDto } from './dto/res/do.vote.response.dto';
 import { DoLikeInfoResponseDto } from './dto/res/do.like.response.dto';
+import { AccessTokenGuard, MemberDeco } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('SELECT VOTE - 선택 투표')
@@ -29,10 +28,10 @@ export class SelectVoteController {
   @ApiResponse({
     type: GetSelectVoteInfoResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get()
-  async getSelectVote(@Body() data: GetCommonDto) {
-    return await this.selectVoteService.getSelectVote(data);
+  async getSelectVote(@MemberDeco('memberId') memberId: string) {
+    return await this.selectVoteService.getSelectVote(memberId);
   }
 
   // 투표 하기
@@ -40,10 +39,13 @@ export class SelectVoteController {
   @ApiResponse({
     type: DoVoteInfoResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post()
-  async doVote(@Body() data: DoVoteDto) {
-    return await this.selectVoteService.doVote(data);
+  async doVote(
+    @MemberDeco('memberId') memberId: string,
+    @Body() data: DoVoteDto,
+  ) {
+    return await this.selectVoteService.doVote(memberId, data);
   }
 
   // 좋아요
@@ -51,10 +53,13 @@ export class SelectVoteController {
   @ApiResponse({
     type: DoLikeInfoResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('like')
-  async doLike(@Body() data: DoVoteDto) {
-    return await this.selectVoteService.doLike(data);
+  async doLike(
+    @MemberDeco('memberId') memberId: string,
+    @Body() data: DoVoteDto,
+  ) {
+    return await this.selectVoteService.doLike(memberId, data);
   }
 
   // 투표 결과
@@ -62,17 +67,20 @@ export class SelectVoteController {
   @ApiResponse({
     type: GetSelectVoteResultResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('result/:voteId')
-  async getResult(@Body() data: GetCommonDto, @Param('voteId') voteId: number) {
-    return await this.selectVoteService.getVoteResult(data.memberId, voteId);
+  async getResult(
+    @MemberDeco('memberId') memberId: string,
+    @Param('voteId') voteId: number,
+  ) {
+    return await this.selectVoteService.getVoteResult(memberId, voteId);
   }
 
   // KTMF 이벤트 메일 확인
   @ApiOperation({ summary: 'KTMF 이벤트 메일 확인' })
   @Get('ktmf-email')
-  @UseGuards(JwtGuard)
-  async getKtmfEmail(@Body() data: GetCommonDto) {
-    return await this.selectVoteService.getKtmfEmail(data.memberId);
+  @UseGuards(AccessTokenGuard)
+  async getKtmfEmail(@MemberDeco('memberId') memberId: string) {
+    return await this.selectVoteService.getKtmfEmail(memberId);
   }
 }

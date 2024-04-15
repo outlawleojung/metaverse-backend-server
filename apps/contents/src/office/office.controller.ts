@@ -2,8 +2,7 @@ import { SuccessDto } from './../dto/success.response.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateReservDto } from './dto/request/create.reserv.dto';
 import { GetReservResponseDto } from './dto/response/get.reserv.response.dto';
-import { GetCommonDto } from '../dto/get.common.dto';
-import { JwtGuard, AzureBlobService } from '@libs/common';
+import { AccessTokenGuard, AzureBlobService, MemberDeco } from '@libs/common';
 import { OfficeService } from './office.service';
 import {
   Body,
@@ -66,13 +65,10 @@ export class OfficeController {
     status: HttpStatus.OK,
     type: GetRoomInfoResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('getRoomInfo/:roomCode')
-  async getRoomInfo(
-    @Body() req: GetCommonDto,
-    @Param('roomCode') roomCode: string,
-  ) {
-    return await this.officeService.getRoomInfo(req, roomCode);
+  async getRoomInfo(@Param('roomCode') roomCode: string) {
+    return await this.officeService.getRoomInfo(roomCode);
   }
 
   // 룸 코드 / 패스워드 확인
@@ -85,13 +81,10 @@ export class OfficeController {
     status: HttpStatus.OK,
     type: SuccessDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('checkRoomCodePassword')
   async checkRoomCodePassword(@Body() data: CheckRoomCodePassword) {
-    return await this.officeService.checkRoomCodePassword(
-      data.roomCode,
-      data.password,
-    );
+    return await this.officeService.checkRoomCodePassword(data);
   }
 
   // 나의 예약 목록 조회
@@ -100,10 +93,10 @@ export class OfficeController {
     status: HttpStatus.OK,
     type: GetReservResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('getReservInfo')
-  async getReservInfo(@Body() req: GetCommonDto) {
-    return await this.officeService.getReservInfo(req);
+  async getReservInfo(@MemberDeco('memberId') memberId: string) {
+    return await this.officeService.getReservInfo(memberId);
   }
 
   // 나의 대기 목록 조회
@@ -112,10 +105,10 @@ export class OfficeController {
     status: HttpStatus.OK,
     type: GetWaitingResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('getWaitInfo')
-  async getWaitInfo(@Body() req: GetCommonDto) {
-    return await this.officeService.getWaitInfo(req);
+  async getWaitInfo(@MemberDeco('memberId') memberId: string) {
+    return await this.officeService.getWaitInfo(memberId);
   }
 
   // 오피스 예약 하기
@@ -125,19 +118,15 @@ export class OfficeController {
     type: CreateOfficeResponseDto,
   })
   @UseInterceptors(FileInterceptor('image'))
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('createOfficeReserv')
   async createOfficeReserv(
     @UploadedFile() file: Express.Multer.File,
-    @Headers() headers,
+    @MemberDeco('memberId') memberId: string,
     @Body() req: CreateReservDto,
   ) {
-    const result = await this.officeService.CreateOffice(
-      file,
-      headers.memberId,
-      req,
-    );
-    // this.officeLogService.OfficeReservGenerator(result);
+    const result = await this.officeService.CreateOffice(file, memberId, req);
+
     return result;
   }
 
@@ -148,17 +137,17 @@ export class OfficeController {
     type: CreateOfficeResponseDto,
   })
   @UseInterceptors(FileInterceptor('image'))
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('updateOfficeReserv/:roomCode')
   async updateOfficeReserv(
     @UploadedFile() file: Express.Multer.File,
-    @Headers() headers,
+    @MemberDeco('memberId') memberId: string,
     @Body() data: UpdateReservDto,
     @Param('roomCode') roomCode: string,
   ) {
     const result = await this.officeService.UpdateOffice(
       file,
-      headers.memberId,
+      memberId,
       roomCode,
       data,
     );
@@ -172,11 +161,14 @@ export class OfficeController {
     status: HttpStatus.OK,
     type: SuccessDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('waitOfficeReserv')
-  async waitOfficeReserv(@Body() req: CreateWaitDto) {
-    const result = await this.officeService.waitOfficeReserv(req);
-    // this.officeLogService.waitOfficeReserv(result);
+  async waitOfficeReserv(
+    @MemberDeco('memberId') memberId: string,
+    @Body() data: CreateWaitDto,
+  ) {
+    const result = await this.officeService.waitOfficeReserv(memberId, data);
+
     return result;
   }
 
@@ -186,13 +178,13 @@ export class OfficeController {
     status: HttpStatus.OK,
     type: DeleteReservResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Delete('deleteReservation/:roomCode')
   async deleteReservation(
-    @Body() data: GetCommonDto,
+    @MemberDeco('memberId') memberId: string,
     @Param('roomCode') roomCode: string,
   ) {
-    return await this.officeService.deleteReservation(data, roomCode);
+    return await this.officeService.deleteReservation(memberId, roomCode);
   }
 
   // 오피스 대기 취소
@@ -201,13 +193,13 @@ export class OfficeController {
     status: HttpStatus.OK,
     type: DeleteReservResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Delete('deleteWaiting/:roomCode')
   async deleteWaiting(
-    @Body() data: GetCommonDto,
+    @MemberDeco('memberId') memberId: string,
     @Param('roomCode') roomCode: string,
   ) {
-    const result = await this.officeService.deleteWaiting(data, roomCode);
+    const result = await this.officeService.deleteWaiting(memberId, roomCode);
     // this.officeLogService.deleteWaiting(result);
     return result;
   }
@@ -219,26 +211,21 @@ export class OfficeController {
     type: GetAdvertisingResponseDto,
   })
   @Get('getIsAdvertisingList')
-  @UseGuards(JwtGuard)
-  async getIsAdvertisingList(@Body() data: GetCommonDto) {
+  @UseGuards(AccessTokenGuard)
+  async getIsAdvertisingList() {
     return await this.officeService.getIsAdvertisingList();
   }
-
-  // @ApiOperation({ summary: '행사 권한 조회' })
-  // @Get('get-exhibition-auth')
-  // @UseGuards(JwtGuard)
-  // async getExhibitionAith(@Body() data: GetCommonDto) {
-  //   return await this.officeService.getExhibitionAuth('3f5570b0-4d3a-11ee-bab1-255021385de7');
-  // }
 
   @ApiExcludeEndpoint()
   // 테스트 업로드
   @UseInterceptors(FileInterceptor('image'))
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('upload')
-  async upload(@UploadedFile() file: Express.Multer.File, @Headers() req) {
-    this.logger.debug('memberId : ', req.memberId);
-    this.logger.debug(req);
+  async upload(
+    @UploadedFile() file: Express.Multer.File,
+    @MemberDeco('memberId') memberId: string,
+  ) {
+    this.logger.debug('memberId : ', memberId);
     this.logger.debug(file);
   }
 }

@@ -25,6 +25,7 @@ import {
 } from '@libs/constants';
 import { CreateMyRoomDto } from './dto/request/create.my.room.dto';
 import { UpdateFrameImageDto } from './dto/request/update.frame.image.dto';
+import { UpdateStateTypeDto } from './dto/request/update.state.dto';
 
 @Injectable()
 export class MyRoomService {
@@ -49,7 +50,7 @@ export class MyRoomService {
       };
     }
 
-    const othersRoomList = await this.commonService.GetMyRoomInfo(
+    const othersRoomList = await this.commonService.getMyRoomInfo(
       exMember.memberId,
     );
 
@@ -77,12 +78,12 @@ export class MyRoomService {
       );
     }
 
-    const othersRoomList = await this.commonService.GetMyRoomInfo(
+    const othersRoomList = await this.commonService.getMyRoomInfo(
       exMember.memberId,
     );
     // 마이룸 액자 정보
     const othersMyRoomFrameImages =
-      await this.commonService.GetMyRoomFrameImages(exMember.memberId);
+      await this.commonService.getMyRoomFrameImages(exMember.memberId);
 
     return {
       othersRoomList: othersRoomList,
@@ -93,10 +94,10 @@ export class MyRoomService {
   }
 
   // 마이룸 만들기
-  async createMyRoom(data: CreateMyRoomDto) {
+  async createMyRoom(memberId: string, data: CreateMyRoomDto) {
     const member = await this.memberRepository.findOne({
       where: {
-        memberId: data.memberId,
+        memberId,
       },
     });
     if (!member) {
@@ -116,7 +117,7 @@ export class MyRoomService {
           .getRepository(MemberMyRoomInfo)
           .findOne({
             where: {
-              memberId: data.memberId,
+              memberId,
               itemId: item.itemId,
               num: item.num,
             },
@@ -137,7 +138,7 @@ export class MyRoomService {
           .getRepository(MemberFurnitureItemInven)
           .findOne({
             where: {
-              memberId: data.memberId,
+              memberId,
               itemId: item.itemId,
               num: item.num,
             },
@@ -153,7 +154,7 @@ export class MyRoomService {
           .getRepository(MemberMyRoomInfo)
           .findOne({
             where: {
-              memberId: data.memberId,
+              memberId,
               itemId: item.itemId,
               num: item.num,
             },
@@ -199,7 +200,7 @@ export class MyRoomService {
           .getRepository(MemberFurnitureItemInven)
           .findOne({
             where: {
-              memberId: data.memberId,
+              memberId,
               itemId: item.itemId,
               num: item.num,
             },
@@ -223,7 +224,7 @@ export class MyRoomService {
           .getRepository(MemberMyRoomInfo)
           .findOne({
             where: {
-              memberId: data.memberId,
+              memberId,
               itemId: item.itemId,
               num: item.num,
             },
@@ -262,7 +263,7 @@ export class MyRoomService {
               x: item.x,
               y: item.y,
               rotation: item.rotation,
-              memberId: data.memberId,
+              memberId,
             })
             .execute();
         }
@@ -278,7 +279,7 @@ export class MyRoomService {
             .where('itemId = :itemId AND num = :num AND memberId = :memberId', {
               itemId: item.itemId,
               num: item.num,
-              memberId: data.memberId,
+              memberId,
             });
 
           await updateQuery.execute();
@@ -295,14 +296,14 @@ export class MyRoomService {
             .where('itemId = :itemId AND num = :num AND memberId = :memberId', {
               itemId: item.itemId,
               num: item.num,
-              memberId: data.memberId,
+              memberId,
             })
             .execute();
         }
       }
 
       await queryRunner.commitTransaction();
-      const myRoomInfos = await this.commonService.GetMyRoomInfo(data.memberId);
+      const myRoomInfos = await this.commonService.getMyRoomInfo(memberId);
 
       return {
         myRoomInfos,
@@ -324,7 +325,7 @@ export class MyRoomService {
     }
   }
 
-  async updateStateType(memberId: string, stateType: number) {
+  async updateStateType(memberId: string, data: UpdateStateTypeDto) {
     const exMember = await this.memberRepository.findOne({
       where: {
         memberId: memberId,
@@ -340,7 +341,7 @@ export class MyRoomService {
 
     const member = new Member();
     member.memberId = memberId;
-    member.myRoomStateType = stateType;
+    member.myRoomStateType = data.myRoomStateType;
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -350,7 +351,7 @@ export class MyRoomService {
       await queryRunner.manager.getRepository(Member).save(member);
       await queryRunner.commitTransaction();
       return {
-        myRoomStateType: stateType,
+        myRoomStateType: data.myRoomStateType,
         error: ERRORCODE.NET_E_SUCCESS,
         errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
       };
@@ -471,7 +472,7 @@ export class MyRoomService {
 
       await queryRunner.commitTransaction();
       const frameImages =
-        await this.commonService.GetMemberFrameImages(memberId);
+        await this.commonService.getMemberFrameImages(memberId);
       return {
         frameImages,
         error: ERRORCODE.NET_E_SUCCESS,
@@ -552,7 +553,7 @@ export class MyRoomService {
 
       await queryRunner.commitTransaction();
       const frameImages =
-        await this.commonService.GetMemberFrameImages(memberId);
+        await this.commonService.getMemberFrameImages(memberId);
       return {
         frameImages,
         error: ERRORCODE.NET_E_SUCCESS,

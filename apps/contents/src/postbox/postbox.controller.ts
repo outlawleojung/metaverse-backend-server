@@ -11,11 +11,10 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MorganInterceptor } from 'nest-morgan';
 import { PostboxService } from './postbox.service';
-import { JwtGuard } from '@libs/common';
-import { GetCommonDto } from '../dto/get.common.dto';
 import { GetPostboxesResponseDto } from './dto/res/get.postboxes.response';
 import { ReceiveEachPostResponseDto } from './dto/res/receive.each.post.response';
 import { ReceiveAllPostResponseDto } from './dto/res/receive.all.post.response copy';
+import { AccessTokenGuard, MemberDeco } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('POSTBOX - 우편함')
@@ -29,10 +28,10 @@ export class PostboxController {
     status: HttpStatus.OK,
     type: GetPostboxesResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get()
-  async getPostboxes(@Body() data: GetCommonDto) {
-    return await this.postboxService.getPostboxes(data);
+  async getPostboxes(@MemberDeco('memberId') memberId: string) {
+    return await this.postboxService.getPostboxes(memberId);
   }
 
   // 우편함 수령하기
@@ -41,10 +40,13 @@ export class PostboxController {
     status: HttpStatus.OK,
     type: ReceiveEachPostResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('recieve/:id')
-  async receivePost(@Body() data: GetCommonDto, @Param('id') id: number) {
-    return await this.postboxService.receivePost(data.memberId, id);
+  async receivePost(
+    @MemberDeco('memberId') memberId: string,
+    @Param('id') id: number,
+  ) {
+    return await this.postboxService.receivePost(memberId, id);
   }
 
   // 우편함 수령하기
@@ -53,9 +55,9 @@ export class PostboxController {
     status: HttpStatus.OK,
     type: ReceiveAllPostResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('receive-all')
-  async receiveAppPost(@Body() data: GetCommonDto) {
-    return await this.postboxService.receiveAllPost(data.memberId);
+  async receiveAppPost(@MemberDeco('memberId') memberId: string) {
+    return await this.postboxService.receiveAllPost(memberId);
   }
 }

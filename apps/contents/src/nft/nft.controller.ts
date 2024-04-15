@@ -10,10 +10,9 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MorganInterceptor } from 'nest-morgan';
 import { NftService } from './nft.service';
-import { JwtGuard } from '@libs/common';
 import { LinkedWalletDto } from './dto/req/linked.wallet.dto';
 import { LinkedWalletResDto } from './dto/res/linked.wallet.res.dto';
-import { GetCommonDto } from '../dto/get.common.dto';
+import { AccessTokenGuard, MemberDeco } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('NFT')
@@ -26,19 +25,22 @@ export class NftController {
     status: HttpStatus.OK,
     type: LinkedWalletResDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('linked-wallet')
-  async linkedWallet(@Body() data: LinkedWalletDto) {
-    return await this.nftService.linkedWallet(data.memberId, data.walletAddr);
+  async linkedWallet(
+    @MemberDeco('memberId') memberId: string,
+    @Body() data: LinkedWalletDto,
+  ) {
+    return await this.nftService.linkedWallet(memberId, data.walletAddr);
   }
 
   @ApiOperation({ summary: '지갑 해제 하기' })
   @ApiResponse({
     status: HttpStatus.OK,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Delete('unlinked-wallet')
-  async unlinkedWallet(@Body() data: GetCommonDto) {
-    return await this.nftService.unLinkedWallet(data.memberId);
+  async unlinkedWallet(@MemberDeco('memberId') memberId: string) {
+    return await this.nftService.unLinkedWallet(memberId);
   }
 }

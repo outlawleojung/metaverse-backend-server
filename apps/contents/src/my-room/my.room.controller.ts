@@ -21,7 +21,6 @@ import {
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { MorganInterceptor } from 'nest-morgan';
 import { MemberMyRoomInfo } from '@libs/entity';
-import { JwtGuard } from '@libs/common';
 import { CreateMyRoomDto } from './dto/request/create.my.room.dto';
 import { UpdateStateTypeDto } from './dto/request/update.state.dto';
 import { UpdateStateTypeResponseDto } from './dto/response/upadte.state.response.dto';
@@ -30,6 +29,7 @@ import { UpdateFrameImageDto } from './dto/request/update.frame.image.dto';
 import { ERRORCODE, ERROR_MESSAGE } from '@libs/constants';
 import { UploadImageResponseDto } from './dto/response/upload.image.response.dto';
 import axios from 'axios';
+import { AccessTokenGuard, MemberDeco } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('MY ROOM - 마이룸')
@@ -49,7 +49,7 @@ export class MyRoomController {
     isArray: true,
     type: MemberMyRoomInfo,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('othersRoomList/:othersMemberCode')
   async getOthersRoomList(@Param('othersMemberCode') othersMemberCode: string) {
     return await this.myRoomService.getOthersRoomList(othersMemberCode);
@@ -61,10 +61,13 @@ export class MyRoomController {
     isArray: true,
     type: MemberMyRoomInfo,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('create')
-  async create(@Body() req: CreateMyRoomDto) {
-    return await this.myRoomService.createMyRoom(req);
+  async create(
+    @MemberDeco('memberId') memberId: string,
+    @Body() data: CreateMyRoomDto,
+  ) {
+    return await this.myRoomService.createMyRoom(memberId, data);
   }
 
   @ApiOperation({ summary: '마이룸 상태 타입 변경' })
@@ -72,13 +75,13 @@ export class MyRoomController {
     status: HttpStatus.OK,
     type: UpdateStateTypeResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Put('stateType')
-  async upateStateType(@Body() req: UpdateStateTypeDto) {
-    return await this.myRoomService.updateStateType(
-      req.memberId,
-      req.myRoomStateType,
-    );
+  async upateStateType(
+    @MemberDeco('memberId') memberId: string,
+    @Body() data: UpdateStateTypeDto,
+  ) {
+    return await this.myRoomService.updateStateType(memberId, data);
   }
 
   @ApiOperation({ summary: '마이룸 이미지 업로드' })
@@ -86,11 +89,11 @@ export class MyRoomController {
     status: HttpStatus.OK,
     type: UploadImageResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @UseInterceptors(FileInterceptor('image'))
   @Post('frame-image')
   async frameImageUpload(
-    @Headers() headers,
+    @MemberDeco('memberId') memberId: string,
     @Body() data: UpdateFrameImageDto,
     @UploadedFile() @Optional() file?: Express.Multer.File,
   ) {
@@ -143,11 +146,7 @@ export class MyRoomController {
     }
 
     if (result.error === ERRORCODE.NET_E_SUCCESS) {
-      return await this.myRoomService.uploadIFrameImage(
-        headers.memberId,
-        data,
-        file,
-      );
+      return await this.myRoomService.uploadIFrameImage(memberId, data, file);
     }
 
     return result;
@@ -158,12 +157,12 @@ export class MyRoomController {
     status: HttpStatus.OK,
     type: UploadImageResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Delete('frame-image')
   async delteFrameImage(
-    @Headers() headers,
+    @MemberDeco('memberId') memberId: string,
     @Query('frameImages') items: string,
   ) {
-    return this.myRoomService.deleteFrameImage(headers.memberId, items);
+    return this.myRoomService.deleteFrameImage(memberId, items);
   }
 }

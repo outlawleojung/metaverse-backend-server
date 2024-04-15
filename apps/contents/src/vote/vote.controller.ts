@@ -1,5 +1,4 @@
 import { GetVoteInfoResponseDto } from './dto/response/get.vote.info.response.dto';
-import { GetCommonDto } from '../dto/get.common.dto';
 import {
   Controller,
   UseInterceptors,
@@ -11,8 +10,8 @@ import {
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { MorganInterceptor } from 'nest-morgan';
 import { VoteService } from './vote.service';
-import { JwtGuard } from '@libs/common';
 import { DoVoteDto } from './dto/request/do.vote.dto';
+import { AccessTokenGuard, MemberDeco } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('VOTE - 투표')
@@ -25,17 +24,20 @@ export class VoteController {
   @ApiResponse({
     type: GetVoteInfoResponseDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get()
-  async getVotes(@Body() request: GetCommonDto) {
-    return await this.voteService.getVotes(request);
+  async getVotes(@MemberDeco('memberId') memberId: string) {
+    return await this.voteService.getVotes(memberId);
   }
 
   // 투표 하기
   @ApiOperation({ summary: '투표 하기' })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post()
-  async doVote(@Body() request: DoVoteDto) {
-    return await this.voteService.DoVote(request);
+  async doVote(
+    @MemberDeco('memberId') memberId: string,
+    @Body() data: DoVoteDto,
+  ) {
+    return await this.voteService.DoVote(memberId, data);
   }
 }
