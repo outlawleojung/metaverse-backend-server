@@ -71,18 +71,16 @@ export class C_MYROOM_KICK implements PACKET {
 }
 export class S_MYROOM_KICK implements PACKET {
   eventName = MY_ROOM_SOCKET_S_MESSAGE.S_MYROOM_KICK;
-  success: boolean;
+  clientId: string;
 }
 
 ///
 
 export class C_MYROOM_SHUTDOWN implements PACKET {
   eventName = MY_ROOM_SOCKET_C_MESSAGE.C_MYROOM_SHUTDOWN;
-  isShutdown: boolean;
 }
 export class S_MYROOM_SHUTDOWN implements PACKET {
   eventName = MY_ROOM_SOCKET_S_MESSAGE.S_MYROOM_SHUTDOWN;
-  isShutdown: boolean;
 }
 
 export class C_BASE_SET_OBJECT_DATA implements PACKET {

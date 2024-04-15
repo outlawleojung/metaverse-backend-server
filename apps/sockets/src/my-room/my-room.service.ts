@@ -11,6 +11,7 @@ import {
   S_MYROOM_END_EDIT,
   S_MYROOM_GET_ROOMINFO,
   S_MYROOM_KICK,
+  S_MYROOM_SHUTDOWN,
   S_MYROOM_START_EDIT,
 } from '../packets/myroom-packet';
 import {
@@ -55,7 +56,7 @@ export class MyRoomService {
         await this.kick(client, payload.data as C_MYROOM_KICK);
         break;
       case MY_ROOM_SOCKET_C_MESSAGE.C_MYROOM_SHUTDOWN:
-        await this.shutDown(client, payload.data as C_MYROOM_SHUTDOWN);
+        await this.shutDown(client);
         break;
       default:
         this.logger.debug('잘못된 패킷 입니다.');
@@ -194,27 +195,6 @@ export class MyRoomService {
     this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
   }
 
-  async broadcastKick(data) {
-    const redisRoomId = data.redisRoomId;
-    const kickClientId = data.clientId;
-    const ownerClientId = data.ownerClientId;
-
-    const kickClient = await this.clientService.getSocket(kickClientId);
-    const ownerClient = await this.clientService.getSocket(ownerClientId);
-
-    const packet = new S_MYROOM_KICK();
-    if (!kickClient) {
-      packet.success = false;
-      const { eventName, ...packetData } = packet;
-      ownerClient.emit(eventName, JSON.stringify(packetData));
-    } else {
-      kickClient.leave(redisRoomId);
-      packet.success = true;
-      const { eventName, ...packetData } = packet;
-      ownerClient.emit(eventName, JSON.stringify(packetData));
-    }
-  }
-
   async kick(client: CustomSocket, packet: C_MYROOM_KICK) {
     const memberId = client.data.memberId;
     const memberKey = RedisKey.getStrMemberCurrentRoom(memberId);
@@ -227,12 +207,11 @@ export class MyRoomService {
       return client.emit(SOCKET_S_GLOBAL.ERROR, '마이룸 오너가 아닙니다.');
     }
 
-    const response = new C_MYROOM_KICK();
+    const response = new S_MYROOM_KICK();
     response.clientId = packet.clientId;
 
     const data = {
       redisRoomId,
-      ownerClientId: clientId,
       packet: response,
     };
 
@@ -243,7 +222,44 @@ export class MyRoomService {
     );
   }
 
-  async shutDown(client: CustomSocket, packet: C_MYROOM_SHUTDOWN) {}
+  async broadcastKick(data) {
+    const redisRoomId = data.redisRoomId;
+
+    const { eventName, ...packetData } = data.packet;
+
+    this.server.to(redisRoomId).emit(eventName, packetData);
+  }
+
+  async shutDown(client: CustomSocket) {
+    const redisRoomId = client.data.roomId;
+    const clientId = client.data.clientId;
+
+    const isMyRoomOwner = this.isMyRoomOwner(clientId, redisRoomId);
+
+    if (!isMyRoomOwner) {
+      return client.emit(SOCKET_S_GLOBAL.ERROR, '마이룸 오너가 아닙니다.');
+    }
+
+    const packet = new S_MYROOM_SHUTDOWN();
+
+    const data = {
+      redisRoomId,
+      packet,
+    };
+
+    this.messageHandler.publishHandler(
+      `${NATS_EVENTS.MY_ROOM}:${redisRoomId}`,
+      JSON.stringify(data),
+    );
+  }
+
+  async broadcastMyRoomShutDown(data) {
+    const redisRoomId = data.redisRoomId;
+
+    const { eventName, ...packetData } = data.packet;
+
+    this.server.to(redisRoomId).emit(eventName, packetData);
+  }
 
   async updateNickname(nickname: string) {}
 

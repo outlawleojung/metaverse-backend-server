@@ -78,8 +78,11 @@ export class SubscribeService {
       case MY_ROOM_SOCKET_C_MESSAGE.C_MYROOM_END_EDIT:
         await this.myroomService.broadcastEndEdit(data);
         break;
-      case MY_ROOM_SOCKET_C_MESSAGE.C_MYROOM_KICK:
+      case MY_ROOM_SOCKET_S_MESSAGE.S_MYROOM_KICK:
         await this.myroomService.broadcastKick(data);
+        break;
+      case MY_ROOM_SOCKET_S_MESSAGE.S_MYROOM_SHUTDOWN:
+        await this.myroomService.broadcastMyRoomShutDown(data);
         break;
       default:
         this.logger.debug('잘못된 마이룸 패킷 입니다.');
