@@ -73,7 +73,7 @@ export class MemberController {
     type: GetUpdateCardInfoResponseDto,
   })
   @ApiOperation({ summary: '명함 업데이트' })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Put('updateMyCard')
   async updateMyCard(
     @MemberDeco('memberId') memberId: string,
@@ -93,7 +93,7 @@ export class MemberController {
     type: UpdateProfileResponseDto,
   })
   @ApiOperation({ summary: '프로필 업데이트' })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Put('updateMyProfile')
   async updateMyProfile(
     @MemberDeco('memberId') memberId: string,
@@ -113,7 +113,7 @@ export class MemberController {
     type: SetAvatarResponseDto,
   })
   @ApiOperation({ summary: '아바타 파츠 설정' })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('avatar')
   async updateAvatar(
     @MemberDeco('memberId') memberId: string,
@@ -133,7 +133,7 @@ export class MemberController {
     type: SuccessDto,
   })
   @ApiOperation({ summary: '이메일 변경' })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Put('updateEmail')
   async updateEmail(
     @MemberDeco('memberId') memberId: string,
@@ -153,7 +153,7 @@ export class MemberController {
     type: SuccessDto,
   })
   @ApiOperation({ summary: '회원 탈퇴' })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Delete('withdrawal')
   async withdrawal(@MemberDeco('memberId') memberId: string) {
     return await this.memberService.withdrawal(memberId);
@@ -170,7 +170,7 @@ export class MemberController {
     type: SetAvatarPresetResponseDto,
   })
   @ApiOperation({ summary: '아바타 프리셋 설정' })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('setAvatarPreset')
   async setAvatarPreset(
     @MemberDeco('memberId') memberId: string,
@@ -208,7 +208,7 @@ export class MemberController {
     type: GetAppInfoResponseDto,
   })
   @ApiOperation({ summary: '앱 정보 조회' })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('getAppInfo')
   async getAppInfo() {
     return await this.memberService.getAppInfo();
@@ -225,7 +225,7 @@ export class MemberController {
     type: GetMoneyInfoResponseDto,
   })
   @ApiOperation({ summary: '재화 정보 조회' })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('get-money-info')
   async getMoneyInfo(@MemberDeco('memberId') memberId: string) {
     return await this.memberService.getMoneyInfo(memberId);
@@ -242,7 +242,7 @@ export class MemberController {
     type: SuccessDto,
   })
   @ApiOperation({ summary: '패스워드 변경' })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Put('changePassword')
   async changePassword(
     @MemberDeco('memberId') memberId: string,
@@ -256,7 +256,7 @@ export class MemberController {
     status: HttpStatus.OK,
     type: SuccessDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('setDefaultCardInfo')
   async setDefaultCardInfo(
     @MemberDeco('memberId') memberId: string,
@@ -270,20 +270,20 @@ export class MemberController {
     status: HttpStatus.OK,
     type: SuccessDto,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
   @Delete('delDefaultCardInfo')
   async delDefaultCardInfo(@MemberDeco('memberId') memberId: string) {
     return await this.memberService.delDefaultCardInfo(memberId);
   }
 
-  @ApiOperation({ summary: '유학박람회 관리자 확인' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: SuccessDto,
-  })
-  @UseGuards(JwtGuard)
-  @Get('get-csaf-admin')
-  async getCSAFAdmin(@Headers() headers) {
-    return await this.memberService.getCSAFAdmin(headers.memberId);
-  }
+  // @ApiOperation({ summary: '유학박람회 관리자 확인' })
+  // @ApiResponse({
+  //   status: HttpStatus.OK,
+  //   type: SuccessDto,
+  // })
+  // @UseGuards(AccessTokenGuard)
+  // @Get('get-csaf-admin')
+  // async getCSAFAdmin(@Headers() headers) {
+  //   return await this.memberService.getCSAFAdmin(headers.memberId);
+  // }
 }
