@@ -1,8 +1,7 @@
-import { GetCommonDto } from '../../../dto/get.common.dto';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ChangePasswordDto extends GetCommonDto {
+export class ChangePasswordDto {
   @ApiProperty({
     example: '패스워드',
     description: '패스워드',

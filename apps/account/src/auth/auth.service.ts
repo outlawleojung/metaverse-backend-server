@@ -92,143 +92,125 @@ export class AuthService {
   async authenticateWithEmailAndPassword(
     memberAccount: Pick<MemberAccount, 'accountToken' | 'password'>,
   ) {
-    const email = memberAccount.accountToken;
-    const exMember = await this.memberService.getMemberByEmail(email);
-
-    if (!exMember) {
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_NOT_EXIST_USER,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    }
-
-    const validPassword = await bcryptjs.compareSync(
-      memberAccount.password,
-      exMember.password,
-    );
-
-    if (!validPassword) {
-      this.logger.error(ERROR_MESSAGE(ERRORCODE.NET_E_NOT_MATCH_PASSWORD));
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_NOT_MATCH_PASSWORD,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_MATCH_PASSWORD),
-        },
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
-
-    const member = await this.memberRepository.findOne({
-      where: {
-        memberId: exMember.memberId,
-      },
-    });
-
-    return member;
+    // const email = memberAccount.accountToken;
+    // const exMember = await this.memberService.getMemberByEmail(email);
+    // if (!exMember) {
+    //   throw new HttpException(
+    //     {
+    //       error: ERRORCODE.NET_E_NOT_EXIST_USER,
+    //       message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
+    //     },
+    //     HttpStatus.FORBIDDEN,
+    //   );
+    // }
+    // const validPassword = await bcryptjs.compareSync(
+    //   memberAccount.password,
+    //   exMember.password,
+    // );
+    // if (!validPassword) {
+    //   this.logger.error(ERROR_MESSAGE(ERRORCODE.NET_E_NOT_MATCH_PASSWORD));
+    //   throw new HttpException(
+    //     {
+    //       error: ERRORCODE.NET_E_NOT_MATCH_PASSWORD,
+    //       message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_MATCH_PASSWORD),
+    //     },
+    //     HttpStatus.UNAUTHORIZED,
+    //   );
+    // }
+    // const member = await this.memberRepository.findOne({
+    //   where: {
+    //     memberId: exMember.memberId,
+    //   },
+    // });
+    // return member;
   }
 
   async loginWithEmail(
     memberAccount: Pick<MemberAccount, 'accountToken' | 'password'>,
   ) {
-    const exMember = await this.authenticateWithEmailAndPassword(memberAccount);
-
-    return this.loginMember(exMember);
+    // const exMember = await this.authenticateWithEmailAndPassword(memberAccount);
+    // return this.loginMember(exMember);
   }
 
   // 자체 계정 생성
   async registerWithEmail(
     account: Pick<MemberAccount, 'accountToken' | 'password' | 'regPathType'>,
   ) {
-    const accountToken = Decrypt(account.accountToken) as string;
-
-    // 이메일 중복 검증
-    const exAccount = await this.memberAccountRepository.exists({
-      where: {
-        accountToken: accountToken,
-        providerType: PROVIDER_TYPE.ARZMETA,
-      },
-    });
-
-    if (exAccount) {
-      this.logger.error(ERROR_MESSAGE(ERRORCODE.NET_E_ALREADY_EXIST_EMAIL));
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_ALREADY_EXIST_EMAIL,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_ALREADY_EXIST_EMAIL),
-        },
-        400,
-      );
-    }
-
-    // 이메일 인증 여부 확인
-    const emailConfirm = await this.emailConfirmRepository.findOne({
-      where: {
-        email: accountToken,
-      },
-    });
-
-    if (!emailConfirm) {
-      this.logger.error(ERROR_MESSAGE(ERRORCODE.NET_E_NOT_AUTH_EMAIL));
-      throw new ForbiddenException({
-        error: ERRORCODE.NET_E_NOT_AUTH_EMAIL,
-        message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_AUTH_EMAIL),
-      });
-    }
-
-    // 패스워드 없음
-    if (!account.password) {
-      this.logger.error(ERROR_MESSAGE(ERRORCODE.NET_E_EMPTY_PASSWORD));
-      throw new ForbiddenException({
-        error: ERRORCODE.NET_E_EMPTY_PASSWORD,
-        message: ERROR_MESSAGE(ERRORCODE.NET_E_EMPTY_PASSWORD),
-      });
-    }
-
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      const memberInfo = await this.accountService.commonCreateAccount(
-        queryRunner,
-        accountToken,
-        PROVIDER_TYPE.ARZMETA,
-        account.regPathType,
-      );
-
-      // 인증 된 이메일 정보 삭제
-      await queryRunner.manager.delete(EmailCheck, { email: accountToken });
-      await queryRunner.manager.delete(EmailConfirm, { email: accountToken });
-
-      //패스워드 설정
-      const password: string = String(Decrypt(account.password));
-      const hashedPassword = await bcryptjs.hash(password, 12);
-
-      const memberAccount = new MemberAccount();
-      memberAccount.memberId = memberInfo.memberId;
-      memberAccount.providerType = PROVIDER_TYPE.ARZMETA;
-      memberAccount.password = hashedPassword;
-
-      await queryRunner.manager
-        .getRepository(MemberAccount)
-        .save(memberAccount);
-
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ err });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
-    }
+    // const accountToken = Decrypt(account.accountToken) as string;
+    // // 이메일 중복 검증
+    // const exAccount = await this.memberAccountRepository.exists({
+    //   where: {
+    //     accountToken: accountToken,
+    //     providerType: PROVIDER_TYPE.ARZMETA,
+    //   },
+    // });
+    // if (exAccount) {
+    //   this.logger.error(ERROR_MESSAGE(ERRORCODE.NET_E_ALREADY_EXIST_EMAIL));
+    //   throw new HttpException(
+    //     {
+    //       error: ERRORCODE.NET_E_ALREADY_EXIST_EMAIL,
+    //       message: ERROR_MESSAGE(ERRORCODE.NET_E_ALREADY_EXIST_EMAIL),
+    //     },
+    //     400,
+    //   );
+    // }
+    // // 이메일 인증 여부 확인
+    // const emailConfirm = await this.emailConfirmRepository.findOne({
+    //   where: {
+    //     email: accountToken,
+    //   },
+    // });
+    // if (!emailConfirm) {
+    //   this.logger.error(ERROR_MESSAGE(ERRORCODE.NET_E_NOT_AUTH_EMAIL));
+    //   throw new ForbiddenException({
+    //     error: ERRORCODE.NET_E_NOT_AUTH_EMAIL,
+    //     message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_AUTH_EMAIL),
+    //   });
+    // }
+    // // 패스워드 없음
+    // if (!account.password) {
+    //   this.logger.error(ERROR_MESSAGE(ERRORCODE.NET_E_EMPTY_PASSWORD));
+    //   throw new ForbiddenException({
+    //     error: ERRORCODE.NET_E_EMPTY_PASSWORD,
+    //     message: ERROR_MESSAGE(ERRORCODE.NET_E_EMPTY_PASSWORD),
+    //   });
+    // }
+    // const queryRunner = this.dataSource.createQueryRunner();
+    // await queryRunner.connect();
+    // await queryRunner.startTransaction();
+    // try {
+    //   const memberInfo = await this.accountService.commonCreateAccount(
+    //     queryRunner,
+    //     accountToken,
+    //     PROVIDER_TYPE.ARZMETA,
+    //     account.regPathType,
+    //   );
+    //   // 인증 된 이메일 정보 삭제
+    //   await queryRunner.manager.delete(EmailCheck, { email: accountToken });
+    //   await queryRunner.manager.delete(EmailConfirm, { email: accountToken });
+    //   //패스워드 설정
+    //   const password: string = String(Decrypt(account.password));
+    //   const hashedPassword = await bcryptjs.hash(password, 12);
+    //   const memberAccount = new MemberAccount();
+    //   memberAccount.memberId = memberInfo.memberId;
+    //   memberAccount.providerType = PROVIDER_TYPE.ARZMETA;
+    //   memberAccount.password = hashedPassword;
+    //   await queryRunner.manager
+    //     .getRepository(MemberAccount)
+    //     .save(memberAccount);
+    //   await queryRunner.commitTransaction();
+    // } catch (err) {
+    //   await queryRunner.rollbackTransaction();
+    //   this.logger.error({ err });
+    //   throw new HttpException(
+    //     {
+    //       error: ERRORCODE.NET_E_DB_FAILED,
+    //       message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
+    //     },
+    //     HttpStatus.FORBIDDEN,
+    //   );
+    // } finally {
+    //   await queryRunner.release();
+    // }
   }
 }

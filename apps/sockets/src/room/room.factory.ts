@@ -1,3 +1,4 @@
+import { MeetingRoom } from './rooms/meeting-room';
 import { Injectable, Logger } from '@nestjs/common';
 import { GameRoom } from './rooms/game-room';
 import { MyRoom } from './rooms/my-room';
@@ -38,7 +39,6 @@ export class RoomFactory {
       case RoomType.Conference:
       case RoomType.Vote:
       case RoomType.Store:
-      case RoomType.Office:
       case RoomType.Busan:
       case RoomType.Festival:
         return new GameRoom({
@@ -56,13 +56,25 @@ export class RoomFactory {
           ownerNickname: onwerData.ownerNickname,
           ownerAvatarInfo: onwerData.ownerAvatarInfo,
         });
-      case RoomType.Office:
-        return new OfficeRoom({
-          roomId,
-          sceneName: data.sceneName,
-          ownerId: data.ownerId,
-          roomCode: data.roomCode,
-        });
+      case RoomType.Meeting:
+      // return new MeetingRoom({
+      //   roomId,
+      //   sceneName: data.sceneName,
+      //   roomName: data.roomName,
+      //   roomCode: data.roomCode,
+      //   creatorId: data.creatorId,
+      //   description: data.description,
+      //   spaceInfoId: data.spaceInfoId,
+      //   topicType: data.topicType,
+      //   thumbnail: data.thumbnail,
+      //   currentHostId: data.currentHostId,
+      //   password: data.password,
+      //   isAdvertising: data.isAdvertising,
+      //   isShutdown: data.isShutdown,
+      //   isWaitingRoom: data.isWaitingRoom,
+      //   runningTime: data.runningTime,
+      //   personnel: data.personnel,
+      // });
       default:
         throw new Error('Invalid room type');
     }

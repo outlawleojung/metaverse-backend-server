@@ -18,9 +18,13 @@ import {
   CSAFEventBoothInfo,
   MemberOfficeReservationInfo,
   CSAFEventInfo,
+  EmailCheck,
+  EmailConfirm,
 } from '@libs/entity';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RoomDataLogSchema, WorldChattingLogSchema } from '@libs/mongodb';
+import { AuthService } from './auth/auth.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -48,12 +52,20 @@ import { RoomDataLogSchema, WorldChattingLogSchema } from '@libs/mongodb';
       StartMyRoom,
       ResetPasswdCount,
       LicenseInfo,
+      EmailConfirm,
+      EmailCheck,
     ]),
     SessionModule,
-    JwtAuthModule,
     EntityModule,
+    JwtAuthModule,
   ],
-  providers: [CommonService],
-  exports: [CommonService, SessionModule, JwtAuthModule],
+  providers: [CommonService, JwtService, AuthService],
+  exports: [
+    CommonService,
+    SessionModule,
+    JwtAuthModule,
+    JwtService,
+    AuthService,
+  ],
 })
 export class CommonModule {}

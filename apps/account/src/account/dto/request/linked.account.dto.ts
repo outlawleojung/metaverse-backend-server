@@ -1,8 +1,7 @@
-import { GetCommonDto } from './../../../dto/get.common.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsString, ValidateIf } from 'class-validator';
 
-export class LinkedAccountDto extends GetCommonDto {
+export class LinkedAccountDto {
   @ApiProperty({
     example: '93b800-9b1e-11ed-9bd3....',
     description: '연동 될 계정의 아이디 (이메일 또는 소셜 아이디)',

@@ -1,9 +1,8 @@
-import { GetCommonDto } from '../../../dto/get.common.dto';
 import { IsNotEmpty, IsNumber, IsString, ValidateIf } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNull } from 'typeorm';
 
-export class SetAvatarPreset extends GetCommonDto {
+export class SetAvatarPreset {
   @ApiProperty({
     example: 1,
     description: '프리셋 타입',

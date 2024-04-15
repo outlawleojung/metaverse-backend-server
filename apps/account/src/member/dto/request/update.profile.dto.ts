@@ -1,8 +1,7 @@
-import { GetCommonDto } from '../../../dto/get.common.dto';
-import { IsNotEmpty, IsString, ValidateIf } from 'class-validator';
+import { IsString, ValidateIf } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UpdateProfileDto extends GetCommonDto {
+export class UpdateProfileDto {
   @ApiProperty({
     example: '닉네임',
     description: '닉네임',

@@ -70,103 +70,90 @@ export class AccountService {
 
   // 자체 계정 생성
   async createMember(memberData: SignMemberDto) {
-    const accountToken = Decrypt(memberData.accountToken) as string;
-    // 이메일 중복 검증
-    const exAccount = await this.memberAccountRepository.findOne({
-      where: {
-        accountToken: accountToken,
-        providerType: PROVIDER_TYPE.ARZMETA,
-      },
-    });
-
-    if (exAccount) {
-      this.logger.error(ERROR_MESSAGE(ERRORCODE.NET_E_ALREADY_EXIST_EMAIL));
-      throw new HttpException({ error: 254, message: '사용중인 이메일' }, 400);
-    }
-
-    // 이메일 인증 여부 확인
-    const emailConfirm = await this.emailConfirmRepository.findOne({
-      where: {
-        email: accountToken,
-      },
-    });
-
-    if (!emailConfirm) {
-      this.logger.error(ERROR_MESSAGE(ERRORCODE.NET_E_NOT_AUTH_EMAIL));
-      throw new ForbiddenException({
-        error: ERRORCODE.NET_E_NOT_AUTH_EMAIL,
-        message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_AUTH_EMAIL),
-      });
-    }
-
-    // 패스워드 없음
-    if (!memberData.password) {
-      this.logger.error(ERROR_MESSAGE(ERRORCODE.NET_E_EMPTY_PASSWORD));
-      throw new ForbiddenException({
-        error: ERRORCODE.NET_E_EMPTY_PASSWORD,
-        message: ERROR_MESSAGE(ERRORCODE.NET_E_EMPTY_PASSWORD),
-      });
-    }
-
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      const memberInfo = await this.commonCreateAccount(
-        queryRunner,
-        accountToken,
-        PROVIDER_TYPE.ARZMETA,
-        memberData.regPathType,
-      );
-
-      // 인증 된 이메일 정보 삭제
-      await queryRunner.manager.delete(EmailCheck, { email: accountToken });
-      await queryRunner.manager.delete(EmailConfirm, { email: accountToken });
-
-      //패스워드 설정
-      // 패스워드 해싱
-      const password: string = String(Decrypt(memberData.password));
-      const hashedPassword = await bcryptjs.hash(password, 12);
-
-      const memberAccount = new MemberAccount();
-      memberAccount.memberId = memberInfo.memberId;
-      memberAccount.providerType = PROVIDER_TYPE.ARZMETA;
-      memberAccount.password = hashedPassword;
-
-      await queryRunner.manager
-        .getRepository(MemberAccount)
-        .save(memberAccount);
-
-      await queryRunner.commitTransaction();
-
-      const m = await this.memberRepository.findOne({
-        where: { memberId: memberInfo.memberId },
-      });
-      // 로그인 토큰 발급
-      const loginToken = await this.loginTokenService.signToken(
-        memberInfo.memberId,
-        hashedPassword,
-        m.passwdUpdatedAt,
-      );
-
-      memberInfo.loginToken = loginToken;
-      memberInfo.error = ERRORCODE.NET_E_SUCCESS;
-      memberInfo.errorMessage = ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS);
-      return memberInfo;
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ err });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
-    }
+    // const accountToken = Decrypt(memberData.accountToken) as string;
+    // // 이메일 중복 검증
+    // const exAccount = await this.memberAccountRepository.findOne({
+    //   where: {
+    //     accountToken: accountToken,
+    //     providerType: PROVIDER_TYPE.ARZMETA,
+    //   },
+    // });
+    // if (exAccount) {
+    //   this.logger.error(ERROR_MESSAGE(ERRORCODE.NET_E_ALREADY_EXIST_EMAIL));
+    //   throw new HttpException({ error: 254, message: '사용중인 이메일' }, 400);
+    // }
+    // // 이메일 인증 여부 확인
+    // const emailConfirm = await this.emailConfirmRepository.findOne({
+    //   where: {
+    //     email: accountToken,
+    //   },
+    // });
+    // if (!emailConfirm) {
+    //   this.logger.error(ERROR_MESSAGE(ERRORCODE.NET_E_NOT_AUTH_EMAIL));
+    //   throw new ForbiddenException({
+    //     error: ERRORCODE.NET_E_NOT_AUTH_EMAIL,
+    //     message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_AUTH_EMAIL),
+    //   });
+    // }
+    // // 패스워드 없음
+    // if (!memberData.password) {
+    //   this.logger.error(ERROR_MESSAGE(ERRORCODE.NET_E_EMPTY_PASSWORD));
+    //   throw new ForbiddenException({
+    //     error: ERRORCODE.NET_E_EMPTY_PASSWORD,
+    //     message: ERROR_MESSAGE(ERRORCODE.NET_E_EMPTY_PASSWORD),
+    //   });
+    // }
+    // const queryRunner = this.dataSource.createQueryRunner();
+    // await queryRunner.connect();
+    // await queryRunner.startTransaction();
+    // try {
+    //   const memberInfo = await this.commonService.commonCreateAccount(
+    //     queryRunner,
+    //     accountToken,
+    //     PROVIDER_TYPE.ARZMETA,
+    //     memberData.regPathType,
+    //   );
+    //   // 인증 된 이메일 정보 삭제
+    //   await queryRunner.manager.delete(EmailCheck, { email: accountToken });
+    //   await queryRunner.manager.delete(EmailConfirm, { email: accountToken });
+    //   //패스워드 설정
+    //   // 패스워드 해싱
+    //   const password: string = String(Decrypt(memberData.password));
+    //   const hashedPassword = await bcryptjs.hash(password, 12);
+    //   const memberAccount = new MemberAccount();
+    //   memberAccount.memberId = memberInfo.memberId;
+    //   memberAccount.providerType = PROVIDER_TYPE.ARZMETA;
+    //   memberAccount.password = hashedPassword;
+    //   await queryRunner.manager
+    //     .getRepository(MemberAccount)
+    //     .save(memberAccount);
+    //   await queryRunner.commitTransaction();
+    //   const m = await this.memberRepository.findOne({
+    //     where: { memberId: memberInfo.memberId },
+    //   });
+    //   // 로그인 토큰 발급
+    //   const loginToken = await this.loginTokenService.signToken(
+    //     memberInfo.memberId,
+    //     hashedPassword,
+    //     m.passwdUpdatedAt,
+    //   );
+    //   memberInfo.loginToken = loginToken;
+    //   memberInfo.error = ERRORCODE.NET_E_SUCCESS;
+    //   memberInfo.errorMessage = ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS);
+    //   return memberInfo;
+    // } catch (err) {
+    //   await queryRunner.rollbackTransaction();
+    //   this.logger.error({ err });
+    //   throw new HttpException(
+    //     {
+    //       error: ERRORCODE.NET_E_DB_FAILED,
+    //       message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
+    //     },
+    //     HttpStatus.FORBIDDEN,
+    //   );
+    // } finally {
+    //   await queryRunner.release();
+    // }
   }
 
   // 아즈메타 로그인
@@ -268,7 +255,7 @@ export class AccountService {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       try {
-        await this.commonCreateAccount(
+        await this.commonService.commonCreateAccount(
           queryRunner,
           accountToken,
           memberData.providerType,
@@ -372,7 +359,7 @@ export class AccountService {
   }
 
   // 계정 연동
-  async linkedAccount(data: LinkedAccountDto) {
+  async linkedAccount(memberId: string, data: LinkedAccountDto) {
     console.log('linkedAccount Data: ', data);
     const accountToken = String(Decrypt(data.accountToken));
 
@@ -412,7 +399,7 @@ export class AccountService {
     // 해당 계정에 연동 할 회원 유형이 이미 연동 되어 있는지 확인
     const memberAccount = await this.memberAccountRepository.findOne({
       where: {
-        memberId: data.memberId,
+        memberId,
         providerType: data.providerType,
       },
     });
@@ -502,7 +489,7 @@ export class AccountService {
       const newAccount = new MemberAccount();
       newAccount.accountToken = accountToken;
       newAccount.providerType = data.providerType;
-      newAccount.memberId = data.memberId;
+      newAccount.memberId = memberId;
       if (data.password) {
         const hashedpassword = await bcryptjs.hash(
           String(Decrypt(data.password)),
@@ -516,7 +503,7 @@ export class AccountService {
       if (data.providerType === PROVIDER_TYPE.ARZMETA) {
         const m = new Member();
         m.email = accountToken;
-        m.memberId = data.memberId;
+        m.memberId = memberId;
 
         await queryRunner.manager.getRepository(Member).save(m);
       }
@@ -526,7 +513,7 @@ export class AccountService {
       const socialLoginInfo = await this.memberAccountRepository.find({
         select: { providerType: true, accountToken: true },
         where: {
-          memberId: data.memberId,
+          memberId,
         },
       });
 
@@ -772,7 +759,7 @@ export class AccountService {
       // 유니크 아이디 (memberId) 발급
       const memberId = v1();
 
-      const memberCode = await this.commonService.GnenerateMemberCode();
+      const memberCode = await this.commonService.gnenerateMemberCode();
 
       const member = new Member();
       member.memberId = memberId;
@@ -781,19 +768,19 @@ export class AccountService {
       await queryRunner.manager.getRepository(Member).save(member);
 
       // 기본 인벤토리 설정 ( 인테리어)
-      await this.commonService.CreateMemberInteriorInventoryInit(
+      await this.commonService.createMemberInteriorInventoryInit(
         member.memberId,
         queryRunner,
       );
 
       // 기본 마이룸 설정
-      await this.commonService.CreateMemberMyRoomInit(
+      await this.commonService.createMemberMyRoomInit(
         member.memberId,
         queryRunner,
       );
 
       // 기본 아바타 파츠 설정
-      await this.commonService.CreateMemberAvatarPartsInventoryInit(
+      await this.commonService.createMemberAvatarPartsInventoryInit(
         member.memberId,
         queryRunner,
       );
@@ -1200,63 +1187,6 @@ export class AccountService {
     } finally {
       await queryRunner.release();
     }
-  }
-
-  // 공용 계정 생성 모듈
-  async commonCreateAccount(
-    queryRunner: QueryRunner,
-    accountToken,
-    providerType,
-    regPathType,
-  ) {
-    this.logger.debug('providerType: ', providerType);
-    // 유니크 아이디 (memberId) 발급
-    const memberId = v1();
-
-    const memberCode = await this.commonService.GnenerateMemberCode();
-
-    const member = new Member();
-    member.memberId = memberId;
-    member.memberCode = memberCode;
-    member.firstProviderType = providerType;
-    member.regPathType = regPathType;
-
-    if (providerType === PROVIDER_TYPE.ARZMETA) {
-      member.email = accountToken;
-    }
-
-    await queryRunner.manager.getRepository(Member).save(member);
-
-    // 기본 인벤토리 설정 ( 인테리어)
-    await this.commonService.CreateMemberInteriorInventoryInit(
-      member.memberId,
-      queryRunner,
-    );
-
-    // 기본 마이룸 설정
-    await this.commonService.CreateMemberMyRoomInit(
-      member.memberId,
-      queryRunner,
-    );
-
-    // 기본 아바타 파츠 설정
-    await this.commonService.CreateMemberAvatarPartsInventoryInit(
-      member.memberId,
-      queryRunner,
-    );
-
-    // 계정 생성
-    const memberAccount = new MemberAccount();
-    memberAccount.memberId = member.memberId;
-    memberAccount.providerType = providerType;
-    memberAccount.accountToken = accountToken;
-
-    await queryRunner.manager.getRepository(MemberAccount).save(memberAccount);
-
-    const responseData = new SignUpResponseDto();
-    responseData.memberId = member.memberId;
-
-    return responseData;
   }
 
   // 공용 로그인

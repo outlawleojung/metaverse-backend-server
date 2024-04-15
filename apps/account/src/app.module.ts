@@ -17,7 +17,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AccountController } from './account/account.controller';
 import { AccountModule } from './account/account.module';
-import { CommonService, JwtGuard } from '@libs/common';
+import { CommonModule, CommonService, JwtGuard } from '@libs/common';
 import { JwtAuthModule, SessionModule } from '@libs/common';
 import { MorganModule, MorganInterceptor } from 'nest-morgan';
 import { MemberController } from './member/member.controller';
@@ -63,6 +63,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     MemberModule,
     MailModule,
     SchemaModule,
+    CommonModule,
   ],
   controllers: [AppController, AccountController, MemberController],
   providers: [

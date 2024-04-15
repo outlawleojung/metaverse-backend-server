@@ -1,14 +1,13 @@
-import { GetCommonDto } from '../../../dto/get.common.dto';
-import { IsNotEmpty, IsString, ValidateIf } from 'class-validator';
+import { IsOptional, IsString, ValidateIf } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UpdateMyProfileDto extends GetCommonDto {
+export class UpdateMyProfileDto {
   @ApiProperty({
     example: '내별명이다.',
     description: '닉네임',
   })
   @IsString()
-  @ValidateIf((object, value) => value !== null)
+  @IsOptional()
   public readonly nickname: string | null;
 
   @ApiProperty({
@@ -16,6 +15,6 @@ export class UpdateMyProfileDto extends GetCommonDto {
     description: '상태메세지',
   })
   @IsString()
-  @ValidateIf((object, value) => value !== null)
+  @IsOptional()
   public readonly stateMessage: string | null;
 }

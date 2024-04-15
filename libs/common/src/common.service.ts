@@ -19,7 +19,9 @@ import {
   LicenseInfo,
   MemberOfficeReservationInfo,
   CSAFEventBoothInfo,
+  MemberAccount,
 } from '@libs/entity';
+import { v1 } from 'uuid';
 import {
   ForbiddenException,
   HttpException,
@@ -40,12 +42,15 @@ import {
   ERROR_MESSAGE,
   FUNCTION_TABLE,
   ITEM_TYPE,
+  PROVIDER_TYPE,
 } from '@libs/constants';
 
 @Injectable()
 export class CommonService {
   constructor(
     @InjectRepository(Member) private memberRepository: Repository<Member>,
+    @InjectRepository(MemberAccount)
+    private memberAccountRepository: Repository<MemberAccount>,
     @InjectRepository(MemberWalletInfo)
     private memberWalletRepository: Repository<MemberWalletInfo>,
     @InjectRepository(MemberFurnitureItemInven)
@@ -60,7 +65,7 @@ export class CommonService {
   ) {}
 
   // 지갑 정보
-  async GetWalletInfo(memberId: string) {
+  async getWalletInfo(memberId: string) {
     try {
       const walletInfo = await this.memberWalletRepository.findOne({
         where: {
@@ -78,7 +83,7 @@ export class CommonService {
     }
   }
 
-  async GetAvatarInfo(member: Member) {
+  async getAvatarInfo(member: Member) {
     try {
       const avatarInfo = await this.dataSource
         .getRepository(MemberAvatarInfo)
@@ -98,7 +103,7 @@ export class CommonService {
     }
   }
 
-  async GetMyRoomFrameImages(memberId: string) {
+  async getMyRoomFrameImages(memberId: string) {
     try {
       const memberFrameImages = await this.dataSource
         .getRepository(MemberFrameImage)
@@ -114,7 +119,7 @@ export class CommonService {
     }
   }
 
-  async GetMyRoomInfo(memberId: string) {
+  async getMyRoomInfo(memberId: string) {
     try {
       const myRoomInfos = await this.dataSource
         .getRepository(MemberMyRoomInfo)
@@ -139,7 +144,7 @@ export class CommonService {
   }
 
   // 재화 정보 조회
-  async GetMoneyInfo(memberId: string) {
+  async getMoneyInfo(memberId: string) {
     try {
       const memberMoney = await this.dataSource
         .getRepository(MoneyType) // MoneyType을 기준으로 쿼리
@@ -165,7 +170,7 @@ export class CommonService {
   }
 
   // 재화 추가
-  async AddMemberMoney(
+  async addMemberMoney(
     queryRunner: QueryRunner,
     memberId: string,
     moneyType: number,
@@ -201,7 +206,7 @@ export class CommonService {
   }
 
   // 재화 차감
-  async SubtractMemberMoney(
+  async subtractMemberMoney(
     queryRunner: QueryRunner,
     memberId: string,
     moneyType: number,
@@ -253,7 +258,7 @@ export class CommonService {
     }
   }
 
-  async GetInteriorItemInven(memberId: string) {
+  async getInteriorItemInven(memberId: string) {
     try {
       const interiorItemInvens = await this.dataSource
         .getRepository(MemberFurnitureItemInven)
@@ -271,7 +276,7 @@ export class CommonService {
   }
 
   // 아바타 인벤토리
-  async GetAvatarPartsItemInven(memberId: string) {
+  async getAvatarPartsItemInven(memberId: string) {
     try {
       const avatarPartsItemInvens =
         await this.memberAvatarPartsItemInvenRepository.find({
@@ -287,7 +292,7 @@ export class CommonService {
     }
   }
 
-  async CreateMemberAvatarPartsInventoryInit(
+  async createMemberAvatarPartsInventoryInit(
     memberId: string,
     queryRunner: QueryRunner,
   ) {
@@ -322,7 +327,7 @@ export class CommonService {
     }
   }
 
-  async CreateMemberInteriorInventoryInit(
+  async createMemberInteriorInventoryInit(
     memberId: string,
     queryRunner: QueryRunner,
   ) {
@@ -363,7 +368,7 @@ export class CommonService {
     }
   }
 
-  async CreateMemberMyRoomInit(memberId: string, queryRunner: QueryRunner) {
+  async createMemberMyRoomInit(memberId: string, queryRunner: QueryRunner) {
     const memberMyRoomInfo = await this.dataSource
       .getRepository(MemberMyRoomInfo)
       .find({
@@ -422,7 +427,26 @@ export class CommonService {
     }
   }
 
-  async GetBusinessCardList(memberId: string) {
+  async getMemberInfo(memberId: string) {
+    try {
+      return await this.memberRepository.findOne({
+        select: [
+          'memberId',
+          'memberCode',
+          'providerType',
+          'officeGradeType',
+          'myRoomStateType',
+          'nickname',
+          'stateMessage',
+        ],
+        where: {
+          memberId: memberId,
+        },
+      });
+    } catch (error) {}
+  }
+
+  async getBusinessCardList(memberId: string) {
     const businessCardInfos = await this.dataSource
       .getRepository(MemberBusinessCardInfo)
       .createQueryBuilder('b')
@@ -445,7 +469,7 @@ export class CommonService {
     return businessCardInfos;
   }
 
-  async GetDefaultCardInfo(memberId: string) {
+  async getDefaultCardInfo(memberId: string) {
     const defaultCardInfo = await this.dataSource
       .getRepository(MemberDefaultCardInfo)
       .findOne({
@@ -457,11 +481,11 @@ export class CommonService {
     return defaultCardInfo;
   }
 
-  async GetOnfContentsInfo() {
+  async getOnfContentsInfo() {
     return await this.dataSource.getRepository(OnfContentsInfo).find();
   }
 
-  async GnenerateMemberCode() {
+  async gnenerateMemberCode() {
     // 유저코드 발급
     let memberCode = '';
     while (true) {
@@ -580,7 +604,7 @@ export class CommonService {
   }
 
   // 아바타 정보 조회
-  async getMemberAvatarInfos(memberCode: string) {
+  async getMemberAvatarInfos(memberCode: string[]) {
     const member = await this.dataSource.getRepository(Member).findOne({
       where: {
         memberCode: memberCode,
@@ -607,7 +631,7 @@ export class CommonService {
     return null;
   }
 
-  async GetMemberFrameImages(memberId: string) {
+  async getMemberFrameImages(memberId: string) {
     const frameImages = await this.dataSource
       .getRepository(MemberFrameImage)
       .find({
@@ -629,7 +653,7 @@ export class CommonService {
     );
   }
 
-  async GetFurnitureItemNum(queryRunner: QueryRunner, memberId: string) {
+  async getFurnitureItemNum(queryRunner: QueryRunner, memberId: string) {
     const maxNum = await queryRunner.manager
       .getRepository(MemberFurnitureItemInven)
       .createQueryBuilder('m')
@@ -797,5 +821,61 @@ export class CommonService {
       console.log(error);
       throw new ForbiddenException('DB Failed');
     }
+  }
+
+  async getMemberByEmail(email: string): Promise<MemberAccount> {
+    return this.memberAccountRepository.findOne({
+      where: {
+        providerType: PROVIDER_TYPE.ARZMETA,
+        accountToken: email,
+      },
+    });
+  }
+
+  // 공용 계정 생성 모듈
+  async commonCreateAccount(
+    queryRunner: QueryRunner,
+    accountToken,
+    providerType,
+    regPathType,
+  ): Promise<Member> {
+    // 유니크 아이디 (memberId) 발급
+    const memberId = v1();
+
+    const memberCode = await this.gnenerateMemberCode();
+
+    const member = new Member();
+    member.memberId = memberId;
+    member.memberCode = memberCode;
+    member.firstProviderType = providerType;
+    member.regPathType = regPathType;
+
+    if (providerType === PROVIDER_TYPE.ARZMETA) {
+      member.email = accountToken;
+    }
+
+    await queryRunner.manager.getRepository(Member).save(member);
+
+    // 기본 인벤토리 설정 ( 인테리어)
+    await this.createMemberInteriorInventoryInit(member.memberId, queryRunner);
+
+    // 기본 마이룸 설정
+    await this.createMemberMyRoomInit(member.memberId, queryRunner);
+
+    // 기본 아바타 파츠 설정
+    await this.createMemberAvatarPartsInventoryInit(
+      member.memberId,
+      queryRunner,
+    );
+
+    // 계정 생성
+    const memberAccount = new MemberAccount();
+    memberAccount.memberId = member.memberId;
+    memberAccount.providerType = providerType;
+    memberAccount.accountToken = accountToken;
+
+    await queryRunner.manager.getRepository(MemberAccount).save(memberAccount);
+
+    return member;
   }
 }

@@ -33,7 +33,6 @@ import {
   HttpException,
   HttpStatus,
   Logger,
-  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import bcrypt from 'bcryptjs';
@@ -43,7 +42,6 @@ import { SetAvatarPreset } from './dto/request/set.avatar.preset.dto';
 import { CheckNickNameDto } from './dto/request/check.nickname.dto';
 import { UpdateEmailDto } from './dto/request/update.email.dto';
 import { ChangePasswordDto } from './dto/request/changepassword.dto';
-import { GetCommonDto } from '../dto/get.common.dto';
 import {
   CreateCardInfo,
   DeleteCardInfo,
@@ -72,23 +70,6 @@ export class MemberService {
     private loginTokenService: LoginTokenService,
     @Inject(DataSource) private dataSource: DataSource,
   ) {}
-
-  // 하트 비트 체크
-  async checkLive() {
-    return {
-      error: ERRORCODE.NET_E_SUCCESS,
-      errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-    };
-  }
-
-  async getMemberByEmail(email: string) {
-    return this.memberAccountRepository.findOne({
-      where: {
-        providerType: PROVIDER_TYPE.ARZMETA,
-        accountToken: email,
-      },
-    });
-  }
 
   // 탈퇴 진행 여부 체크
   async checkWithdrawalProcess(data: CheckWidhDrawalDto) {
@@ -170,10 +151,10 @@ export class MemberService {
   }
 
   // 프로필 업데이트
-  async updateMyProfile(data: UpdateMyProfileDto) {
+  async updateMyProfile(memberId: string, data: UpdateMyProfileDto) {
     // 사용자 존재 여부 확인
     const exMember = await this.memberRepository.findOne({
-      where: { memberId: data.memberId },
+      where: { memberId },
     });
     if (!exMember) {
       throw new HttpException(
@@ -209,7 +190,7 @@ export class MemberService {
     }
 
     const memberProfile = new Member();
-    memberProfile.memberId = data.memberId;
+    memberProfile.memberId = memberId;
     memberProfile.nickname = data.nickname;
     memberProfile.stateMessage = data.stateMessage;
 
@@ -222,7 +203,7 @@ export class MemberService {
 
       if (data.nickname) {
         const nicknameLog = new MemberNicknameLog();
-        nicknameLog.memberId = data.memberId;
+        nicknameLog.memberId = memberId;
         nicknameLog.nickname = data.nickname;
         await queryRunner.manager
           .getRepository(MemberNicknameLog)
@@ -245,10 +226,10 @@ export class MemberService {
   }
 
   // 내 명함 업데이트
-  async updateMyCardInfo(data: UpdateMyCardDto) {
+  async updateMyCardInfo(memberId: string, data: UpdateMyCardDto) {
     // 사용자 존재 여부 확인
     const exMember = await this.memberRepository.findOne({
-      where: { memberId: data.memberId },
+      where: { memberId },
     });
     if (!exMember) {
       throw new HttpException(
@@ -274,7 +255,7 @@ export class MemberService {
       .getRepository(MemberBusinessCardInfo)
       .count({
         where: {
-          memberId: data.memberId,
+          memberId,
         },
       });
 
@@ -319,7 +300,7 @@ export class MemberService {
         }
 
         const newCard = new UpdateCardInfo();
-        newCard.memberId = data.memberId;
+        newCard.memberId = memberId;
         newCard.num = udCard.num;
         newCard.templateId = udCard.templateId;
 
@@ -342,7 +323,7 @@ export class MemberService {
         .getRepository(MemberBusinessCardInfo)
         .createQueryBuilder('b')
         .select('MAX(b.num)', 'num')
-        .where('b.memberId = :memberId', { memberId: data.memberId })
+        .where('b.memberId = :memberId', { memberId })
         .getRawOne();
 
       console.log(result);
@@ -363,7 +344,7 @@ export class MemberService {
 
         num++;
         const newCard = new UpdateCardInfo();
-        newCard.memberId = data.memberId;
+        newCard.memberId = memberId;
         newCard.templateId = cardTmplt.id;
         newCard.num = num;
 
@@ -385,7 +366,7 @@ export class MemberService {
     if (data.deleteCardInfos && data.deleteCardInfos.length > 0) {
       for (const udCard of data.deleteCardInfos) {
         const delCard = new UpdateCardInfo();
-        delCard.memberId = data.memberId;
+        delCard.memberId = memberId;
         delCard.templateId = udCard.templateId;
         delCard.num = udCard.num;
 
@@ -427,9 +408,8 @@ export class MemberService {
       }
 
       await queryRunner.commitTransaction();
-      const businessCardInfos = await this.commonService.GetBusinessCardList(
-        data.memberId,
-      );
+      const businessCardInfos =
+        await this.commonService.getBusinessCardList(memberId);
       return {
         businessCardInfos,
         error: ERRORCODE.NET_E_SUCCESS,
@@ -451,10 +431,10 @@ export class MemberService {
   }
 
   // 아바타 파츠 설정
-  async setAvatar(avatarInfo: SetAvatar) {
+  async setAvatar(memberId: string, avatarInfo: SetAvatar) {
     // 사용자 존재 여부 확인
     const exMember = await this.memberRepository.findOne({
-      where: { memberId: avatarInfo.memberId },
+      where: { memberId },
     });
 
     if (!exMember) {
@@ -480,7 +460,7 @@ export class MemberService {
 
         const memberAvatarInfo = await this.memberAvatarInfoRepository.findOne({
           where: {
-            memberId: avatarInfo.memberId,
+            memberId,
             avatarPartsType: partsType.type,
           },
         });
@@ -489,13 +469,13 @@ export class MemberService {
           if (memberAvatarInfo) {
             // 삭제
             await queryRunner.manager.delete(MemberAvatarInfo, {
-              memberId: avatarInfo.memberId,
+              memberId,
               avatarPartsType: partsType.type,
             });
           }
         } else {
           const memberAvatar = new MemberAvatarInfo();
-          memberAvatar.memberId = avatarInfo.memberId;
+          memberAvatar.memberId = memberId;
           memberAvatar.avatarPartsType = partsType.type;
           memberAvatar.itemId = itemId;
 
@@ -505,7 +485,7 @@ export class MemberService {
         }
       }
       await queryRunner.commitTransaction();
-      const avatarInfos = await this.commonService.GetAvatarInfo(exMember);
+      const avatarInfos = await this.commonService.getAvatarInfo(exMember);
 
       return {
         avatarInfos: avatarInfos,
@@ -527,7 +507,7 @@ export class MemberService {
     }
   }
 
-  async updateEmail(updateEmail: UpdateEmailDto) {
+  async updateEmail(memberId: string, updateEmail: UpdateEmailDto) {
     //이메일 인증 여부 확인
     const emailConfirm = await this.emailConfirmRepository.findOne({
       where: {
@@ -553,7 +533,7 @@ export class MemberService {
     try {
       await queryRunner.manager.update(
         MemberAccount,
-        { memberId: updateEmail.memberId, providerType: PROVIDER_TYPE.ARZMETA },
+        { memberId, providerType: PROVIDER_TYPE.ARZMETA },
         {
           accountToken: updateEmail.email,
         },
@@ -583,10 +563,10 @@ export class MemberService {
   }
 
   // 회원 탈퇴
-  async withdrawal(withdrawal: GetCommonDto) {
+  async withdrawal(memberId: string) {
     // 사용자 존재 여부 확인
     const exMember = await this.memberRepository.findOne({
-      where: { memberId: withdrawal.memberId },
+      where: { memberId },
     });
 
     if (!exMember) {
@@ -605,7 +585,7 @@ export class MemberService {
 
     try {
       const upMember = new Member();
-      upMember.memberId = withdrawal.memberId;
+      upMember.memberId = memberId;
       upMember.deletedAt = new Date();
 
       await queryRunner.manager.getRepository(Member).save(upMember);
@@ -671,10 +651,10 @@ export class MemberService {
   }
 
   // 아바타 프리셋 세팅
-  async setAvatarPreset(avatarInfo: SetAvatarPreset) {
+  async setAvatarPreset(memberId: string, avatarInfo: SetAvatarPreset) {
     // 사용자 존재 여부 확인
     const exMember = await this.memberRepository.findOne({
-      where: { memberId: avatarInfo.memberId },
+      where: { memberId },
     });
 
     if (!exMember) {
@@ -739,7 +719,7 @@ export class MemberService {
         this.logger.debug({ preset });
 
         const memberAvatar = new MemberAvatarInfo();
-        memberAvatar.memberId = avatarInfo.memberId;
+        memberAvatar.memberId = memberId;
         memberAvatar.itemId = preset.itemId;
         memberAvatar.avatarPartsType = preset.partsType;
 
@@ -750,7 +730,7 @@ export class MemberService {
 
       // 닉네임, 상태메시지 업데이트
       const mac = new Member();
-      mac.memberId = avatarInfo.memberId;
+      mac.memberId = memberId;
       mac.nickname = avatarInfo.nickname;
       mac.stateMessage = avatarInfo.stateMessage;
 
@@ -758,7 +738,7 @@ export class MemberService {
 
       if (avatarInfo.nickname) {
         const nicknameLog = new MemberNicknameLog();
-        nicknameLog.memberId = avatarInfo.memberId;
+        nicknameLog.memberId = memberId;
         nicknameLog.nickname = avatarInfo.nickname;
         await queryRunner.manager
           .getRepository(MemberNicknameLog)
@@ -767,7 +747,7 @@ export class MemberService {
 
       await queryRunner.commitTransaction();
 
-      const avatarInfos = await this.commonService.GetAvatarInfo(exMember);
+      const avatarInfos = await this.commonService.getAvatarInfo(exMember);
 
       return {
         avatarInfos: avatarInfos,
@@ -792,9 +772,9 @@ export class MemberService {
   }
 
   // 앱 정보 조회
-  async getAppInfo(data: GetCommonDto) {
+  async getAppInfo() {
     // 컨텐츠 온오프 정보
-    const onfContentsInfo = await this.commonService.GetOnfContentsInfo();
+    const onfContentsInfo = await this.commonService.getOnfContentsInfo();
 
     const noticeInfo = await this.getNotice();
 
@@ -841,7 +821,7 @@ export class MemberService {
   }
 
   async getMoneyInfo(memberId: string) {
-    const moneyInfos = await this.commonService.GetMoneyInfo(memberId);
+    const moneyInfos = await this.commonService.getMoneyInfo(memberId);
 
     return {
       error: ERRORCODE.NET_E_SUCCESS,
@@ -851,10 +831,10 @@ export class MemberService {
   }
 
   // 회원 정보 조회
-  async getMemberInfo(getMemberInfo: GetCommonDto) {
+  async getMemberInfo(memberId: string) {
     // 사용자 존재 여부 확인
     const exMember = await this.memberRepository.findOne({
-      where: { memberId: getMemberInfo.memberId },
+      where: { memberId },
     });
 
     if (!exMember) {
@@ -867,41 +847,36 @@ export class MemberService {
       );
     }
 
+    const membmerInfo = await this.commonService.getMemberInfo(memberId);
+
     // 비지니스 명함 정보
-    const businessCardInfos = await this.commonService.GetBusinessCardList(
-      exMember.memberId,
-    );
+    const businessCardInfos =
+      await this.commonService.getBusinessCardList(memberId);
 
     // 기본 명함 정보
-    const defaultCardInfo = await this.commonService.GetDefaultCardInfo(
-      exMember.memberId,
-    );
+    const defaultCardInfo =
+      await this.commonService.getDefaultCardInfo(memberId);
 
     // 아바타 정보
-    const avatarInfos = await this.commonService.GetAvatarInfo(exMember);
+    const avatarInfos = await this.commonService.getAvatarInfo(exMember);
 
     // 마이룸 정보
-    const myRoomList = await this.commonService.GetMyRoomInfo(
-      exMember.memberId,
-    );
+    const myRoomList = await this.commonService.getMyRoomInfo(memberId);
 
     // 마이룸 액자 정보
-    const myRoomFrameImages = await this.commonService.GetMyRoomFrameImages(
-      exMember.memberId,
-    );
+    const myRoomFrameImages =
+      await this.commonService.getMyRoomFrameImages(memberId);
 
     // 가구 인벤 정보
-    const interiorItemInvens = await this.commonService.GetInteriorItemInven(
-      exMember.memberId,
-    );
+    const interiorItemInvens =
+      await this.commonService.getInteriorItemInven(memberId);
 
     // 아바타 인벤 정보
-    const avatarPartsInvens = await this.commonService.GetAvatarPartsItemInven(
-      exMember.memberId,
-    );
+    const avatarPartsInvens =
+      await this.commonService.getAvatarPartsItemInven(memberId);
 
     // 재화 정보
-    const moneyInfos = await this.commonService.GetMoneyInfo(exMember.memberId);
+    const moneyInfos = await this.commonService.getMoneyInfo(exMember.memberId);
 
     // // 지갑 정보
     // const walletAddr = await this.commonService.GetWalletInfo(exMember.memberId);
@@ -910,7 +885,7 @@ export class MemberService {
     const socialLoginInfo = await this.memberAccountRepository.find({
       select: { providerType: true, accountToken: true },
       where: {
-        memberId: getMemberInfo.memberId,
+        memberId,
       },
     });
 
@@ -920,33 +895,33 @@ export class MemberService {
       .find({
         select: ['contentsId'],
         where: {
-          memberId: exMember.memberId,
+          memberId,
         },
       });
 
     return {
-      avatarInfos: avatarInfos,
-      businessCardInfos: businessCardInfos,
-      defaultCardInfo: defaultCardInfo,
-      socialLoginInfo: socialLoginInfo,
-      myRoomList: myRoomList,
-      myRoomFrameImages: myRoomFrameImages,
-      interiorItemInvens: interiorItemInvens,
-      avatarPartsInvens: avatarPartsInvens,
-      moneyInfos: moneyInfos,
-      memberAdContents: memberAdContents,
-      // walletAddr: walletAddr,
+      membmerInfo,
+      avatarInfos,
+      businessCardInfos,
+      defaultCardInfo,
+      socialLoginInfo,
+      myRoomList,
+      myRoomFrameImages,
+      interiorItemInvens,
+      avatarPartsInvens,
+      moneyInfos,
+      memberAdContents,
       error: ERRORCODE.NET_E_SUCCESS,
       message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
     };
   }
 
   // 패스워드 변경
-  async changePassword(changePassword: ChangePasswordDto) {
+  async changePassword(memberId: string, changePassword: ChangePasswordDto) {
     // 사용자 존재 여부 확인
     const memberAccount = await this.memberAccountRepository.findOne({
       where: {
-        memberId: changePassword.memberId,
+        memberId,
         providerType: PROVIDER_TYPE.ARZMETA,
       },
     });
@@ -1013,7 +988,7 @@ export class MemberService {
 
       const member = await this.memberRepository.findOne({
         where: {
-          memberId: changePassword.memberId,
+          memberId,
         },
       });
 
@@ -1045,13 +1020,13 @@ export class MemberService {
   }
 
   // 기본 명함 설정 하기
-  async setDefaultCardInfo(data: SetDefaultCardInfoDto) {
+  async setDefaultCardInfo(memberId: string, data: SetDefaultCardInfoDto) {
     // 명함 유효성 검증
     const businessCardInfo = await this.dataSource
       .getRepository(MemberBusinessCardInfo)
       .findOne({
         where: {
-          memberId: data.memberId,
+          memberId,
           templateId: data.templateId,
           num: data.num,
         },
@@ -1073,7 +1048,7 @@ export class MemberService {
 
     try {
       const defaultCard = new MemberDefaultCardInfo();
-      defaultCard.memberId = data.memberId;
+      defaultCard.memberId = memberId;
       defaultCard.templateId = data.templateId;
       defaultCard.num = data.num;
 
@@ -1083,7 +1058,7 @@ export class MemberService {
       await queryRunner.commitTransaction();
 
       // 기본 명함 정보
-      const defaultCardInfo = await this.getDefaultCardInfo(data.memberId);
+      const defaultCardInfo = await this.getDefaultCardInfo(memberId);
 
       return {
         defaultCardInfo,
@@ -1113,7 +1088,7 @@ export class MemberService {
 
     try {
       await queryRunner.manager.getRepository(MemberDefaultCardInfo).delete({
-        memberId: memberId,
+        memberId,
       });
       await queryRunner.commitTransaction();
 

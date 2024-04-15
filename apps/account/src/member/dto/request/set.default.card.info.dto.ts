@@ -1,8 +1,7 @@
-import { GetCommonDto } from '../../../dto/get.common.dto';
-import { IsNotEmpty, IsString, IsArray, IsObject, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class SetDefaultCardInfoDto extends GetCommonDto {
+export class SetDefaultCardInfoDto {
   @ApiProperty({
     example: 1,
     description: '명함 템플릿 아이디',

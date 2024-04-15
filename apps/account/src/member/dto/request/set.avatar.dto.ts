@@ -1,11 +1,10 @@
-import { GetCommonDto } from '../../../dto/get.common.dto';
-import { IsNotEmpty, IsString, IsArray, IsObject } from 'class-validator';
+import { IsNotEmpty, IsObject } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 type Avatar = {
   [key: string]: number;
 };
 
-export class SetAvatar extends GetCommonDto {
+export class SetAvatar {
   @ApiProperty({
     example: {
       '1': 101,
@@ -16,5 +15,5 @@ export class SetAvatar extends GetCommonDto {
   })
   @IsObject()
   @IsNotEmpty()
-  public readonly avatarInfos: Object;
+  public readonly avatarInfos: Avatar;
 }

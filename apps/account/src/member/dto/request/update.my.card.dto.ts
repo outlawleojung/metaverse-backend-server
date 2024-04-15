@@ -1,5 +1,4 @@
-import { GetCommonDto } from '../../../dto/get.common.dto';
-import { IsNotEmpty, IsString, ValidateIf, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { MemberBusinessCardInfo } from '@libs/entity';
 
@@ -11,7 +10,7 @@ export class UpdateCardInfo extends CreateCardInfo {
   public num: number;
 }
 
-export class DeleteCardInfo extends GetCommonDto {
+export class DeleteCardInfo {
   @ApiProperty({
     example: 2,
     description: '명함 템플릿 아이디',
@@ -26,13 +25,13 @@ export class DeleteCardInfo extends GetCommonDto {
   num: number;
 }
 
-export class UpdateMyCardDto extends GetCommonDto {
+export class UpdateMyCardDto {
   @ApiProperty({
     type: UpdateCardInfo,
     isArray: true,
     description: '갱신 비즈니스 명함',
   })
-  @ValidateIf((object, value) => value !== null)
+  @IsOptional()
   public readonly updateCardInfos: UpdateCardInfo[] | null;
 
   @ApiProperty({
@@ -40,7 +39,7 @@ export class UpdateMyCardDto extends GetCommonDto {
     isArray: true,
     description: '추가 비즈니스 명함',
   })
-  @ValidateIf((object, value) => value !== null)
+  @IsOptional()
   public readonly createCardInfos: CreateCardInfo[] | null;
 
   @ApiProperty({
@@ -48,6 +47,6 @@ export class UpdateMyCardDto extends GetCommonDto {
     isArray: true,
     description: '삭제 비즈니스 명함',
   })
-  @ValidateIf((object, value) => value !== null)
+  @IsOptional()
   public readonly deleteCardInfos: DeleteCardInfo[] | null;
 }
