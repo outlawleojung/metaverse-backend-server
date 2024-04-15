@@ -1,11 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
-import cookieParser from 'cookie-parser';
-import session from 'express-session';
+
 import passport from 'passport';
 import cors from 'cors';
-import fs from 'fs';
+
 import { HttpExceptionFilter } from './httpException.filter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { join } from 'path';
@@ -42,27 +41,10 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.use(cookieParser());
-  app.use(
-    session({
-      resave: false,
-      saveUninitialized: false,
-      secret: process.env.COOKIE_SECRET,
-      cookie: {
-        httpOnly: true,
-        secure: false,
-      },
-    }),
-  );
 
   app.use(passport.initialize());
   app.use(passport.session());
-  app.use(
-    cors({
-      origin: process.env.ADMIN_FRONT_URL,
-      credentials: true,
-    }),
-  );
+
   app.setBaseViewsDir(join(__dirname, '..', 'src', 'views'));
 
   const port = process.env.ACCOUNT_SERVER || 4810;
