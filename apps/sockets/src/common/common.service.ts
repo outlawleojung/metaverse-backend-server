@@ -61,6 +61,7 @@ export class CommonService {
     const roomId = client.data.roomId;
     const objectId = payload.objectId;
     const clientId = client.data.clientId;
+    const socketId = client.data.socketId;
 
     // 게임 오브젝트 데이터 존재 여부 확인
     const isExists = await this.gameObjectService.getExistsGameObject(
@@ -89,6 +90,7 @@ export class CommonService {
 
         const data = {
           redisRoomId: roomId,
+          socketId,
           packet,
         };
 
@@ -147,16 +149,23 @@ export class CommonService {
 
   async broadcastSetObjectData(data) {
     const redisRoomId = data.redisRoomId;
+    const socketId = data.socketId;
     const { eventName, ...packetData } = data.packet;
 
-    this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
+    this.server
+      .to(redisRoomId)
+      .except(socketId)
+      .emit(eventName, JSON.stringify(packetData));
   }
 
   async broadcastMyRoomGetRoomInfo(data) {
     const redisRoomId = data.redisRoomId;
     const { eventName, ...packetData } = data.packet;
 
-    this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
+    this.server
+      .to(redisRoomId)
+
+      .emit(eventName, JSON.stringify(packetData));
   }
 
   async isMyRoom(roomId: string): Promise<boolean> {
