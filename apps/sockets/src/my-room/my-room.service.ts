@@ -252,7 +252,7 @@ export class MyRoomService {
 
     const { eventName, ...packetData } = data.packet;
 
-    this.server.to(redisRoomId).emit(eventName, packetData);
+    this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
   }
 
   async shutDown(client: CustomSocket, packet: C_MYROOM_SHUTDOWN) {
@@ -298,7 +298,7 @@ export class MyRoomService {
 
     const { eventName, ...packetData } = data.packet;
 
-    this.server.to(redisRoomId).emit(eventName, packetData);
+    this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
   }
 
   async updateNickname(nickname: string) {}
