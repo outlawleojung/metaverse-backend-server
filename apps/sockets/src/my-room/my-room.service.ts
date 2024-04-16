@@ -56,7 +56,7 @@ export class MyRoomService {
         await this.kick(client, payload.data as C_MYROOM_KICK);
         break;
       case MY_ROOM_SOCKET_C_MESSAGE.C_MYROOM_SHUTDOWN:
-        await this.shutDown(client);
+        await this.shutDown(client, payload.data as C_MYROOM_SHUTDOWN);
         break;
       default:
         this.logger.debug('잘못된 패킷 입니다.');
@@ -124,6 +124,11 @@ export class MyRoomService {
     return client.emit(eventName, JSON.stringify(packetData));
   }
 
+  /**
+   * 마이룸 편집 시작
+   * @param client
+   * @returns
+   */
   async startEdit(client: CustomSocket) {
     const memberId = client.data.memberId;
     const memberKey = RedisKey.getStrMemberCurrentRoom(memberId);
@@ -150,6 +155,12 @@ export class MyRoomService {
     );
   }
 
+  /**
+   * 마이룸 편집 종료
+   * @param client
+   * @param packet
+   * @returns
+   */
   async endEdit(client: CustomSocket, packet: C_MYROOM_END_EDIT) {
     const memberId = client.data.memberId;
     const memberKey = RedisKey.getStrMemberCurrentRoom(memberId);
@@ -177,6 +188,10 @@ export class MyRoomService {
     );
   }
 
+  /**
+   * 마이룸 편집 시작 브로드캐스팅
+   * @param data
+   */
   async broadcastStartEdit(data) {
     const redisRoomId = data.redisRoomId;
     const packet = new S_MYROOM_START_EDIT();
@@ -185,6 +200,10 @@ export class MyRoomService {
     this.server.to(redisRoomId).emit(eventName, '');
   }
 
+  /**
+   * 마이룸 편집 종료 브로드캐스팅
+   * @param data
+   */
   async broadcastEndEdit(data) {
     const redisRoomId = data.redisRoomId;
     const packet = new S_MYROOM_END_EDIT();
@@ -195,6 +214,12 @@ export class MyRoomService {
     this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
   }
 
+  /**
+   * 마이룸에서 모두 내보내기
+   * @param client
+   * @param packet
+   * @returns
+   */
   async kick(client: CustomSocket, packet: C_MYROOM_KICK) {
     const memberId = client.data.memberId;
     const memberKey = RedisKey.getStrMemberCurrentRoom(memberId);
@@ -230,7 +255,7 @@ export class MyRoomService {
     this.server.to(redisRoomId).emit(eventName, packetData);
   }
 
-  async shutDown(client: CustomSocket) {
+  async shutDown(client: CustomSocket, packet: C_MYROOM_SHUTDOWN) {
     const redisRoomId = client.data.roomId;
     const clientId = client.data.clientId;
 
@@ -240,11 +265,26 @@ export class MyRoomService {
       return client.emit(SOCKET_S_GLOBAL.ERROR, '마이룸 오너가 아닙니다.');
     }
 
-    const packet = new S_MYROOM_SHUTDOWN();
+    const roomData = JSON.parse(
+      await this.redisClient.hget(RedisKey.getStrRooms(), redisRoomId),
+    );
+
+    roomData.isShutdown = packet.isShutdown;
+
+    // 룸 정보 업데이트
+    const updatedRoomDataString = JSON.stringify(roomData);
+    await this.redisClient.hset(
+      RedisKey.getStrRooms(),
+      redisRoomId,
+      updatedRoomDataString,
+    );
+
+    const response = new S_MYROOM_SHUTDOWN();
+    response.isShutdown = packet.isShutdown;
 
     const data = {
       redisRoomId,
-      packet,
+      packet: response,
     };
 
     this.messageHandler.publishHandler(
