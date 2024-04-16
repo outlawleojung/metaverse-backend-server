@@ -7,6 +7,7 @@ export interface MyRoomDetails {
   ownerId: string;
   ownerNickname: string;
   ownerAvatarInfo: object;
+  isShutdown: boolean;
 }
 
 export class MyRoom implements IRoomWithOwner {
@@ -21,7 +22,6 @@ export class MyRoom implements IRoomWithOwner {
 
   constructor(details: MyRoomDetails) {
     this.type = RoomType.MyRoom;
-    this.isShutdown = false;
     Object.assign(this, details);
   }
 }

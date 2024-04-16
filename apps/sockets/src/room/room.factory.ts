@@ -6,7 +6,7 @@ import { IRoom } from './room';
 import { RoomType } from './room-type';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
-import { RedisKey } from '@libs/constants';
+import { MY_ROOM_STATE_TYPE, RedisKey } from '@libs/constants';
 import { OfficeRoom } from './rooms/office-room';
 import { CreateRoomRequestDto } from './dto/create-room-request.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,6 +17,7 @@ import { MyRoomService } from '../my-room/my-room.service';
 interface OwnerData {
   ownerNickname: string;
   ownerAvatarInfo: object;
+  isShutdown: boolean;
 }
 @Injectable()
 export class RoomFactory {
@@ -47,14 +48,15 @@ export class RoomFactory {
           sceneName: data.sceneName,
         });
       case RoomType.MyRoom:
-        const onwerData: OwnerData = await this.getOwnerInfo(data.ownerId);
+        const ownerData: OwnerData = await this.getOwnerInfo(data.ownerId);
 
         return new MyRoom({
           roomId,
           sceneName: data.sceneName,
           ownerId: data.ownerId,
-          ownerNickname: onwerData.ownerNickname,
-          ownerAvatarInfo: onwerData.ownerAvatarInfo,
+          ownerNickname: ownerData.ownerNickname,
+          ownerAvatarInfo: ownerData.ownerAvatarInfo,
+          isShutdown: ownerData.isShutdown,
         });
       case RoomType.Meeting:
       // return new MeetingRoom({
@@ -83,7 +85,7 @@ export class RoomFactory {
   async getOwnerInfo(ownerId: string) {
     try {
       const member = await this.memberRepository.findOne({
-        select: ['nickname', 'memberId'],
+        select: ['nickname', 'memberId', 'myRoomStateType'],
         where: {
           memberCode: ownerId,
         },
@@ -105,6 +107,8 @@ export class RoomFactory {
       const data: OwnerData = {
         ownerNickname: member.nickname,
         ownerAvatarInfo,
+        isShutdown:
+          member.myRoomStateType === MY_ROOM_STATE_TYPE.NOBODY ? true : false,
       };
 
       return data;

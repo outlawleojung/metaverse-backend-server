@@ -1033,3 +1033,10 @@ export const ROOM_TYPE = Object.freeze({
   Festival: 14,
   Unknown: 15,
 });
+
+export const MY_ROOM_STATE_TYPE = Object.freeze({
+  ANYONE: 1,
+  FRIEND: 2,
+  INVITE: 3,
+  NOBODY: 4,
+});
