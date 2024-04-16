@@ -62,19 +62,19 @@ export class TokenCheckService {
       client['data'].memberId = payload.idx;
     });
 
-    const sessionInfo = await this.sessionInfoRepository.findOne({
-      where: {
-        memberId: client.data.memberId,
-      },
-    });
+    // const sessionInfo = await this.sessionInfoRepository.findOne({
+    //   where: {
+    //     memberId: client.data.memberId,
+    //   },
+    // });
 
     // 세션 아이디 검증
-    if (sessionId !== sessionInfo.sessionId) {
-      this.logger.debug('세션 아이디가 일치하지 않습니다.');
-      client.emit(SOCKET_S_GLOBAL.S_DROP_PLAYER, 10001);
-      client.disconnect();
-      return;
-    }
+    // if (sessionId !== sessionInfo.sessionId) {
+    //   this.logger.debug('세션 아이디가 일치하지 않습니다.');
+    //   client.emit(SOCKET_S_GLOBAL.S_DROP_PLAYER, 10001);
+    //   client.disconnect();
+    //   return;
+    // }
   }
 
   async getJwtAccessTokenAndSessionId(client: CustomSocket) {

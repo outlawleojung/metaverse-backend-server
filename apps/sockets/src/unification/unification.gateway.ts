@@ -20,7 +20,6 @@ import {
   NAMESPACE,
   NATS_EVENTS,
   OFFICE_SOCKET_S_MESSAGE,
-  RedisKey,
   SCREEN_BANNER_SOCKET_S_MESSAGE,
   SOCKET_C_GLOBAL,
   SOCKET_S_GLOBAL,
@@ -193,7 +192,7 @@ export class UnificationGateway
     await this.unificationService.handleDisconnect(client);
 
     this.logger.debug('disonnected', client.id);
-    this.logger.debug(`${client.id} 소켓 연결 해제 ❌`);
+    this.logger.debug(`${client.data.memberId} 소켓 연결 해제 ❌`);
   }
 
   // 닉네임 변경 요청

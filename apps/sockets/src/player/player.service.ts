@@ -17,6 +17,7 @@ import {
   C_INTERACTION_REMOVE_ITEM,
   C_INTERACTION_SET_ITEM,
   S_BASE_REMOVE_OBJECT,
+  S_BASE_SET_ANIMATION,
   S_BASE_SET_TRANSFORM,
   S_LEAVE,
 } from '../packets/packet';
@@ -198,7 +199,7 @@ export class PlayerService {
       };
 
       this.messageHandler.publishHandler(
-        `${NATS_EVENTS.SYNC_ROOM}`,
+        `${NATS_EVENTS.SYNC_ROOM}:${redisRoomId}`,
         JSON.stringify(data),
       );
     }
@@ -208,9 +209,10 @@ export class PlayerService {
     const redisRoomId = data.redisRoomId;
     const socketId = data.socketId;
 
-    const packet = data.packet as C_BASE_SET_ANIMATION;
+    const { eventName, ...packetData } = data.packet;
 
-    const { eventName, ...packetData } = packet;
+    console.log('setAnimation: ', socketId);
+    console.log('setAnimation: ', data.packet);
 
     this.server
       .to(redisRoomId)
