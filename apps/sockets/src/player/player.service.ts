@@ -106,6 +106,7 @@ export class PlayerService {
   }
 
   async getClient(client: CustomSocket) {
+    this.logger.debug('getClient');
     // client의 룸 조회
     const memberId = client.data.memberId;
 
@@ -124,6 +125,7 @@ export class PlayerService {
         await this.redisClient.get(RedisKey.getStrMemberSocket(p)),
       );
 
+      this.logger.debug('socketInfo : ', socketInfo);
       const client = {
         clientId: socketInfo.clientId,
         nickname: socketInfo.nickname,
