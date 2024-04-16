@@ -258,6 +258,7 @@ export class MyRoomService {
   async shutDown(client: CustomSocket, packet: C_MYROOM_SHUTDOWN) {
     const redisRoomId = client.data.roomId;
     const clientId = client.data.clientId;
+    const socketId = client.data.socketId;
 
     const isMyRoomOwner = this.isMyRoomOwner(clientId, redisRoomId);
 
@@ -284,6 +285,7 @@ export class MyRoomService {
 
     const data = {
       redisRoomId,
+      ownerSocketId: socketId,
       packet: response,
     };
 
@@ -295,10 +297,14 @@ export class MyRoomService {
 
   async broadcastMyRoomShutDown(data) {
     const redisRoomId = data.redisRoomId;
+    const ownerSocketId = data.ownerSocketId;
 
     const { eventName, ...packetData } = data.packet;
 
-    this.server.to(redisRoomId).emit(eventName, JSON.stringify(packetData));
+    this.server
+      .to(redisRoomId)
+      .except(ownerSocketId)
+      .emit(eventName, JSON.stringify(packetData));
   }
 
   async updateNickname(nickname: string) {}

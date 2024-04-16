@@ -110,6 +110,7 @@ export class UnificationService {
     client.data.nickname = member.nickname;
     client.data.clientId = member.memberCode;
     client.data.stateMessage = member.stateMessage;
+    client.data.socketId = client.id;
 
     client.join(memberId);
     client.join(sessionId);
