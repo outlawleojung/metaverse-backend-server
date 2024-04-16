@@ -211,9 +211,6 @@ export class PlayerService {
 
     const { eventName, ...packetData } = data.packet;
 
-    console.log('setAnimation: ', socketId);
-    console.log('setAnimation: ', data.packet);
-
     this.server
       .to(redisRoomId)
       .except(socketId)
