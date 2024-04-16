@@ -11,6 +11,7 @@ interface SocketData {
   roomCode: string;
   roomName: string;
   stateMessage: string;
+  socketId: string;
 }
 
 export interface CustomSocket extends Socket {
