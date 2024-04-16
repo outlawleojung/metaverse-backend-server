@@ -3,7 +3,7 @@ import cluster from 'node:cluster';
 import * as os from 'os';
 import { Injectable } from '@nestjs/common';
 
-const numCPUs = process.env.NODE_ENV === 'production' ? os.cpus().length : 4;
+const numCPUs = process.env.NODE_ENV === 'production' ? os.cpus().length : 2;
 
 @Injectable()
 export class AppClusterService {
@@ -17,7 +17,7 @@ export class AppClusterService {
         `마스터 서버 시작 ${process.pid} - core count : ${numCPUs}`,
       );
 
-      for (let i = 0; i < os.cpus().length; i++) {
+      for (let i = 0; i < numCPUs; i++) {
         cluster.fork();
       }
       cluster.on('exit', (worker, code, signal) => {

@@ -125,14 +125,15 @@ export class PlayerService {
         await this.redisClient.get(RedisKey.getStrMemberSocket(p)),
       );
 
-      this.logger.debug('socketInfo : ', socketInfo);
-      const client = {
-        clientId: socketInfo.clientId,
-        nickname: socketInfo.nickname,
-        stateMessage: socketInfo.stateMessage,
-      };
+      if (socketInfo) {
+        const client = {
+          clientId: socketInfo.clientId,
+          nickname: socketInfo.nickname,
+          stateMessage: socketInfo.stateMessage,
+        };
 
-      clientInfos.push(client);
+        clientInfos.push(client);
+      }
     }
 
     client.emit(

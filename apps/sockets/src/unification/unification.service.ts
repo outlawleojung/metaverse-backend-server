@@ -137,6 +137,8 @@ export class UnificationService {
     const memberId = client.data.memberId;
 
     await this.checkLeaveRoom(client, memberId);
+    await this.allLeaveRoom(client);
+
     await this.redisClient.del(RedisKey.getStrMemberSocket(memberId));
 
     // 중복 로그인 알림 구독 해제
@@ -343,6 +345,18 @@ export class UnificationService {
     //     roomId: redisRoomId,
     //   }),
     // );
+  }
+
+  async allLeaveRoom(client: CustomSocket) {
+    const roomsData = await this.redisClient.hgetall(RedisKey.getStrRooms());
+    const roomKeys = Object.keys(roomsData);
+
+    for (const r of roomKeys) {
+      await this.redisClient.srem(
+        RedisKey.getStrRoomPlayerList(r),
+        client.data.memberId,
+      );
+    }
   }
 
   // 사용자 퇴장 처리
