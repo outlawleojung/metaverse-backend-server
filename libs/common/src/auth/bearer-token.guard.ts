@@ -18,8 +18,6 @@ export class BearerTokenGuard implements CanActivate {
 
     const rawToken = req.headers['authorization'];
 
-    console.log('req.headers : ', req.headers);
-
     if (!rawToken) {
       throw new UnauthorizedException('토큰이 없습니다.');
     }

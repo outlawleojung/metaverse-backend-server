@@ -231,3 +231,13 @@ export { VoteResultExposureType } from '../entities/voteResultExposureType.entit
 export { VoteResultType } from '../entities/voteResultType.entity';
 export { VoteStateType } from '../entities/voteStateType.entity';
 export { WorldType } from '../entities/worldType.entity';
+
+export { TransactionInterceptor } from '../interceptor/transaction.interceptor';
+
+export { MemberRepository } from '../repositories/member.repository';
+export { MemberAccountRepository } from '../repositories/member-account.repository';
+export { EmailCheckRepository } from '../repositories/email-check.repository';
+export { EmailConfirmRepository } from '../repositories/email-confirm.repository';
+export { EmailLimitRepository } from '../repositories/email-limit.repository';
+export { MemberBusinessCardInfoRepository } from '../repositories/member-business-card-info.repository';
+export { MemberPasswordAuthRepository } from '../repositories/member-password-auth.repository';

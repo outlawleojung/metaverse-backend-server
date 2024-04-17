@@ -29,10 +29,17 @@ import { ResetPasswordDto } from './dto/request/reset.password.dto';
 import { SuccessDto } from '../dto/success.response.dto';
 import { AuthEmailResponseDto } from './dto/response/auth.email.response.dto';
 import { ArzmetaLogInMemberDto } from './dto/request/arzmeta.login.member.dto';
-import { AuthService, BasicTokenGuard, RefreshTokenGuard } from '@libs/common';
+import {
+  AuthService,
+  BasicTokenGuard,
+  QueryRunner,
+  RefreshTokenGuard,
+} from '@libs/common';
 import { AuthEmailErrorResponseDto } from './dto/response/auth.email.error.response.dto';
 import { RegisterDto } from './dto/request/register.dto';
 import { LoginResponseDto } from './dto/response/login.response';
+import { TransactionInterceptor } from '@libs/entity';
+import { QueryRunner as QR } from 'typeorm';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('ACCOUNT - 계정')
@@ -151,9 +158,13 @@ export class AccountController {
     type: AuthEmailErrorResponseDto,
   })
   @ApiOperation({ summary: '이메일 인증번호 받기' })
+  @UseInterceptors(TransactionInterceptor)
   @Post('authEmail')
-  async authEmail(@Body() autoEmailDto: AuthEmailDto) {
-    return await this.accountService.authEmail(autoEmailDto);
+  async authEmail(
+    @QueryRunner() queryRunner: QR,
+    @Body() autoEmailDto: AuthEmailDto,
+  ) {
+    return await this.accountService.authEmail(autoEmailDto, queryRunner);
   }
 
   // 이메일 인증 확인 받기
@@ -167,9 +178,13 @@ export class AccountController {
     type: ConfirmEmailResponseDto,
   })
   @ApiOperation({ summary: '이메일 인증 확인' })
+  @UseInterceptors(TransactionInterceptor)
   @Post('confirmEmail')
-  async confirmEmail(@Body() confirmEmailDto: ConfirmEmailDto) {
-    return await this.accountService.confirmEmail(confirmEmailDto);
+  async confirmEmail(
+    @QueryRunner() queryRunner: QR,
+    @Body() confirmEmailDto: ConfirmEmailDto,
+  ) {
+    return await this.accountService.confirmEmail(confirmEmailDto, queryRunner);
   }
 
   // 패스워드 재설정
@@ -183,8 +198,15 @@ export class AccountController {
     type: SuccessDto,
   })
   @ApiOperation({ summary: '패스워드 재설정' })
+  @UseInterceptors(TransactionInterceptor)
   @Post('resetPassword')
-  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-    return await this.accountService.resetPassword(resetPasswordDto);
+  async resetPassword(
+    @QueryRunner() queryRunner: QR,
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ) {
+    return await this.accountService.resetPassword(
+      resetPasswordDto,
+      queryRunner,
+    );
   }
 }

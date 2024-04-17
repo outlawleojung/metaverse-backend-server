@@ -19,36 +19,16 @@
     "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true,
     "paths": {
-      "@libs/entity": [
-        "libs/entity/src"
-      ],
-      "@libs/entity/*": [
-        "libs/entity/src/*"
-      ],
-      "@libs/common": [
-        "libs/common/src"
-      ],
-      "@libs/common/*": [
-        "libs/common/src/*"
-      ],
-      "@libs/constants": [
-        "libs/constants/src"
-      ],
-      "@libs/constants/*": [
-        "libs/constants/src/*"
-      ],
-      "@libs/mongodb": [
-        "libs/mongodb/src"
-      ],
-      "@libs/mongodb/*": [
-        "libs/mongodb/src/*"
-      ],
-      "@libs/redis": [
-        "libs/redis/src"
-      ],
-      "@libs/redis/*": [
-        "libs/redis/src/*"
-      ]
+      "@libs/entity": ["libs/entity/src"],
+      "@libs/entity/*": ["libs/entity/src/*"],
+      "@libs/common": ["libs/common/src"],
+      "@libs/common/*": ["libs/common/src/*"],
+      "@libs/constants": ["libs/constants/src"],
+      "@libs/constants/*": ["libs/constants/src/*"],
+      "@libs/mongodb": ["libs/mongodb/src"],
+      "@libs/mongodb/*": ["libs/mongodb/src/*"],
+      "@libs/redis": ["libs/redis/src"],
+      "@libs/redis/*": ["libs/redis/src/*"]
     }
   }
 }

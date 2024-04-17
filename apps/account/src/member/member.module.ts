@@ -16,6 +16,10 @@ import {
   LicenseInfo,
   LicenseGroupInfo,
   NoticeInfo,
+  MemberRepository,
+  MemberAccountRepository,
+  MemberBusinessCardInfoRepository,
+  MemberBusinessCardInfo,
 } from '@libs/entity';
 import { CommonModule } from '@libs/common';
 
@@ -35,11 +39,17 @@ import { CommonModule } from '@libs/common';
       LicenseInfo,
       LicenseGroupInfo,
       NoticeInfo,
+      MemberBusinessCardInfo,
     ]),
     EntityModule,
     CommonModule,
   ],
-  providers: [MemberService],
+  providers: [
+    MemberService,
+    MemberRepository,
+    MemberAccountRepository,
+    MemberBusinessCardInfoRepository,
+  ],
   exports: [MemberService],
 })
 export class MemberModule {}

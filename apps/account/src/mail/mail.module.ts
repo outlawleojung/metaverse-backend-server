@@ -12,7 +12,7 @@ import { join } from 'path';
         from: `"admin" <${process.env.MAIL_ID}>`,
       },
       template: {
-        dir: join(__dirname, '..', 'views'),
+        dir: join(__dirname, '..', 'account/views'),
         adapter: new EjsAdapter(),
         options: {
           strict: true,

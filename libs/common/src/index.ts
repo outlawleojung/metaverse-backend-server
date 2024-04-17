@@ -11,6 +11,7 @@ export { BasicTokenGuard } from './auth/basic-token.guard';
 export { AccessTokenGuard, RefreshTokenGuard } from './auth/bearer-token.guard';
 export { MemberDto } from './dto/member.dto';
 export { MemberDeco } from './decorators/member.decorator';
+export { QueryRunner } from './decorators/query-runner.decorator';
 
 export * from './utils/timeConvertor';
 export * from './utils/crypter';

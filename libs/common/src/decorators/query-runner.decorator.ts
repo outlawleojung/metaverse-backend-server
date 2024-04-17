@@ -5,16 +5,14 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 
-export const MemberDeco = createParamDecorator(
+export const QueryRunner = createParamDecorator(
   (data: keyof Member | undefined, context: ExecutionContext) => {
     const req = context.switchToHttp().getRequest();
 
-    const member = req.member as Member;
-
-    if (!member) {
-      throw new InternalServerErrorException();
+    if (!req.queryRunner) {
+      throw new InternalServerErrorException('QueryRunner가 없습니다.');
     }
 
-    return data ? member[data] : member;
+    return req.queryRunner;
   },
 );

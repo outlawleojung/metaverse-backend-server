@@ -3,6 +3,13 @@ import {
   MemberPasswordAuth,
   MemberLoginRewardLog,
   MemberNftRewardLog,
+  MemberRepository,
+  MemberAccountRepository,
+  EmailCheckRepository,
+  EmailConfirmRepository,
+  EmailLimitRepository,
+  EmailLimit,
+  MemberPasswordAuthRepository,
 } from '@libs/entity';
 import { Module } from '@nestjs/common';
 import { AccountController } from './account.controller';
@@ -32,16 +39,26 @@ import { MailModule } from '../mail/mail.module';
       StartMyRoom,
       EmailCheck,
       EmailConfirm,
+      EmailLimit,
       MemberPasswordAuth,
       MemberLoginRewardLog,
       MemberNftRewardLog,
+      MemberPasswordAuth,
     ]),
     EntityModule,
     CommonModule,
     MailModule,
   ],
   controllers: [AccountController],
-  providers: [AccountService],
+  providers: [
+    AccountService,
+    MemberRepository,
+    MemberAccountRepository,
+    EmailCheckRepository,
+    EmailConfirmRepository,
+    EmailLimitRepository,
+    MemberPasswordAuthRepository,
+  ],
   exports: [AccountService],
 })
 export class AccountModule {}

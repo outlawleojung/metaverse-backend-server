@@ -1,5 +1,11 @@
 import { UpdateProfileResponseDto } from './dto/response/update.profile.response.dto';
-import { AccessTokenGuard, MemberDeco, MemberDto } from '@libs/common';
+import {
+  AccessTokenGuard,
+  CommonService,
+  MemberDeco,
+  MemberDto,
+  QueryRunner,
+} from '@libs/common';
 import { MemberService } from './member.service';
 import {
   Body,
@@ -31,12 +37,18 @@ import { SetDefaultCardInfoDto } from './dto/request/set.default.card.info.dto';
 import { GetUpdateCardInfoResponseDto } from './dto/response/get.update.card.info.response.dto';
 import { CheckWidhDrawalDto } from './dto/request/check.withdrawal.dto';
 import { GetMoneyInfoResponseDto } from './dto/response/get.moneyinfo.response.dto';
+import { TransactionInterceptor } from '@libs/entity';
+import { QueryRunner as QR } from 'typeorm';
+import { ERROR_MESSAGE, ERRORCODE } from '@libs/constants';
 
 @ApiTags('MEMBER - 회원')
 @UseInterceptors(MorganInterceptor('combined'))
 @Controller('api/member')
 export class MemberController {
-  constructor(private readonly memberService: MemberService) {}
+  constructor(
+    private readonly memberService: MemberService,
+    private readonly commonService: CommonService,
+  ) {}
 
   // 탈퇴 진행 여부 확인
   @ApiOperation({ summary: '탈퇴 진행 여부 확인' })
@@ -73,12 +85,29 @@ export class MemberController {
   })
   @ApiOperation({ summary: '명함 업데이트' })
   @UseGuards(AccessTokenGuard)
+  @UseInterceptors(TransactionInterceptor)
   @Put('updateMyCard')
   async updateMyCard(
     @MemberDeco() member: MemberDto,
+    @QueryRunner() queryRunner: QR,
     @Body() data: UpdateMyCardDto,
   ) {
-    return await this.memberService.updateMyCardInfo(member.memberId, data);
+    await this.memberService.updateMyCardInfo(
+      member.memberId,
+      data,
+      queryRunner,
+    );
+
+    const businessCardInfos = await this.memberService.getBusinessCardList(
+      member.memberId,
+      queryRunner,
+    );
+
+    return {
+      businessCardInfos,
+      error: ERRORCODE.NET_E_SUCCESS,
+      errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
   }
 
   //  프로필 업데이트
@@ -93,12 +122,31 @@ export class MemberController {
   })
   @ApiOperation({ summary: '프로필 업데이트' })
   @UseGuards(AccessTokenGuard)
+  @UseInterceptors(TransactionInterceptor)
   @Put('updateMyProfile')
   async updateMyProfile(
     @MemberDeco() member: MemberDto,
-    data: UpdateMyProfileDto,
+    @QueryRunner() queryRunner: QR,
+    @Body() data: UpdateMyProfileDto,
   ) {
-    return await this.memberService.updateMyProfile(member.memberId, data);
+    await this.memberService.updateMyProfile(
+      member.memberId,
+      data,
+      queryRunner,
+    );
+
+    await this.memberService.updateNicknameLog(
+      member.memberId,
+      data.nickname,
+      queryRunner,
+    );
+
+    return {
+      nickname: data.nickname,
+      statemessage: data.stateMessage,
+      error: ERRORCODE.NET_E_SUCCESS,
+      errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
   }
 
   // 아바타 파츠 설정
@@ -189,7 +237,6 @@ export class MemberController {
   @UseGuards(AccessTokenGuard)
   @Get('getMemberInfo')
   async getMemberInfo(@MemberDeco() member: MemberDto) {
-    console.log(member.memberId);
     return await this.memberService.getMemberInfo(member.memberId);
   }
 

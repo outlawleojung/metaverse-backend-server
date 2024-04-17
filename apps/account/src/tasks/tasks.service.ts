@@ -15,7 +15,8 @@ export class TasksService {
     const checkWithdrawal = await this.memberService.checkWithdrawal();
 
     // 오피스 구매 종료 처리
-    const checkUpdateofficeGradeType = await this.memberService.checkUpdateOfficeGradeType();
+    const checkUpdateofficeGradeType =
+      await this.memberService.checkUpdateOfficeGradeType();
 
     return this.logger.log({ checkWithdrawal, checkUpdateofficeGradeType });
   }

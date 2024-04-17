@@ -4,17 +4,13 @@ import {
   HttpException,
   HttpStatus,
   Inject,
-  ForbiddenException,
   Logger,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Not, QueryRunner, Repository } from 'typeorm';
-import { v1 } from 'uuid';
-import bcryptjs from 'bcryptjs';
+import { DataSource, Not, QueryRunner } from 'typeorm';
 import crypto from 'crypto';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import { Decrypt, CommonService } from '@libs/common';
+import { CommonService } from '@libs/common';
 import {
   ERRORCODE,
   ERROR_MESSAGE,
@@ -22,38 +18,35 @@ import {
   PROVIDER_TYPE,
 } from '@libs/constants';
 import {
-  EmailCheck,
-  EmailConfirm,
   Member,
   MemberAccount,
-  EmailLimit,
   MemberPasswordAuth,
   MemberWalletInfo,
   KtmfNftTokenToWallet,
   MemberNftRewardLog,
   KtmfNftToken,
   MemberMoney,
+  MemberRepository,
+  MemberAccountRepository,
+  EmailCheckRepository,
+  EmailConfirmRepository,
+  EmailLimitRepository,
+  MemberPasswordAuthRepository,
 } from '@libs/entity';
-import { SignMemberDto } from './dto/request/sign.member.dto';
-import { LogInMemberDto } from './dto/request/login.member.dto';
 import { MailService, EmailOptions } from '../mail/mail.service';
-import { LoginAuthDto } from './dto/request/login.auth.dto';
 import { AuthEmailDto } from './dto/request/auth.email.dto';
 import { ConfirmEmailDto } from './dto/request/confirm.email.dto';
 import { ResetPasswordDto } from './dto/request/reset.password.dto';
-import { ArzmetaLogInMemberDto } from './dto/request/arzmeta.login.member.dto';
-import { LinkedAccountDto } from './dto/request/linked.account.dto';
 
 @Injectable()
 export class AccountService {
   constructor(
-    @InjectRepository(Member) private memberRepository: Repository<Member>,
-    @InjectRepository(MemberAccount)
-    private memberAccountRepository: Repository<MemberAccount>,
-    @InjectRepository(EmailCheck)
-    private emailCheckRepository: Repository<EmailCheck>,
-    @InjectRepository(EmailConfirm)
-    private emailConfirmRepository: Repository<EmailConfirm>,
+    private memberRepository: MemberRepository,
+    private memberAccountRepository: MemberAccountRepository,
+    private emailCheckRepository: EmailCheckRepository,
+    private emailConfirmRepository: EmailConfirmRepository,
+    private emailLimitRepository: EmailLimitRepository,
+    private memberPasswordAuthRepository: MemberPasswordAuthRepository,
     private commonService: CommonService,
     private mailService: MailService,
     @Inject(DataSource) private dataSource: DataSource,
@@ -61,7 +54,7 @@ export class AccountService {
   private readonly logger = new Logger(AccountService.name);
 
   // 이메일 인증 번호 받기
-  async authEmail(authEmail: AuthEmailDto) {
+  async authEmail(authEmail: AuthEmailDto, queryRunner: QueryRunner) {
     const email = String(authEmail.email);
     const remainTime = Number(process.env.MAIL_REMAIN_MINIUTE || 3) * 60 * 1000;
 
@@ -76,25 +69,18 @@ export class AccountService {
     }
 
     // 사용자 존재 여부 확인
-    const memberAccount = await this.memberAccountRepository.findOne({
-      where: {
-        accountToken: email,
-      },
-    });
+    const memberAccount =
+      await this.memberAccountRepository.findByAccountToken(email);
 
     if (memberAccount) {
-      const member = await this.memberRepository.findOne({
-        where: {
-          memberId: memberAccount.memberId,
-        },
-      });
+      const member = await this.memberRepository.findByMemberId(
+        memberAccount.memberId,
+      );
 
-      const socialLoginInfo = await this.memberAccountRepository.find({
-        select: { providerType: true, accountToken: true },
-        where: {
-          memberId: memberAccount.memberId,
-        },
-      });
+      const socialLoginInfo =
+        await this.memberAccountRepository.findByMemberIdForSocialInfo(
+          memberAccount.memberId,
+        );
 
       const avatarInfos = await this.commonService.getMemberAvatarInfo(
         member.memberCode,
@@ -115,11 +101,7 @@ export class AccountService {
     }
 
     // 이메일 횟수 제한 체크
-    const emailLimit = await this.dataSource.getRepository(EmailLimit).findOne({
-      where: {
-        email: email,
-      },
-    });
+    const emailLimit = await this.emailLimitRepository.findByEmail(email);
 
     const now = new Date();
     const today = dayjs(now).format('YYYY.MM.DD');
@@ -140,160 +122,64 @@ export class AccountService {
       }
     }
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      if (emailLimit) {
-        // 마지막 인증이 오늘 날짜가 아니라면 초기화
-        if (today > lastUpdatedAt) {
-          await queryRunner.manager.update(
-            EmailLimit,
-            { email: email },
-            {
-              count: 0,
-            },
-          );
-        } else {
-          // 횟수 증가
-
-          await queryRunner.manager.update(
-            EmailLimit,
-            { email: email },
-            {
-              count: emailLimit.count + 1,
-            },
-          );
-        }
-      } else {
-        const emailLimit = new EmailLimit();
-        emailLimit.email = email;
-        emailLimit.count = 1;
-
-        await queryRunner.manager.getRepository(EmailLimit).save(emailLimit);
+    if (emailLimit) {
+      let count = 0;
+      // 마지막 인증 날짜 비교
+      if (today <= lastUpdatedAt) {
+        // 횟수 증가
+        count = emailLimit.count + 1;
       }
-
-      // 이메일과 인증 코드를 데이터베이스에 저장한다.
-      const authCode: number = Math.floor(Math.random() * 8999) + 1000;
-
-      // 이메일 보내기
-      const emailOptions: EmailOptions = {
-        to: email,
-        subject: '[moasis] 회원가입 이메일 인증',
-        html: 'emailAuth',
-        text: '인증 메일 입니다.',
-      };
-
-      const context = {
-        authCode: authCode,
-        remainTime: remainTime / 60 / 1000,
-      };
-
-      this.mailService.sendEmail(emailOptions, context);
-
-      // 기존에 정보가 남아 있다면 삭제한다.
-      await this.dataSource
-        .getRepository(EmailCheck)
-        .findOne({ where: { email } })
-        .then(async (data) => {
-          if (data) {
-            await queryRunner.manager
-              .getRepository(EmailCheck)
-              .delete({ id: data.id });
-          }
-        })
-        .catch((err) => {
-          throw new HttpException(
-            {
-              error: ERRORCODE.NET_E_DB_FAILED,
-              message: err,
-            },
-            HttpStatus.FORBIDDEN,
-          );
-        });
-
-      const emailCheck = new EmailCheck();
-      emailCheck.email = email;
-      emailCheck.authCode = authCode;
-
-      await queryRunner.manager.getRepository(EmailCheck).save(emailCheck);
-
-      setTimeout(async () => {
-        await this.dataSource
-          .getRepository(EmailCheck)
-          .findOne({ where: { email, authCode } })
-          .then(async (data) => {
-            this.logger.debug({ data });
-            if (data) {
-              await this.emailCheckRepository.delete({ id: data.id });
-            }
-          })
-          .catch((err) => {
-            throw new HttpException(
-              {
-                error: ERRORCODE.NET_E_DB_FAILED,
-                message: err,
-              },
-              HttpStatus.FORBIDDEN,
-            );
-          });
-      }, remainTime);
-
-      // 이메일 인증 여부 확인 후 정보가 있다면 삭제 (추후 인증번호로 인증 후 다시 저장)
-      await this.dataSource
-        .getRepository(EmailConfirm)
-        .findOne({ where: { email } })
-        .then(async (data) => {
-          if (data) {
-            await queryRunner.manager
-              .getRepository(EmailConfirm)
-              .delete({ id: data.id });
-          }
-        })
-        .catch((err) => {
-          throw new HttpException(
-            {
-              error: ERRORCODE.NET_E_DB_FAILED,
-              message: err,
-            },
-            HttpStatus.FORBIDDEN,
-          );
-        });
-
-      await queryRunner.commitTransaction();
-
-      return {
-        remainTime: parseInt(process.env.MAIL_REMAIN_MINIUTE) * 60,
-        error: ERRORCODE.NET_E_SUCCESS,
-        errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-      };
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ error });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: error,
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
+      await this.emailLimitRepository.update(email, count, queryRunner);
+    } else {
+      await this.emailLimitRepository.create(email, queryRunner);
     }
+
+    // 이메일과 인증 코드를 데이터베이스에 저장한다.
+    const authCode: number = Math.floor(Math.random() * 8999) + 1000;
+
+    // 이메일 보내기
+    const emailOptions: EmailOptions = {
+      to: email,
+      subject: '[moasis] 회원가입 이메일 인증',
+      html: 'emailAuth',
+      text: '인증 메일 입니다.',
+    };
+
+    const context = {
+      authCode: authCode,
+      remainTime: remainTime / 60 / 1000,
+    };
+
+    this.mailService.sendEmail(emailOptions, context);
+
+    // 기존에 정보가 남아 있다면 삭제한다.
+    await this.emailCheckRepository.deleteByExists(email, queryRunner);
+
+    await this.emailCheckRepository.create(email, authCode, queryRunner);
+
+    setTimeout(async () => {
+      await this.emailCheckRepository.deleteByExists(email);
+    }, remainTime);
+
+    // 이메일 인증 여부 확인 후 정보가 있다면 삭제 (추후 인증번호로 인증 후 다시 저장)
+    await this.emailConfirmRepository.deleteByExists(email);
+
+    return {
+      remainTime: parseInt(process.env.MAIL_REMAIN_MINIUTE) * 60,
+      error: ERRORCODE.NET_E_SUCCESS,
+      errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
   }
 
   // 이메일 인증 번호 확인
-  async confirmEmail(confirmemail: ConfirmEmailDto) {
+  async confirmEmail(confirmemail: ConfirmEmailDto, queryRunner: QueryRunner) {
     const email: string = String(confirmemail.email);
     const authCode: number = Number(confirmemail.authCode);
     // 이메일 인증 번호 확인
-    const emailCheck = await this.emailCheckRepository.findOne({
-      where: {
-        email,
-        authCode,
-      },
-    });
+    const emailCheck = await this.emailCheckRepository.findByEmailAndAuthCode(
+      email,
+      authCode,
+    );
 
     if (!emailCheck) {
       throw new HttpException(
@@ -305,60 +191,38 @@ export class AccountService {
       );
     }
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    // 인증 완료 시 인증 번호 삭제
+    await this.emailCheckRepository.deleteById(emailCheck.id, queryRunner);
 
-    try {
-      // 인증 완료 시 인증 번호 삭제
-      await queryRunner.manager
-        .getRepository(EmailCheck)
-        .delete({ id: emailCheck.id });
+    // 인증 완료 여부 저장
+    await this.emailConfirmRepository.create(email, queryRunner);
 
-      // 인증 완료 여부 저장
-      const emailConfirm = new EmailConfirm();
-      emailConfirm.email = email;
-      await queryRunner.manager.getRepository(EmailConfirm).save(emailConfirm);
+    // 저장 된 정보 3분 후 자동 삭제
+    setTimeout(
+      async () => {
+        await this.emailConfirmRepository.deleteByExists(email);
+      },
+      60 * 3 * 1000,
+    );
 
-      // 저장 된 정보 3분 후 자동 삭제
-      setTimeout(
-        async () => {
-          await this.dataSource
-            .getRepository(EmailConfirm)
-            .findOne({ where: { email } })
-            .then(async (data) => {
-              if (data) {
-                await this.emailConfirmRepository.delete({ id: data.id });
-              }
-            });
-        },
-        60 * 3 * 1000,
-      );
-
-      await queryRunner.commitTransaction();
-
-      return {
-        error: ERRORCODE.NET_E_SUCCESS,
-        errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-      };
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ err });
-    } finally {
-      await queryRunner.release();
-    }
+    return {
+      error: ERRORCODE.NET_E_SUCCESS,
+      errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
   }
 
   // 패스워드 재설정
-  async resetPassword(resetPassword: ResetPasswordDto) {
+  async resetPassword(
+    resetPassword: ResetPasswordDto,
+    queryRunner: QueryRunner,
+  ) {
     const email = String(resetPassword.email);
 
-    const memberAccount = await this.memberAccountRepository.findOne({
-      where: {
-        accountToken: email,
-        providerType: PROVIDER_TYPE.ARZMETA,
-      },
-    });
+    const memberAccount =
+      await this.memberAccountRepository.findByAccountTokenAndProviderType(
+        PROVIDER_TYPE.ARZMETA,
+        email,
+      );
 
     if (!memberAccount) {
       this.logger.error(ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER));
@@ -378,57 +242,41 @@ export class AccountService {
     data.memberId = memberAccount.memberId;
     data.ttl = Number(process.env.MAIL_REMAIN_MINIUTE) * 60; // ttl 값 설정 (3분)
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      // 이메일 검증 횟수 체크
-      const isEnableSendEmail =
-        await this.commonService.isResetPasswordEmailAndIdentification(
-          email,
-          queryRunner,
-        );
-      if (!isEnableSendEmail) {
-        return {
-          error: ERRORCODE.NET_E_OVER_COUNT_EMAIL_AUTH,
-          errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_OVER_COUNT_EMAIL_AUTH),
-        };
-      }
-
-      await queryRunner.manager.getRepository(MemberPasswordAuth).save(data);
-
-      // 이메일 발송
-      const emailOptions: EmailOptions = {
-        to: email,
-        subject: '[a:rzmeta] 패스워드 재설정 이메일',
-        html: 'passwordReset',
-        text: '패스워드 재설정 이메일 입니다.',
-      };
-
-      const context = {
-        url: process.env.HOMEPAGE_FRONT_URL,
-        token: token,
-        email: email,
-        remainTime: Number(process.env.MAIL_REMAIN_MINIUTE),
-      };
-      this.mailService.sendEmail(emailOptions, context);
-
-      await queryRunner.commitTransaction();
+    // 이메일 검증 횟수 체크
+    const isEnableSendEmail =
+      await this.commonService.isResetPasswordEmailAndIdentification(
+        email,
+        queryRunner,
+      );
+    if (!isEnableSendEmail) {
       return {
-        error: ERRORCODE.NET_E_SUCCESS,
-        errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+        error: ERRORCODE.NET_E_OVER_COUNT_EMAIL_AUTH,
+        errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_OVER_COUNT_EMAIL_AUTH),
       };
-    } catch (error) {
-      console.log(error);
-      await queryRunner.rollbackTransaction();
-      return {
-        error: ERRORCODE.NET_E_DB_FAILED,
-        errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-      };
-    } finally {
-      await queryRunner.release();
     }
+
+    await this.memberPasswordAuthRepository.create(data, queryRunner);
+
+    // 이메일 발송
+    const emailOptions: EmailOptions = {
+      to: email,
+      subject: '[a:rzmeta] 패스워드 재설정 이메일',
+      html: 'passwordReset',
+      text: '패스워드 재설정 이메일 입니다.',
+    };
+
+    const context = {
+      url: process.env.HOMEPAGE_FRONT_URL,
+      token: token,
+      email: email,
+      remainTime: Number(process.env.MAIL_REMAIN_MINIUTE),
+    };
+    this.mailService.sendEmail(emailOptions, context);
+
+    return {
+      error: ERRORCODE.NET_E_SUCCESS,
+      errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
   }
 
   private async ktmfNftLoginReward(queryRunner: QueryRunner, memberId: string) {

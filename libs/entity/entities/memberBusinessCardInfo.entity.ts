@@ -107,10 +107,14 @@ export class MemberBusinessCardInfo {
   @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
   Member: Member;
 
-  @ManyToOne(() => BusinessCardTemplate, (businesscardtemplate) => businesscardtemplate.MemberBusinessCardInfos, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => BusinessCardTemplate,
+    (businesscardtemplate) => businesscardtemplate.MemberBusinessCardInfos,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'templateId', referencedColumnName: 'id' }])
   BusinessCardTemplate: BusinessCardTemplate;
 }
