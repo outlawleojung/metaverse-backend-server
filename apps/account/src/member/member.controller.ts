@@ -20,7 +20,7 @@ import {
 } from '@nestjs/common';
 import { MorganInterceptor } from 'nest-morgan';
 import { SetAvatar } from './dto/request/set.avatar.dto';
-import { SetAvatarPreset } from './dto/request/set.avatar.preset.dto';
+import { SetAvatarPresetDto } from './dto/request/set.avatar.preset.dto';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { ErrorDto } from '../dto/error.response.dto';
 import { CheckNickNameDto } from './dto/request/check.nickname.dto';
@@ -161,9 +161,20 @@ export class MemberController {
   })
   @ApiOperation({ summary: '아바타 파츠 설정' })
   @UseGuards(AccessTokenGuard)
+  @UseInterceptors(TransactionInterceptor)
   @Post('avatar')
-  async updateAvatar(@MemberDeco() member: MemberDto, @Body() data: SetAvatar) {
-    return await this.memberService.setAvatar(member.memberId, data);
+  async updateAvatar(
+    @QueryRunner() queryRunner: QR,
+    @MemberDeco() member: MemberDto,
+    @Body() data: SetAvatar,
+  ) {
+    await this.memberService.setAvatar(member.memberId, data, queryRunner);
+    const avatarInfos = await this.commonService.getAvatarInfo(member.memberId);
+
+    return {
+      avatarInfos: avatarInfos,
+      error: ERRORCODE.NET_E_SUCCESS,
+    };
   }
 
   // 이메일 변경
@@ -178,12 +189,18 @@ export class MemberController {
   })
   @ApiOperation({ summary: '이메일 변경' })
   @UseGuards(AccessTokenGuard)
+  @UseInterceptors(TransactionInterceptor)
   @Put('updateEmail')
   async updateEmail(
+    @QueryRunner() queryRunner: QR,
     @MemberDeco() member: MemberDto,
     @Body() data: UpdateEmailDto,
   ) {
-    return await this.memberService.updateEmail(member.memberId, data);
+    return await this.memberService.updateEmail(
+      member.memberId,
+      data,
+      queryRunner,
+    );
   }
 
   // 회원 탈퇴
@@ -215,12 +232,31 @@ export class MemberController {
   })
   @ApiOperation({ summary: '아바타 프리셋 설정' })
   @UseGuards(AccessTokenGuard)
+  @UseInterceptors(TransactionInterceptor)
   @Post('setAvatarPreset')
   async setAvatarPreset(
+    @QueryRunner() queryRunner: QR,
     @MemberDeco() member: MemberDto,
-    @Body() data: SetAvatarPreset,
+    @Body() data: SetAvatarPresetDto,
   ) {
-    return await this.memberService.setAvatarPreset(member.memberId, data);
+    await this.memberService.setAvatarPreset(
+      member.memberId,
+      data,
+      queryRunner,
+    );
+    await this.memberService.updateNicknameLog(
+      member.memberId,
+      data.nickname,
+      queryRunner,
+    );
+    const avatarInfos = await this.commonService.getAvatarInfo(member.memberId);
+
+    return {
+      avatarInfos: avatarInfos,
+      nickname: data.nickname,
+      stateMessage: data.stateMessage,
+      error: ERRORCODE.NET_E_SUCCESS,
+    };
   }
 
   // 회원 정보 조회

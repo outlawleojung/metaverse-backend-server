@@ -2,7 +2,7 @@ import { IsNotEmpty, IsNumber, IsString, ValidateIf } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNull } from 'typeorm';
 
-export class SetAvatarPreset {
+export class SetAvatarPresetDto {
   @ApiProperty({
     example: 1,
     description: '프리셋 타입',

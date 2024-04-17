@@ -1,12 +1,15 @@
 import { DeleteResult, QueryRunner, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EmailConfirm } from '../entities/emailConfirm.entity';
+import { BaseRepository } from './base-repository';
 
-export class EmailConfirmRepository {
+export class EmailConfirmRepository extends BaseRepository<EmailConfirm> {
   constructor(
     @InjectRepository(EmailConfirm)
-    private repository: Repository<EmailConfirm>,
-  ) {}
+    private emailConfirmrepository: Repository<EmailConfirm>,
+  ) {
+    super(emailConfirmrepository, EmailConfirm);
+  }
 
   async delete(id: number): Promise<DeleteResult> {
     return await this.repository.delete({ id });
@@ -20,18 +23,10 @@ export class EmailConfirmRepository {
     });
   }
 
-  async create(email: string, queryRunner: QueryRunner) {
+  async create(email: string, queryRunner?: QueryRunner) {
     const emailConfirm = new EmailConfirm();
     emailConfirm.email = email;
 
-    await queryRunner.manager
-      .getRepository<EmailConfirm>(EmailConfirm)
-      .save(emailConfirm);
-  }
-
-  private getRepository(queryRunner?: QueryRunner) {
-    return queryRunner
-      ? queryRunner.manager.getRepository<EmailConfirm>(EmailConfirm)
-      : this.repository;
+    await this.getRepository(queryRunner).save(emailConfirm);
   }
 }

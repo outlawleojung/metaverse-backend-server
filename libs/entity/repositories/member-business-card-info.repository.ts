@@ -1,12 +1,15 @@
 import { MemberBusinessCardInfo } from '@libs/entity';
 import { QueryRunner, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { BaseRepository } from './base-repository';
 
-export class MemberBusinessCardInfoRepository {
+export class MemberBusinessCardInfoRepository extends BaseRepository<MemberBusinessCardInfo> {
   constructor(
     @InjectRepository(MemberBusinessCardInfo)
-    private repository: Repository<MemberBusinessCardInfo>,
-  ) {}
+    private memberBusinessCardInfoRepository: Repository<MemberBusinessCardInfo>,
+  ) {
+    super(memberBusinessCardInfoRepository, MemberBusinessCardInfo);
+  }
 
   async findAllByMemberId(
     memberId: string,
@@ -33,24 +36,14 @@ export class MemberBusinessCardInfoRepository {
   }
 
   async create(data: MemberBusinessCardInfo, queryRunner: QueryRunner) {
-    await queryRunner.manager.getRepository(MemberBusinessCardInfo).save(data);
+    await this.getRepository(queryRunner).save(data);
   }
 
   async update(data: MemberBusinessCardInfo, queryRunner: QueryRunner) {
-    await queryRunner.manager.getRepository(MemberBusinessCardInfo).save(data);
+    await this.getRepository(queryRunner).save(data);
   }
 
   async delete(data: MemberBusinessCardInfo, queryRunner: QueryRunner) {
-    await queryRunner.manager
-      .getRepository(MemberBusinessCardInfo)
-      .delete(data);
-  }
-
-  private getRepository(queryRunner?: QueryRunner) {
-    return queryRunner
-      ? queryRunner.manager.getRepository<MemberBusinessCardInfo>(
-          MemberBusinessCardInfo,
-        )
-      : this.repository;
+    await this.getRepository(queryRunner).delete(data);
   }
 }

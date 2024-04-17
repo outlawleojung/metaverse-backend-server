@@ -20,6 +20,7 @@ import {
   MemberAccountRepository,
   MemberBusinessCardInfoRepository,
   MemberBusinessCardInfo,
+  MemberAvatarInfoRepository,
 } from '@libs/entity';
 import { CommonModule } from '@libs/common';
 
@@ -49,6 +50,7 @@ import { CommonModule } from '@libs/common';
     MemberRepository,
     MemberAccountRepository,
     MemberBusinessCardInfoRepository,
+    MemberAvatarInfoRepository,
   ],
   exports: [MemberService],
 })

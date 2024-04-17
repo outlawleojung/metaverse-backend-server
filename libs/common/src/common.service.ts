@@ -83,13 +83,13 @@ export class CommonService {
     }
   }
 
-  async getAvatarInfo(member: Member) {
+  async getAvatarInfo(memberId: string) {
     try {
       const avatarInfo = await this.dataSource
         .getRepository(MemberAvatarInfo)
         .find({
           where: {
-            memberId: member.memberId,
+            memberId,
           },
         });
 

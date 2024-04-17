@@ -1,11 +1,14 @@
 import { QueryRunner, Repository } from 'typeorm';
 import { Member } from '../entities/member.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { BaseRepository } from './base-repository';
 
-export class MemberRepository {
+export class MemberRepository extends BaseRepository<Member> {
   constructor(
-    @InjectRepository(Member) private repository: Repository<Member>,
-  ) {}
+    @InjectRepository(Member) private memberRepository: Repository<Member>,
+  ) {
+    super(memberRepository, Member);
+  }
 
   async findByMemberId(memberId: string): Promise<Member | null> {
     return await this.repository.findOneBy({ memberId });

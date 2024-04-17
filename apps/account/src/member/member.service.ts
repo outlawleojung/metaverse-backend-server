@@ -28,6 +28,7 @@ import {
   MemberRepository,
   MemberAccountRepository,
   MemberBusinessCardInfoRepository,
+  MemberAvatarInfoRepository,
 } from '@libs/entity';
 import {
   Inject,
@@ -46,7 +47,7 @@ import {
   Repository,
 } from 'typeorm';
 import { SetAvatar } from './dto/request/set.avatar.dto';
-import { SetAvatarPreset } from './dto/request/set.avatar.preset.dto';
+import { SetAvatarPresetDto } from './dto/request/set.avatar.preset.dto';
 import { CheckNickNameDto } from './dto/request/check.nickname.dto';
 import { UpdateEmailDto } from './dto/request/update.email.dto';
 import { ChangePasswordDto } from './dto/request/changepassword.dto';
@@ -68,8 +69,9 @@ export class MemberService {
     private memberBusinessCardInfoRepository: MemberBusinessCardInfoRepository,
     @InjectRepository(AvatarPartsType)
     private avatarPartsTypeRepository: Repository<AvatarPartsType>,
-    @InjectRepository(MemberAvatarInfo)
-    private memberAvatarInfoRepository: Repository<MemberAvatarInfo>,
+    // @InjectRepository(MemberAvatarInfo)
+    // private memberAvatarInfoRepository: Repository<MemberAvatarInfo>,
+    private memberAvatarInfoRepository: MemberAvatarInfoRepository,
     @InjectRepository(EmailConfirm)
     private emailConfirmRepository: Repository<EmailConfirm>,
     @InjectRepository(AvatarPreset)
@@ -389,7 +391,11 @@ export class MemberService {
     );
   }
   // 아바타 파츠 설정
-  async setAvatar(memberId: string, avatarInfo: SetAvatar) {
+  async setAvatar(
+    memberId: string,
+    avatarInfo: SetAvatar,
+    queryRunner: QueryRunner,
+  ) {
     // 사용자 존재 여부 확인
     const exMember = await this.memberRepository.findByMemberId(memberId);
 
@@ -405,69 +411,46 @@ export class MemberService {
 
     const avatarPartsTypes = await this.avatarPartsTypeRepository.find();
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    for (const partsType of avatarPartsTypes) {
+      const itemId: number = Number(avatarInfo.avatarInfos[partsType.type]);
+      this.logger.debug('itemId :', itemId);
 
-    try {
-      for (const partsType of avatarPartsTypes) {
-        const itemId: number = Number(avatarInfo.avatarInfos[partsType.type]);
-        this.logger.debug('itemId :', itemId);
+      const memberAvatarInfo =
+        await this.memberAvatarInfoRepository.findByMemberIdAndPartsType(
+          memberId,
+          partsType.type,
+        );
 
-        const memberAvatarInfo = await this.memberAvatarInfoRepository.findOne({
-          where: {
+      if (!itemId) {
+        if (memberAvatarInfo) {
+          // 삭제
+          await this.memberAvatarInfoRepository.deleteByMemberIdAndParsType(
             memberId,
-            avatarPartsType: partsType.type,
-          },
-        });
-
-        if (!itemId) {
-          if (memberAvatarInfo) {
-            // 삭제
-            await queryRunner.manager.delete(MemberAvatarInfo, {
-              memberId,
-              avatarPartsType: partsType.type,
-            });
-          }
-        } else {
-          const memberAvatar = new MemberAvatarInfo();
-          memberAvatar.memberId = memberId;
-          memberAvatar.avatarPartsType = partsType.type;
-          memberAvatar.itemId = itemId;
-
-          await queryRunner.manager
-            .getRepository(MemberAvatarInfo)
-            .save(memberAvatar);
+            partsType.type,
+            queryRunner,
+          );
         }
+      } else {
+        const memberAvatar = new MemberAvatarInfo();
+        memberAvatar.memberId = memberId;
+        memberAvatar.avatarPartsType = partsType.type;
+        memberAvatar.itemId = itemId;
+
+        await this.memberAvatarInfoRepository.create(memberAvatar, queryRunner);
       }
-      await queryRunner.commitTransaction();
-      const avatarInfos = await this.commonService.getAvatarInfo(exMember);
-
-      return {
-        avatarInfos: avatarInfos,
-        error: ERRORCODE.NET_E_SUCCESS,
-      };
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ error });
-
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
     }
   }
 
-  async updateEmail(memberId: string, updateEmail: UpdateEmailDto) {
+  async updateEmail(
+    memberId: string,
+    data: UpdateEmailDto,
+    queryRunner: QueryRunner,
+  ) {
+    const email = data.email;
     //이메일 인증 여부 확인
     const emailConfirm = await this.emailConfirmRepository.findOne({
       where: {
-        email: updateEmail.email,
+        email,
       },
     });
 
@@ -481,40 +464,17 @@ export class MemberService {
         HttpStatus.FORBIDDEN,
       );
     }
+    await this.memberAccountRepository.updateEmail(
+      memberId,
+      email,
+      queryRunner,
+    );
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      await queryRunner.manager.update(
-        MemberAccount,
-        { memberId, providerType: PROVIDER_TYPE.ARZMETA },
-        {
-          accountToken: updateEmail.email,
-        },
-      );
-
-      await queryRunner.commitTransaction();
-
-      this.logger.debug('success');
-      return {
-        error: ERRORCODE.NET_E_SUCCESS,
-        errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-      };
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ error });
-
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
-    }
+    this.logger.debug('success');
+    return {
+      error: ERRORCODE.NET_E_SUCCESS,
+      errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
   }
 
   // 회원 탈퇴
@@ -580,7 +540,6 @@ export class MemberService {
     this.logger.log('한달 전 : ', oneMonthAgo);
 
     const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
@@ -604,7 +563,14 @@ export class MemberService {
   }
 
   // 아바타 프리셋 세팅
-  async setAvatarPreset(memberId: string, avatarInfo: SetAvatarPreset) {
+  async setAvatarPreset(
+    memberId: string,
+    avatarInfo: SetAvatarPresetDto,
+    queryRunner: QueryRunner,
+  ) {
+    const stateMessage = avatarInfo.stateMessage;
+    const nickname = avatarInfo.nickname;
+
     // 사용자 존재 여부 확인
     const exMember = await this.memberRepository.findByMemberId(memberId);
 
@@ -619,12 +585,11 @@ export class MemberService {
     }
 
     // 현재 닉네임과 비교
-    if (exMember.nickname !== avatarInfo.nickname) {
+    if (exMember.nickname !== nickname) {
       // 닉네임 중복 체크
       if (exMember.nickname) {
-        const exists = await this.memberRepository.checkIfNicknameExists(
-          avatarInfo.nickname,
-        );
+        const exists =
+          await this.memberRepository.checkIfNicknameExists(nickname);
 
         if (exists) {
           throw new HttpException(
@@ -657,67 +622,30 @@ export class MemberService {
       );
     }
 
-    const stateMessage = avatarInfo.stateMessage;
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    for (let index = 0; index < avatarPreset.length; index++) {
+      const preset = avatarPreset[index];
+      this.logger.debug({ preset });
 
-    try {
-      for (let index = 0; index < avatarPreset.length; index++) {
-        const preset = avatarPreset[index];
-        this.logger.debug({ preset });
+      const memberAvatar = new MemberAvatarInfo();
+      memberAvatar.memberId = memberId;
+      memberAvatar.itemId = preset.itemId;
+      memberAvatar.avatarPartsType = preset.partsType;
 
-        const memberAvatar = new MemberAvatarInfo();
-        memberAvatar.memberId = memberId;
-        memberAvatar.itemId = preset.itemId;
-        memberAvatar.avatarPartsType = preset.partsType;
-
-        await queryRunner.manager
-          .getRepository(MemberAvatarInfo)
-          .save(memberAvatar);
-      }
-
-      // 닉네임, 상태메시지 업데이트
-      const mac = new Member();
-      mac.memberId = memberId;
-      mac.nickname = avatarInfo.nickname;
-      mac.stateMessage = avatarInfo.stateMessage;
-
-      await queryRunner.manager.getRepository(Member).save(mac);
-
-      if (avatarInfo.nickname) {
-        const nicknameLog = new MemberNicknameLog();
-        nicknameLog.memberId = memberId;
-        nicknameLog.nickname = avatarInfo.nickname;
-        await queryRunner.manager
-          .getRepository(MemberNicknameLog)
-          .save(nicknameLog);
-      }
-
-      await queryRunner.commitTransaction();
-
-      const avatarInfos = await this.commonService.getAvatarInfo(exMember);
-
-      return {
-        avatarInfos: avatarInfos,
-        nickname: avatarInfo.nickname,
-        stateMessage: stateMessage,
-        error: ERRORCODE.NET_E_SUCCESS,
-      };
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-
-      this.logger.error({ error });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
+      await this.memberAvatarInfoRepository.create(memberAvatar, queryRunner);
     }
+
+    // 닉네임, 상태메시지 업데이트
+    const mac = new Member();
+    mac.memberId = memberId;
+    mac.nickname = nickname;
+    mac.stateMessage = stateMessage;
+
+    await this.memberRepository.updateMemberProfile(
+      memberId,
+      nickname,
+      stateMessage,
+      queryRunner,
+    );
   }
 
   // 앱 정보 조회
@@ -805,7 +733,9 @@ export class MemberService {
       await this.commonService.getDefaultCardInfo(memberId);
 
     // 아바타 정보
-    const avatarInfos = await this.commonService.getAvatarInfo(exMember);
+    const avatarInfos = await this.commonService.getAvatarInfo(
+      exMember.memberId,
+    );
 
     // 마이룸 정보
     const myRoomList = await this.commonService.getMyRoomInfo(memberId);

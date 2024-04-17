@@ -1,11 +1,15 @@
 import { DeleteResult, QueryRunner, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EmailCheck } from '../entities/emailCheck.entity';
+import { BaseRepository } from './base-repository';
 
-export class EmailCheckRepository {
+export class EmailCheckRepository extends BaseRepository<EmailCheck> {
   constructor(
-    @InjectRepository(EmailCheck) private repository: Repository<EmailCheck>,
-  ) {}
+    @InjectRepository(EmailCheck)
+    private emailCheckRepository: Repository<EmailCheck>,
+  ) {
+    super(emailCheckRepository, EmailCheck);
+  }
 
   async findByEmailAndAuthCode(
     email: string,
@@ -38,11 +42,5 @@ export class EmailCheckRepository {
     await queryRunner.manager
       .getRepository<EmailCheck>(EmailCheck)
       .save({ email, authCode });
-  }
-
-  private getRepository(queryRunner?: QueryRunner) {
-    return queryRunner
-      ? queryRunner.manager.getRepository<EmailCheck>(EmailCheck)
-      : this.repository;
   }
 }

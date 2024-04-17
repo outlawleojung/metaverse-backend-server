@@ -1,18 +1,22 @@
 import { DeleteResult, QueryRunner, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EmailLimit } from '../entities/emailLimit.entity';
+import { BaseRepository } from './base-repository';
 
-export class EmailLimitRepository {
+export class EmailLimitRepository extends BaseRepository<EmailLimit> {
   constructor(
-    @InjectRepository(EmailLimit) private repository: Repository<EmailLimit>,
-  ) {}
+    @InjectRepository(EmailLimit)
+    private emailLimitRepository: Repository<EmailLimit>,
+  ) {
+    super(emailLimitRepository, EmailLimit);
+  }
 
   async findByEmail(email: string): Promise<EmailLimit | null> {
     return await this.repository.findOneBy({ email });
   }
 
-  async update(email: string, count: number, queryRunner: QueryRunner) {
-    await queryRunner.manager.getRepository<EmailLimit>(EmailLimit).update(
+  async update(email: string, count: number, queryRunner?: QueryRunner) {
+    await this.getRepository(queryRunner).update(
       {
         email,
       },
@@ -20,27 +24,10 @@ export class EmailLimitRepository {
     );
   }
 
-  async create(email, queryRunner: QueryRunner) {
+  async create(email, queryRunner?: QueryRunner) {
     const emailLimit = new EmailLimit();
     emailLimit.email = email;
     emailLimit.count = 0;
-    await queryRunner.manager
-      .getRepository<EmailLimit>(EmailLimit)
-      .save(emailLimit);
+    await this.getRepository(queryRunner).save(emailLimit);
   }
-  // async findByEmailAndAuthCode(
-  //   email: string,
-  //   authCode: number,
-  // ): Promise<EmailCheck | null> {
-  //   return await this.repository.findOne({
-  //     where: {
-  //       email,
-  //       authCode,
-  //     },
-  //   });
-  // }
-
-  // async delete(id: number): Promise<DeleteResult> {
-  //   return await this.repository.delete({ id });
-  // }
 }
