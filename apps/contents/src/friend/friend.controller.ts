@@ -22,7 +22,7 @@ import { BlockMembersResponseDto } from './dto/response/block.members.response.d
 import { FindFriendDto } from './dto/request/find.friend.dto';
 import { BookmarkResponseDto } from './dto/response/bookmark.response.dto';
 import { GetFriendRoomIdResponseDto } from './dto/response/get.friend.roomid.response.dto';
-import { AccessTokenGuard, MemberDeco } from '@libs/common';
+import { AccessTokenGuard, MemberDeco, MemberDto } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('FRIEND - 친구')
@@ -38,8 +38,8 @@ export class FriendController {
   })
   @UseGuards(AccessTokenGuard)
   @Get()
-  async getFriends(@MemberDeco('memberId') memberId: string) {
-    return await this.friendService.getFriends(memberId);
+  async getFriends(@MemberDeco() member: MemberDto) {
+    return await this.friendService.getFriends(member.memberId);
   }
 
   // 친구 요청 하기
@@ -51,10 +51,10 @@ export class FriendController {
   @UseGuards(AccessTokenGuard)
   @Post('/requestFriend')
   async requestFriend(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Body() data: FindFriendDto,
   ) {
-    return await this.friendService.requestFriend(memberId, data);
+    return await this.friendService.requestFriend(member.memberId, data);
   }
 
   // 친구 요청 목록 조회
@@ -65,8 +65,8 @@ export class FriendController {
   })
   @UseGuards(AccessTokenGuard)
   @Get('/getRequestFriends')
-  async getRequestFriends(@MemberDeco('memberId') memberId: string) {
-    return await this.friendService.getRequestFriends(memberId);
+  async getRequestFriends(@MemberDeco() member: MemberDto) {
+    return await this.friendService.getRequestFriends(member.memberId);
   }
 
   // 친구 요청 받은 목록 조회
@@ -77,8 +77,8 @@ export class FriendController {
   })
   @UseGuards(AccessTokenGuard)
   @Get('/receiveRequestFriends')
-  async receiveRequestFriends(@MemberDeco('memberId') memberId: string) {
-    return await this.friendService.receiveRequestFriends(memberId);
+  async receiveRequestFriends(@MemberDeco() member: MemberDto) {
+    return await this.friendService.receiveRequestFriends(member.memberId);
   }
 
   // 친구 수락 하기
@@ -90,10 +90,13 @@ export class FriendController {
   @UseGuards(AccessTokenGuard)
   @Put('/acceptFriend/:friendMemeberCode')
   async acceptFriend(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Param('friendMemeberCode') friendMemeberCode: string,
   ) {
-    return await this.friendService.acceptFriend(memberId, friendMemeberCode);
+    return await this.friendService.acceptFriend(
+      member.memberId,
+      friendMemeberCode,
+    );
   }
 
   // 친구 요청 취소 하기
@@ -105,11 +108,11 @@ export class FriendController {
   @UseGuards(AccessTokenGuard)
   @Put('/cancelRequestFriend/:friendMemeberCode')
   async cancelRequestFriend(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Param('friendMemeberCode') friendMemeberCode: string,
   ) {
     return await this.friendService.cancelRequestFriend(
-      memberId,
+      member.memberId,
       friendMemeberCode,
     );
   }
@@ -123,10 +126,13 @@ export class FriendController {
   @UseGuards(AccessTokenGuard)
   @Put('/refusalRequestFriend/:friendMemeberCode')
   async refusalRequestFriend(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Param('friendMemeberCode') friendMemeberCode: string,
   ) {
-    return this.friendService.refusalRequestFriend(memberId, friendMemeberCode);
+    return this.friendService.refusalRequestFriend(
+      member.memberId,
+      friendMemeberCode,
+    );
   }
 
   // 친구 차단 하기
@@ -138,10 +144,10 @@ export class FriendController {
   @UseGuards(AccessTokenGuard)
   @Post('/blockFriend')
   async blockFriend(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Body() data: CommonFriendDto,
   ) {
-    return this.friendService.blockFriend(memberId, data);
+    return this.friendService.blockFriend(member.memberId, data);
   }
 
   // 친구 삭제
@@ -153,10 +159,10 @@ export class FriendController {
   @UseGuards(AccessTokenGuard)
   @Delete('/deleteFriend/:friendMemeberCode')
   async deleteFriend(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Param('friendMemeberCode') friendMemeberCode: string,
   ) {
-    return this.friendService.deleteFriend(memberId, friendMemeberCode);
+    return this.friendService.deleteFriend(member.memberId, friendMemeberCode);
   }
 
   // 친구 차단 해제 하기
@@ -168,10 +174,13 @@ export class FriendController {
   @UseGuards(AccessTokenGuard)
   @Put('/releaseBlockFriend/:friendMemeberCode')
   async releaseBlockFriend(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Param('friendMemeberCode') friendMemeberCode: string,
   ) {
-    return this.friendService.releaseBlockFriend(memberId, friendMemeberCode);
+    return this.friendService.releaseBlockFriend(
+      member.memberId,
+      friendMemeberCode,
+    );
   }
 
   // 친구 차단 목록 조회
@@ -182,8 +191,8 @@ export class FriendController {
   })
   @UseGuards(AccessTokenGuard)
   @Get('/getBlockFriends')
-  async getBlockFriends(@MemberDeco('memberId') memberId: string) {
-    return this.friendService.getBlockFriends(memberId);
+  async getBlockFriends(@MemberDeco() member: MemberDto) {
+    return this.friendService.getBlockFriends(member.memberId);
   }
 
   // 친구 조회
@@ -210,10 +219,10 @@ export class FriendController {
   @UseGuards(AccessTokenGuard)
   @Post('/bookmark')
   async bookmark(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Body() data: CommonFriendDto,
   ) {
-    return this.friendService.bookmark(memberId, data);
+    return this.friendService.bookmark(member.memberId, data);
   }
 
   // 친구 조회

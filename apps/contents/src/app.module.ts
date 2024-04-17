@@ -5,17 +5,8 @@ import { MyRoomModule } from './my-room/my.room.module';
 import { VoteModule } from './vote/vote.module';
 import { VoteController } from './vote/vote.controller';
 import { AppService } from './app.service';
-import { FriendService } from './friend/friend.service';
 import { Module } from '@nestjs/common';
-import {
-  AzureBlobService,
-  JwtAuthModule,
-  SessionModule,
-  CommonService,
-  AuthService,
-  JwtService,
-  CommonModule,
-} from '@libs/common';
+import { AzureBlobService, CommonService, CommonModule } from '@libs/common';
 import { FriendController } from './friend/friend.controller';
 import { FriendModule } from './friend/friend.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
@@ -51,7 +42,6 @@ import { OfficeLogService } from '@libs/common';
 import { PostboxModule } from './postbox/postbox.module';
 import { PostboxController } from './postbox/postbox.controller';
 import { ImageAnalysisService } from './services/Image-analysis.service';
-// import { PrismaModule } from '@libs/prisma';
 import { ImageResizeService } from './services/image-resize.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScreenBannerController } from './screen-banner/screen-banner.controller';
@@ -94,9 +84,7 @@ import { CsafModule } from './csaf/csaf.module';
     OfficeModule,
     OthersModule,
     RankingModule,
-    SessionModule,
     SchemaModule,
-    JwtAuthModule,
     PostboxModule,
     ScreenBannerModule,
     SelectVoteModule,

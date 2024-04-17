@@ -4,10 +4,8 @@ import { Member } from '@libs/entity';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Redis } from 'ioredis';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { Repository } from 'typeorm';
-import { io } from 'socket.io-client';
-
 import { RedisFunctionService } from '@libs/redis';
 import axios from 'axios';
 import {
@@ -50,16 +48,13 @@ export class UnificationService {
 
   //소켓 연결
   async handleConnection(server: Server, client: CustomSocket) {
-    const authInfo =
-      await this.tokenCheckService.getJwtAccessTokenAndSessionId(client);
+    const authInfo = await this.tokenCheckService.getJwtAccessToken(client);
 
     const jwtAccessToken = authInfo.jwtAccessToken;
-    const sessionId = authInfo.sessionId;
 
-    await this.tokenCheckService.checkTokenSession(
+    await this.tokenCheckService.checkAccessToken(
       client,
       authInfo.jwtAccessToken,
-      authInfo.sessionId,
     );
 
     if (!client.data.memberId) {
@@ -105,7 +100,6 @@ export class UnificationService {
 
     // 클라이언트 데이터 설정
     client.data.memberId = memberId;
-    client.data.sessionId = sessionId;
     client.data.jwtAccessToken = jwtAccessToken;
     client.data.nickname = member.nickname;
     client.data.clientId = member.memberCode;
@@ -113,12 +107,12 @@ export class UnificationService {
     client.data.socketId = client.id;
 
     client.join(memberId);
-    client.join(sessionId);
+    client.join(jwtAccessToken);
 
     await this.clientService.setSocket(member.memberCode, client);
 
     this.logger.debug(
-      `Unification 서버에 연결되었어요 ✅: ${memberId} - sessionId : ${sessionId}`,
+      `Unification 서버에 연결되었어요 ✅: ${memberId} - jwtAccessToken : ${jwtAccessToken}`,
     );
 
     await this.redisClient.set(
@@ -161,8 +155,7 @@ export class UnificationService {
   async joinRoom(client: CustomSocket, packet: C_ENTER) {
     this.logger.debug('💚💚 Join Room 💚💚');
     console.log(packet);
-    const authInfo =
-      await this.tokenCheckService.getJwtAccessTokenAndSessionId(client);
+    const authInfo = await this.tokenCheckService.getJwtAccessToken(client);
 
     const jwtAccessToken = authInfo.jwtAccessToken;
 
@@ -348,15 +341,15 @@ export class UnificationService {
   }
 
   async allLeaveRoom(client: CustomSocket) {
+    const memberId = client.data.memberId;
     const roomsData = await this.redisClient.hgetall(RedisKey.getStrRooms());
     const roomKeys = Object.keys(roomsData);
 
     for (const r of roomKeys) {
-      await this.redisClient.srem(
-        RedisKey.getStrRoomPlayerList(r),
-        client.data.memberId,
-      );
+      await this.redisClient.srem(RedisKey.getStrRoomPlayerList(r), memberId);
     }
+
+    await this.redisClient.del(RedisKey.getStrMemberCurrentRoom(memberId));
   }
 
   // 사용자 퇴장 처리

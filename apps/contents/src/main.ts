@@ -1,7 +1,4 @@
-import { session } from 'express-session';
-import { cookieParser } from 'cookie-parser';
 import { NestFactory } from '@nestjs/core';
-import cors from 'cors';
 import { AppModule } from './app.module';
 import expressBasicAuth from 'express-basic-auth';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -24,7 +21,10 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('[moasis] 컨텐츠 서버 API')
     .setDescription('[moasis] 컨텐츠 서버 개발을 위한 API 문서')
-    .addCookieAuth('connect.sid')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'access-token',
+    )
     .setVersion('1.0.0')
     .build();
 
@@ -39,6 +39,12 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
+
+  app.enableCors({
+    origin: 'http://localhost',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
+  });
 
   const port = process.env.CONTENTS_SERVER || 4730;
   await app.listen(port);

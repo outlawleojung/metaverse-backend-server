@@ -18,7 +18,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, QueryRunner } from 'typeorm';
-import { AzureBlobService, JwtService } from '@libs/common';
+import { AzureBlobService } from '@libs/common';
 import { BOOLEAN, ERRORCODE, ERROR_MESSAGE } from '@libs/constants';
 import { CreateWaitDto } from './dto/request/create.wait.dto';
 import dayjs from 'dayjs';
@@ -38,7 +38,6 @@ export class OfficeService {
     @InjectRepository(OfficeSpaceInfo)
     private officeSpaceInfoRespository: Repository<OfficeSpaceInfo>,
     private azureBlobService: AzureBlobService,
-    private jwtService: JwtService,
     @Inject(DataSource) private dataSource: DataSource,
   ) {}
 
@@ -458,8 +457,8 @@ export class OfficeService {
 
   // 오피스 생성 하기
   async CreateOffice(
-    file: Express.Multer.File,
     memberId: string,
+    file: Express.Multer.File,
     data: CreateReservDto,
   ) {
     if (
@@ -769,8 +768,8 @@ export class OfficeService {
 
   // 오피스 예약 편집 하기
   async UpdateOffice(
-    file: Express.Multer.File,
     memberId: string,
+    file: Express.Multer.File,
     roomCode: string,
     data: any,
   ) {

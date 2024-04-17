@@ -15,7 +15,7 @@ import { DoVoteDto } from './dto/req/do.vote.dto';
 import { GetSelectVoteResultResponseDto } from './dto/res/get.select.vote.result.dto';
 import { DoVoteInfoResponseDto } from './dto/res/do.vote.response.dto';
 import { DoLikeInfoResponseDto } from './dto/res/do.like.response.dto';
-import { AccessTokenGuard, MemberDeco } from '@libs/common';
+import { AccessTokenGuard, MemberDeco, MemberDto } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('SELECT VOTE - 선택 투표')
@@ -30,8 +30,8 @@ export class SelectVoteController {
   })
   @UseGuards(AccessTokenGuard)
   @Get()
-  async getSelectVote(@MemberDeco('memberId') memberId: string) {
-    return await this.selectVoteService.getSelectVote(memberId);
+  async getSelectVote(@MemberDeco() member: MemberDto) {
+    return await this.selectVoteService.getSelectVote(member.memberId);
   }
 
   // 투표 하기
@@ -41,11 +41,8 @@ export class SelectVoteController {
   })
   @UseGuards(AccessTokenGuard)
   @Post()
-  async doVote(
-    @MemberDeco('memberId') memberId: string,
-    @Body() data: DoVoteDto,
-  ) {
-    return await this.selectVoteService.doVote(memberId, data);
+  async doVote(@MemberDeco() member: MemberDto, @Body() data: DoVoteDto) {
+    return await this.selectVoteService.doVote(member.memberId, data);
   }
 
   // 좋아요
@@ -55,11 +52,8 @@ export class SelectVoteController {
   })
   @UseGuards(AccessTokenGuard)
   @Post('like')
-  async doLike(
-    @MemberDeco('memberId') memberId: string,
-    @Body() data: DoVoteDto,
-  ) {
-    return await this.selectVoteService.doLike(memberId, data);
+  async doLike(@MemberDeco() member: MemberDto, @Body() data: DoVoteDto) {
+    return await this.selectVoteService.doLike(member.memberId, data);
   }
 
   // 투표 결과
@@ -70,17 +64,17 @@ export class SelectVoteController {
   @UseGuards(AccessTokenGuard)
   @Get('result/:voteId')
   async getResult(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Param('voteId') voteId: number,
   ) {
-    return await this.selectVoteService.getVoteResult(memberId, voteId);
+    return await this.selectVoteService.getVoteResult(member.memberId, voteId);
   }
 
   // KTMF 이벤트 메일 확인
   @ApiOperation({ summary: 'KTMF 이벤트 메일 확인' })
   @Get('ktmf-email')
   @UseGuards(AccessTokenGuard)
-  async getKtmfEmail(@MemberDeco('memberId') memberId: string) {
-    return await this.selectVoteService.getKtmfEmail(memberId);
+  async getKtmfEmail(@MemberDeco() member: MemberDto) {
+    return await this.selectVoteService.getKtmfEmail(member.memberId);
   }
 }

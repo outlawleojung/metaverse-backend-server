@@ -1,5 +1,11 @@
 import { v1 } from 'uuid';
-import { EmailCheck, EmailConfirm, Member, MemberAccount } from '@libs/entity';
+import {
+  EmailCheck,
+  EmailConfirm,
+  Member,
+  MemberAccount,
+  MemberLoginLog,
+} from '@libs/entity';
 import {
   ForbiddenException,
   forwardRef,
@@ -28,6 +34,8 @@ export class AuthService {
     private readonly memberAccountRepository: Repository<MemberAccount>,
     @InjectRepository(EmailConfirm)
     private emailConfirmRepository: Repository<EmailConfirm>,
+    @InjectRepository(MemberLoginLog)
+    private memberLoginLogRepository: Repository<MemberLoginLog>,
     private readonly jwtService: JwtService,
     private readonly dataSource: DataSource,
     @Inject(forwardRef(() => CommonService))
@@ -94,6 +102,12 @@ export class AuthService {
     }
   }
 
+  /**
+   * 토큰 재발급
+   * @param token
+   * @param isRefreshToken
+   * @returns
+   */
   async rotateToken(token: string, isRefreshToken: boolean) {
     try {
       const decoded = this.jwtService.verify(token, {
@@ -131,6 +145,10 @@ export class AuthService {
     }
   }
 
+  /**
+   * Refresh Token 데이터베이스에 저장
+   * @param token
+   */
   async saveRefreshToken(token) {
     const result = this.verifyToken(token);
 
@@ -152,6 +170,8 @@ export class AuthService {
     const refreshToken = this.signToken(member, true);
 
     await this.saveRefreshToken(refreshToken);
+    await this.loginCounting(member.memberId);
+
     return {
       accessToken: this.signToken(member, false),
       refreshToken,
@@ -326,5 +346,22 @@ export class AuthService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async loginCounting(memberId: string) {
+    // 로그인 횟수 체크
+    const newMember = new Member();
+    newMember.memberId = memberId;
+    newMember.loginedAt = new Date();
+    newMember.deletedAt = null;
+
+    await this.memberRepository.save(newMember);
+
+    // 로그인 로그
+    const loginLog = new MemberLoginLog();
+    loginLog.memberId = memberId;
+    loginLog.providerType = PROVIDER_TYPE.ARZMETA;
+
+    await this.memberLoginLogRepository.save(loginLog);
   }
 }

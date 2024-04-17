@@ -19,14 +19,9 @@ import {
   UseInterceptors,
   HttpStatus,
   UseGuards,
-  Delete,
   Headers,
-  Param,
 } from '@nestjs/common';
 import { AccountService } from './account.service';
-import { SignMemberDto } from './dto/request/sign.member.dto';
-import { LogInMemberDto } from './dto/request/login.member.dto';
-import { LoginAuthDto } from './dto/request/login.auth.dto';
 import { ErrorDto } from '../dto/error.response.dto';
 import { ConfirmEmailResponseDto } from './dto/response/confirm.email.response.dto';
 import { ConfirmEmailDto } from './dto/request/confirm.email.dto';
@@ -34,16 +29,7 @@ import { ResetPasswordDto } from './dto/request/reset.password.dto';
 import { SuccessDto } from '../dto/success.response.dto';
 import { AuthEmailResponseDto } from './dto/response/auth.email.response.dto';
 import { ArzmetaLogInMemberDto } from './dto/request/arzmeta.login.member.dto';
-import { AzmetaLoginResponseDto } from './dto/response/arzmeta.login.response.dto';
-import { LinkedAccountDto } from './dto/request/linked.account.dto';
-import { LinkedAccountResponseDto } from './dto/response/linked.account.response.dto';
-import {
-  AuthService,
-  BasicTokenGuard,
-  MemberDeco,
-  RefreshTokenGuard,
-} from '@libs/common';
-import { AlreadyLinkedAccountResponseDto } from './dto/response/already.linked.account.response.dto';
+import { AuthService, BasicTokenGuard, RefreshTokenGuard } from '@libs/common';
 import { AuthEmailErrorResponseDto } from './dto/response/auth.email.error.response.dto';
 import { RegisterDto } from './dto/request/register.dto';
 import { LoginResponseDto } from './dto/response/login.response';
@@ -200,46 +186,5 @@ export class AccountController {
   @Post('resetPassword')
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return await this.accountService.resetPassword(resetPasswordDto);
-  }
-
-  // 아즈메타 계정 여부 확인
-  @ApiResponse({
-    status: HttpStatus.FORBIDDEN,
-    type: ErrorDto,
-    description: 'Error',
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: SuccessDto,
-  })
-  @ApiOperation({ summary: '아즈메타 계정 여부 확인' })
-  @Post('checkArzmetaAccount')
-  async checkArzmetaAccount(@Body() data: ArzmetaLogInMemberDto) {
-    return await this.accountService.checkArzmetaAccount(data);
-  }
-
-  @ApiExcludeEndpoint()
-  @Get()
-  async getDatabase() {
-    return await this.accountService.getDatabase();
-  }
-
-  @ApiExcludeEndpoint()
-  @Get('createTestAccount')
-  async createTestAccount() {
-    return await this.accountService.createTestAccount();
-  }
-
-  // 개발용 Encrypt API
-  @ApiExcludeEndpoint()
-  @Post('createTestAccountEncrypt')
-  async createTestAccountToken1(@Body() data: any) {
-    return await this.accountService.createTestAccountEncrypt(data);
-  }
-
-  @ApiExcludeEndpoint()
-  @Get('test-date')
-  async testDate() {
-    return await this.accountService.testDate();
   }
 }

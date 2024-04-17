@@ -443,7 +443,9 @@ export class CommonService {
           memberId: memberId,
         },
       });
-    } catch (error) {}
+    } catch (error) {
+      throw new ForbiddenException('DB 실패');
+    }
   }
 
   async getBusinessCardList(memberId: string) {

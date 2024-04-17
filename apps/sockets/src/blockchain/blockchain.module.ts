@@ -1,14 +1,11 @@
 import { Module } from '@nestjs/common';
 import { BlockchainService } from './blockchain.service';
 import { BlockchainController } from './blockchain.controller';
-import { TokenCheckService } from '../unification/auth/tocket-check.service';
-import { RedisFunctionService } from '@libs/redis';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   Member,
   MemberAvatarInfo,
   MemberAvatarPartsItemInven,
-  SessionInfo,
 } from '@libs/entity';
 import { CommonModule } from '@libs/common';
 import { HubSocketModule } from '../hub-socket/hub-socket.module';
@@ -17,7 +14,6 @@ import { HubSocketModule } from '../hub-socket/hub-socket.module';
   imports: [
     TypeOrmModule.forFeature([
       Member,
-      SessionInfo,
       MemberAvatarPartsItemInven,
       MemberAvatarInfo,
     ]),

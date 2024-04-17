@@ -18,7 +18,6 @@ import {
   NoticeInfo,
 } from '@libs/entity';
 import { CommonModule } from '@libs/common';
-import { LoginTokenService } from '../auth/login-token.service';
 
 @Module({
   imports: [
@@ -40,7 +39,7 @@ import { LoginTokenService } from '../auth/login-token.service';
     EntityModule,
     CommonModule,
   ],
-  providers: [MemberService, LoginTokenService],
+  providers: [MemberService],
   exports: [MemberService],
 })
 export class MemberModule {}

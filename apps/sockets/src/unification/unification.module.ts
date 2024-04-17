@@ -1,5 +1,5 @@
 import { MatchingRoomModule } from '../matching-room/matching-room.module';
-import { EntityModule, Member, SessionInfo } from '@libs/entity';
+import { EntityModule, Member } from '@libs/entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UnificationGateway } from './unification.gateway';
@@ -30,8 +30,7 @@ import { CommonModule } from '../common/common.module';
       isGlobal: true,
       envFilePath: `.${process.env.NODE_ENV}.env`,
     }),
-    TypeOrmModule.forFeature([Member, SessionInfo]),
-    // AppModule,
+    TypeOrmModule.forFeature([Member]),
     EntityModule,
     MorganModule,
     ChatModule,

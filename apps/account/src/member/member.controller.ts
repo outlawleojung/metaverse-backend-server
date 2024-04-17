@@ -1,5 +1,5 @@
 import { UpdateProfileResponseDto } from './dto/response/update.profile.response.dto';
-import { AccessTokenGuard, MemberDeco } from '@libs/common';
+import { AccessTokenGuard, MemberDeco, MemberDto } from '@libs/common';
 import { MemberService } from './member.service';
 import {
   Body,
@@ -11,7 +11,6 @@ import {
   Put,
   Delete,
   Get,
-  Headers,
 } from '@nestjs/common';
 import { MorganInterceptor } from 'nest-morgan';
 import { SetAvatar } from './dto/request/set.avatar.dto';
@@ -76,10 +75,10 @@ export class MemberController {
   @UseGuards(AccessTokenGuard)
   @Put('updateMyCard')
   async updateMyCard(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Body() data: UpdateMyCardDto,
   ) {
-    return await this.memberService.updateMyCardInfo(memberId, data);
+    return await this.memberService.updateMyCardInfo(member.memberId, data);
   }
 
   //  프로필 업데이트
@@ -96,10 +95,10 @@ export class MemberController {
   @UseGuards(AccessTokenGuard)
   @Put('updateMyProfile')
   async updateMyProfile(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     data: UpdateMyProfileDto,
   ) {
-    return await this.memberService.updateMyProfile(memberId, data);
+    return await this.memberService.updateMyProfile(member.memberId, data);
   }
 
   // 아바타 파츠 설정
@@ -115,11 +114,8 @@ export class MemberController {
   @ApiOperation({ summary: '아바타 파츠 설정' })
   @UseGuards(AccessTokenGuard)
   @Post('avatar')
-  async updateAvatar(
-    @MemberDeco('memberId') memberId: string,
-    @Body() data: SetAvatar,
-  ) {
-    return await this.memberService.setAvatar(memberId, data);
+  async updateAvatar(@MemberDeco() member: MemberDto, @Body() data: SetAvatar) {
+    return await this.memberService.setAvatar(member.memberId, data);
   }
 
   // 이메일 변경
@@ -136,10 +132,10 @@ export class MemberController {
   @UseGuards(AccessTokenGuard)
   @Put('updateEmail')
   async updateEmail(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Body() data: UpdateEmailDto,
   ) {
-    return await this.memberService.updateEmail(memberId, data);
+    return await this.memberService.updateEmail(member.memberId, data);
   }
 
   // 회원 탈퇴
@@ -155,8 +151,8 @@ export class MemberController {
   @ApiOperation({ summary: '회원 탈퇴' })
   @UseGuards(AccessTokenGuard)
   @Delete('withdrawal')
-  async withdrawal(@MemberDeco('memberId') memberId: string) {
-    return await this.memberService.withdrawal(memberId);
+  async withdrawal(@MemberDeco() member: MemberDto) {
+    return await this.memberService.withdrawal(member.memberId);
   }
 
   // 아바타 프리셋 설정
@@ -173,10 +169,10 @@ export class MemberController {
   @UseGuards(AccessTokenGuard)
   @Post('setAvatarPreset')
   async setAvatarPreset(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Body() data: SetAvatarPreset,
   ) {
-    return await this.memberService.setAvatarPreset(memberId, data);
+    return await this.memberService.setAvatarPreset(member.memberId, data);
   }
 
   // 회원 정보 조회
@@ -192,9 +188,9 @@ export class MemberController {
   @ApiOperation({ summary: '회원 정보 조회' })
   @UseGuards(AccessTokenGuard)
   @Get('getMemberInfo')
-  async getMemberInfo(@MemberDeco('memberId') memberId: string) {
-    console.log(memberId);
-    return await this.memberService.getMemberInfo(memberId);
+  async getMemberInfo(@MemberDeco() member: MemberDto) {
+    console.log(member.memberId);
+    return await this.memberService.getMemberInfo(member.memberId);
   }
 
   // 앱 정보 조회
@@ -227,8 +223,8 @@ export class MemberController {
   @ApiOperation({ summary: '재화 정보 조회' })
   @UseGuards(AccessTokenGuard)
   @Get('get-money-info')
-  async getMoneyInfo(@MemberDeco('memberId') memberId: string) {
-    return await this.memberService.getMoneyInfo(memberId);
+  async getMoneyInfo(@MemberDeco() member: MemberDto) {
+    return await this.memberService.getMoneyInfo(member.memberId);
   }
 
   // 패스워드 변경
@@ -245,10 +241,13 @@ export class MemberController {
   @UseGuards(AccessTokenGuard)
   @Put('changePassword')
   async changePassword(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Body() changePassword: ChangePasswordDto,
   ) {
-    return await this.memberService.changePassword(memberId, changePassword);
+    return await this.memberService.changePassword(
+      member.memberId,
+      changePassword,
+    );
   }
 
   @ApiOperation({ summary: '기본 명함 설정' })
@@ -259,10 +258,10 @@ export class MemberController {
   @UseGuards(AccessTokenGuard)
   @Post('setDefaultCardInfo')
   async setDefaultCardInfo(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Body() data: SetDefaultCardInfoDto,
   ) {
-    return await this.memberService.setDefaultCardInfo(memberId, data);
+    return await this.memberService.setDefaultCardInfo(member.memberId, data);
   }
 
   @ApiOperation({ summary: '기본 명함 설정 삭제' })
@@ -272,18 +271,7 @@ export class MemberController {
   })
   @UseGuards(AccessTokenGuard)
   @Delete('delDefaultCardInfo')
-  async delDefaultCardInfo(@MemberDeco('memberId') memberId: string) {
-    return await this.memberService.delDefaultCardInfo(memberId);
+  async delDefaultCardInfo(@MemberDeco() member: MemberDto) {
+    return await this.memberService.delDefaultCardInfo(member.memberId);
   }
-
-  // @ApiOperation({ summary: '유학박람회 관리자 확인' })
-  // @ApiResponse({
-  //   status: HttpStatus.OK,
-  //   type: SuccessDto,
-  // })
-  // @UseGuards(AccessTokenGuard)
-  // @Get('get-csaf-admin')
-  // async getCSAFAdmin(@Headers() headers) {
-  //   return await this.memberService.getCSAFAdmin(headers.memberId);
-  // }
 }

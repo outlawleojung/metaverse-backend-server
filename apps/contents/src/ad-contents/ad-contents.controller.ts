@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Get,
   HttpStatus,
   Post,
   UseGuards,
@@ -12,7 +11,7 @@ import { MorganInterceptor } from 'nest-morgan';
 import { AdContentsService } from './ad-contents.service';
 import { AdContentsRewardDto } from './dto/req/ad.contents.reward.dto';
 import { AdContentsRewardResponseDto } from './dto/res/ad.contents.reward.res.dto';
-import { AccessTokenGuard, MemberDeco } from '@libs/common';
+import { AccessTokenGuard, MemberDeco, MemberDto } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('AD-CONTENTS - 광고 컨텐츠')
@@ -29,9 +28,9 @@ export class AdContentsController {
   @UseGuards(AccessTokenGuard)
   @Post()
   async adContentsReward(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Body() data: AdContentsRewardDto,
   ) {
-    return await this.adContentsService.adContentsReward(memberId, data);
+    return await this.adContentsService.adContentsReward(member.memberId, data);
   }
 }

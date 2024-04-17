@@ -13,7 +13,7 @@ import { RankingService } from './ranking.service';
 import { GetAllMyRankingResponseDto } from './dto/get.all.my.ranking.response.dto';
 import { GetAllRankingResponseDto } from './dto/get.all.ranking.response.dto';
 import { CreateRankingDto } from './dto/create.ranking.dto';
-import { AccessTokenGuard, MemberDeco } from '@libs/common';
+import { AccessTokenGuard, MemberDeco, MemberDto } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('RANKING - 랭킹')
@@ -29,10 +29,10 @@ export class RankingController {
   @UseGuards(AccessTokenGuard)
   @Post()
   async createRanking(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Body() data: CreateRankingDto,
   ) {
-    return await this.rankingService.crreateRanking(memberId, data);
+    return await this.rankingService.crreateRanking(member.memberId, data);
   }
 
   @ApiOperation({ summary: '전체 랭킹, 나의 기록 모두 조회' })
@@ -42,8 +42,8 @@ export class RankingController {
   })
   @UseGuards(AccessTokenGuard)
   @Get('allMyRanking')
-  async getAllMyRanking(@MemberDeco('memberId') memberId: string) {
-    return await this.rankingService.getAllMyRanking(memberId);
+  async getAllMyRanking(@MemberDeco() member: MemberDto) {
+    return await this.rankingService.getAllMyRanking(member.memberId);
   }
 
   @ApiOperation({ summary: '전체 랭킹만 조회' })
@@ -64,7 +64,7 @@ export class RankingController {
   })
   @UseGuards(AccessTokenGuard)
   @Get('myRanking')
-  async getMyRanking(@MemberDeco('memberId') memberId: string) {
-    return await this.rankingService.getMyRanking(memberId);
+  async getMyRanking(@MemberDeco() member: MemberDto) {
+    return await this.rankingService.getMyRanking(member.memberId);
   }
 }

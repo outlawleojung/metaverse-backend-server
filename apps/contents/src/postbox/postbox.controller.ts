@@ -14,7 +14,7 @@ import { PostboxService } from './postbox.service';
 import { GetPostboxesResponseDto } from './dto/res/get.postboxes.response';
 import { ReceiveEachPostResponseDto } from './dto/res/receive.each.post.response';
 import { ReceiveAllPostResponseDto } from './dto/res/receive.all.post.response copy';
-import { AccessTokenGuard, MemberDeco } from '@libs/common';
+import { AccessTokenGuard, MemberDeco, MemberDto } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('POSTBOX - 우편함')
@@ -30,8 +30,8 @@ export class PostboxController {
   })
   @UseGuards(AccessTokenGuard)
   @Get()
-  async getPostboxes(@MemberDeco('memberId') memberId: string) {
-    return await this.postboxService.getPostboxes(memberId);
+  async getPostboxes(@MemberDeco() member: MemberDto) {
+    return await this.postboxService.getPostboxes(member.memberId);
   }
 
   // 우편함 수령하기
@@ -42,11 +42,8 @@ export class PostboxController {
   })
   @UseGuards(AccessTokenGuard)
   @Post('recieve/:id')
-  async receivePost(
-    @MemberDeco('memberId') memberId: string,
-    @Param('id') id: number,
-  ) {
-    return await this.postboxService.receivePost(memberId, id);
+  async receivePost(@MemberDeco() member: MemberDto, @Param('id') id: number) {
+    return await this.postboxService.receivePost(member.memberId, id);
   }
 
   // 우편함 수령하기
@@ -57,7 +54,7 @@ export class PostboxController {
   })
   @UseGuards(AccessTokenGuard)
   @Post('receive-all')
-  async receiveAppPost(@MemberDeco('memberId') memberId: string) {
-    return await this.postboxService.receiveAllPost(memberId);
+  async receiveAppPost(@MemberDeco() member: MemberDto) {
+    return await this.postboxService.receiveAllPost(member.memberId);
   }
 }

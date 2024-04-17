@@ -5,7 +5,6 @@ interface SocketData {
   clientId: string;
   objectId: string;
   jwtAccessToken: string;
-  sessionId: string;
   nickname: string;
   roomId: string;
   roomCode: string;

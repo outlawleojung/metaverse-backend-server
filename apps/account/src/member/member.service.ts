@@ -1,5 +1,4 @@
 import { UpdateMyProfileDto } from './dto/request/update.my.profile.dto';
-import { LoginTokenService } from '../auth/login-token.service';
 import { CommonService, Decrypt } from '@libs/common';
 import {
   PROVIDER_TYPE,
@@ -67,7 +66,6 @@ export class MemberService {
     @InjectRepository(AvatarPreset)
     private avatarPresetRepository: Repository<AvatarPreset>,
     private commonService: CommonService,
-    private loginTokenService: LoginTokenService,
     @Inject(DataSource) private dataSource: DataSource,
   ) {}
 
@@ -986,23 +984,22 @@ export class MemberService {
 
       await queryRunner.commitTransaction();
 
-      const member = await this.memberRepository.findOne({
-        where: {
-          memberId,
-        },
-      });
+      // const member = await this.memberRepository.findOne({
+      //   where: {
+      //     memberId,
+      //   },
+      // });
 
       // 로그인 토큰 발급
-      const loginToken = await this.loginTokenService.signToken(
-        member.memberId,
-        newHashedpassword,
-        member.passwdUpdatedAt,
-      );
+      // const loginToken = await this.loginTokenService.signToken(
+      //   member.memberId,
+      //   newHashedpassword,
+      //   member.passwdUpdatedAt,
+      // );
 
       return {
         error: ERRORCODE.NET_E_SUCCESS,
         errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-        loginToken: loginToken,
       };
     } catch (error) {
       await queryRunner.rollbackTransaction();

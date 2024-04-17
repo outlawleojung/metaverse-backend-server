@@ -1,7 +1,5 @@
-import { SessionModule } from './auth/session.module';
 import { Module } from '@nestjs/common';
 import { CommonService } from './common.service';
-import { JwtAuthModule } from './auth/jwt.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   Member,
@@ -20,6 +18,7 @@ import {
   CSAFEventInfo,
   EmailCheck,
   EmailConfirm,
+  MemberLoginLog,
 } from '@libs/entity';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RoomDataLogSchema, WorldChattingLogSchema } from '@libs/mongodb';
@@ -54,18 +53,11 @@ import { JwtService } from '@nestjs/jwt';
       LicenseInfo,
       EmailConfirm,
       EmailCheck,
+      MemberLoginLog,
     ]),
-    SessionModule,
     EntityModule,
-    JwtAuthModule,
   ],
   providers: [CommonService, JwtService, AuthService],
-  exports: [
-    CommonService,
-    SessionModule,
-    JwtAuthModule,
-    JwtService,
-    AuthService,
-  ],
+  exports: [CommonService, JwtService, AuthService],
 })
 export class CommonModule {}

@@ -2,7 +2,12 @@ import { SuccessDto } from './../dto/success.response.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateReservDto } from './dto/request/create.reserv.dto';
 import { GetReservResponseDto } from './dto/response/get.reserv.response.dto';
-import { AccessTokenGuard, AzureBlobService, MemberDeco } from '@libs/common';
+import {
+  AccessTokenGuard,
+  AzureBlobService,
+  MemberDeco,
+  MemberDto,
+} from '@libs/common';
 import { OfficeService } from './office.service';
 import {
   Body,
@@ -95,8 +100,8 @@ export class OfficeController {
   })
   @UseGuards(AccessTokenGuard)
   @Get('getReservInfo')
-  async getReservInfo(@MemberDeco('memberId') memberId: string) {
-    return await this.officeService.getReservInfo(memberId);
+  async getReservInfo(@MemberDeco() member: MemberDto) {
+    return await this.officeService.getReservInfo(member.memberId);
   }
 
   // 나의 대기 목록 조회
@@ -107,8 +112,8 @@ export class OfficeController {
   })
   @UseGuards(AccessTokenGuard)
   @Get('getWaitInfo')
-  async getWaitInfo(@MemberDeco('memberId') memberId: string) {
-    return await this.officeService.getWaitInfo(memberId);
+  async getWaitInfo(@MemberDeco() member: MemberDto) {
+    return await this.officeService.getWaitInfo(member.memberId);
   }
 
   // 오피스 예약 하기
@@ -121,11 +126,15 @@ export class OfficeController {
   @UseGuards(AccessTokenGuard)
   @Post('createOfficeReserv')
   async createOfficeReserv(
+    @MemberDeco() member: MemberDto,
     @UploadedFile() file: Express.Multer.File,
-    @MemberDeco('memberId') memberId: string,
-    @Body() req: CreateReservDto,
+    @Body() data: CreateReservDto,
   ) {
-    const result = await this.officeService.CreateOffice(file, memberId, req);
+    const result = await this.officeService.CreateOffice(
+      member.memberId,
+      file,
+      data,
+    );
 
     return result;
   }
@@ -140,18 +149,18 @@ export class OfficeController {
   @UseGuards(AccessTokenGuard)
   @Post('updateOfficeReserv/:roomCode')
   async updateOfficeReserv(
+    @MemberDeco() member: MemberDto,
     @UploadedFile() file: Express.Multer.File,
-    @MemberDeco('memberId') memberId: string,
     @Body() data: UpdateReservDto,
     @Param('roomCode') roomCode: string,
   ) {
     const result = await this.officeService.UpdateOffice(
+      member.memberId,
       file,
-      memberId,
       roomCode,
       data,
     );
-    // this.officeLogService.updateOfficeReserv(result);c
+
     return result;
   }
 
@@ -164,10 +173,13 @@ export class OfficeController {
   @UseGuards(AccessTokenGuard)
   @Post('waitOfficeReserv')
   async waitOfficeReserv(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Body() data: CreateWaitDto,
   ) {
-    const result = await this.officeService.waitOfficeReserv(memberId, data);
+    const result = await this.officeService.waitOfficeReserv(
+      member.memberId,
+      data,
+    );
 
     return result;
   }
@@ -181,10 +193,13 @@ export class OfficeController {
   @UseGuards(AccessTokenGuard)
   @Delete('deleteReservation/:roomCode')
   async deleteReservation(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Param('roomCode') roomCode: string,
   ) {
-    return await this.officeService.deleteReservation(memberId, roomCode);
+    return await this.officeService.deleteReservation(
+      member.memberId,
+      roomCode,
+    );
   }
 
   // 오피스 대기 취소
@@ -196,10 +211,13 @@ export class OfficeController {
   @UseGuards(AccessTokenGuard)
   @Delete('deleteWaiting/:roomCode')
   async deleteWaiting(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Param('roomCode') roomCode: string,
   ) {
-    const result = await this.officeService.deleteWaiting(memberId, roomCode);
+    const result = await this.officeService.deleteWaiting(
+      member.memberId,
+      roomCode,
+    );
     // this.officeLogService.deleteWaiting(result);
     return result;
   }
@@ -223,9 +241,9 @@ export class OfficeController {
   @Post('upload')
   async upload(
     @UploadedFile() file: Express.Multer.File,
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
   ) {
-    this.logger.debug('memberId : ', memberId);
+    this.logger.debug('memberId : ', member.memberId);
     this.logger.debug(file);
   }
 }

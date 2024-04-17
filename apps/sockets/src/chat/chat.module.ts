@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Member, SessionInfo, MemberOfficeVisitLog } from '@libs/entity';
+import { Member, MemberOfficeVisitLog } from '@libs/entity';
 import {
   CreateFriendChattingSchema,
   OneOnOneChattingLogSchema,
@@ -16,7 +16,7 @@ import { HubSocketModule } from '../hub-socket/hub-socket.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Member, SessionInfo, MemberOfficeVisitLog]),
+    TypeOrmModule.forFeature([Member, MemberOfficeVisitLog]),
     MongooseModule.forFeature([
       {
         name: 'createFriendChatting',

@@ -12,7 +12,6 @@ import {
   JumpingMatchingLevel,
   Member,
   MemberOfficeVisitLog,
-  SessionInfo,
 } from '@libs/entity';
 import { ClientService } from '../services/client.service';
 import { GameData } from '../game/game-data';
@@ -21,7 +20,6 @@ import { GameData } from '../game/game-data';
   imports: [
     TypeOrmModule.forFeature([
       Member,
-      SessionInfo,
       MemberOfficeVisitLog,
       JumpingMatchingLevel,
     ]),

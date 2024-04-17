@@ -6,7 +6,6 @@ import {
   Controller,
   Delete,
   Get,
-  Headers,
   HttpStatus,
   Logger,
   Optional,
@@ -29,7 +28,7 @@ import { UpdateFrameImageDto } from './dto/request/update.frame.image.dto';
 import { ERRORCODE, ERROR_MESSAGE } from '@libs/constants';
 import { UploadImageResponseDto } from './dto/response/upload.image.response.dto';
 import axios from 'axios';
-import { AccessTokenGuard, MemberDeco } from '@libs/common';
+import { AccessTokenGuard, MemberDeco, MemberDto } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('MY ROOM - 마이룸')
@@ -63,11 +62,8 @@ export class MyRoomController {
   })
   @UseGuards(AccessTokenGuard)
   @Post('create')
-  async create(
-    @MemberDeco('memberId') memberId: string,
-    @Body() data: CreateMyRoomDto,
-  ) {
-    return await this.myRoomService.createMyRoom(memberId, data);
+  async create(@MemberDeco() member: MemberDto, @Body() data: CreateMyRoomDto) {
+    return await this.myRoomService.createMyRoom(member.memberId, data);
   }
 
   @ApiOperation({ summary: '마이룸 상태 타입 변경' })
@@ -78,10 +74,10 @@ export class MyRoomController {
   @UseGuards(AccessTokenGuard)
   @Put('stateType')
   async upateStateType(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Body() data: UpdateStateTypeDto,
   ) {
-    return await this.myRoomService.updateStateType(memberId, data);
+    return await this.myRoomService.updateStateType(member.memberId, data);
   }
 
   @ApiOperation({ summary: '마이룸 이미지 업로드' })
@@ -93,7 +89,7 @@ export class MyRoomController {
   @UseInterceptors(FileInterceptor('image'))
   @Post('frame-image')
   async frameImageUpload(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Body() data: UpdateFrameImageDto,
     @UploadedFile() @Optional() file?: Express.Multer.File,
   ) {
@@ -146,7 +142,11 @@ export class MyRoomController {
     }
 
     if (result.error === ERRORCODE.NET_E_SUCCESS) {
-      return await this.myRoomService.uploadIFrameImage(memberId, data, file);
+      return await this.myRoomService.uploadIFrameImage(
+        member.memberId,
+        data,
+        file,
+      );
     }
 
     return result;
@@ -160,9 +160,9 @@ export class MyRoomController {
   @UseGuards(AccessTokenGuard)
   @Delete('frame-image')
   async delteFrameImage(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Query('frameImages') items: string,
   ) {
-    return this.myRoomService.deleteFrameImage(memberId, items);
+    return this.myRoomService.deleteFrameImage(member.memberId, items);
   }
 }

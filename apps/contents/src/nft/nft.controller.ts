@@ -12,7 +12,7 @@ import { MorganInterceptor } from 'nest-morgan';
 import { NftService } from './nft.service';
 import { LinkedWalletDto } from './dto/req/linked.wallet.dto';
 import { LinkedWalletResDto } from './dto/res/linked.wallet.res.dto';
-import { AccessTokenGuard, MemberDeco } from '@libs/common';
+import { AccessTokenGuard, MemberDeco, MemberDto } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('NFT')
@@ -28,10 +28,10 @@ export class NftController {
   @UseGuards(AccessTokenGuard)
   @Post('linked-wallet')
   async linkedWallet(
-    @MemberDeco('memberId') memberId: string,
+    @MemberDeco() member: MemberDto,
     @Body() data: LinkedWalletDto,
   ) {
-    return await this.nftService.linkedWallet(memberId, data.walletAddr);
+    return await this.nftService.linkedWallet(member.memberId, data.walletAddr);
   }
 
   @ApiOperation({ summary: '지갑 해제 하기' })
@@ -40,7 +40,7 @@ export class NftController {
   })
   @UseGuards(AccessTokenGuard)
   @Delete('unlinked-wallet')
-  async unlinkedWallet(@MemberDeco('memberId') memberId: string) {
-    return await this.nftService.unLinkedWallet(memberId);
+  async unlinkedWallet(@MemberDeco() member: MemberDto) {
+    return await this.nftService.unLinkedWallet(member.memberId);
   }
 }

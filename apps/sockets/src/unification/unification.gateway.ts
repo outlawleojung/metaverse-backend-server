@@ -105,10 +105,10 @@ export class UnificationGateway
   async initRegisterSubscribe(client: CustomSocket) {
     // 중복 로그인 알림 구독
     this.messageHandler.registerHandler(
-      `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${client.handshake.auth.sessionId}`,
-      (sessionId) => {
+      `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${client.handshake.auth.jwtAccessToken}`,
+      (jwtAccessToken) => {
         // 서버에서 소켓 연결 제거
-        this.server.sockets.sockets.get(sessionId)?.disconnect();
+        this.server.sockets.sockets.get(jwtAccessToken)?.disconnect();
       },
     );
 

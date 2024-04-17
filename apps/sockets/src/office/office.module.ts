@@ -1,4 +1,4 @@
-import { Member, SessionInfo, MemberOfficeReservationInfo } from '@libs/entity';
+import { Member, MemberOfficeReservationInfo } from '@libs/entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OfficeService } from './office.service';
@@ -8,11 +8,7 @@ import { HubSocketModule } from '../hub-socket/hub-socket.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Member,
-      SessionInfo,
-      MemberOfficeReservationInfo,
-    ]),
+    TypeOrmModule.forFeature([Member, MemberOfficeReservationInfo]),
     HubSocketModule,
   ],
   providers: [OfficeService, OfficeWebService],
