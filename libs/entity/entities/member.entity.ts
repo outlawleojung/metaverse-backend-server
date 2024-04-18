@@ -17,8 +17,8 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { BlockMember } from './blockMember.entity';
-import { FriendRequest } from './friendRequest.entity';
+import { MemberBlock } from './memberBlock.entity';
+import { MemberFriendRequest } from './memberFriendRequest.entity';
 import { InfiniteCodeRank } from './infiniteCodeRank.entity';
 import { MemberAccount } from './memberAccount.entity';
 import { MemberAvatarInfo } from './memberAvatarInfo.entity';
@@ -115,23 +115,23 @@ export class Member {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToMany(() => BlockMember, (blockmember) => blockmember.Member)
-  Members: BlockMember[];
+  @OneToMany(() => MemberBlock, (blockmember) => blockmember.Member)
+  Members: MemberBlock[];
 
-  @OneToMany(() => BlockMember, (blockmember) => blockmember.BlockMember)
-  BlockMembers: BlockMember[];
+  @OneToMany(() => MemberBlock, (blockmember) => blockmember.MemberBlock)
+  MemberBlocks: MemberBlock[];
 
   @OneToMany(
-    () => FriendRequest,
+    () => MemberFriendRequest,
     (friendrequest) => friendrequest.RequestMember,
   )
-  RequestMembers: FriendRequest[];
+  RequestMembers: MemberFriendRequest[];
 
   @OneToMany(
-    () => FriendRequest,
+    () => MemberFriendRequest,
     (friendrequest) => friendrequest.ReceivedMember,
   )
-  ReceivedMembers: FriendRequest[];
+  ReceivedMembers: MemberFriendRequest[];
 
   @OneToOne(
     () => InfiniteCodeRank,

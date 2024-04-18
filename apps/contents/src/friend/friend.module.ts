@@ -4,12 +4,18 @@ import { Module } from '@nestjs/common';
 import { FriendService } from './friend.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
-  BlockMember,
   EntityModule,
-  FriendRequest,
+  MemberFriendRequest,
   Member,
   MemberFriend,
+  MemberRepository,
   SessionInfo,
+  MemberFriendRepository,
+  MemberFriendRequestRepository,
+  MemberBlock,
+  MemberBlockRepository,
+  FunctionTableRepository,
+  FunctionTable,
 } from '@libs/entity';
 
 @Module({
@@ -17,15 +23,23 @@ import {
     TypeOrmModule.forFeature([
       Member,
       MemberFriend,
-      FriendRequest,
-      BlockMember,
+      MemberFriendRequest,
+      MemberBlock,
       SessionInfo,
+      FunctionTable,
     ]),
     EntityModule,
     CommonModule,
   ],
   controllers: [FriendController],
-  providers: [FriendService],
+  providers: [
+    FriendService,
+    MemberRepository,
+    MemberFriendRepository,
+    MemberFriendRequestRepository,
+    MemberBlockRepository,
+    FunctionTableRepository,
+  ],
   exports: [FriendService],
 })
 export class FriendModule {}

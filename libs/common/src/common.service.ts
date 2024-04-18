@@ -169,42 +169,6 @@ export class CommonService {
     }
   }
 
-  // 재화 추가
-  async addMemberMoney(
-    queryRunner: QueryRunner,
-    memberId: string,
-    moneyType: number,
-    count: number,
-  ) {
-    try {
-      const _memberMoney = await queryRunner.manager
-        .getRepository(MemberMoney)
-        .findOne({
-          select: ['moneyType', 'count'],
-          where: {
-            memberId: memberId,
-            moneyType: moneyType,
-          },
-        });
-
-      let totalCount = 0;
-      if (_memberMoney) {
-        totalCount = _memberMoney.count + count;
-      } else {
-        totalCount = count;
-      }
-
-      const memberMoney = new MemberMoney();
-      memberMoney.memberId = memberId;
-      memberMoney.moneyType = moneyType;
-      memberMoney.count = totalCount;
-
-      await queryRunner.manager.getRepository(MemberMoney).save(memberMoney);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
   // 재화 차감
   async subtractMemberMoney(
     queryRunner: QueryRunner,

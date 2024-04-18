@@ -7,16 +7,30 @@ import {
   Member,
   AdContents,
   MemberAdContents,
+  AdContentsRepository,
+  MemberAdContentsRepository,
+  MemberMoneyRepository,
+  MemberMoney,
 } from '@libs/entity';
 import { CommonModule } from '@libs/common';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Member, AdContents, MemberAdContents]),
+    TypeOrmModule.forFeature([
+      Member,
+      AdContents,
+      MemberAdContents,
+      MemberMoney,
+    ]),
     EntityModule,
     CommonModule,
   ],
   controllers: [AdContentsController],
-  providers: [AdContentsService],
+  providers: [
+    AdContentsService,
+    AdContentsRepository,
+    MemberAdContentsRepository,
+    MemberMoneyRepository,
+  ],
 })
 export class AdContentsModule {}

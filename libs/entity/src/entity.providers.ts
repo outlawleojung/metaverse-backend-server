@@ -17,7 +17,6 @@ import { AzureStorage } from '../entities/azureStorage.entity';
 import { BannerInfo } from '../entities/bannerInfo.entity';
 import { BannerType } from '../entities/bannerType.entity';
 import { BannerReservation } from '../entities/bannerReservation.entity';
-import { BlockMember } from '../entities/blockMember.entity';
 import { BlockchainTransferEventLog } from '../entities/blockchainTransferEventLog.entity';
 import { BooleanType } from '../entities/booleanType.entity';
 import { BoothBannerInfo } from '../entities/boothBannerInfo.entity';
@@ -45,7 +44,7 @@ import { EventSpaceType } from '../entities/eventSpaceType.entity';
 import { Faq } from '../entities/faq.entity';
 import { FileBoxType } from '../entities/fileBoxType.entity';
 import { Forbiddenwords } from '../entities/forbiddenwords.entity';
-import { FriendRequest } from '../entities/friendRequest.entity';
+import { MemberFriendRequest } from '../entities/memberFriendRequest.entity';
 import { FunctionTable } from '../entities/functionTable.entity';
 import { Gateway } from '../entities/gateway.entity';
 import { GradeType } from '../entities/gradeType.entity';
@@ -87,6 +86,7 @@ import { Member } from '../entities/member.entity';
 import { MemberAccount } from '../entities/memberAccount.entity';
 import { MemberAdContents } from '../entities/memberAdContents.entity';
 import { MemberAvatarInfo } from '../entities/memberAvatarInfo.entity';
+import { MemberBlock } from '../entities/memberBlock.entity';
 import { MemberBusinessCardInfo } from '../entities/memberBusinessCardInfo.entity';
 import { MemberConnectInfo } from '../entities/memberConnectInfo.entity';
 import { MemberDefaultCardInfo } from '../entities/memberDefaultCardInfo.entity';
@@ -262,7 +262,6 @@ export const entityProviders = [
           BannerInfo,
           BannerType,
           BannerReservation,
-          BlockMember,
           BlockchainTransferEventLog,
           BooleanType,
           BoothBannerInfo,
@@ -291,7 +290,6 @@ export const entityProviders = [
           Faq,
           FileBoxType,
           Forbiddenwords,
-          FriendRequest,
           FunctionTable,
           Gateway,
           GradeType,
@@ -335,11 +333,13 @@ export const entityProviders = [
           MemberAccount,
           MemberAdContents,
           MemberAvatarInfo,
+          MemberBlock,
           MemberBusinessCardInfo,
           MemberConnectInfo,
           MemberDefaultCardInfo,
           MemberFrameImage,
           MemberFriend,
+          MemberFriendRequest,
           MemberFurnitureItemInven,
           MemberIdentification,
           MemberInfiniteCodeRank,

@@ -11,8 +11,8 @@ import {
 import { Member } from './member.entity';
 
 @Index('blockMemberId', ['blockMemberId'], {})
-@Entity('block_member')
-export class BlockMember {
+@Entity('member_block')
+export class MemberBlock {
   @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
   memberId: string;
 
@@ -25,17 +25,17 @@ export class BlockMember {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => Member, (member) => member.BlockMembers, {
+  @ManyToOne(() => Member, (member) => member.MemberBlocks, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
   @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
   Member: Member;
 
-  @ManyToOne(() => Member, (member) => member.BlockMembers, {
+  @ManyToOne(() => Member, (member) => member.MemberBlocks, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
   @JoinColumn([{ name: 'blockMemberId', referencedColumnName: 'memberId' }])
-  BlockMember: Member;
+  MemberBlock: Member;
 }

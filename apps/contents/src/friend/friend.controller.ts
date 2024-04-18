@@ -22,7 +22,14 @@ import { BlockMembersResponseDto } from './dto/response/block.members.response.d
 import { FindFriendDto } from './dto/request/find.friend.dto';
 import { BookmarkResponseDto } from './dto/response/bookmark.response.dto';
 import { GetFriendRoomIdResponseDto } from './dto/response/get.friend.roomid.response.dto';
-import { AccessTokenGuard, MemberDeco, MemberDto } from '@libs/common';
+import {
+  AccessTokenGuard,
+  MemberDeco,
+  MemberDto,
+  QueryRunner,
+} from '@libs/common';
+import { TransactionInterceptor } from '@libs/entity';
+import { QueryRunner as QR } from 'typeorm';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('FRIEND - 친구')
@@ -30,17 +37,17 @@ import { AccessTokenGuard, MemberDeco, MemberDto } from '@libs/common';
 export class FriendController {
   constructor(private readonly friendService: FriendService) {}
 
-  // 친구 목록 조회
-  @ApiOperation({ summary: '친구 목록 조회' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: GetFriendResponseDto,
-  })
-  @UseGuards(AccessTokenGuard)
-  @Get()
-  async getFriends(@MemberDeco() member: MemberDto) {
-    return await this.friendService.getFriends(member.memberId);
-  }
+  // // 친구 목록 조회
+  // @ApiOperation({ summary: '친구 목록 조회' })
+  // @ApiResponse({
+  //   status: HttpStatus.OK,
+  //   type: GetFriendResponseDto,
+  // })
+  // @UseGuards(AccessTokenGuard)
+  // @Get()
+  // async getFriends(@MemberDeco() member: MemberDto) {
+  //   return await this.friendService.getFriends(member.memberId);
+  // }
 
   // 친구 요청 하기
   @ApiOperation({ summary: '친구 요청 하기' })
@@ -49,12 +56,18 @@ export class FriendController {
     type: SuccessDto,
   })
   @UseGuards(AccessTokenGuard)
+  @UseInterceptors(TransactionInterceptor)
   @Post('/requestFriend')
   async requestFriend(
+    @QueryRunner() queryRunner: QR,
     @MemberDeco() member: MemberDto,
     @Body() data: FindFriendDto,
   ) {
-    return await this.friendService.requestFriend(member.memberId, data);
+    return await this.friendService.requestFriend(
+      member.memberId,
+      data,
+      queryRunner,
+    );
   }
 
   // 친구 요청 목록 조회
@@ -81,59 +94,59 @@ export class FriendController {
     return await this.friendService.receiveRequestFriends(member.memberId);
   }
 
-  // 친구 수락 하기
-  @ApiOperation({ summary: '친구 수락 하기' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: SuccessDto,
-  })
-  @UseGuards(AccessTokenGuard)
-  @Put('/acceptFriend/:friendMemeberCode')
-  async acceptFriend(
-    @MemberDeco() member: MemberDto,
-    @Param('friendMemeberCode') friendMemeberCode: string,
-  ) {
-    return await this.friendService.acceptFriend(
-      member.memberId,
-      friendMemeberCode,
-    );
-  }
+  // // 친구 수락 하기
+  // @ApiOperation({ summary: '친구 수락 하기' })
+  // @ApiResponse({
+  //   status: HttpStatus.OK,
+  //   type: SuccessDto,
+  // })
+  // @UseGuards(AccessTokenGuard)
+  // @Put('/acceptFriend/:friendMemeberCode')
+  // async acceptFriend(
+  //   @MemberDeco() member: MemberDto,
+  //   @Param('friendMemeberCode') friendMemeberCode: string,
+  // ) {
+  //   return await this.friendService.acceptFriend(
+  //     member.memberId,
+  //     friendMemeberCode,
+  //   );
+  // }
 
-  // 친구 요청 취소 하기
-  @ApiOperation({ summary: '친구 요청 취소 하기' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: SuccessDto,
-  })
-  @UseGuards(AccessTokenGuard)
-  @Put('/cancelRequestFriend/:friendMemeberCode')
-  async cancelRequestFriend(
-    @MemberDeco() member: MemberDto,
-    @Param('friendMemeberCode') friendMemeberCode: string,
-  ) {
-    return await this.friendService.cancelRequestFriend(
-      member.memberId,
-      friendMemeberCode,
-    );
-  }
+  // // 친구 요청 취소 하기
+  // @ApiOperation({ summary: '친구 요청 취소 하기' })
+  // @ApiResponse({
+  //   status: HttpStatus.OK,
+  //   type: SuccessDto,
+  // })
+  // @UseGuards(AccessTokenGuard)
+  // @Put('/cancelRequestFriend/:friendMemeberCode')
+  // async cancelRequestFriend(
+  //   @MemberDeco() member: MemberDto,
+  //   @Param('friendMemeberCode') friendMemeberCode: string,
+  // ) {
+  //   return await this.friendService.cancelRequestFriend(
+  //     member.memberId,
+  //     friendMemeberCode,
+  //   );
+  // }
 
-  // 친구 요청 거절 하기
-  @ApiOperation({ summary: '친구 요청 거절 하기' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: SuccessDto,
-  })
-  @UseGuards(AccessTokenGuard)
-  @Put('/refusalRequestFriend/:friendMemeberCode')
-  async refusalRequestFriend(
-    @MemberDeco() member: MemberDto,
-    @Param('friendMemeberCode') friendMemeberCode: string,
-  ) {
-    return this.friendService.refusalRequestFriend(
-      member.memberId,
-      friendMemeberCode,
-    );
-  }
+  // // 친구 요청 거절 하기
+  // @ApiOperation({ summary: '친구 요청 거절 하기' })
+  // @ApiResponse({
+  //   status: HttpStatus.OK,
+  //   type: SuccessDto,
+  // })
+  // @UseGuards(AccessTokenGuard)
+  // @Put('/refusalRequestFriend/:friendMemeberCode')
+  // async refusalRequestFriend(
+  //   @MemberDeco() member: MemberDto,
+  //   @Param('friendMemeberCode') friendMemeberCode: string,
+  // ) {
+  //   return this.friendService.refusalRequestFriend(
+  //     member.memberId,
+  //     friendMemeberCode,
+  //   );
+  // }
 
   // 친구 차단 하기
   @ApiOperation({ summary: '친구 차단 하기' })
@@ -142,12 +155,14 @@ export class FriendController {
     type: SuccessDto,
   })
   @UseGuards(AccessTokenGuard)
+  @UseInterceptors(TransactionInterceptor)
   @Post('/blockFriend')
   async blockFriend(
+    @QueryRunner() queryRunner: QR,
     @MemberDeco() member: MemberDto,
     @Body() data: CommonFriendDto,
   ) {
-    return this.friendService.blockFriend(member.memberId, data);
+    return this.friendService.blockFriend(member.memberId, data, queryRunner);
   }
 
   // 친구 삭제
@@ -157,12 +172,18 @@ export class FriendController {
     type: SuccessDto,
   })
   @UseGuards(AccessTokenGuard)
+  @UseInterceptors(TransactionInterceptor)
   @Delete('/deleteFriend/:friendMemeberCode')
   async deleteFriend(
+    @QueryRunner() queryRunner: QR,
     @MemberDeco() member: MemberDto,
     @Param('friendMemeberCode') friendMemeberCode: string,
   ) {
-    return this.friendService.deleteFriend(member.memberId, friendMemeberCode);
+    return await this.friendService.deleteFriend(
+      member.memberId,
+      friendMemeberCode,
+      queryRunner,
+    );
   }
 
   // 친구 차단 해제 하기
@@ -172,14 +193,17 @@ export class FriendController {
     type: SuccessDto,
   })
   @UseGuards(AccessTokenGuard)
+  @UseInterceptors(TransactionInterceptor)
   @Put('/releaseBlockFriend/:friendMemeberCode')
   async releaseBlockFriend(
+    @QueryRunner() queryRunner: QR,
     @MemberDeco() member: MemberDto,
     @Param('friendMemeberCode') friendMemeberCode: string,
   ) {
     return this.friendService.releaseBlockFriend(
       member.memberId,
       friendMemeberCode,
+      queryRunner,
     );
   }
 
@@ -195,45 +219,45 @@ export class FriendController {
     return this.friendService.getBlockFriends(member.memberId);
   }
 
-  // 친구 조회
-  @ApiOperation({ summary: '친구 조회' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: FindFriendResponseDto,
-  })
-  @UseGuards(AccessTokenGuard)
-  @Get('/findFriend/:requestType/:friendId')
-  async findFriend(
-    @Param('requestType') requestType: number,
-    @Param('friendId') friendId: string,
-  ) {
-    return this.friendService.findFriend(requestType, friendId);
-  }
+  // // 친구 조회
+  // @ApiOperation({ summary: '친구 조회' })
+  // @ApiResponse({
+  //   status: HttpStatus.OK,
+  //   type: FindFriendResponseDto,
+  // })
+  // @UseGuards(AccessTokenGuard)
+  // @Get('/findFriend/:requestType/:friendId')
+  // async findFriend(
+  //   @Param('requestType') requestType: number,
+  //   @Param('friendId') friendId: string,
+  // ) {
+  //   return this.friendService.findFriend(requestType, friendId);
+  // }
 
   // 친구 즐겨찾기
-  @ApiOperation({ summary: '친구 즐겨찾기' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: BookmarkResponseDto,
-  })
-  @UseGuards(AccessTokenGuard)
-  @Post('/bookmark')
-  async bookmark(
-    @MemberDeco() member: MemberDto,
-    @Body() data: CommonFriendDto,
-  ) {
-    return this.friendService.bookmark(member.memberId, data);
-  }
+  // @ApiOperation({ summary: '친구 즐겨찾기' })
+  // @ApiResponse({
+  //   status: HttpStatus.OK,
+  //   type: BookmarkResponseDto,
+  // })
+  // @UseGuards(AccessTokenGuard)
+  // @Post('/bookmark')
+  // async bookmark(
+  //   @MemberDeco() member: MemberDto,
+  //   @Body() data: CommonFriendDto,
+  // ) {
+  //   return this.friendService.bookmark(member.memberId, data);
+  // }
 
-  // 친구 조회
-  @ApiOperation({ summary: '친구 룸아이디 조회' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: GetFriendRoomIdResponseDto,
-  })
-  @UseGuards(AccessTokenGuard)
-  @Get('/findRoomId/:friendMemeberCode')
-  async findRoomId(@Param('friendMemeberCode') friendMemeberCode: string) {
-    return this.friendService.findRoomId(friendMemeberCode);
-  }
+  // // 친구 룸아이디 조회
+  // @ApiOperation({ summary: '친구 룸아이디 조회' })
+  // @ApiResponse({
+  //   status: HttpStatus.OK,
+  //   type: GetFriendRoomIdResponseDto,
+  // })
+  // @UseGuards(AccessTokenGuard)
+  // @Get('/findRoomId/:friendMemeberCode')
+  // async findRoomId(@Param('friendMemeberCode') friendMemeberCode: string) {
+  //   return this.friendService.findRoomId(friendMemeberCode);
+  // }
 }

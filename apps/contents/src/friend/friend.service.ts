@@ -1,27 +1,16 @@
 import {
-  BlockMember,
-  FriendRequest,
-  FunctionTable,
-  Member,
-  MemberConnectInfo,
+  FunctionTableRepository,
+  MemberBlock,
+  MemberBlockRepository,
   MemberFriend,
+  MemberFriendRepository,
+  MemberFriendRequestRepository,
+  MemberRepository,
 } from '@libs/entity';
-import {
-  Inject,
-  Injectable,
-  HttpException,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Not, In, Repository } from 'typeorm';
+import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { QueryRunner } from 'typeorm';
 import { CommonService } from '@libs/common';
-import {
-  ERRORCODE,
-  ERROR_MESSAGE,
-  FRND_REQUEST_TYPE,
-  FUNCTION_TABLE,
-} from '@libs/constants';
+import { ERRORCODE, ERROR_MESSAGE, FUNCTION_TABLE } from '@libs/constants';
 import { CommonFriendDto } from './dto/request/common.friend.dto';
 import { FindFriendDto } from './dto/request/find.friend.dto';
 
@@ -29,83 +18,72 @@ import { FindFriendDto } from './dto/request/find.friend.dto';
 export class FriendService {
   private readonly logger = new Logger(FriendService.name);
   constructor(
-    @InjectRepository(Member) private memberRepository: Repository<Member>,
-    @InjectRepository(MemberFriend)
-    private memberFriendRepository: Repository<MemberFriend>,
-    @InjectRepository(FriendRequest)
-    private friendRequestRepository: Repository<FriendRequest>,
-    @InjectRepository(BlockMember)
-    private blockMemberRepository: Repository<BlockMember>,
+    private memberRepository: MemberRepository,
+    private memberFriendRepository: MemberFriendRepository,
+    private memberFriendRequestRepository: MemberFriendRequestRepository,
+    private memberBlockRepository: MemberBlockRepository,
+    private functionTableRepository: FunctionTableRepository,
     private readonly commonService: CommonService,
-    @Inject(DataSource) private dataSource: DataSource,
   ) {}
 
-  async getFriends(memberId: string) {
-    try {
-      const friends = await this.memberFriendRepository
-        .createQueryBuilder('mf')
-        .select([
-          'm.memberCode as friendMemberCode',
-          'm.nickname as friendNickname',
-          'm.stateMessage as friendMessage',
-          'mf.createdAt as createdAt',
-          'mf.bookmark as bookmark',
-          'mf.bookmarkedAt as bookmarkedAt',
-        ])
-        .innerJoin('member', 'm', 'm.memberId = mf.friendMemberId')
-        .where('mf.memberId = :memberId', { memberId })
-        .getRawMany();
+  // async getFriends(memberId: string) {
+  //   try {
+  //     const friends = await this.memberFriendRepository
+  //       .createQueryBuilder('mf')
+  //       .select([
+  //         'm.memberCode as friendMemberCode',
+  //         'm.nickname as friendNickname',
+  //         'm.stateMessage as friendMessage',
+  //         'mf.createdAt as createdAt',
+  //         'mf.bookmark as bookmark',
+  //         'mf.bookmarkedAt as bookmarkedAt',
+  //       ])
+  //       .innerJoin('member', 'm', 'm.memberId = mf.friendMemberId')
+  //       .where('mf.memberId = :memberId', { memberId })
+  //       .getRawMany();
 
-      for (const f of friends) {
-        const avatarInfos = await this.commonService.getMemberAvatarInfo(
-          f.friendMemberCode,
-        );
-        f.avatarInfos = avatarInfos;
-      }
+  //     for (const f of friends) {
+  //       const avatarInfos = await this.commonService.getMemberAvatarInfo(
+  //         f.friendMemberCode,
+  //       );
+  //       f.avatarInfos = avatarInfos;
+  //     }
 
-      return {
-        friends,
-        error: ERRORCODE.NET_E_SUCCESS,
-        message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-      };
-    } catch (err) {
-      console.log(err);
-      this.logger.log(err);
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    }
-  }
+  //     return {
+  //       friends,
+  //       error: ERRORCODE.NET_E_SUCCESS,
+  //       message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+  //     };
+  //   } catch (err) {
+  //     console.log(err);
+  //     this.logger.log(err);
+  //     throw new HttpException(
+  //       {
+  //         error: ERRORCODE.NET_E_DB_FAILED,
+  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
+  //       },
+  //       HttpStatus.FORBIDDEN,
+  //     );
+  //   }
+  // }
 
   // 친구 요청 하기
-  async requestFriend(memberId: string, data: FindFriendDto): Promise<any> {
+  async requestFriend(
+    memberId: string,
+    data: FindFriendDto,
+    queryRunner: QueryRunner,
+  ): Promise<any> {
     const requestType = data.requestType;
     const friendId = data.friendId;
 
     // 해당 친구의 존재 여부 확인
-    const member = await this.memberRepository
-      .createQueryBuilder('m')
-      .select(['m.memberId as memberId']);
-
-    switch (requestType) {
-      case FRND_REQUEST_TYPE.MEMBER_CODE:
-        member.where('m.memberCode=:memberCode', { memberCode: friendId });
-        break;
-
-      case FRND_REQUEST_TYPE.NICKNAME:
-        member.where('m.nickname=:nickname', { nickname: friendId });
-        break;
-      default:
-        break;
-    }
-    const exFrnd = await member.getRawOne();
+    const friend = await this.memberRepository.findByRequestTypeForFriend(
+      requestType,
+      friendId,
+    );
 
     // 존재하지 않는다.
-    if (!exFrnd) {
+    if (!friend) {
       throw new HttpException(
         {
           error: ERRORCODE.NET_E_NOT_EXIST_USER,
@@ -116,7 +94,7 @@ export class FriendService {
     }
 
     // 자기 자신은 친구로 추가 할 수 없음.
-    if (exFrnd.memberId === memberId) {
+    if (friend.memberId === memberId) {
       throw new HttpException(
         {
           error: ERRORCODE.NET_E_CANNOT_REQUEST_MYSELF,
@@ -127,12 +105,10 @@ export class FriendService {
     }
 
     // 차단된 회원인지 확인
-    const blockmember = await this.blockMemberRepository.findOne({
-      where: {
-        memberId: memberId,
-        blockMemberId: exFrnd.memberId,
-      },
-    });
+    const blockmember = await this.memberBlockRepository.exists(
+      memberId,
+      friend.memberId,
+    );
 
     if (blockmember) {
       throw new HttpException(
@@ -145,15 +121,13 @@ export class FriendService {
     }
 
     // 이미 친구 인지 확인
-    const myFrnd = await this.memberFriendRepository.findOne({
-      where: {
-        memberId: memberId,
-        friendMemberId: exFrnd.memberId,
-      },
-    });
+    const myFriend = await this.memberFriendRepository.exists(
+      memberId,
+      friend.memberId,
+    );
 
     // 이미 친구 이다.
-    if (myFrnd) {
+    if (myFriend) {
       throw new HttpException(
         {
           error: ERRORCODE.NET_E_ALREADY_FRIEND,
@@ -164,12 +138,10 @@ export class FriendService {
     }
 
     // 이미 친구 요청을 보냈는지 확인
-    const myRequest = await this.friendRequestRepository.findOne({
-      where: {
-        requestMemberId: memberId,
-        receivedMemberId: exFrnd.memberId,
-      },
-    });
+    const myRequest = await this.memberFriendRequestRepository.exists(
+      memberId,
+      friend.memberId,
+    );
 
     // 이미 요청을 보낸 사용자
     if (myRequest) {
@@ -183,12 +155,10 @@ export class FriendService {
     }
 
     // 이미 나에게 요청을 보낸 사용자인지 확인
-    const requstMe = await this.friendRequestRepository.findOne({
-      where: {
-        requestMemberId: exFrnd.memberId,
-        receivedMemberId: memberId,
-      },
-    });
+    const requstMe = await this.memberFriendRequestRepository.exists(
+      friend.memberId,
+      memberId,
+    );
 
     // 이미 나에게 요청을 보낸 사용자
     if (requstMe) {
@@ -203,117 +173,30 @@ export class FriendService {
       );
     }
 
-    const reqMaxCount = await this.dataSource
-      .getRepository(FunctionTable)
-      .findOne({
-        where: {
-          id: FUNCTION_TABLE.REQUEST_FRIEND_COUNT,
-        },
-      });
+    const maxCount = await this.functionTableRepository.findById(
+      FUNCTION_TABLE.RECEIVE_FRIEND_COUNT,
+    );
 
-    const rcvMaxCount = await this.dataSource
-      .getRepository(FunctionTable)
-      .findOne({
-        where: {
-          id: FUNCTION_TABLE.RECEIVE_FRIEND_COUNT,
-        },
-      });
+    await this.memberFriendRequestRepository.managerFriendRequest(
+      memberId,
+      friend.memberId,
+      maxCount.value,
+      queryRunner,
+    );
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      const fr = new FriendRequest();
-      fr.requestMemberId = memberId;
-      fr.receivedMemberId = exFrnd.memberId;
-
-      await queryRunner.manager.getRepository(FriendRequest).save(fr);
-
-      // 내 요청이 100개 이상이면 오래 된 순으로 삭제 ( 100개 유지 )
-      const myRequest = await this.friendRequestRepository
-        .createQueryBuilder('f')
-        .select(['f.createdAt as createdAt'])
-        .where('f.requestMemberId = :memberId', { memberId })
-        .limit(reqMaxCount.value)
-        .orderBy('f.createdAt', 'DESC')
-        .getRawMany();
-
-      console.log(myRequest);
-      console.log(myRequest.length);
-
-      if (myRequest.length >= reqMaxCount.value) {
-        const deletedAt = myRequest[reqMaxCount.value - 1].createdAt;
-
-        await queryRunner.query(
-          `DELETE FROM friendrequest 
-        WHERE requestMemberId = ? AND createdAt <= ?`,
-          [memberId, deletedAt],
-        );
-      }
-
-      // 상대의 받은 요청이 100개 이상이면 오래 된 순으로 삭제 ( 100개 유지 )
-      const otherReceived = await this.friendRequestRepository
-        .createQueryBuilder('f')
-        .select(['f.createdAt as createdAt'])
-        .where('f.receivedMemberId = :memberId', { memberId: exFrnd.memberId })
-        .limit(rcvMaxCount.value)
-        .orderBy('f.createdAt', 'DESC')
-        .getRawMany();
-
-      if (otherReceived.length >= rcvMaxCount.value) {
-        const deletedAt = otherReceived[rcvMaxCount.value - 1].createdAt;
-
-        await queryRunner.query(
-          `DELETE FROM friendrequest 
-        WHERE receivedMemberId = ? AND createdAt <= ?`,
-          [exFrnd.memberId, deletedAt],
-        );
-      }
-
-      await queryRunner.commitTransaction();
-
-      return {
-        error: ERRORCODE.NET_E_SUCCESS,
-        message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-      };
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ err });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
-    }
+    return {
+      error: ERRORCODE.NET_E_SUCCESS,
+      message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
   }
 
   // 친구 요청 목록 조회
   async getRequestFriends(memberId: string) {
-    const rquestMemberId = memberId;
     try {
-      const friends = await this.friendRequestRepository
-        .createQueryBuilder('fq')
-        .select([
-          'm.memberCode as friendMemberCode',
-          'm.nickname as friendNickname',
-          'm.stateMessage as friendMessage',
-          'fq.createdAt as createdAt',
-        ])
-        .innerJoin('member', 'm', 'm.memberId = fq.receivedMemberId')
-        .where('fq.requestMemberId = :rquestMemberId', { rquestMemberId })
-        .getRawMany();
-
-      for (const f of friends) {
-        const avatarInfos = await this.commonService.getMemberAvatarInfo(
-          f.friendMemberCode,
+      const friends =
+        await this.memberFriendRequestRepository.findByReceivedMemberId(
+          memberId,
         );
-        f.avatarInfos = avatarInfos;
-      }
 
       return {
         myRequestList: friends,
@@ -321,7 +204,7 @@ export class FriendService {
         message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
       };
     } catch (err) {
-      this.logger.error({ err });
+      console.log(err.toString);
       throw new HttpException(
         {
           error: ERRORCODE.NET_E_DB_FAILED,
@@ -334,28 +217,11 @@ export class FriendService {
 
   // 친구 요청 받은 목록 조회
   async receiveRequestFriends(memberId: string) {
-    const receivedMemberId = memberId;
     try {
-      const friends = await this.dataSource.manager.query(
-        `SELECT 
-        m.memberCode as friendMemberCode, 
-        m.nickname as friendNickname, 
-        m.stateMessage as friendMessage,
-        fq.createdAt as requestedAt
-        FROM friendRequest as fq 
-        LEFT JOIN member as m on fq.requestMemberId = m.memberId 
-        WHERE
-        receivedMemberId = ? and requestMemberId 
-        NOT IN (select blockMemberId from blockMember where memberId = ?)`,
-        [receivedMemberId, receivedMemberId],
-      );
-
-      for (const f of friends) {
-        const avatarInfos = await this.commonService.getMemberAvatarInfo(
-          f.friendMemberCode,
+      const friends =
+        await this.memberFriendRequestRepository.findByRequestMemberId(
+          memberId,
         );
-        f.avatarInfos = avatarInfos;
-      }
 
       return {
         myReceivedList: friends,
@@ -375,14 +241,15 @@ export class FriendService {
   }
 
   // 친구 수락 하기
-  async acceptFriend(memberId: string, friendMemeberCode: string) {
-    const exMember = await this.memberRepository.findOne({
-      where: {
-        memberCode: friendMemeberCode,
-      },
-    });
+  async acceptFriend(
+    memberId: string,
+    friendMemeberCode: string,
+    queryRunner: QueryRunner,
+  ) {
+    const exFriend =
+      await this.memberRepository.findByMemberCode(friendMemeberCode);
 
-    if (!exMember) {
+    if (!exFriend) {
       throw new HttpException(
         {
           error: ERRORCODE.NET_E_NOT_EXIST_USER,
@@ -393,12 +260,10 @@ export class FriendService {
     }
 
     // 친구 요청을 받았는지 확인
-    const friendRequest = await this.friendRequestRepository.findOne({
-      where: {
-        requestMemberId: exMember.memberId,
-        receivedMemberId: memberId,
-      },
-    });
+    const friendRequest = await this.memberFriendRequestRepository.exists(
+      exFriend.memberId,
+      memberId,
+    );
     if (!friendRequest) {
       throw new HttpException(
         {
@@ -410,12 +275,11 @@ export class FriendService {
     }
 
     // 친구 여부 확인
-    const friend = await this.memberFriendRepository.findOne({
-      where: {
+    const friend =
+      await this.memberFriendRepository.findByMemberIdAndFriendMemberId(
         memberId,
-        friendMemberId: exMember.memberId,
-      },
-    });
+        exFriend.memberId,
+      );
     if (friend) {
       throw new HttpException(
         {
@@ -427,23 +291,15 @@ export class FriendService {
     }
 
     // 최대 가능한 친구 수
-    const maxFriendCount = await this.dataSource
-      .getRepository(FunctionTable)
-      .findOne({
-        where: {
-          id: FUNCTION_TABLE.MAX_FRIEND_COUNT,
-        },
-      });
+    const maxCount = await this.functionTableRepository.findById(
+      FUNCTION_TABLE.MAX_FRIEND_COUNT,
+    );
 
     // 내 친구 수 확인
-    const myFrined = await this.memberFriendRepository.count({
-      where: {
-        memberId,
-      },
-    });
+    const myFrinedCount = await this.memberFriendRepository.count(memberId);
 
     // 내 친구 수 초과 시
-    if (myFrined >= maxFriendCount.value) {
+    if (myFrinedCount >= maxCount.value) {
       throw new HttpException(
         {
           error: ERRORCODE.NET_E_MY_FRIEND_MAX_COUNT,
@@ -454,14 +310,12 @@ export class FriendService {
     }
 
     // 상대 친구 수 확인
-    const targetFrined = await this.memberFriendRepository.count({
-      where: {
-        memberId: exMember.memberId,
-      },
-    });
+    const targetFrinedCount = await this.memberFriendRepository.count(
+      exFriend.memberId,
+    );
 
     // 상대의 친구 수 초과 시
-    if (targetFrined >= maxFriendCount.value) {
+    if (targetFrinedCount >= maxCount.value) {
       throw new HttpException(
         {
           error: ERRORCODE.NET_E_TARGET_FRIEND_MAX_COUNT,
@@ -471,213 +325,190 @@ export class FriendService {
       );
     }
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    const memberFriendMe = new MemberFriend();
+    memberFriendMe.memberId = memberId;
+    memberFriendMe.friendMemberId = exFriend.memberId;
 
-    try {
-      const memberFriendMe = new MemberFriend();
-      memberFriendMe.memberId = memberId;
-      memberFriendMe.friendMemberId = exMember.memberId;
+    await this.memberFriendRepository.create(memberFriendMe, queryRunner);
 
-      const memberFriendYou = new MemberFriend();
-      memberFriendYou.memberId = exMember.memberId;
-      memberFriendYou.friendMemberId = memberId;
+    const memberFriendYou = new MemberFriend();
+    memberFriendYou.memberId = exFriend.memberId;
+    memberFriendYou.friendMemberId = memberId;
 
-      await queryRunner.manager
-        .getRepository(MemberFriend)
-        .save(memberFriendMe);
-      await queryRunner.manager
-        .getRepository(MemberFriend)
-        .save(memberFriendYou);
+    await this.memberFriendRepository.create(memberFriendYou, queryRunner);
 
-      await this.friendRequestRepository.delete({
-        requestMemberId: exMember.memberId,
-        receivedMemberId: memberId,
-      });
-
-      await queryRunner.commitTransaction();
-
-      return {
-        error: ERRORCODE.NET_E_SUCCESS,
-        message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-      };
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ error });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
-    }
+    await this.memberFriendRequestRepository.delete(
+      exFriend.memberId,
+      memberId,
+      queryRunner,
+    );
+    return {
+      error: ERRORCODE.NET_E_SUCCESS,
+      message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
   }
 
-  // 친구 요청 취소 하기
-  async cancelRequestFriend(memberId: string, friendMemeberCode: string) {
-    // 요청 받은 친구 확인
-    const exFrnd = await this.memberRepository.findOne({
-      where: {
-        memberCode: friendMemeberCode,
-      },
-    });
+  // // 친구 요청 취소 하기
+  // async cancelRequestFriend(memberId: string, friendMemeberCode: string) {
+  //   // 요청 받은 친구 확인
+  //   const exFrnd = await this.memberRepository.findOne({
+  //     where: {
+  //       memberCode: friendMemeberCode,
+  //     },
+  //   });
 
-    // 존재하지 않는다.
-    if (!exFrnd) {
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_NOT_EXIST_USER,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    }
+  //   // 존재하지 않는다.
+  //   if (!exFrnd) {
+  //     throw new HttpException(
+  //       {
+  //         error: ERRORCODE.NET_E_NOT_EXIST_USER,
+  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
+  //       },
+  //       HttpStatus.FORBIDDEN,
+  //     );
+  //   }
 
-    // 나의 요청 확인 하기
-    const requestFriend = await this.friendRequestRepository.findOne({
-      where: {
-        requestMemberId: memberId,
-        receivedMemberId: exFrnd.memberId,
-      },
-    });
+  //   // 나의 요청 확인 하기
+  //   const requestFriend = await this.friendRequestRepository.findOne({
+  //     where: {
+  //       requestMemberId: memberId,
+  //       receivedMemberId: exFrnd.memberId,
+  //     },
+  //   });
 
-    if (!requestFriend) {
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_NOT_EXIST_REQUEST,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_REQUEST),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    }
+  //   if (!requestFriend) {
+  //     throw new HttpException(
+  //       {
+  //         error: ERRORCODE.NET_E_NOT_EXIST_REQUEST,
+  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_REQUEST),
+  //       },
+  //       HttpStatus.FORBIDDEN,
+  //     );
+  //   }
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+  //   const queryRunner = this.dataSource.createQueryRunner();
+  //   await queryRunner.connect();
+  //   await queryRunner.startTransaction();
 
-    try {
-      await queryRunner.manager.delete(FriendRequest, {
-        requestMemberId: memberId,
-        receivedMemberId: exFrnd.memberId,
-      });
+  //   try {
+  //     await queryRunner.manager.delete(FriendRequest, {
+  //       requestMemberId: memberId,
+  //       receivedMemberId: exFrnd.memberId,
+  //     });
 
-      await queryRunner.commitTransaction();
+  //     await queryRunner.commitTransaction();
 
-      return {
-        error: ERRORCODE.NET_E_SUCCESS,
-        message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-      };
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ error });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
-    }
-  }
+  //     return {
+  //       error: ERRORCODE.NET_E_SUCCESS,
+  //       message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+  //     };
+  //   } catch (error) {
+  //     await queryRunner.rollbackTransaction();
+  //     this.logger.error({ error });
+  //     throw new HttpException(
+  //       {
+  //         error: ERRORCODE.NET_E_DB_FAILED,
+  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
+  //       },
+  //       HttpStatus.FORBIDDEN,
+  //     );
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
 
-  // 친구 요청 거절 하기
-  async refusalRequestFriend(memberId: string, friendMemeberCode: string) {
-    // 요청한 친구 확인
-    const exFrnd = await this.memberRepository.findOne({
-      where: {
-        memberCode: friendMemeberCode,
-      },
-    });
+  // // 친구 요청 거절 하기
+  // async refusalRequestFriend(memberId: string, friendMemeberCode: string) {
+  //   // 요청한 친구 확인
+  //   const exFrnd = await this.memberRepository.findOne({
+  //     where: {
+  //       memberCode: friendMemeberCode,
+  //     },
+  //   });
 
-    // 존재하지 않는다.
-    if (!exFrnd) {
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_NOT_EXIST_USER,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    }
+  //   // 존재하지 않는다.
+  //   if (!exFrnd) {
+  //     throw new HttpException(
+  //       {
+  //         error: ERRORCODE.NET_E_NOT_EXIST_USER,
+  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
+  //       },
+  //       HttpStatus.FORBIDDEN,
+  //     );
+  //   }
 
-    // 친구 요청 확인 하기
-    const requestFriend = await this.friendRequestRepository.findOne({
-      where: {
-        requestMemberId: exFrnd.memberId,
-        receivedMemberId: memberId,
-      },
-    });
+  //   // 친구 요청 확인 하기
+  //   const requestFriend = await this.friendRequestRepository.findOne({
+  //     where: {
+  //       requestMemberId: exFrnd.memberId,
+  //       receivedMemberId: memberId,
+  //     },
+  //   });
 
-    if (!requestFriend) {
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_NOT_EXIST_REQUEST,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_REQUEST),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    }
+  //   if (!requestFriend) {
+  //     throw new HttpException(
+  //       {
+  //         error: ERRORCODE.NET_E_NOT_EXIST_REQUEST,
+  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_REQUEST),
+  //       },
+  //       HttpStatus.FORBIDDEN,
+  //     );
+  //   }
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+  //   const queryRunner = this.dataSource.createQueryRunner();
+  //   await queryRunner.connect();
+  //   await queryRunner.startTransaction();
 
-    try {
-      await queryRunner.manager.delete(FriendRequest, {
-        requestMemberId: exFrnd.memberId,
-        receivedMemberId: memberId,
-      });
+  //   try {
+  //     await queryRunner.manager.delete(FriendRequest, {
+  //       requestMemberId: exFrnd.memberId,
+  //       receivedMemberId: memberId,
+  //     });
 
-      await queryRunner.commitTransaction();
+  //     await queryRunner.commitTransaction();
 
-      return {
-        error: ERRORCODE.NET_E_SUCCESS,
-        message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-      };
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ error });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
-    }
-  }
+  //     return {
+  //       error: ERRORCODE.NET_E_SUCCESS,
+  //       message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+  //     };
+  //   } catch (error) {
+  //     await queryRunner.rollbackTransaction();
+  //     this.logger.error({ error });
+  //     throw new HttpException(
+  //       {
+  //         error: ERRORCODE.NET_E_DB_FAILED,
+  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
+  //       },
+  //       HttpStatus.FORBIDDEN,
+  //     );
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
 
   // 친구 차단 하기
-  async blockFriend(memberId: string, data: CommonFriendDto) {
+  async blockFriend(
+    memberId: string,
+    data: CommonFriendDto,
+    queryRunner: QueryRunner,
+  ) {
     // 사용자 존재 여부 확인
-    const me = await this.memberRepository.findOne({
-      where: { memberId },
-    });
+    // const me = await this.memberRepository.findByMemberId(memberId);
 
-    if (me.memberCode === data.friendMemeberCode) {
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_CANNOT_BLOCK_MYSELF,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_CANNOT_BLOCK_MYSELF),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    }
+    // if (me.memberCode === data.friendMemeberCode) {
+    //   throw new HttpException(
+    //     {
+    //       error: ERRORCODE.NET_E_CANNOT_BLOCK_MYSELF,
+    //       message: ERROR_MESSAGE(ERRORCODE.NET_E_CANNOT_BLOCK_MYSELF),
+    //     },
+    //     HttpStatus.FORBIDDEN,
+    //   );
+    // }
 
     // 차단할 친구 확인
-    const exFrnd = await this.memberRepository.findOne({
-      where: {
-        memberCode: data.friendMemeberCode,
-      },
-    });
+    const exFrnd = await this.memberRepository.findByMemberCode(
+      data.friendMemeberCode,
+    );
 
     // 존재하지 않는다.
     if (!exFrnd) {
@@ -691,12 +522,10 @@ export class FriendService {
     }
 
     // 차단 여부 확인
-    const preBlock = await this.blockMemberRepository.findOne({
-      where: {
-        memberId,
-        blockMemberId: exFrnd.memberId,
-      },
-    });
+    const preBlock = await this.memberBlockRepository.exists(
+      memberId,
+      exFrnd.memberId,
+    );
 
     // 이미 차단 됨.
     if (preBlock) {
@@ -709,58 +538,41 @@ export class FriendService {
       );
     }
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    // 친구 상태 해제
+    await this.memberFriendRepository.delete(
+      memberId,
+      exFrnd.memberId,
+      queryRunner,
+    );
 
-    try {
-      // 친구 상태 해제
-      await queryRunner.manager.delete(MemberFriend, {
-        memberId,
-        friendMemberId: exFrnd.memberId,
-      });
+    await this.memberFriendRepository.delete(
+      exFrnd.memberId,
+      memberId,
+      queryRunner,
+    );
 
-      await queryRunner.manager.delete(MemberFriend, {
-        memberId: exFrnd.memberId,
-        friendMemberId: memberId,
-      });
+    // 차단 목록에 등록
+    const memberBlock = new MemberBlock();
+    memberBlock.memberId = memberId;
+    memberBlock.blockMemberId = exFrnd.memberId;
 
-      // 차단 목록에 등록
-      const blockMember = new BlockMember();
-      blockMember.memberId = memberId;
-      blockMember.blockMemberId = exFrnd.memberId;
+    await this.memberBlockRepository.create(memberBlock, queryRunner);
 
-      await queryRunner.manager.getRepository(BlockMember).save(blockMember);
-
-      await queryRunner.commitTransaction();
-
-      return {
-        error: ERRORCODE.NET_E_SUCCESS,
-        message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-      };
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ error });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
-    }
+    return {
+      error: ERRORCODE.NET_E_SUCCESS,
+      message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
   }
 
   // 친구 삭제
-  async deleteFriend(memberId: string, friendMemeberCode: string) {
+  async deleteFriend(
+    memberId: string,
+    friendMemeberCode: string,
+    queryRunner: QueryRunner,
+  ) {
     // 요청한 친구 확인
-    const exFrnd = await this.memberRepository.findOne({
-      where: {
-        memberCode: friendMemeberCode,
-      },
-    });
+    const exFrnd =
+      await this.memberRepository.findByMemberCode(friendMemeberCode);
 
     // 존재하지 않는다.
     if (!exFrnd) {
@@ -774,12 +586,11 @@ export class FriendService {
     }
 
     // 친구 여부 확인 하기
-    const memberFriend = await this.memberFriendRepository.findOne({
-      where: {
+    const memberFriend =
+      await this.memberFriendRepository.findByMemberIdAndFriendMemberId(
         memberId,
-        friendMemberId: exFrnd.memberId,
-      },
-    });
+        exFrnd.memberId,
+      );
 
     if (!memberFriend) {
       throw new HttpException(
@@ -791,50 +602,33 @@ export class FriendService {
       );
     }
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    await this.memberFriendRepository.delete(
+      memberId,
+      exFrnd.memberId,
+      queryRunner,
+    );
 
-    try {
-      await queryRunner.manager.delete(MemberFriend, {
-        memberId,
-        friendMemberId: exFrnd.memberId,
-      });
+    await this.memberFriendRepository.delete(
+      exFrnd.memberId,
+      memberId,
+      queryRunner,
+    );
 
-      await queryRunner.manager.delete(MemberFriend, {
-        memberId: exFrnd.memberId,
-        friendMemberId: memberId,
-      });
-
-      await queryRunner.commitTransaction();
-
-      return {
-        error: ERRORCODE.NET_E_SUCCESS,
-        message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-      };
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ error });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
-    }
+    return {
+      error: ERRORCODE.NET_E_SUCCESS,
+      message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
   }
 
   // 친구 차단 해제 하기
-  async releaseBlockFriend(memberId: string, friendMemeberCode: string) {
+  async releaseBlockFriend(
+    memberId: string,
+    friendMemeberCode: string,
+    queryRunner: QueryRunner,
+  ) {
     // 차단 친구 확인
-    const exFrnd = await this.memberRepository.findOne({
-      where: {
-        memberCode: friendMemeberCode,
-      },
-    });
+    const exFrnd =
+      await this.memberRepository.findByMemberCode(friendMemeberCode);
 
     // 존재하지 않는다.
     if (!exFrnd) {
@@ -847,12 +641,10 @@ export class FriendService {
       );
     }
 
-    const blockMember = await this.blockMemberRepository.findOne({
-      where: {
-        memberId,
-        blockMemberId: exFrnd.memberId,
-      },
-    });
+    const blockMember = await this.memberBlockRepository.exists(
+      memberId,
+      exFrnd.memberId,
+    );
 
     // 차단 목록에 없다.
     if (!blockMember) {
@@ -865,56 +657,24 @@ export class FriendService {
       );
     }
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    await this.memberBlockRepository.delete(
+      memberId,
+      exFrnd.memberId,
+      queryRunner,
+    );
 
-    try {
-      await queryRunner.manager.delete(BlockMember, {
-        memberId,
-        blockMemberId: exFrnd.memberId,
-      });
-
-      await queryRunner.commitTransaction();
-
-      return {
-        error: ERRORCODE.NET_E_SUCCESS,
-        message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-      };
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ error });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
-    }
+    return {
+      error: ERRORCODE.NET_E_SUCCESS,
+      message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
   }
 
   // 친구 차단 목록 조회
   async getBlockFriends(memberId: string) {
-    const blockMembers = await this.blockMemberRepository
-      .createQueryBuilder('b')
-      .select([
-        'm.memberCode as memberCode',
-        'm.nickname as nickname',
-        'm.stateMessage as stateMessage',
-      ])
-      .innerJoin('member', 'm', 'm.memberId = b.blockMemberId')
-      .where('b.memberid=:memberId', { memberId })
-      .getRawMany();
-
-    for (const f of blockMembers) {
-      const avatarInfos = await this.commonService.getMemberAvatarInfo(
-        f.memberCode,
+    const blockMembers =
+      await this.memberBlockRepository.findByMemberIdForBlockMemberInfo(
+        memberId,
       );
-      f.avatarInfos = avatarInfos;
-    }
 
     return {
       blockMembers,
@@ -923,167 +683,167 @@ export class FriendService {
     };
   }
 
-  // 친구 조회
-  async findFriend(requestType: number, friendId: string) {
-    // 해당 친구의 존재 여부 확인
-    const m = await this.memberRepository
-      .createQueryBuilder('m')
-      .select([
-        'm.memberCode as friendMemberCode',
-        'm.nickname as friendNickname',
-        'm.stateMessage as friendMessage',
-      ]);
+  // // 친구 조회
+  // async findFriend(requestType: number, friendId: string) {
+  //   // 해당 친구의 존재 여부 확인
+  //   const m = await this.memberRepository
+  //     .createQueryBuilder('m')
+  //     .select([
+  //       'm.memberCode as friendMemberCode',
+  //       'm.nickname as friendNickname',
+  //       'm.stateMessage as friendMessage',
+  //     ]);
 
-    switch (requestType) {
-      case FRND_REQUEST_TYPE.MEMBER_CODE:
-        m.where('m.memberCode=:memberCode', { memberCode: friendId });
-        break;
+  //   switch (requestType) {
+  //     case FRND_REQUEST_TYPE.MEMBER_CODE:
+  //       m.where('m.memberCode=:memberCode', { memberCode: friendId });
+  //       break;
 
-      case FRND_REQUEST_TYPE.NICKNAME:
-        m.where('m.nickname=:nickname', { nickname: friendId });
-        break;
-      default:
-        throw new HttpException(
-          {
-            error: ERRORCODE.NET_E_DB_FAILED,
-            message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-    }
+  //     case FRND_REQUEST_TYPE.NICKNAME:
+  //       m.where('m.nickname=:nickname', { nickname: friendId });
+  //       break;
+  //     default:
+  //       throw new HttpException(
+  //         {
+  //           error: ERRORCODE.NET_E_DB_FAILED,
+  //           message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
+  //         },
+  //         HttpStatus.BAD_REQUEST,
+  //       );
+  //   }
 
-    const member = await m.getRawOne();
+  //   const member = await m.getRawOne();
 
-    // 존재하지 않는다.
-    if (!member) {
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_NOT_EXIST_USER,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    }
+  //   // 존재하지 않는다.
+  //   if (!member) {
+  //     throw new HttpException(
+  //       {
+  //         error: ERRORCODE.NET_E_NOT_EXIST_USER,
+  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
+  //       },
+  //       HttpStatus.FORBIDDEN,
+  //     );
+  //   }
 
-    const avatarInfos = await this.commonService.getMemberAvatarInfo(
-      member.friendMemberCode,
-    );
-    member.avatarInfos = avatarInfos;
+  //   const avatarInfos = await this.commonService.getMemberAvatarInfo(
+  //     member.friendMemberCode,
+  //   );
+  //   member.avatarInfos = avatarInfos;
 
-    return {
-      member,
-      error: ERRORCODE.NET_E_SUCCESS,
-      message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-    };
-  }
+  //   return {
+  //     member,
+  //     error: ERRORCODE.NET_E_SUCCESS,
+  //     message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+  //   };
+  // }
 
-  // 친구 즐겨찾기
-  async bookmark(memberId: string, data: CommonFriendDto) {
-    // 즐겨찾기 친구 확인
-    const exFrnd = await this.memberRepository.findOne({
-      where: {
-        memberCode: data.friendMemeberCode,
-      },
-    });
+  // // 친구 즐겨찾기
+  // async bookmark(memberId: string, data: CommonFriendDto) {
+  //   // 즐겨찾기 친구 확인
+  //   const exFrnd = await this.memberRepository.findOne({
+  //     where: {
+  //       memberCode: data.friendMemeberCode,
+  //     },
+  //   });
 
-    // 존재하지 않는다.
-    if (!exFrnd) {
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_NOT_EXIST_USER,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    }
+  //   // 존재하지 않는다.
+  //   if (!exFrnd) {
+  //     throw new HttpException(
+  //       {
+  //         error: ERRORCODE.NET_E_NOT_EXIST_USER,
+  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
+  //       },
+  //       HttpStatus.FORBIDDEN,
+  //     );
+  //   }
 
-    // 친구 여부 확인
-    const memberFriend = await this.memberFriendRepository.findOne({
-      where: {
-        memberId,
-        friendMemberId: exFrnd.memberId,
-      },
-    });
+  //   // 친구 여부 확인
+  //   const memberFriend = await this.memberFriendRepository.findOne({
+  //     where: {
+  //       memberId,
+  //       friendMemberId: exFrnd.memberId,
+  //     },
+  //   });
 
-    // 존재하지 않는다.
-    if (!memberFriend) {
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_NOT_EXIST_USER,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    }
+  //   // 존재하지 않는다.
+  //   if (!memberFriend) {
+  //     throw new HttpException(
+  //       {
+  //         error: ERRORCODE.NET_E_NOT_EXIST_USER,
+  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
+  //       },
+  //       HttpStatus.FORBIDDEN,
+  //     );
+  //   }
 
-    const newMemberFriend = new MemberFriend();
-    newMemberFriend.memberId = memberId;
-    newMemberFriend.friendMemberId = exFrnd.memberId;
-    newMemberFriend.bookmark = memberFriend.bookmark === 1 ? 0 : 1;
-    newMemberFriend.bookmarkedAt =
-      memberFriend.bookmarkedAt === null ? new Date() : null;
+  //   const newMemberFriend = new MemberFriend();
+  //   newMemberFriend.memberId = memberId;
+  //   newMemberFriend.friendMemberId = exFrnd.memberId;
+  //   newMemberFriend.bookmark = memberFriend.bookmark === 1 ? 0 : 1;
+  //   newMemberFriend.bookmarkedAt =
+  //     memberFriend.bookmarkedAt === null ? new Date() : null;
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+  //   const queryRunner = this.dataSource.createQueryRunner();
+  //   await queryRunner.connect();
+  //   await queryRunner.startTransaction();
 
-    try {
-      await queryRunner.manager
-        .getRepository(MemberFriend)
-        .save(newMemberFriend);
-      await queryRunner.commitTransaction();
+  //   try {
+  //     await queryRunner.manager
+  //       .getRepository(MemberFriend)
+  //       .save(newMemberFriend);
+  //     await queryRunner.commitTransaction();
 
-      return {
-        friendMemberCode: exFrnd.memberCode,
-        bookmark: newMemberFriend.bookmark,
-        bookmarkedAt: newMemberFriend.bookmarkedAt,
-        error: ERRORCODE.NET_E_SUCCESS,
-        message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-      };
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ err });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
-    }
-  }
+  //     return {
+  //       friendMemberCode: exFrnd.memberCode,
+  //       bookmark: newMemberFriend.bookmark,
+  //       bookmarkedAt: newMemberFriend.bookmarkedAt,
+  //       error: ERRORCODE.NET_E_SUCCESS,
+  //       message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+  //     };
+  //   } catch (err) {
+  //     await queryRunner.rollbackTransaction();
+  //     this.logger.error({ err });
+  //     throw new HttpException(
+  //       {
+  //         error: ERRORCODE.NET_E_DB_FAILED,
+  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
+  //       },
+  //       HttpStatus.FORBIDDEN,
+  //     );
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
 
-  async findRoomId(friendMemberCode: string) {
-    try {
-      const roomId = await this.dataSource
-        .getRepository(MemberConnectInfo)
-        .createQueryBuilder('m')
-        .select('m.roomId as roomId')
-        .where('m.memberCode = :memberCode', { memberCode: friendMemberCode })
-        .getRawOne();
+  // async findRoomId(friendMemberCode: string) {
+  //   try {
+  //     const roomId = await this.dataSource
+  //       .getRepository(MemberConnectInfo)
+  //       .createQueryBuilder('m')
+  //       .select('m.roomId as roomId')
+  //       .where('m.memberCode = :memberCode', { memberCode: friendMemberCode })
+  //       .getRawOne();
 
-      if (!roomId)
-        return {
-          roomId: null,
-          error: ERRORCODE.NET_E_SUCCESS,
-          errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-        };
-      return {
-        roomId,
-        error: ERRORCODE.NET_E_SUCCESS,
-        errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-      };
-    } catch (error) {
-      this.logger.error({ error });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    }
-  }
+  //     if (!roomId)
+  //       return {
+  //         roomId: null,
+  //         error: ERRORCODE.NET_E_SUCCESS,
+  //         errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+  //       };
+  //     return {
+  //       roomId,
+  //       error: ERRORCODE.NET_E_SUCCESS,
+  //       errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+  //     };
+  //   } catch (error) {
+  //     this.logger.error({ error });
+  //     throw new HttpException(
+  //       {
+  //         error: ERRORCODE.NET_E_DB_FAILED,
+  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
+  //       },
+  //       HttpStatus.FORBIDDEN,
+  //     );
+  //   }
+  // }
 }

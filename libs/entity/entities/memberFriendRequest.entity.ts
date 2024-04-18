@@ -11,8 +11,8 @@ import {
 import { Member } from './member.entity';
 
 @Index('receivedMemberId', ['receivedMemberId'], {})
-@Entity('friend_request')
-export class FriendRequest {
+@Entity('member_friend_request')
+export class MemberFriendRequest {
   @PrimaryColumn('varchar', { name: 'requestMemberId', length: 100 })
   requestMemberId: string;
 
