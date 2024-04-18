@@ -41,14 +41,25 @@ export class MemberAccountRepository extends BaseRepository<MemberAccount> {
     return await this.repository.findOne({ where: { providerType, memberId } });
   }
 
-  async updateEmail(
-    memberId: string,
-    email: string,
+  async updateMemberAccount(
+    data: Partial<MemberAccount>,
     queryRunner?: QueryRunner,
-  ) {
-    await this.getRepository(queryRunner).update(
-      { memberId, providerType: PROVIDER_TYPE.ARZMETA },
-      { accountToken: email },
-    );
+  ): Promise<MemberAccount> {
+    const { memberId, providerType, ...updateData } = data;
+
+    const ma = await this.getRepository(queryRunner).findOne({
+      where: {
+        memberId,
+        providerType,
+      },
+    });
+
+    if (!ma) {
+      throw new Error('MemberAccount not found');
+    }
+
+    Object.assign(ma, updateData);
+
+    return await this.getRepository(queryRunner).save(ma);
   }
 }

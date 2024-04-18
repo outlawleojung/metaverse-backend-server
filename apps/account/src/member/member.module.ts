@@ -21,6 +21,8 @@ import {
   MemberBusinessCardInfoRepository,
   MemberBusinessCardInfo,
   MemberAvatarInfoRepository,
+  MemberDefaultCardInfoRepository,
+  MemberDefaultCardInfo,
 } from '@libs/entity';
 import { CommonModule } from '@libs/common';
 
@@ -41,6 +43,7 @@ import { CommonModule } from '@libs/common';
       LicenseGroupInfo,
       NoticeInfo,
       MemberBusinessCardInfo,
+      MemberDefaultCardInfo,
     ]),
     EntityModule,
     CommonModule,
@@ -51,6 +54,7 @@ import { CommonModule } from '@libs/common';
     MemberAccountRepository,
     MemberBusinessCardInfoRepository,
     MemberAvatarInfoRepository,
+    MemberDefaultCardInfoRepository,
   ],
   exports: [MemberService],
 })

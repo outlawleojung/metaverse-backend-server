@@ -12,12 +12,12 @@ export class TasksService {
     this.logger.debug('Called when the current day');
 
     // 탈퇴 처리
-    const checkWithdrawal = await this.memberService.checkWithdrawal();
+    // const checkWithdrawal = await this.memberService.checkWithdrawal();
 
     // 오피스 구매 종료 처리
-    const checkUpdateofficeGradeType =
-      await this.memberService.checkUpdateOfficeGradeType();
+    // const checkUpdateofficeGradeType =
+    //   await this.memberService.checkUpdateOfficeGradeType();
 
-    return this.logger.log({ checkWithdrawal, checkUpdateofficeGradeType });
+    // return this.logger.log({ checkWithdrawal, checkUpdateofficeGradeType });
   }
 }

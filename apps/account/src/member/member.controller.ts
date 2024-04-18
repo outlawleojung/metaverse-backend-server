@@ -215,9 +215,13 @@ export class MemberController {
   })
   @ApiOperation({ summary: '회원 탈퇴' })
   @UseGuards(AccessTokenGuard)
+  @UseInterceptors(TransactionInterceptor)
   @Delete('withdrawal')
-  async withdrawal(@MemberDeco() member: MemberDto) {
-    return await this.memberService.withdrawal(member.memberId);
+  async withdrawal(
+    @QueryRunner() queryRunner: QR,
+    @MemberDeco() member: MemberDto,
+  ) {
+    return await this.memberService.withdrawal(member.memberId, queryRunner);
   }
 
   // 아바타 프리셋 설정
@@ -322,14 +326,17 @@ export class MemberController {
   })
   @ApiOperation({ summary: '패스워드 변경' })
   @UseGuards(AccessTokenGuard)
+  @UseInterceptors(TransactionInterceptor)
   @Put('changePassword')
   async changePassword(
+    @QueryRunner() queryRunner: QR,
     @MemberDeco() member: MemberDto,
-    @Body() changePassword: ChangePasswordDto,
+    @Body() data: ChangePasswordDto,
   ) {
     return await this.memberService.changePassword(
       member.memberId,
-      changePassword,
+      data,
+      queryRunner,
     );
   }
 
@@ -339,12 +346,18 @@ export class MemberController {
     type: SuccessDto,
   })
   @UseGuards(AccessTokenGuard)
+  @UseInterceptors(TransactionInterceptor)
   @Post('setDefaultCardInfo')
   async setDefaultCardInfo(
+    @QueryRunner() queryRunner: QR,
     @MemberDeco() member: MemberDto,
     @Body() data: SetDefaultCardInfoDto,
   ) {
-    return await this.memberService.setDefaultCardInfo(member.memberId, data);
+    return await this.memberService.setDefaultCardInfo(
+      member.memberId,
+      data,
+      queryRunner,
+    );
   }
 
   @ApiOperation({ summary: '기본 명함 설정 삭제' })
@@ -353,8 +366,15 @@ export class MemberController {
     type: SuccessDto,
   })
   @UseGuards(AccessTokenGuard)
+  @UseInterceptors(TransactionInterceptor)
   @Delete('delDefaultCardInfo')
-  async delDefaultCardInfo(@MemberDeco() member: MemberDto) {
-    return await this.memberService.delDefaultCardInfo(member.memberId);
+  async delDefaultCardInfo(
+    @QueryRunner() queryRunner: QR,
+    @MemberDeco() member: MemberDto,
+  ) {
+    return await this.memberService.deleteDefaultCardInfo(
+      member.memberId,
+      queryRunner,
+    );
   }
 }

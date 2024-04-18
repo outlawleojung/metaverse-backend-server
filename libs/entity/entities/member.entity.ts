@@ -7,6 +7,7 @@ import { OfficeGradeType } from './officeGradeType.entity';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   Index,
   JoinColumn,
@@ -105,8 +106,8 @@ export class Member {
   @Column('datetime', { name: 'emailUpdatedAt', nullable: true })
   emailUpdatedAt: Date | null;
 
-  @Column('datetime', { name: 'deletedAt', nullable: true })
-  deletedAt: Date | null;
+  @DeleteDateColumn()
+  deletedAt?: Date;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -240,5 +240,6 @@ export { EmailCheckRepository } from '../repositories/email-check.repository';
 export { EmailConfirmRepository } from '../repositories/email-confirm.repository';
 export { EmailLimitRepository } from '../repositories/email-limit.repository';
 export { MemberBusinessCardInfoRepository } from '../repositories/member-business-card-info.repository';
+export { MemberDefaultCardInfoRepository } from '../repositories/member-default-card-info.repository';
 export { MemberPasswordAuthRepository } from '../repositories/member-password-auth.repository';
 export { MemberAvatarInfoRepository } from '../repositories/member-avatar-info.repository';

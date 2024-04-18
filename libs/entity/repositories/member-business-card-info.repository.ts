@@ -35,12 +35,38 @@ export class MemberBusinessCardInfoRepository extends BaseRepository<MemberBusin
     });
   }
 
+  async findOneByKey(memberId: string, templateId: number, num: number) {
+    return await this.memberBusinessCardInfoRepository.findOne({
+      where: {
+        memberId,
+        templateId,
+        num,
+      },
+    });
+  }
+
   async create(data: MemberBusinessCardInfo, queryRunner: QueryRunner) {
     await this.getRepository(queryRunner).save(data);
   }
 
   async update(data: MemberBusinessCardInfo, queryRunner: QueryRunner) {
-    await this.getRepository(queryRunner).save(data);
+    const { memberId, templateId, num, ...updateData } = data;
+
+    const mb = await this.getRepository(queryRunner).findOne({
+      where: {
+        memberId,
+        templateId,
+        num,
+      },
+    });
+
+    if (!mb) {
+      throw new Error('MemberBusinessCardInfo not found');
+    }
+
+    Object.assign(mb, updateData);
+
+    return await this.getRepository(queryRunner).save(mb);
   }
 
   async delete(data: MemberBusinessCardInfo, queryRunner: QueryRunner) {

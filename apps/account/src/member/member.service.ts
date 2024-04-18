@@ -1,5 +1,5 @@
 import { UpdateMyProfileDto } from './dto/request/update.my.profile.dto';
-import { CommonService, Decrypt } from '@libs/common';
+import { CommonService } from '@libs/common';
 import {
   PROVIDER_TYPE,
   ERRORCODE,
@@ -29,6 +29,7 @@ import {
   MemberAccountRepository,
   MemberBusinessCardInfoRepository,
   MemberAvatarInfoRepository,
+  MemberDefaultCardInfoRepository,
 } from '@libs/entity';
 import {
   Inject,
@@ -67,6 +68,7 @@ export class MemberService {
     private memberRepository: MemberRepository,
     private memberAccountRepository: MemberAccountRepository,
     private memberBusinessCardInfoRepository: MemberBusinessCardInfoRepository,
+    private memberDefaultCardInfoRepository: MemberDefaultCardInfoRepository,
     @InjectRepository(AvatarPartsType)
     private avatarPartsTypeRepository: Repository<AvatarPartsType>,
     // @InjectRepository(MemberAvatarInfo)
@@ -82,7 +84,7 @@ export class MemberService {
 
   // 탈퇴 진행 여부 체크
   async checkWithdrawalProcess(data: CheckWidhDrawalDto) {
-    const accountToken = String(Decrypt(data.accountToken));
+    const accountToken = data.accountToken;
     const memberAccount =
       await this.memberAccountRepository.findByAccountTokenAndProviderType(
         data.providerType,
@@ -97,7 +99,7 @@ export class MemberService {
     }
 
     if (data.providerType === PROVIDER_TYPE.ARZMETA) {
-      const password = String(Decrypt(data.password));
+      const password = data.password;
       const validPassword = await bcrypt.compareSync(
         password,
         memberAccount.password!,
@@ -193,12 +195,12 @@ export class MemberService {
       }
     }
 
-    await this.memberRepository.updateMemberProfile(
-      memberId,
-      data.nickname,
-      data.stateMessage,
-      queryRunner,
-    );
+    const newMember = new Member();
+    newMember.memberId = memberId;
+    newMember.nickname = data.nickname;
+    newMember.stateMessage = data.stateMessage;
+
+    await this.memberRepository.updateMember(newMember, queryRunner);
   }
 
   async updateNicknameLog(
@@ -464,13 +466,17 @@ export class MemberService {
         HttpStatus.FORBIDDEN,
       );
     }
-    await this.memberAccountRepository.updateEmail(
-      memberId,
-      email,
+
+    const newMemberAccount = new MemberAccount();
+    newMemberAccount.memberId = memberId;
+    newMemberAccount.providerType = PROVIDER_TYPE.ARZMETA;
+    newMemberAccount.accountToken = email;
+
+    await this.memberAccountRepository.updateMemberAccount(
+      newMemberAccount,
       queryRunner,
     );
 
-    this.logger.debug('success');
     return {
       error: ERRORCODE.NET_E_SUCCESS,
       errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
@@ -478,7 +484,7 @@ export class MemberService {
   }
 
   // 회원 탈퇴
-  async withdrawal(memberId: string) {
+  async withdrawal(memberId: string, queryRunner: QueryRunner) {
     // 사용자 존재 여부 확인
     const exMember = await this.memberRepository.findByMemberId(memberId);
 
@@ -492,74 +498,30 @@ export class MemberService {
       );
     }
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    await this.memberRepository.softDelete(memberId, queryRunner);
 
-    try {
-      const upMember = new Member();
-      upMember.memberId = memberId;
-      upMember.deletedAt = new Date();
-
-      await queryRunner.manager.getRepository(Member).save(upMember);
-      await queryRunner.commitTransaction();
-
-      return {
-        error: ERRORCODE.NET_E_SUCCESS,
-        errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-      };
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-
-      this.logger.error({ err });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
-    }
+    return {
+      error: ERRORCODE.NET_E_SUCCESS,
+      errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
   }
 
   // 탈퇴 신청 계정 확인 후 삭제
-  async checkWithdrawal() {
-    const members = await this.dataSource
-      .getRepository(Member)
-      .createQueryBuilder('m')
-      .select(['m.memberId as memberId', 'm.deletedAt as deletedAt'])
-      .where('m.deletedAt IS NOT NULL')
-      .withDeleted()
-      .getRawMany();
+  async checkWithdrawal(queryRunner: QueryRunner) {
+    const members = await this.memberRepository.findAllForDeleteMembers();
 
     const now = new Date(); // 현재 날짜 및 시간
     this.logger.log('현재 : ', now);
     const oneMonthAgo = new Date(now.setMonth(now.getMonth() - 1)); // 한달 전
     this.logger.log('한달 전 : ', oneMonthAgo);
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.startTransaction();
-
-    try {
-      for (const member of members) {
-        if (new Date(member.deletedAt) <= new Date(oneMonthAgo)) {
-          await queryRunner.manager
-            .getRepository(Member)
-            .delete({ memberId: member.memberId });
-        }
+    for (const member of members) {
+      if (new Date(member.deletedAt) <= new Date(oneMonthAgo)) {
+        await this.memberRepository.delete(member.memberId, queryRunner);
       }
-
-      await queryRunner.commitTransaction();
-      return true;
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error(err);
-      return false;
-    } finally {
-      await queryRunner.release();
     }
+
+    return true;
   }
 
   // 아바타 프리셋 세팅
@@ -640,12 +602,7 @@ export class MemberService {
     mac.nickname = nickname;
     mac.stateMessage = stateMessage;
 
-    await this.memberRepository.updateMemberProfile(
-      memberId,
-      nickname,
-      stateMessage,
-      queryRunner,
-    );
+    await this.memberRepository.updateMember(mac, queryRunner);
   }
 
   // 앱 정보 조회
@@ -790,7 +747,11 @@ export class MemberService {
   }
 
   // 패스워드 변경
-  async changePassword(memberId: string, changePassword: ChangePasswordDto) {
+  async changePassword(
+    memberId: string,
+    data: ChangePasswordDto,
+    queryRunner: QueryRunner,
+  ) {
     // 사용자 존재 여부 확인
     const memberAccount =
       await this.memberAccountRepository.findByMemberIdAndProviderType(
@@ -809,7 +770,8 @@ export class MemberService {
     }
 
     // 기존 패스워드 검증
-    const password = String(Decrypt(changePassword.password));
+    const password = data.password;
+
     const validPassword = await bcrypt.compareSync(
       password,
       memberAccount.password!,
@@ -827,81 +789,37 @@ export class MemberService {
     }
 
     // 새패스워드
-    const newHashedpassword = await bcrypt.hash(
-      String(Decrypt(changePassword.newPassword)),
-      12,
+    const newHashedpassword = await bcrypt.hash(data.newPassword, 12);
+
+    const newMemberAccount = new MemberAccount();
+    newMemberAccount.memberId = memberId;
+    newMemberAccount.password = newHashedpassword;
+    newMemberAccount.providerType = PROVIDER_TYPE.ARZMETA;
+
+    await this.memberAccountRepository.updateMemberAccount(
+      newMemberAccount,
+      queryRunner,
     );
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      await queryRunner.manager.update(
-        Member,
-        { memberId: memberAccount.memberId },
-        {
-          passwdUpdatedAt: new Date(),
-        },
-      );
-
-      await queryRunner.manager.update(
-        MemberAccount,
-        {
-          memberId: memberAccount.memberId,
-          providerType: PROVIDER_TYPE.ARZMETA,
-        },
-        {
-          password: newHashedpassword,
-        },
-      );
-
-      await queryRunner.commitTransaction();
-
-      // const member = await this.memberRepository.findOne({
-      //   where: {
-      //     memberId,
-      //   },
-      // });
-
-      // 로그인 토큰 발급
-      // const loginToken = await this.loginTokenService.signToken(
-      //   member.memberId,
-      //   newHashedpassword,
-      //   member.passwdUpdatedAt,
-      // );
-
-      return {
-        error: ERRORCODE.NET_E_SUCCESS,
-        errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-      };
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ error });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
-    }
+    return {
+      error: ERRORCODE.NET_E_SUCCESS,
+      errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
   }
 
   // 기본 명함 설정 하기
-  async setDefaultCardInfo(memberId: string, data: SetDefaultCardInfoDto) {
+  async setDefaultCardInfo(
+    memberId: string,
+    data: SetDefaultCardInfoDto,
+    queryRunner: QueryRunner,
+  ) {
     // 명함 유효성 검증
-    const businessCardInfo = await this.dataSource
-      .getRepository(MemberBusinessCardInfo)
-      .findOne({
-        where: {
-          memberId,
-          templateId: data.templateId,
-          num: data.num,
-        },
-      });
+    const businessCardInfo =
+      await this.memberBusinessCardInfoRepository.findOneByKey(
+        memberId,
+        data.templateId,
+        data.num,
+      );
 
     if (!businessCardInfo) {
       throw new HttpException(
@@ -913,73 +831,31 @@ export class MemberService {
       );
     }
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    const defaultCard = new MemberDefaultCardInfo();
+    defaultCard.memberId = memberId;
+    defaultCard.templateId = data.templateId;
+    defaultCard.num = data.num;
 
-    try {
-      const defaultCard = new MemberDefaultCardInfo();
-      defaultCard.memberId = memberId;
-      defaultCard.templateId = data.templateId;
-      defaultCard.num = data.num;
+    const result = await this.memberDefaultCardInfoRepository.update(
+      defaultCard,
+      queryRunner,
+    );
 
-      await queryRunner.manager
-        .getRepository(MemberDefaultCardInfo)
-        .save(defaultCard);
-      await queryRunner.commitTransaction();
-
-      // 기본 명함 정보
-      const defaultCardInfo = await this.getDefaultCardInfo(memberId);
-
-      return {
-        defaultCardInfo,
-        error: ERRORCODE.NET_E_SUCCESS,
-        errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-      };
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ error });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
-    }
+    return {
+      defaultCardInfo: result,
+      error: ERRORCODE.NET_E_SUCCESS,
+      errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
   }
 
   // 기본 명함 설정 삭제
-  async delDefaultCardInfo(memberId: string) {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+  async deleteDefaultCardInfo(memberId: string, queryRunner: QueryRunner) {
+    await this.memberDefaultCardInfoRepository.delete(memberId, queryRunner);
 
-    try {
-      await queryRunner.manager.getRepository(MemberDefaultCardInfo).delete({
-        memberId,
-      });
-      await queryRunner.commitTransaction();
-
-      return {
-        error: ERRORCODE.NET_E_SUCCESS,
-        errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-      };
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ error });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
-    }
+    return {
+      error: ERRORCODE.NET_E_SUCCESS,
+      errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
   }
 
   async getDefaultCardInfo(memberId: string) {
@@ -1037,7 +913,7 @@ export class MemberService {
     }
   }
 
-  getNotice = async () => {
+  async getNotice() {
     const noticeInfos = [];
     const noticeTypes = await this.dataSource.getRepository(NoticeType).find();
     for (const noticeType of noticeTypes) {
@@ -1065,7 +941,7 @@ export class MemberService {
       }
     }
     return noticeInfos;
-  };
+  }
 
   checkUpdateOfficeGradeType = async () => {};
 }
