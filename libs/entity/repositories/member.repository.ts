@@ -62,6 +62,56 @@ export class MemberRepository extends BaseRepository<Member> {
     return member;
   }
 
+  async findByMemberIdForMemberInfo(
+    memberId: string,
+  ): Promise<Member[] | null> {
+    const rawResults = await this.memberRepository
+      .createQueryBuilder('m')
+      .select([
+        'm.memberCode as memberCode',
+        'm.nickname as nickname',
+        'm.stateMessage as stateMessage',
+        'ai.avatarPartsType',
+        'ai.itemId',
+      ])
+      .leftJoin('m.MemberAvatarInfos', 'ai')
+      .where('m.memberId = :memberId', { memberId })
+      .getRawMany();
+
+    // Reduce the raw results into structured friend objects
+    const friends = rawResults.reduce((acc, item) => {
+      const { friendMemberCode, friendNickname, friendMessage, createdAt } =
+        item;
+
+      // Create a unique key for each friend
+      const key = friendMemberCode;
+
+      // Initialize if this friend is not already processed
+      if (!acc[key]) {
+        acc[key] = {
+          friendMemberCode,
+          friendNickname,
+          friendMessage,
+          createdAt,
+          avatarInfos: [],
+        };
+      }
+
+      // Add avatar info if available
+      if (item.ai_avatarPartsType !== null) {
+        acc[key].avatarInfos.push({
+          avatarPartsType: item.ai_avatarPartsType,
+          itemId: item.ai_itemId,
+        });
+      }
+
+      return acc;
+    }, {});
+
+    // Convert the accumulated object back to an array
+    return Object.values(friends);
+  }
+
   /**
    * 닉네임 중복 체크를 위한 조회
    * @param nickname

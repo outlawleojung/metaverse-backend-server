@@ -151,7 +151,7 @@ export class Member {
   @OneToMany(() => MemberFriend, (memberfriend) => memberfriend.Member)
   OwnerMembers: MemberFriend[];
 
-  @OneToMany(() => MemberFriend, (memberfriend) => memberfriend.friendMember)
+  @OneToMany(() => MemberFriend, (memberfriend) => memberfriend.FriendMember)
   MemberFriends: MemberFriend[];
 
   @OneToMany(

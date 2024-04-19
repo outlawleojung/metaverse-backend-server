@@ -250,3 +250,4 @@ export { MemberAdContentsRepository } from '../repositories/member-ad-contents.r
 export { MemberMoneyRepository } from '../repositories/member-money.repository';
 export { MemberFriendRepository } from '../repositories/member-friend.repository';
 export { MemberFriendRequestRepository } from '../repositories/member-friend-request.repository';
+export { MemberConnectInfoRepository } from '../repositories/member-connect-info.repository';

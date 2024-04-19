@@ -43,5 +43,5 @@ export class MemberFriend {
     onUpdate: 'CASCADE',
   })
   @JoinColumn([{ name: 'friendMemberId', referencedColumnName: 'memberId' }])
-  friendMember: Member;
+  FriendMember: Member;
 }

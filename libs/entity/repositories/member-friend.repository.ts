@@ -49,6 +49,43 @@ export class MemberFriendRepository extends BaseRepository<MemberFriend> {
     await this.getRepository(queryRunner).save(data);
   }
 
+  async update(data: Partial<MemberFriend>, queryRunner?: QueryRunner) {
+    const { memberId, friendMemberId } = data;
+
+    if (!this.exists(memberId, friendMemberId)) {
+      throw new Error('Member Is Not Friend');
+    }
+
+    await this.getRepository(queryRunner).save(data);
+  }
+
+  async toggleBookmark(
+    memberId: string,
+    friendMemberId: string,
+    queryRunner?: QueryRunner,
+  ): Promise<MemberFriend | null> {
+    const friendRelation = await this.findByMemberIdAndFriendMemberId(
+      memberId,
+      friendMemberId,
+    );
+
+    if (!friendRelation) {
+      throw new Error('Member Is Not Friend');
+    }
+
+    if (friendRelation.bookmark === 1) {
+      friendRelation.bookmark = 0;
+      friendRelation.bookmarkedAt = null;
+    } else {
+      friendRelation.bookmark = 1;
+      friendRelation.bookmarkedAt = new Date();
+    }
+
+    await this.getRepository(queryRunner).save(friendRelation);
+
+    return friendRelation;
+  }
+
   async delete(
     memberId: string,
     friendMemberId: string,

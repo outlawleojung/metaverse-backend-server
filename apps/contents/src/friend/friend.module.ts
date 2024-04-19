@@ -16,6 +16,7 @@ import {
   MemberBlockRepository,
   FunctionTableRepository,
   FunctionTable,
+  MemberConnectInfoRepository,
 } from '@libs/entity';
 
 @Module({
@@ -39,6 +40,7 @@ import {
     MemberFriendRequestRepository,
     MemberBlockRepository,
     FunctionTableRepository,
+    MemberConnectInfoRepository,
   ],
   exports: [FriendService],
 })

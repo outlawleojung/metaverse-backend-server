@@ -7,21 +7,21 @@ export class FriendMemberDefault {
     description: '친구 회원 코드',
     required: true,
   })
-  public friendMemberCode: string;
+  public memberCode: string;
 
   @ApiProperty({
     example: '왕방구',
     description: '친구 닉네임',
     required: false,
   })
-  public frinedsNickname: string;
+  public nickname: string;
 
   @ApiProperty({
     example: '상태 썩음',
     description: '상태메세지',
     required: false,
   })
-  public friendStateMessage: string;
+  public stateMessage: string;
 
   @ApiProperty({
     example: {

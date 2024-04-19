@@ -2,6 +2,7 @@ import {
   FunctionTableRepository,
   MemberBlock,
   MemberBlockRepository,
+  MemberConnectInfoRepository,
   MemberFriend,
   MemberFriendRepository,
   MemberFriendRequestRepository,
@@ -23,6 +24,7 @@ export class FriendService {
     private memberFriendRequestRepository: MemberFriendRequestRepository,
     private memberBlockRepository: MemberBlockRepository,
     private functionTableRepository: FunctionTableRepository,
+    private memberConnectInfoRepository: MemberConnectInfoRepository,
     private readonly commonService: CommonService,
   ) {}
 
@@ -348,143 +350,92 @@ export class FriendService {
     };
   }
 
-  // // 친구 요청 취소 하기
-  // async cancelRequestFriend(memberId: string, friendMemeberCode: string) {
-  //   // 요청 받은 친구 확인
-  //   const exFrnd = await this.memberRepository.findOne({
-  //     where: {
-  //       memberCode: friendMemeberCode,
-  //     },
-  //   });
+  // 친구 요청 취소 하기
+  async cancelRequestFriend(
+    memberId: string,
+    friendMemeberCode: string,
+    queryRunner: QueryRunner,
+  ) {
+    // 요청 받은 친구 확인
+    const exFriend =
+      await this.memberRepository.findByMemberCode(friendMemeberCode);
 
-  //   // 존재하지 않는다.
-  //   if (!exFrnd) {
-  //     throw new HttpException(
-  //       {
-  //         error: ERRORCODE.NET_E_NOT_EXIST_USER,
-  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
-  //       },
-  //       HttpStatus.FORBIDDEN,
-  //     );
-  //   }
+    // 존재하지 않는다.
+    if (!exFriend) {
+      throw new HttpException(
+        {
+          error: ERRORCODE.NET_E_NOT_EXIST_USER,
+          message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
 
-  //   // 나의 요청 확인 하기
-  //   const requestFriend = await this.friendRequestRepository.findOne({
-  //     where: {
-  //       requestMemberId: memberId,
-  //       receivedMemberId: exFrnd.memberId,
-  //     },
-  //   });
+    const result = await this.memberFriendRequestRepository.delete(
+      memberId,
+      exFriend.memberId,
+      queryRunner,
+    );
 
-  //   if (!requestFriend) {
-  //     throw new HttpException(
-  //       {
-  //         error: ERRORCODE.NET_E_NOT_EXIST_REQUEST,
-  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_REQUEST),
-  //       },
-  //       HttpStatus.FORBIDDEN,
-  //     );
-  //   }
+    if (result.affected === 0) {
+      throw new HttpException(
+        {
+          error: ERRORCODE.NET_E_NOT_EXIST_REQUEST,
+          message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_REQUEST),
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
 
-  //   const queryRunner = this.dataSource.createQueryRunner();
-  //   await queryRunner.connect();
-  //   await queryRunner.startTransaction();
+    return {
+      error: ERRORCODE.NET_E_SUCCESS,
+      message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
+  }
 
-  //   try {
-  //     await queryRunner.manager.delete(FriendRequest, {
-  //       requestMemberId: memberId,
-  //       receivedMemberId: exFrnd.memberId,
-  //     });
+  // 받은 친구 요청 거절 하기
+  async refusalRequestFriend(
+    memberId: string,
+    friendMemeberCode: string,
+    queryRunner: QueryRunner,
+  ) {
+    // 요청한 친구 확인
 
-  //     await queryRunner.commitTransaction();
+    const exFriend =
+      await this.memberRepository.findByMemberCode(friendMemeberCode);
 
-  //     return {
-  //       error: ERRORCODE.NET_E_SUCCESS,
-  //       message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-  //     };
-  //   } catch (error) {
-  //     await queryRunner.rollbackTransaction();
-  //     this.logger.error({ error });
-  //     throw new HttpException(
-  //       {
-  //         error: ERRORCODE.NET_E_DB_FAILED,
-  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-  //       },
-  //       HttpStatus.FORBIDDEN,
-  //     );
-  //   } finally {
-  //     await queryRunner.release();
-  //   }
-  // }
+    // 존재하지 않는다.
+    if (!exFriend) {
+      throw new HttpException(
+        {
+          error: ERRORCODE.NET_E_NOT_EXIST_USER,
+          message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
 
-  // // 친구 요청 거절 하기
-  // async refusalRequestFriend(memberId: string, friendMemeberCode: string) {
-  //   // 요청한 친구 확인
-  //   const exFrnd = await this.memberRepository.findOne({
-  //     where: {
-  //       memberCode: friendMemeberCode,
-  //     },
-  //   });
+    const result = await this.memberFriendRequestRepository.delete(
+      exFriend.memberId,
+      memberId,
+      queryRunner,
+    );
 
-  //   // 존재하지 않는다.
-  //   if (!exFrnd) {
-  //     throw new HttpException(
-  //       {
-  //         error: ERRORCODE.NET_E_NOT_EXIST_USER,
-  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
-  //       },
-  //       HttpStatus.FORBIDDEN,
-  //     );
-  //   }
+    if (result.affected === 0) {
+      throw new HttpException(
+        {
+          error: ERRORCODE.NET_E_NOT_EXIST_RECEIVED_REQUEST,
+          message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_RECEIVED_REQUEST),
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
 
-  //   // 친구 요청 확인 하기
-  //   const requestFriend = await this.friendRequestRepository.findOne({
-  //     where: {
-  //       requestMemberId: exFrnd.memberId,
-  //       receivedMemberId: memberId,
-  //     },
-  //   });
-
-  //   if (!requestFriend) {
-  //     throw new HttpException(
-  //       {
-  //         error: ERRORCODE.NET_E_NOT_EXIST_REQUEST,
-  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_REQUEST),
-  //       },
-  //       HttpStatus.FORBIDDEN,
-  //     );
-  //   }
-
-  //   const queryRunner = this.dataSource.createQueryRunner();
-  //   await queryRunner.connect();
-  //   await queryRunner.startTransaction();
-
-  //   try {
-  //     await queryRunner.manager.delete(FriendRequest, {
-  //       requestMemberId: exFrnd.memberId,
-  //       receivedMemberId: memberId,
-  //     });
-
-  //     await queryRunner.commitTransaction();
-
-  //     return {
-  //       error: ERRORCODE.NET_E_SUCCESS,
-  //       message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-  //     };
-  //   } catch (error) {
-  //     await queryRunner.rollbackTransaction();
-  //     this.logger.error({ error });
-  //     throw new HttpException(
-  //       {
-  //         error: ERRORCODE.NET_E_DB_FAILED,
-  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-  //       },
-  //       HttpStatus.FORBIDDEN,
-  //     );
-  //   } finally {
-  //     await queryRunner.release();
-  //   }
-  // }
+    return {
+      error: ERRORCODE.NET_E_SUCCESS,
+      message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
+  }
 
   // 친구 차단 하기
   async blockFriend(
@@ -683,167 +634,98 @@ export class FriendService {
     };
   }
 
-  // // 친구 조회
-  // async findFriend(requestType: number, friendId: string) {
-  //   // 해당 친구의 존재 여부 확인
-  //   const m = await this.memberRepository
-  //     .createQueryBuilder('m')
-  //     .select([
-  //       'm.memberCode as friendMemberCode',
-  //       'm.nickname as friendNickname',
-  //       'm.stateMessage as friendMessage',
-  //     ]);
+  // 친구 조회
+  async findFriend(requestType: number, friendId: string) {
+    // 해당 친구의 존재 여부 확인
+    const friend = await this.memberRepository.findByRequestTypeForFriend(
+      requestType,
+      friendId,
+    );
 
-  //   switch (requestType) {
-  //     case FRND_REQUEST_TYPE.MEMBER_CODE:
-  //       m.where('m.memberCode=:memberCode', { memberCode: friendId });
-  //       break;
+    // 존재하지 않는다.
+    if (!friend) {
+      throw new HttpException(
+        {
+          error: ERRORCODE.NET_E_NOT_EXIST_USER,
+          message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
 
-  //     case FRND_REQUEST_TYPE.NICKNAME:
-  //       m.where('m.nickname=:nickname', { nickname: friendId });
-  //       break;
-  //     default:
-  //       throw new HttpException(
-  //         {
-  //           error: ERRORCODE.NET_E_DB_FAILED,
-  //           message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-  //         },
-  //         HttpStatus.BAD_REQUEST,
-  //       );
-  //   }
+    const member = await this.memberRepository.findByMemberIdForMemberInfo(
+      friend.memberId,
+    );
 
-  //   const member = await m.getRawOne();
+    return {
+      member,
+      error: ERRORCODE.NET_E_SUCCESS,
+      message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
+  }
 
-  //   // 존재하지 않는다.
-  //   if (!member) {
-  //     throw new HttpException(
-  //       {
-  //         error: ERRORCODE.NET_E_NOT_EXIST_USER,
-  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
-  //       },
-  //       HttpStatus.FORBIDDEN,
-  //     );
-  //   }
+  // 친구 즐겨찾기
+  async bookmark(
+    memberId: string,
+    data: CommonFriendDto,
+    queryRunner: QueryRunner,
+  ) {
+    // 즐겨찾기 친구 확인
+    const exfriend = await this.memberRepository.findByMemberCode(
+      data.friendMemeberCode,
+    );
 
-  //   const avatarInfos = await this.commonService.getMemberAvatarInfo(
-  //     member.friendMemberCode,
-  //   );
-  //   member.avatarInfos = avatarInfos;
+    // 존재하지 않는다.
+    if (!exfriend) {
+      throw new HttpException(
+        {
+          error: ERRORCODE.NET_E_NOT_EXIST_USER,
+          message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
 
-  //   return {
-  //     member,
-  //     error: ERRORCODE.NET_E_SUCCESS,
-  //     message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-  //   };
-  // }
+    const memberFriend = await this.memberFriendRepository.toggleBookmark(
+      memberId,
+      exfriend.memberId,
+      queryRunner,
+    );
 
-  // // 친구 즐겨찾기
-  // async bookmark(memberId: string, data: CommonFriendDto) {
-  //   // 즐겨찾기 친구 확인
-  //   const exFrnd = await this.memberRepository.findOne({
-  //     where: {
-  //       memberCode: data.friendMemeberCode,
-  //     },
-  //   });
+    return {
+      friendMemberCode: exfriend.memberCode,
+      bookmark: memberFriend.bookmark,
+      bookmarkedAt: memberFriend.bookmarkedAt,
+      error: ERRORCODE.NET_E_SUCCESS,
+      message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+    };
+  }
 
-  //   // 존재하지 않는다.
-  //   if (!exFrnd) {
-  //     throw new HttpException(
-  //       {
-  //         error: ERRORCODE.NET_E_NOT_EXIST_USER,
-  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
-  //       },
-  //       HttpStatus.FORBIDDEN,
-  //     );
-  //   }
+  async findRoomId(friendMemberCode: string) {
+    try {
+      const roomId =
+        this.memberConnectInfoRepository.findByMemberCode(friendMemberCode);
 
-  //   // 친구 여부 확인
-  //   const memberFriend = await this.memberFriendRepository.findOne({
-  //     where: {
-  //       memberId,
-  //       friendMemberId: exFrnd.memberId,
-  //     },
-  //   });
-
-  //   // 존재하지 않는다.
-  //   if (!memberFriend) {
-  //     throw new HttpException(
-  //       {
-  //         error: ERRORCODE.NET_E_NOT_EXIST_USER,
-  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
-  //       },
-  //       HttpStatus.FORBIDDEN,
-  //     );
-  //   }
-
-  //   const newMemberFriend = new MemberFriend();
-  //   newMemberFriend.memberId = memberId;
-  //   newMemberFriend.friendMemberId = exFrnd.memberId;
-  //   newMemberFriend.bookmark = memberFriend.bookmark === 1 ? 0 : 1;
-  //   newMemberFriend.bookmarkedAt =
-  //     memberFriend.bookmarkedAt === null ? new Date() : null;
-
-  //   const queryRunner = this.dataSource.createQueryRunner();
-  //   await queryRunner.connect();
-  //   await queryRunner.startTransaction();
-
-  //   try {
-  //     await queryRunner.manager
-  //       .getRepository(MemberFriend)
-  //       .save(newMemberFriend);
-  //     await queryRunner.commitTransaction();
-
-  //     return {
-  //       friendMemberCode: exFrnd.memberCode,
-  //       bookmark: newMemberFriend.bookmark,
-  //       bookmarkedAt: newMemberFriend.bookmarkedAt,
-  //       error: ERRORCODE.NET_E_SUCCESS,
-  //       message: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-  //     };
-  //   } catch (err) {
-  //     await queryRunner.rollbackTransaction();
-  //     this.logger.error({ err });
-  //     throw new HttpException(
-  //       {
-  //         error: ERRORCODE.NET_E_DB_FAILED,
-  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-  //       },
-  //       HttpStatus.FORBIDDEN,
-  //     );
-  //   } finally {
-  //     await queryRunner.release();
-  //   }
-  // }
-
-  // async findRoomId(friendMemberCode: string) {
-  //   try {
-  //     const roomId = await this.dataSource
-  //       .getRepository(MemberConnectInfo)
-  //       .createQueryBuilder('m')
-  //       .select('m.roomId as roomId')
-  //       .where('m.memberCode = :memberCode', { memberCode: friendMemberCode })
-  //       .getRawOne();
-
-  //     if (!roomId)
-  //       return {
-  //         roomId: null,
-  //         error: ERRORCODE.NET_E_SUCCESS,
-  //         errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-  //       };
-  //     return {
-  //       roomId,
-  //       error: ERRORCODE.NET_E_SUCCESS,
-  //       errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
-  //     };
-  //   } catch (error) {
-  //     this.logger.error({ error });
-  //     throw new HttpException(
-  //       {
-  //         error: ERRORCODE.NET_E_DB_FAILED,
-  //         message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-  //       },
-  //       HttpStatus.FORBIDDEN,
-  //     );
-  //   }
-  // }
+      if (!roomId)
+        return {
+          roomId: null,
+          error: ERRORCODE.NET_E_SUCCESS,
+          errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+        };
+      return {
+        roomId,
+        error: ERRORCODE.NET_E_SUCCESS,
+        errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_SUCCESS),
+      };
+    } catch (error) {
+      this.logger.error({ error });
+      throw new HttpException(
+        {
+          error: ERRORCODE.NET_E_DB_FAILED,
+          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
+  }
 }
