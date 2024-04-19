@@ -1,5 +1,15 @@
+import { JwtService } from '@nestjs/jwt';
 import { MatchingRoomModule } from '../matching-room/matching-room.module';
-import { EntityModule, Member } from '@libs/entity';
+import {
+  EmailConfirm,
+  EntityModule,
+  Member,
+  MemberAccount,
+  MemberAvatarPartsItemInven,
+  MemberFurnitureItemInven,
+  MemberLoginLog,
+  MemberWalletInfo,
+} from '@libs/entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UnificationGateway } from './unification.gateway';
@@ -17,9 +27,15 @@ import { RedisModule } from '@liaoliaots/nestjs-redis';
 import { RedisConfigService } from '../services/redis-config.service';
 import { ConfigModule } from '@nestjs/config';
 import { HubSocketModule } from '../hub-socket/hub-socket.module';
-import { SchemaModule } from '@libs/mongodb';
+import {
+  RoomDataLogSchema,
+  SchemaModule,
+  WorldChattingLogSchema,
+} from '@libs/mongodb';
 import { SubscribeService } from '../nats/subscribe.service';
 import { CommonModule } from '../common/common.module';
+import { AuthService, CommonService } from '@libs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
@@ -30,7 +46,19 @@ import { CommonModule } from '../common/common.module';
       isGlobal: true,
       envFilePath: `.${process.env.NODE_ENV}.env`,
     }),
-    TypeOrmModule.forFeature([Member]),
+    MongooseModule.forFeature([
+      { name: 'worldChattingLog', schema: WorldChattingLogSchema },
+      { name: 'roomDataLog', schema: RoomDataLogSchema },
+    ]),
+    TypeOrmModule.forFeature([
+      Member,
+      MemberAccount,
+      MemberLoginLog,
+      MemberWalletInfo,
+      EmailConfirm,
+      MemberFurnitureItemInven,
+      MemberAvatarPartsItemInven,
+    ]),
     EntityModule,
     MorganModule,
     ChatModule,
@@ -55,6 +83,9 @@ import { CommonModule } from '../common/common.module';
     UnificationGateway,
     UnificationService,
     SubscribeService,
+    CommonService,
+    JwtService,
+    AuthService,
   ],
   exports: [UnificationGateway, UnificationService, SubscribeService],
 })

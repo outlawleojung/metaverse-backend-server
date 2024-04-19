@@ -1,5 +1,6 @@
 import { TokenCheckService } from './auth/tocket-check.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
+import { v4 as uuidv4 } from 'uuid';
 import { Member } from '@libs/entity';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -24,6 +25,7 @@ import { SubscribeService } from '../nats/subscribe.service';
 import { RoomType } from '../room/room-type';
 import { ClientService } from '../services/client.service';
 import { CustomSocket } from '../interfaces/custom-socket';
+import { AuthService, CommonService } from '@libs/common';
 
 @Injectable()
 export class UnificationService {
@@ -37,6 +39,7 @@ export class UnificationService {
     private readonly socketService: HubSocketService,
     private readonly subscribeService: SubscribeService,
     private readonly clientService: ClientService,
+    private readonly authService: AuthService,
     private messageHandler: NatsMessageHandler,
   ) {}
   private readonly logger = new Logger(UnificationService.name);
@@ -48,23 +51,13 @@ export class UnificationService {
 
   //소켓 연결
   async handleConnection(server: Server, client: CustomSocket) {
-    const authInfo = await this.tokenCheckService.getJwtAccessToken(client);
+    const memberInfo = await this.authService.checkAccessTokenForSocket(client);
 
-    const jwtAccessToken = authInfo.jwtAccessToken;
-
-    await this.tokenCheckService.checkAccessToken(
-      client,
-      authInfo.jwtAccessToken,
-    );
-
-    if (!client.data.memberId) {
+    if (!memberInfo.memberId) {
       client.emit(SOCKET_S_GLOBAL.S_DROP_PLAYER, 10002);
       client.disconnect();
       return;
     }
-
-    const memberInfo =
-      await this.tokenCheckService.checkLoginToken(jwtAccessToken);
 
     const memberId = memberInfo.memberId;
 
@@ -78,41 +71,39 @@ export class UnificationService {
       const socketData = JSON.parse(socketInfo);
 
       // 클라이언트에게 중복 로그인 알림
-      server.sockets
-        .to(socketData.memberId)
-        .emit(SOCKET_S_GLOBAL.S_DROP_PLAYER, 10000);
+      // server.sockets
+      //   .to(socketData.sessionId)
+      //   .emit(SOCKET_S_GLOBAL.S_DROP_PLAYER, 10000);
 
+      this.logger.debug('중복 로그인 검증용 socketData: ', socketData);
+      this.logger.debug('중복 로그인 이벤트 발행: ', socketData.sessionId);
       this.messageHandler.publishHandler(
-        `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${memberId}`,
-        socketData.memberId,
+        `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${socketData.sessionId}`,
+        socketData.sessionId,
       );
 
       // 서버에 저장된 소켓 정보 삭제
       await this.redisClient.del(RedisKey.getStrMemberSocket(memberId));
     }
-
-    //사용자 닉네임 조회
-    const member = await this.memberRepository.findOne({
-      where: {
-        memberId: memberId,
-      },
-    });
+    const sessionId = uuidv4();
 
     // 클라이언트 데이터 설정
     client.data.memberId = memberId;
-    client.data.jwtAccessToken = jwtAccessToken;
-    client.data.nickname = member.nickname;
-    client.data.clientId = member.memberCode;
-    client.data.stateMessage = member.stateMessage;
+    client.data.nickname = memberInfo.nickname;
+    client.data.clientId = memberInfo.memberCode;
+    client.data.stateMessage = memberInfo.stateMessage;
     client.data.socketId = client.id;
+    client.data.sessionId = sessionId;
+
+    this.logger.debug('Client Data : ', client.data);
 
     client.join(memberId);
-    client.join(jwtAccessToken);
+    client.join(sessionId);
 
-    await this.clientService.setSocket(member.memberCode, client);
+    await this.clientService.setSocket(memberInfo.memberCode, client);
 
     this.logger.debug(
-      `Unification 서버에 연결되었어요 ✅: ${memberId} - jwtAccessToken : ${jwtAccessToken}`,
+      `Unification 서버에 연결되었어요 ✅ memberId: ${memberId}`,
     );
 
     await this.redisClient.set(
@@ -128,7 +119,9 @@ export class UnificationService {
   }
 
   async handleDisconnect(client: CustomSocket) {
+    this.logger.debug('소켓 접속 해제 실행 ❌');
     const memberId = client.data.memberId;
+    const sessionId = client.data.sessionId;
 
     await this.checkLeaveRoom(client, memberId);
     await this.allLeaveRoom(client);
@@ -137,10 +130,10 @@ export class UnificationService {
 
     // 중복 로그인 알림 구독 해제
     this.messageHandler.removeHandler(
-      `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${memberId}`,
+      `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${sessionId}`,
     );
 
-    // 내 룸 구독 헤제
+    // 내 룸 구독 해제
     this.messageHandler.removeHandler(memberId);
   }
 
@@ -198,9 +191,9 @@ export class UnificationService {
     }
 
     // 사용자가 룸에 접속한 상태라면 기존 룸에서 퇴장 처리를 한다.
-    this.logger.debug('기존 룸 접속 해제');
+    this.logger.debug('기존 룸 접속 해제 시작');
     await this.checkLeaveRoom(client, memberId);
-
+    this.logger.debug('기존 룸 접속 해제 완료');
     // 입장 처리
     client.data.roomId = redisRoomId;
     client.join(redisRoomId);

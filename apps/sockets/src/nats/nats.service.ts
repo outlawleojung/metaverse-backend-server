@@ -24,10 +24,9 @@ export class NatsService extends EventEmitter implements OnModuleInit {
     subject: string,
     callback: (message: string, subject: string) => void,
   ): void {
+    this.logger.debug(`[ subscribe subject] : ${subject}`);
     const subscription = this.natsConnection.subscribe(subject);
     this.subscriptions.set(subject, subscription);
-
-    this.logger.debug(`[ subscribe subject] : ${subject}`);
 
     (async () => {
       for await (const msg of subscription) {

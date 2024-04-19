@@ -104,11 +104,24 @@ export class UnificationGateway
 
   async initRegisterSubscribe(client: CustomSocket) {
     // 중복 로그인 알림 구독
+    this.logger.debug(
+      '중복 로그인 알림 구독.✅ : sessionId - ',
+      client.data.sessionId,
+    );
     this.messageHandler.registerHandler(
-      `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${client.handshake.auth.jwtAccessToken}`,
-      (jwtAccessToken) => {
+      `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${client.data.sessionId}`,
+      async (sessionId) => {
         // 서버에서 소켓 연결 제거
-        this.server.sockets.sockets.get(jwtAccessToken)?.disconnect();
+        this.logger.debug('중복 로그인 감지');
+        console.log('sessionId: ', sessionId);
+
+        const sockets = await this.server.in(sessionId).fetchSockets();
+
+        sockets.forEach((socket) => {
+          socket.emit(SOCKET_S_GLOBAL.S_DROP_PLAYER, 10000);
+          socket.disconnect(true);
+        });
+        console.log('sockets: ', sockets);
       },
     );
 

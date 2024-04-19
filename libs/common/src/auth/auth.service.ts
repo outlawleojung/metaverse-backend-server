@@ -22,6 +22,7 @@ import { ERROR_MESSAGE, ERRORCODE, PROVIDER_TYPE } from '@libs/constants';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { CommonService } from '@libs/common';
+import { Socket } from 'socket.io';
 
 @Injectable()
 export class AuthService {
@@ -363,5 +364,23 @@ export class AuthService {
     loginLog.providerType = PROVIDER_TYPE.ARZMETA;
 
     await this.memberLoginLogRepository.save(loginLog);
+  }
+
+  async checkAccessTokenForSocket(client: Socket): Promise<Member> {
+    let accessToken;
+    if (!client.handshake.auth.accessToken) {
+      accessToken = client.handshake.headers.authorization;
+    } else {
+      accessToken = client.handshake.auth.accessToken;
+    }
+
+    if (!accessToken) {
+      throw new UnauthorizedException('토큰이 없습니다.');
+    }
+
+    console.log('accessToken: ', accessToken);
+    const result = await this.verifyToken(accessToken);
+
+    return await this.commonService.getMemberByEmail(result.email);
   }
 }
