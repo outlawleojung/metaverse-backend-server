@@ -20,12 +20,18 @@ import { MemberInfoResponseDto } from './dto/res/get.member.dto';
 import { Roles } from '../common/decorators/roles.decorator';
 import { ROLE_TYPE } from '@libs/constants';
 import { GetConstantsResponseDto } from './dto/res/get.constants.response.dto';
+import { PaginateMemberDto } from './dto/req/paginate-member.dto';
 
 @ApiTags('MEMBER - 회원')
 @UseInterceptors(MorganInterceptor('combined'))
 @Controller('api/member')
 export class MemberController {
   constructor(private readonly memberService: MemberService) {}
+
+  @Get('test')
+  async getAdmins(@Query() dto: PaginateMemberDto) {
+    return await this.memberService.paginateMembers(dto);
+  }
 
   // 회원 관련 상수 조회
   @ApiOperation({ summary: '회원 관련 상수 조회' })

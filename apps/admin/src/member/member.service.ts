@@ -25,6 +25,7 @@ import {
 } from '@libs/constants';
 import { EndedUnixTimestamp, StartedUnixTimestamp } from '@libs/common';
 import dayjs from 'dayjs';
+import { PaginateMemberDto } from './dto/req/paginate-member.dto';
 
 @Injectable()
 export class MemberService {
@@ -36,6 +37,11 @@ export class MemberService {
     private roleTypeRepository: Repository<ProviderType>,
     @Inject(DataSource) private dataSource: DataSource,
   ) {}
+
+  // 오름차순만 일단 적용
+  async paginateMembers(dto: PaginateMemberDto) {
+    const members = await this.memberRepository.find({});
+  }
 
   async getConstants() {
     const providerType = await this.dataSource

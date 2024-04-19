@@ -30,6 +30,7 @@ export class AdminService {
     console.log(adminType);
     return { adminType };
   }
+
   // 관리자 목록 조회
   async getAdminList(myId: number, data: GetTableDto) {
     const limit = 10;
