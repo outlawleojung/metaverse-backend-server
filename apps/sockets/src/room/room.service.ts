@@ -15,6 +15,7 @@ import { RedisKey } from '@libs/constants';
 import { RedisLockService } from '../services/redis-lock.service';
 import { MyRoom } from './rooms/my-room';
 import { CreateRoomRequestDto } from './dto/create-room-request.dto';
+import { MemberRepository } from '@libs/entity';
 
 @Injectable()
 export class RoomService {
@@ -24,6 +25,7 @@ export class RoomService {
     @InjectRedis() private readonly redisClient: Redis,
     @Inject(forwardRef(() => RoomFactory))
     private readonly roomFactory: RoomFactory,
+    private memberRepository: MemberRepository,
     private readonly lockService: RedisLockService,
   ) {}
 
@@ -151,8 +153,9 @@ export class RoomService {
     return _rooms;
   }
 
-  async createRoom(req: CreateRoomRequestDto) {
-    const checkRoom = await this.getCheckRoom(req.roomType, req.ownerId);
+  async createRoom(memberId: string, req: CreateRoomRequestDto) {
+    const member = await this.memberRepository.findByMemberId(memberId);
+    const checkRoom = await this.getCheckRoom(req.roomType, member.memberCode);
 
     if (checkRoom) {
       return checkRoom;
@@ -183,7 +186,7 @@ export class RoomService {
       type: room.type,
       roomId: roomId,
       sceneName: room.sceneName,
-      ownerId: req.ownerId,
+      ownerId: member.memberCode,
     };
   }
 

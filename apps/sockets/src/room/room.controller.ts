@@ -4,6 +4,7 @@ import {
   Get,
   Post,
   Query,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { RoomService } from './room.service';
@@ -11,6 +12,7 @@ import { GetRoomRequestDto } from './dto/get-room-request.dto';
 import { CreateRoomRequestDto } from './dto/create-room-request.dto';
 import { MorganInterceptor } from 'nest-morgan';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AccessTokenGuard, MemberDeco, MemberDto } from '@libs/common';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('ROOM - 룸')
@@ -25,8 +27,12 @@ export class RoomController {
   }
 
   @Post()
+  @UseGuards(AccessTokenGuard)
   @ApiOperation({ summary: '룸 생성' })
-  async createRoom(@Body() req: CreateRoomRequestDto) {
-    return await this.roomService.createRoom(req);
+  async createRoom(
+    @MemberDeco() member: MemberDto,
+    @Body() data: CreateRoomRequestDto,
+  ) {
+    return await this.roomService.createRoom(member.memberId, data);
   }
 }

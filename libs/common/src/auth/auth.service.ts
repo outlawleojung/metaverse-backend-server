@@ -18,14 +18,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import bcryptjs from 'bcryptjs';
-import {
-  ERROR_MESSAGE,
-  ERRORCODE,
-  PLAYER_SOCKET_C_MESSAGE,
-  PROVIDER_TYPE,
-  SOCKET_S_GLOBAL,
-  SOCKET_SERVER_ERROR_CODE_GLOBAL,
-} from '@libs/constants';
+import { ERROR_MESSAGE, ERRORCODE, PROVIDER_TYPE } from '@libs/constants';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { CommonService } from '@libs/common';
