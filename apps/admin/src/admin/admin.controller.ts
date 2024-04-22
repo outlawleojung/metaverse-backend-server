@@ -22,12 +22,18 @@ import { ChangeRoleTypeResponseDto } from './dto/response/changeroletype.respons
 import { GetRoleTypeListResponseDto } from './dto/response/getroletypelist.response.dto';
 import { LoggedInGuard } from '../auth/logged-in.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { PaginateAdminDto } from './dto/request/paginate-admin.dto';
 
 @ApiTags('ADMIN - 관리자계정')
 @UseInterceptors(MorganInterceptor('combined'))
 @Controller('api/admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
+
+  @Get('test')
+  async getAdmins(@Query() query: PaginateAdminDto) {
+    return await this.adminService.paginateAdmins(query);
+  }
 
   // 관리자 타입 상수
   @ApiOperation({ summary: '관리자 타입 상수 조회' })

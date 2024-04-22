@@ -6,13 +6,20 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import {
+  DataSource,
+  FindOptionsWhere,
+  LessThan,
+  MoreThan,
+  Repository,
+} from 'typeorm';
 import { AdminType, RoleType, User } from '@libs/entity';
 import { GetTableDto } from '../common/dto/get.table.dto';
 import { ROLE_TYPE } from '@libs/constants';
 import { EndedUnixTimestamp, StartedUnixTimestamp } from '@libs/common';
 import { ForbiddenException } from '@nestjs/common/exceptions';
 import { ChangeRoleTypeDto } from './dto/request/changeroletype.dto';
+import { PaginateAdminDto } from './dto/request/paginate-admin.dto';
 
 @Injectable()
 export class AdminService {
@@ -23,6 +30,70 @@ export class AdminService {
     private roleTypeRepository: Repository<RoleType>,
     @Inject(DataSource) private dataSource: DataSource,
   ) {}
+
+  async paginateAdmins(dto: PaginateAdminDto) {
+    if (dto.page) {
+      this.pagePaginateAdmins(dto);
+    } else {
+      this.cursorPaginateAdmins(dto);
+    }
+  }
+
+  async pagePaginateAdmins(dto: PaginateAdminDto) {}
+
+  async cursorPaginateAdmins(dto: PaginateAdminDto) {
+    const where: FindOptionsWhere<User> = {};
+
+    if (dto.where__id_less_than) {
+      where.id = LessThan(dto.where__id_less_than);
+    } else if (dto.where__id_more_than) {
+      where.id = MoreThan(dto.where__id_more_than);
+    }
+
+    const admins = await this.userRepository.find({
+      where,
+      order: {
+        createdAt: dto.order__createdAt,
+      },
+      take: dto.take,
+    });
+
+    const lastItem =
+      admins.length > 0 && admins.length === dto.take
+        ? admins[admins.length - 1]
+        : null;
+
+    const nextUrl =
+      lastItem && new URL(`${process.env.ADMIN_URL}/api/admin/test`);
+
+    if (nextUrl) {
+      for (const key of Object.keys(dto)) {
+        if (dto[key]) {
+          if (key !== 'where__id_more_than' && key !== 'where__id_less_than') {
+            nextUrl.searchParams.append(key, dto[key].toString());
+          }
+        }
+      }
+
+      let key = null;
+
+      if (dto.order__createdAt === 'ASC') {
+        key = 'where__id_more_than';
+      } else {
+        key = 'where__id_less_than';
+      }
+
+      nextUrl.searchParams.append(key, lastItem.id.toString());
+    }
+    return {
+      data: admins,
+      cursor: {
+        after: lastItem?.id ?? null,
+      },
+      count: admins.length,
+      nextUrl,
+    };
+  }
 
   // 관리자 상수 조회
   async getConstants() {

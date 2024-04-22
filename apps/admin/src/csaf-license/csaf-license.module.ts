@@ -16,6 +16,7 @@ import {
   MemberWalletInfo,
   MemberFurnitureItemInven,
   MemberAvatarPartsItemInven,
+  MemberAccount,
 } from '@libs/entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -36,6 +37,7 @@ import { RoomDataLogSchema, WorldChattingLogSchema } from '@libs/mongodb';
     TypeOrmModule.forFeature([
       User,
       Member,
+      MemberAccount,
       CSAFEventInfo,
       LicenseInfo,
       LicenseGroupInfo,

@@ -4,7 +4,7 @@ export class PaginateMemberDto {
   // 이전 마지막 데이터의 ID
   @IsNumber()
   @IsOptional()
-  where__id_more_than?: number;
+  where__id_more_than?: number = 0;
 
   // 정렬
   @IsIn(['ASC'])

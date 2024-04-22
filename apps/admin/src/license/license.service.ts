@@ -1,6 +1,6 @@
 import { ForbiddenException } from '@nestjs/common/exceptions';
 import {
-  FriendRequest,
+  MemberFriendRequest,
   LicenseType,
   OfficeLicenseDomainInfo,
   LicenseGroupInfo,
@@ -762,7 +762,7 @@ export class LicenseService {
 
   async test() {
     const myRequest = await this.dataSource
-      .getRepository(FriendRequest)
+      .getRepository(MemberFriendRequest)
       .createQueryBuilder('f')
       .select(['f.createdAt as createdAt'])
       .where('f.requestMemberId = :memberId', {
@@ -781,7 +781,7 @@ export class LicenseService {
     try {
       if (myRequest.length > 2) {
         const deletedAt = myRequest[1].createdAt;
-        await queryRunner.manager.getRepository(FriendRequest).delete({
+        await queryRunner.manager.getRepository(MemberFriendRequest).delete({
           requestMemberId: '1593b800-9b1e-11ed-9bd3-93e73d4c0b2d',
           createdAt: deletedAt,
         });
@@ -789,7 +789,7 @@ export class LicenseService {
         await queryRunner.commitTransaction();
 
         const result = await this.dataSource
-          .getRepository(FriendRequest)
+          .getRepository(MemberFriendRequest)
           .createQueryBuilder('f')
           .where('f.requestMemberId = :memberId', {
             memberId: '1593b800-9b1e-11ed-9bd3-93e73d4c0b2d',
