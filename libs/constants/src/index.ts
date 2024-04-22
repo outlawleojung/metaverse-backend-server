@@ -731,6 +731,7 @@ export const RedisKey = {
 
 export const SOCKET_SERVER_ERROR_CODE_GLOBAL = Object.freeze({
   C_RECONNECT_ERROR: 100000, //클라이언트 재연결 시도 후에도 연결이 안될때
+  TOKEN_ERROR: 100001, //클라이언트 재연결 시도 후에도 연결이 안될때
 
   DIRECT_MESSAGE_USER_NOT_FOUND: 2100, // 귓속말(월드 1:1 ) 대상이 존재하지 않을 경우
   DIRECT_MESSAGE_USER_NOT_CONNECTED: 2101, // 귓속말(월드 1:1 ) 대상이 현재 오프라인 상태일 경우
