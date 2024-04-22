@@ -1,4 +1,3 @@
-import { TokenCheckService } from './auth/tocket-check.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { v4 as uuidv4 } from 'uuid';
 import { Member } from '@libs/entity';
@@ -35,7 +34,6 @@ export class UnificationService {
     private memberRepository: Repository<Member>,
     private readonly gameObjectService: GameObjectService,
     private readonly redisFunctionService: RedisFunctionService,
-    private readonly tokenCheckService: TokenCheckService,
     private readonly socketService: HubSocketService,
     private readonly subscribeService: SubscribeService,
     private readonly clientService: ClientService,
