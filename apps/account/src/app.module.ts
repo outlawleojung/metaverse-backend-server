@@ -24,7 +24,6 @@ import { MemberModule } from './member/member.module';
 import { ConfigModule } from '@nestjs/config';
 import { MailModule } from './mail/mail.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TasksService } from './tasks/tasks.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import {
   RoomDataLogSchema,
@@ -70,7 +69,6 @@ import { MongooseModule } from '@nestjs/mongoose';
     },
     AppService,
     CommonService,
-    TasksService,
   ],
 })
 export class AppModule {}
