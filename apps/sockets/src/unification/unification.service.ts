@@ -61,7 +61,14 @@ export class UnificationService {
 
     const memberId = memberInfo.memberId;
 
-    // 소켓 정보 조회
+    /**
+     * 회원 아이디로 소켓 정보 조회
+     * 회원 아이디로 저장 된 소켓 정보가 있다는 것은
+     * 이미 해당 회원 아이디로 로그인 된 정보가 있다는 것
+     * 중복으로 로그인을 시키면 안되기 때문에 기존 로그인은
+     * Disconnect 시킨다.
+     */
+    //
     const socketInfo = await this.redisClient.get(
       RedisKey.getStrMemberSocket(memberId),
     );
@@ -70,12 +77,7 @@ export class UnificationService {
     if (socketInfo) {
       const socketData = JSON.parse(socketInfo);
 
-      // 클라이언트에게 중복 로그인 알림
-      // server.sockets
-      //   .to(socketData.sessionId)
-      //   .emit(SOCKET_S_GLOBAL.S_DROP_PLAYER, 10000);
-
-      this.logger.debug('중복 로그인 검증용 socketData: ', socketData);
+      // 클라이언트에게 중복 로그인 알림과 disconnect
       this.logger.debug('중복 로그인 이벤트 발행: ', socketData.sessionId);
       this.messageHandler.publishHandler(
         `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${socketData.sessionId}`,
@@ -85,6 +87,8 @@ export class UnificationService {
       // 서버에 저장된 소켓 정보 삭제
       await this.redisClient.del(RedisKey.getStrMemberSocket(memberId));
     }
+
+    // 새로운 sessionId 발급
     const sessionId = uuidv4();
 
     // 클라이언트 데이터 설정
@@ -148,15 +152,8 @@ export class UnificationService {
   async joinRoom(client: CustomSocket, packet: C_ENTER) {
     this.logger.debug('💚💚 Join Room 💚💚');
     console.log(packet);
-    const authInfo = await this.tokenCheckService.getJwtAccessToken(client);
 
-    const jwtAccessToken = authInfo.jwtAccessToken;
-
-    // 토큰을 검증하여 멤버 정보를 확인
-    const memberInfo =
-      await this.tokenCheckService.checkLoginToken(jwtAccessToken);
-
-    const memberId = memberInfo.memberId;
+    const memberId = client.data.memberId;
     const redisRoomId = RedisKey.getStrRoomId(packet.roomId);
     this.logger.debug('Join Room redisRoomId : ', redisRoomId);
 
