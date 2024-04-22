@@ -1,6 +1,5 @@
-import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
-import { TokenCheckService } from '../unification/auth/tocket-check.service';
-import { Server, Socket } from 'socket.io';
+import { Injectable, Logger } from '@nestjs/common';
+import { Server } from 'socket.io';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   BannerInfo,
@@ -30,7 +29,6 @@ export class ScreenBannerService {
     private screenReservationRepository: Repository<ScreenReservation>,
     @InjectRepository(BannerReservation)
     private bannerReservationRepository: Repository<BannerReservation>,
-    private readonly tokenCheckService: TokenCheckService,
     private readonly messageHandler: NatsMessageHandler,
   ) {}
 

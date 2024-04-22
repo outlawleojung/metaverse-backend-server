@@ -4,14 +4,13 @@ import { RedisFunctionService } from '@libs/redis';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Redis } from 'ioredis';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import {
   OFFICE_SOCKET_C_MESSAGE,
   OFFICE_SOCKET_S_MESSAGE,
   RedisKey,
   SOCKET_SERVER_ERROR_CODE_GLOBAL,
 } from '@libs/constants';
-import { TokenCheckService } from '../unification/auth/tocket-check.service';
 import { Repository } from 'typeorm';
 import { promisify } from 'util';
 import { RequestPayload } from '../packets/packet-interface';
@@ -24,7 +23,6 @@ export class OfficeService {
     @InjectRedis() private readonly redisClient: Redis,
     @InjectRepository(MemberOfficeReservationInfo)
     private memberOfficeReservationInfoRepository: Repository<MemberOfficeReservationInfo>,
-    private readonly tokenCheckService: TokenCheckService,
     private readonly redisFunctionService: RedisFunctionService,
   ) {}
 
@@ -48,10 +46,6 @@ export class OfficeService {
 
   // 회의실 입장 예약하기
   async officeQueueRegister(client: CustomSocket, roomCode: string) {
-    const jwtAccessToken = client.data.jwtAccessToken;
-    const memberInfo =
-      await this.tokenCheckService.checkLoginToken(jwtAccessToken);
-
     const smembersAsync = promisify(this.redisClient.smembers).bind(
       this.redisClient,
     );
@@ -84,7 +78,7 @@ export class OfficeService {
     if (
       (
         await smembersAsync(RedisKey.getStrOfficeReservRoomCode(roomCode))
-      ).includes(memberInfo.memberId)
+      ).includes(client.data.memberId)
     ) {
       this.logger.debug('이미 예약 대기중인 회의실 입니다.');
       return client.emit(
@@ -122,7 +116,7 @@ export class OfficeService {
         // 예약 목록에 회원 추가
         await saddAsync(
           RedisKey.getStrOfficeReservRoomCode(roomCode),
-          memberInfo.memberId,
+          client.data.memberId,
         );
 
         // 회의실 대기방 접속 (채팅방이나 나머지는 roomId를 기준으로 접속되어서 roomCode로 별도 입장)

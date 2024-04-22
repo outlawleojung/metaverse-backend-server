@@ -1,11 +1,9 @@
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Injectable, Logger } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 
-import { TokenCheckService } from '../unification/auth/tocket-check.service';
-import { RedisFunctionService } from '@libs/redis';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -18,10 +16,9 @@ import { CreateFriendChattingRoom } from '@libs/mongodb';
 import { ChattingMemberInfo } from '@libs/mongodb';
 import { CommonService } from '@libs/common';
 import { Repository } from 'typeorm';
-import { Member, MemberOfficeVisitLog } from '@libs/entity';
+import { Member } from '@libs/entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import moment from 'moment-timezone';
-import { NatsService } from '../nats/nats.service';
 import { NatsMessageHandler } from '../nats/nats-message.handler';
 import {
   CHAT_SOCKET_C_MESSAGE,
@@ -39,6 +36,7 @@ import {
   S_SEND_MESSAGE,
 } from '../packets/packet';
 import { CustomSocket } from '../interfaces/custom-socket';
+import { RedisFunctionService } from '@libs/redis';
 
 @Injectable()
 export class ChatService {
@@ -58,13 +56,9 @@ export class ChatService {
     @InjectModel('roomDataLog')
     private readonly roomDataLog: Model<RoomDataLog>,
     @InjectRepository(Member) private memberRepository: Repository<Member>,
-    @InjectRepository(MemberOfficeVisitLog)
-    private memberOfficeVisitLogRepository: Repository<MemberOfficeVisitLog>,
     private readonly messageHandler: NatsMessageHandler,
-    private readonly natsService: NatsService,
-    private readonly tokenCheckService: TokenCheckService,
-    private readonly redisFunctionService: RedisFunctionService,
     private readonly commonService: CommonService,
+    private readonly redisFunctionService: RedisFunctionService,
   ) {}
 
   private server: Server;

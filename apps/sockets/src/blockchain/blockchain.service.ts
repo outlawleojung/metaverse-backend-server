@@ -1,8 +1,7 @@
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Injectable, Logger } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { Server, Socket } from 'socket.io';
-import { TokenCheckService } from '../unification/auth/tocket-check.service';
+import { Server } from 'socket.io';
 import { RedisKey } from '@libs/constants';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MemberAvatarInfo, MemberAvatarPartsItemInven } from '@libs/entity';
@@ -17,7 +16,6 @@ export class BlockchainService {
     private memberAvatarPartsItemInvenRepository: Repository<MemberAvatarPartsItemInven>,
     @InjectRepository(MemberAvatarInfo)
     private mberAvatarInfoRepository: Repository<MemberAvatarInfo>,
-    private readonly tokenCheckService: TokenCheckService,
   ) {}
 
   private server: Server;
