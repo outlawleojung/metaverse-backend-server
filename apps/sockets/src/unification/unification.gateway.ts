@@ -96,10 +96,19 @@ export class UnificationGateway
   async handleConnection(client: CustomSocket) {
     this.logger.debug('Unification 소켓 연결중.✅');
 
-    await this.unificationService.handleConnection(this.server, client);
-    await this.socketService.handleConnection(client);
+    try {
+      await this.unificationService.handleConnection(this.server, client);
+      await this.socketService.handleConnection(client);
 
-    await this.initRegisterSubscribe(client);
+      await this.initRegisterSubscribe(client);
+    } catch (error) {
+      this.logger.error(`소켓 연결 처리 중 오류 발생: ${error.message}`);
+      client.emit(
+        SOCKET_S_GLOBAL.ERROR,
+        SOCKET_SERVER_ERROR_CODE_GLOBAL.TOKEN_ERROR,
+      );
+      client.disconnect();
+    }
   }
 
   async initRegisterSubscribe(client: CustomSocket) {

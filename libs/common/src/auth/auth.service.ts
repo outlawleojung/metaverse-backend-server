@@ -375,26 +375,26 @@ export class AuthService {
 
   async checkAccessTokenForSocket(client: Socket): Promise<Member> {
     let accessToken;
-    if (!client.handshake.auth.accessToken) {
-      accessToken = client.handshake.headers.authorization;
-    } else {
-      accessToken = client.handshake.auth.accessToken;
-    }
-
-    if (!accessToken) {
-      throw new UnauthorizedException('토큰이 없습니다.');
-    }
-
-    console.log('accessToken: ', accessToken);
     try {
+      if (!client.handshake.auth.accessToken) {
+        accessToken = client.handshake.headers.authorization;
+      } else {
+        accessToken = client.handshake.auth.accessToken;
+      }
+
+      if (!accessToken) {
+        throw new UnauthorizedException('토큰이 없습니다.');
+      }
+
+      console.log('accessToken: ', accessToken);
+
       const result = await this.verifyToken(accessToken);
 
       return await this.commonService.getMemberByEmail(result.email);
     } catch (error) {
-      client.emit(
-        SOCKET_S_GLOBAL.ERROR,
-        SOCKET_SERVER_ERROR_CODE_GLOBAL.TOKEN_ERROR,
-      );
+      console.log('토큰 오류 :', error.toString());
+
+      throw error;
     }
   }
 }

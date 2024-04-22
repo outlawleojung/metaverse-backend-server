@@ -49,75 +49,81 @@ export class UnificationService {
 
   //소켓 연결
   async handleConnection(server: Server, client: CustomSocket) {
-    const memberInfo = await this.authService.checkAccessTokenForSocket(client);
+    try {
+      const memberInfo =
+        await this.authService.checkAccessTokenForSocket(client);
 
-    if (!memberInfo.memberId) {
-      client.emit(SOCKET_S_GLOBAL.S_DROP_PLAYER, 10002);
-      client.disconnect();
-      return;
-    }
+      if (!memberInfo || !memberInfo.memberId) {
+        client.emit(SOCKET_S_GLOBAL.S_DROP_PLAYER, 10002);
+        client.disconnect();
+        return;
+      }
 
-    const memberId = memberInfo.memberId;
+      const memberId = memberInfo.memberId;
 
-    /**
-     * 회원 아이디로 소켓 정보 조회
-     * 회원 아이디로 저장 된 소켓 정보가 있다는 것은
-     * 이미 해당 회원 아이디로 로그인 된 정보가 있다는 것
-     * 중복으로 로그인을 시키면 안되기 때문에 기존 로그인은
-     * Disconnect 시킨다.
-     */
-    //
-    const socketInfo = await this.redisClient.get(
-      RedisKey.getStrMemberSocket(memberId),
-    );
-
-    // 중복 로그인 된 클라이언트가 있는 경우
-    if (socketInfo) {
-      const socketData = JSON.parse(socketInfo);
-
-      // 클라이언트에게 중복 로그인 알림과 disconnect
-      this.logger.debug('중복 로그인 이벤트 발행: ', socketData.sessionId);
-      this.messageHandler.publishHandler(
-        `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${socketData.sessionId}`,
-        socketData.sessionId,
+      /**
+       * 회원 아이디로 소켓 정보 조회
+       * 회원 아이디로 저장 된 소켓 정보가 있다는 것은
+       * 이미 해당 회원 아이디로 로그인 된 정보가 있다는 것
+       * 중복으로 로그인을 시키면 안되기 때문에 기존 로그인은
+       * Disconnect 시킨다.
+       */
+      //
+      const socketInfo = await this.redisClient.get(
+        RedisKey.getStrMemberSocket(memberId),
       );
 
-      // 서버에 저장된 소켓 정보 삭제
-      await this.redisClient.del(RedisKey.getStrMemberSocket(memberId));
+      // 중복 로그인 된 클라이언트가 있는 경우
+      if (socketInfo) {
+        const socketData = JSON.parse(socketInfo);
+
+        // 클라이언트에게 중복 로그인 알림과 disconnect
+        this.logger.debug('중복 로그인 이벤트 발행: ', socketData.sessionId);
+        this.messageHandler.publishHandler(
+          `${NATS_EVENTS.DUPLICATE_LOGIN_USER}:${socketData.sessionId}`,
+          socketData.sessionId,
+        );
+
+        // 서버에 저장된 소켓 정보 삭제
+        await this.redisClient.del(RedisKey.getStrMemberSocket(memberId));
+      }
+
+      // 새로운 sessionId 발급
+      const sessionId = uuidv4();
+
+      // 클라이언트 데이터 설정
+      client.data.memberId = memberId;
+      client.data.nickname = memberInfo.nickname;
+      client.data.clientId = memberInfo.memberCode;
+      client.data.stateMessage = memberInfo.stateMessage;
+      client.data.socketId = client.id;
+      client.data.sessionId = sessionId;
+
+      this.logger.debug('Client Data : ', client.data);
+
+      client.join(memberId);
+      client.join(sessionId);
+
+      await this.clientService.setSocket(memberInfo.memberCode, client);
+
+      this.logger.debug(
+        `Unification 서버에 연결되었어요 ✅ memberId: ${memberId}`,
+      );
+
+      await this.redisClient.set(
+        RedisKey.getStrMemberSocket(memberId),
+        JSON.stringify(client.data),
+      );
+
+      //소켓 연결시 클라이언트에게 사용자 정보 전송
+      client.emit(
+        SOCKET_S_GLOBAL.S_PLAYER_CONNECTED,
+        JSON.stringify(client.data),
+      );
+    } catch (error) {
+      console.log('연결 처리 중 오류 발생:', error.toString());
+      throw new Error('Unification Service Failure');
     }
-
-    // 새로운 sessionId 발급
-    const sessionId = uuidv4();
-
-    // 클라이언트 데이터 설정
-    client.data.memberId = memberId;
-    client.data.nickname = memberInfo.nickname;
-    client.data.clientId = memberInfo.memberCode;
-    client.data.stateMessage = memberInfo.stateMessage;
-    client.data.socketId = client.id;
-    client.data.sessionId = sessionId;
-
-    this.logger.debug('Client Data : ', client.data);
-
-    client.join(memberId);
-    client.join(sessionId);
-
-    await this.clientService.setSocket(memberInfo.memberCode, client);
-
-    this.logger.debug(
-      `Unification 서버에 연결되었어요 ✅ memberId: ${memberId}`,
-    );
-
-    await this.redisClient.set(
-      RedisKey.getStrMemberSocket(memberId),
-      JSON.stringify(client.data),
-    );
-
-    //소켓 연결시 클라이언트에게 사용자 정보 전송
-    client.emit(
-      SOCKET_S_GLOBAL.S_PLAYER_CONNECTED,
-      JSON.stringify(client.data),
-    );
   }
 
   async handleDisconnect(client: CustomSocket) {
