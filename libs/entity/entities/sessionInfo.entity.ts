@@ -1,9 +1,17 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Member } from './member.entity';
 
 @Entity('session_info')
 export class SessionInfo {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @Column('varchar', { name: 'sessionId', nullable: true, length: 100 })
@@ -19,6 +27,6 @@ export class SessionInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 }

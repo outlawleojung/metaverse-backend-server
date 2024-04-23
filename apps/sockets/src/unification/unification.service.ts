@@ -53,13 +53,13 @@ export class UnificationService {
       const memberInfo =
         await this.authService.checkAccessTokenForSocket(client);
 
-      if (!memberInfo || !memberInfo.memberId) {
+      if (!memberInfo || !memberInfo.id) {
         client.emit(SOCKET_S_GLOBAL.S_DROP_PLAYER, 10002);
         client.disconnect();
         return;
       }
 
-      const memberId = memberInfo.memberId;
+      const memberId = memberInfo.id;
 
       /**
        * 회원 아이디로 소켓 정보 조회
@@ -482,7 +482,7 @@ export class UnificationService {
   async nicknameChange(client: CustomSocket) {
     const nicknameFind = await this.memberRepository.findOne({
       where: {
-        memberId: client.data.memberId,
+        id: client.data.memberId,
       },
     });
 

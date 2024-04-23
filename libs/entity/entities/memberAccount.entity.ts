@@ -40,7 +40,7 @@ export class MemberAccount {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
   @ManyToOne(

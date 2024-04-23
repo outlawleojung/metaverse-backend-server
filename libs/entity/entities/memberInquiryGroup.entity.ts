@@ -24,7 +24,7 @@ export class MemberInquiryGroup {
   @Column('int', { name: 'inquiryType' })
   inquiryType: number;
 
-  @Column('varchar', { name: 'memberId', length: 100 })
+  @Column('uuid')
   memberId: string;
 
   @Column('varchar', { name: 'subject', length: 64 })
@@ -42,10 +42,14 @@ export class MemberInquiryGroup {
   @DeleteDateColumn()
   deletedAt: Date | null;
 
-  @ManyToOne(() => InquiryType, (inquirytype) => inquirytype.MemberInquiryGroups, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => InquiryType,
+    (inquirytype) => inquirytype.MemberInquiryGroups,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'inquiryType', referencedColumnName: 'type' }])
   InquiryType: InquiryType;
 
@@ -53,7 +57,7 @@ export class MemberInquiryGroup {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
   @OneToMany(() => MemberInquiry, (inquiry) => inquiry.MemberInquiryGroup)

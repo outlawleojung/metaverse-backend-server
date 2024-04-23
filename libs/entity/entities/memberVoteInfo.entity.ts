@@ -1,4 +1,12 @@
-import { CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import {
+  CreateDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Member } from './member.entity';
 import { VoteInfoExample } from './voteInfoExample.entity';
 
@@ -6,7 +14,7 @@ import { VoteInfoExample } from './voteInfoExample.entity';
 @Index('voteId_num', ['voteId', 'num'], {})
 @Entity('member_vote_info')
 export class MemberVoteInfo {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @PrimaryColumn('int', { name: 'voteId' })
@@ -25,7 +33,7 @@ export class MemberVoteInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
   @ManyToOne(() => VoteInfoExample, (voteinfo) => voteinfo.MemberVoteInfos, {

@@ -154,7 +154,7 @@ export class ChatService {
 
     // 귓속말 대상이 현재 오프라인일 경우
     const targetSocket = await this.redisClient.get(
-      RedisKey.getStrMemberSocket(recvMember.memberId),
+      RedisKey.getStrMemberSocket(recvMember.id),
     );
 
     if (!targetSocket) {
@@ -166,12 +166,12 @@ export class ChatService {
 
     const sendMember = await this.memberRepository.findOne({
       where: {
-        memberId: client.data.memberId,
+        id: client.data.memberId,
       },
     });
 
     // 본인에게 귓속말 보냈을 경우
-    if (sendMember.memberId == recvMember.memberId) {
+    if (sendMember.id == recvMember.id) {
       return client.emit(
         CHAT_SOCKET_S_MESSAGE.S_SYSTEM_MESSAGE,
         SOCKET_SERVER_ERROR_CODE_GLOBAL.DIRECT_MESSAGE_SEND_ME,
@@ -181,9 +181,9 @@ export class ChatService {
     const kstCreatedAt = moment.tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');
     // mongodb 채팅 로그 저장
     const oneononeChattingLogSave = await new this.oneononeChattingLog({
-      sendMemberId: sendMember.memberId,
+      sendMemberId: sendMember.id,
       sendNickname: sendMember.nickname,
-      recvMemberId: recvMember.memberId,
+      recvMemberId: recvMember.id,
       recvNickname: recvMember.nickname,
       chatMessage: packet.message,
       kstCreatedAt: kstCreatedAt,
@@ -200,13 +200,10 @@ export class ChatService {
     client.emit(eventName, JSON.stringify(packetData));
 
     const data = {
-      recvMemberId: recvMember.memberId,
+      recvMemberId: recvMember.id,
       packet: response,
     };
-    this.messageHandler.publishHandler(
-      recvMember.memberId,
-      JSON.stringify(data),
-    );
+    this.messageHandler.publishHandler(recvMember.id, JSON.stringify(data));
   }
 
   // 귓속말 대상자에게 전송
@@ -451,7 +448,7 @@ export class ChatService {
 
     const member = await this.memberRepository.findOne({
       where: {
-        memberId: memberId,
+        id: memberId,
       },
     });
 

@@ -16,7 +16,7 @@ export class MemberInfiniteCodeRank {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column('varchar', { name: 'memberId', length: 100 })
+  @Column('uuid')
   memberId: string;
 
   @Column('float', { name: 'userScore', nullable: true, precision: 12 })
@@ -32,6 +32,6 @@ export class MemberInfiniteCodeRank {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 }

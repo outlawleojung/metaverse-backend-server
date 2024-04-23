@@ -466,7 +466,7 @@ export class AccountService {
     if (exAccount) {
       const exMember = await this.dataSource.getRepository(Member).findOne({
         where: {
-          memberId: exAccount.memberId,
+          id: exAccount.memberId,
         },
       });
 

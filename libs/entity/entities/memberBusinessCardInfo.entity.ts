@@ -17,7 +17,7 @@ import { Member } from './member.entity';
 @Index('num', ['num'], {})
 @Entity('member_business_card_info')
 export class MemberBusinessCardInfo {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @ApiProperty({
@@ -104,7 +104,7 @@ export class MemberBusinessCardInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
   @ManyToOne(

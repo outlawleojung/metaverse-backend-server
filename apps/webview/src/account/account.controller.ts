@@ -27,7 +27,6 @@ import { MorganInterceptor } from 'nest-morgan';
 import { LoginRequestDto } from './dto/req/login.request.dto';
 import { Member } from '@libs/entity';
 import { LoggedInGuard } from '../auth/logged.in.guard';
-import { AuthService } from '../auth/auth.service';
 import { ResetPasswordtDto } from './dto/req/reset.password.dto';
 import { KtmfEmailDto } from './dto/req/ktmf.email.dto';
 
@@ -35,10 +34,7 @@ import { KtmfEmailDto } from './dto/req/ktmf.email.dto';
 @ApiTags('ACCOUNT - 계정')
 @Controller('api/account')
 export class AccountController {
-  constructor(
-    private readonly accountService: AccountService,
-    private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly accountService: AccountService) {}
 
   // 로그인 여부 체크
   @ApiCookieAuth('connect.sid')

@@ -8,15 +8,16 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Member } from './member.entity';
+
 import { Item } from './item.entity';
 import { ItemType } from './itemType.entity';
+import { Member } from './member.entity';
 
 @Index('itemId', ['itemId'], {})
 @Index('itemType', ['itemType'], {})
 @Entity('member_avatar_parts_item_inven')
 export class MemberAvatarPartsItemInven {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @PrimaryColumn('int', { name: 'itemId' })
@@ -35,7 +36,7 @@ export class MemberAvatarPartsItemInven {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
   @ManyToOne(() => Item, (item) => item.MemberAvatarPartsItemInvens, {

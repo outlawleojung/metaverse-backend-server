@@ -18,7 +18,7 @@ export class MemberOfficeReservationWaitingInfo {
   @PrimaryColumn('int', { name: 'reservationId' })
   reservationId: number;
 
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @CreateDateColumn()
@@ -27,17 +27,25 @@ export class MemberOfficeReservationWaitingInfo {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => Member, (member) => member.MemberOfficeReservationWaitingInfos, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @ManyToOne(
+    () => Member,
+    (member) => member.MemberOfficeReservationWaitingInfos,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
-  @ManyToOne(() => MemberOfficeReservationInfo, (info) => info.MemberOfficeReservationWaitingInfos, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => MemberOfficeReservationInfo,
+    (info) => info.MemberOfficeReservationWaitingInfos,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'reservationId', referencedColumnName: 'id' }])
   MemberOfficeReservationInfo: MemberOfficeReservationInfo;
 }

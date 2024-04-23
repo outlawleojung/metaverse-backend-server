@@ -1,4 +1,12 @@
-import { CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import {
+  CreateDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Member } from './member.entity';
 import { SelectVoteItem } from './selectVoteItem.entity';
 
@@ -6,7 +14,7 @@ import { SelectVoteItem } from './selectVoteItem.entity';
 @Index('voteId_num', ['voteId', 'itemNum'], {})
 @Entity('member_select_vote_info')
 export class MemberSelectVoteInfo {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @PrimaryColumn('int', { name: 'voteId' })
@@ -25,13 +33,17 @@ export class MemberSelectVoteInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
-  @ManyToOne(() => SelectVoteItem, (voteinfo) => voteinfo.MemberSelectVoteInfos, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => SelectVoteItem,
+    (voteinfo) => voteinfo.MemberSelectVoteInfos,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([
     { name: 'voteId', referencedColumnName: 'voteId' },
     { name: 'itemNum', referencedColumnName: 'itemNum' },

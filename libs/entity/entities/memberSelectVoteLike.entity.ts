@@ -14,7 +14,7 @@ import { SelectVoteItem } from './selectVoteItem.entity';
 @Index('voteId_itemNum', ['voteId', 'itemNum'], {})
 @Entity('member_select_vote_like')
 export class MemberSelectVoteLike {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @PrimaryColumn('int', { name: 'voteId' })
@@ -36,7 +36,7 @@ export class MemberSelectVoteLike {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
   @ManyToOne(() => SelectVoteItem, (item) => item.MemberSelectVoteLikes, {

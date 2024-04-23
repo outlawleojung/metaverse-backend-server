@@ -1,5 +1,6 @@
 export * from './entity.module';
 
+export { BaseModelEntity } from '../entities/baseModelEntity.entity';
 export { AdContents } from '../entities/adContents.entity';
 export { Admin } from '../entities/admin.entity';
 export { AdminLog } from '../entities/adminLog.entity';

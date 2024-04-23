@@ -30,7 +30,7 @@ export class AccountService {
   async withdrawal(memberId: string) {
     // 사용자 존재 여부 확인
     const exMember = await this.memberRepository.findOne({
-      where: { memberId: memberId },
+      where: { id: memberId },
     });
 
     if (!exMember) {
@@ -43,7 +43,7 @@ export class AccountService {
 
     try {
       const upMember = new Member();
-      upMember.memberId = memberId;
+      upMember.id = memberId;
       upMember.deletedAt = new Date();
 
       await queryRunner.manager.getRepository(Member).save(upMember);
@@ -108,7 +108,7 @@ export class AccountService {
   async ktmfEmail(memberId: string, data: KtmfEmailDto) {
     // 사용자 존재 여부 확인
     const exMember = await this.memberRepository.findOne({
-      where: { memberId: memberId },
+      where: { id: memberId },
     });
 
     if (!exMember) {

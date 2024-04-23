@@ -85,7 +85,7 @@ export class RoomFactory {
   async getOwnerInfo(ownerId: string) {
     try {
       const member = await this.memberRepository.findOne({
-        select: ['nickname', 'memberId', 'myRoomStateType'],
+        select: ['nickname', 'id', 'myRoomStateType'],
         where: {
           memberCode: ownerId,
         },
@@ -94,7 +94,7 @@ export class RoomFactory {
       const memberAvatarInfos = await this.memberAvatarInfoRepository.find({
         select: ['avatarPartsType', 'itemId'],
         where: {
-          memberId: member.memberId,
+          memberId: member.id,
         },
       });
 

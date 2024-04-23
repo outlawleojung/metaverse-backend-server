@@ -15,6 +15,7 @@ import {
   OneToMany,
   OneToOne,
   PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { MemberBlock } from './memberBlock.entity';
@@ -58,8 +59,8 @@ import { CSAFEventEnterLog } from './csafEventEnterLog.entity';
 @Index('firstProviderType', ['firstProviderType'], {})
 @Entity('member')
 export class Member {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
-  memberId: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column('varchar', { name: 'memberCode', unique: true, length: 100 })
   memberCode: string;

@@ -15,7 +15,7 @@ import { Member } from './member.entity';
 @Index('templateId', ['templateId'], {})
 @Entity('member_default_card_info')
 export class MemberDefaultCardInfo {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @Column('int', { name: 'templateId', default: () => "'1'" })
@@ -34,7 +34,7 @@ export class MemberDefaultCardInfo {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
   @ManyToOne(

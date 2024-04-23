@@ -1,11 +1,19 @@
-import { CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import {
+  CreateDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Member } from './member.entity';
 import { Postbox } from './postbox.entity';
 
 @Index('postboxId', ['postboxId'], {})
 @Entity('post_receive_member_info')
 export class PostReceiveMemberInfo {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @PrimaryColumn('int', { name: 'postboxId' })
@@ -21,7 +29,7 @@ export class PostReceiveMemberInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
   @ManyToOne(() => Postbox, (postbox) => postbox.PostReceiveMemberInfos, {

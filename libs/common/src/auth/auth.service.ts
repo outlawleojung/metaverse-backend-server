@@ -74,11 +74,11 @@ export class AuthService {
   }
 
   signToken(
-    member: Pick<Member, 'memberId' | 'nickname' | 'email'>,
+    member: Pick<Member, 'id' | 'nickname' | 'email'>,
     isRefreshToken: boolean,
   ) {
     const payload = {
-      sub: member.memberId,
+      sub: member.id,
       nickname: member.nickname,
       email: member.email,
       type: isRefreshToken ? 'refresh' : 'access',
@@ -124,7 +124,7 @@ export class AuthService {
       // 데이터베이스에 있는 토큰과 비교
       const member = await this.memberRepository.findOne({
         where: {
-          memberId: decoded.sub,
+          id: decoded.sub,
         },
       });
 
@@ -158,7 +158,7 @@ export class AuthService {
 
     try {
       await this.memberRepository.update(
-        { memberId: result.sub },
+        { id: result.sub },
         { refreshToken: hashedRefreshToken },
       );
     } catch (e) {
@@ -167,11 +167,11 @@ export class AuthService {
     }
   }
 
-  async loginMember(member: Pick<Member, 'memberId' | 'nickname' | 'email'>) {
+  async loginMember(member: Pick<Member, 'id' | 'nickname' | 'email'>) {
     const refreshToken = this.signToken(member, true);
 
     await this.saveRefreshToken(refreshToken);
-    await this.loginCounting(member.memberId);
+    await this.loginCounting(member.id);
 
     return {
       accessToken: this.signToken(member, false),
@@ -183,9 +183,9 @@ export class AuthService {
     const result = this.verifyToken(token);
 
     const member = await this.memberRepository.findOne({
-      select: ['memberId', 'memberCode', 'nickname', 'email', 'refreshToken'],
+      select: ['id', 'memberCode', 'nickname', 'email', 'refreshToken'],
       where: {
-        memberId: result.sub,
+        id: result.sub,
       },
     });
 
@@ -231,9 +231,9 @@ export class AuthService {
     }
 
     const member = await this.memberRepository.findOne({
-      select: ['memberId', 'memberCode', 'nickname', 'email'],
+      select: ['id', 'memberCode', 'nickname', 'email'],
       where: {
-        memberId: exMember.memberId,
+        id: exMember.memberId,
       },
     });
 
@@ -323,7 +323,7 @@ export class AuthService {
       const hashedPassword = await bcryptjs.hash(password, 12);
 
       const memberAccount = new MemberAccount();
-      memberAccount.memberId = memberInfo.memberId;
+      memberAccount.memberId = memberInfo.id;
       memberAccount.providerType = PROVIDER_TYPE.ARZMETA;
       memberAccount.password = hashedPassword;
 
@@ -352,7 +352,7 @@ export class AuthService {
   async loginCounting(memberId: string) {
     // 로그인 횟수 체크
     const newMember = new Member();
-    newMember.memberId = memberId;
+    newMember.id = memberId;
     newMember.loginedAt = new Date();
     newMember.deletedAt = null;
 
@@ -383,6 +383,17 @@ export class AuthService {
 
       const result = await this.verifyToken(accessToken);
 
+      return await this.commonService.getMemberByEmail(result.email);
+    } catch (error) {
+      console.log('토큰 오류 :', error.toString());
+
+      throw error;
+    }
+  }
+
+  async validateUser(accessToken: string) {
+    try {
+      const result = await this.verifyToken(accessToken);
       return await this.commonService.getMemberByEmail(result.email);
     } catch (error) {
       console.log('토큰 오류 :', error.toString());

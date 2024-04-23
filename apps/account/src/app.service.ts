@@ -511,7 +511,7 @@ export class AppService {
           .getRepository(MemberAvatarPartsItemInven)
           .find({
             where: {
-              memberId: member.memberId,
+              memberId: member.id,
             },
           });
 
@@ -530,7 +530,7 @@ export class AppService {
             const item = avatarPartsItems[index];
 
             const memberAvatarPartsItemInven = new MemberAvatarPartsItemInven();
-            memberAvatarPartsItemInven.memberId = member.memberId;
+            memberAvatarPartsItemInven.memberId = member.id;
             memberAvatarPartsItemInven.itemId = item.itemId;
 
             await queryRunner.manager
@@ -565,7 +565,7 @@ export class AppService {
           .getRepository(MemberMyRoomInfo)
           .find({
             where: {
-              memberId: member.memberId,
+              memberId: member.id,
             },
           });
 
@@ -579,7 +579,7 @@ export class AppService {
               .getRepository(MemberFurnitureItemInven)
               .find({
                 where: {
-                  memberId: member.memberId,
+                  memberId: member.id,
                 },
               });
 
@@ -589,7 +589,7 @@ export class AppService {
                   .getRepository(MemberMyRoomInfo)
                   .findOne({
                     where: {
-                      memberId: member.memberId,
+                      memberId: member.id,
                       itemId: inven.itemId,
                       num: inven.num,
                     },
@@ -597,7 +597,7 @@ export class AppService {
 
                 if (!myRoom) {
                   const myRoomInfo = new MemberMyRoomInfo();
-                  myRoomInfo.memberId = member.memberId;
+                  myRoomInfo.memberId = member.id;
                   myRoomInfo.itemId = item.itemId;
                   myRoomInfo.num = inven.num;
                   myRoomInfo.layerType = item.layerType;

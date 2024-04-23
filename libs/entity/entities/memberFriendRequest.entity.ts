@@ -13,10 +13,10 @@ import { Member } from './member.entity';
 @Index('receivedMemberId', ['receivedMemberId'], {})
 @Entity('member_friend_request')
 export class MemberFriendRequest {
-  @PrimaryColumn('varchar', { name: 'requestMemberId', length: 100 })
+  @PrimaryColumn('uuid')
   requestMemberId: string;
 
-  @PrimaryColumn('varchar', { name: 'receivedMemberId', length: 100 })
+  @PrimaryColumn('uuid')
   receivedMemberId: string;
 
   @CreateDateColumn()
@@ -29,13 +29,13 @@ export class MemberFriendRequest {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'requestMemberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'requestMemberId' }])
   RequestMember: Member;
 
   @ManyToOne(() => Member, (member) => member.ReceivedMembers, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'receivedMemberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'receivedMemberId' }])
   ReceivedMember: Member;
 }

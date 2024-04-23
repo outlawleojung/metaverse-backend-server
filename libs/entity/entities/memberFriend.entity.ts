@@ -13,10 +13,10 @@ import { Member } from './member.entity';
 @Index('friendMemberId', ['friendMemberId'], {})
 @Entity('member_friend')
 export class MemberFriend {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
-  @PrimaryColumn('varchar', { name: 'friendMemberId', length: 100 })
+  @PrimaryColumn('uuid')
   friendMemberId: string;
 
   @CreateDateColumn()
@@ -35,13 +35,13 @@ export class MemberFriend {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
   @ManyToOne(() => Member, (member) => member.MemberFriends, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'friendMemberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'friendMemberId' }])
   FriendMember: Member;
 }

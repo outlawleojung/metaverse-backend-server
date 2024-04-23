@@ -26,7 +26,7 @@ export class MemberReportInfo {
   @Column('int', { name: 'stateType' })
   stateType: number;
 
-  @Column('varchar', { name: 'reportMemberId', nullable: true, length: 100 })
+  @Column('uuid')
   reportMemberId: string | null;
 
   @Column('varchar', { name: 'reportNickname', length: 64 })
@@ -41,7 +41,7 @@ export class MemberReportInfo {
   @Column('varchar', { name: 'content', length: 1024 })
   content: string;
 
-  @Column('varchar', { name: 'targetMemberId', nullable: true, length: 100 })
+  @Column('uuid')
   targetMemberId: string | null;
 
   @Column('varchar', { name: 'targetNickname', length: 64 })
@@ -72,7 +72,7 @@ export class MemberReportInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'reportMemberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'reportMemberId' }])
   ReportMember: Member;
 
   @ManyToOne(
@@ -93,7 +93,7 @@ export class MemberReportInfo {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'targetMemberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'targetMemberId' }])
   TargetMember: Member;
 
   @ManyToOne(() => ReportStateType, (type) => type.MemberReportInfos, {

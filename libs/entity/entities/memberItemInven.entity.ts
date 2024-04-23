@@ -14,7 +14,7 @@ import { Item } from './item.entity';
 @Index('itemId', ['itemId'], {})
 @Entity('member_item_inven')
 export class MemberItemInven {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @PrimaryColumn('int', { name: 'itemId' })
@@ -36,7 +36,7 @@ export class MemberItemInven {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
   @ManyToOne(() => Item, (item) => item.MemberItemInvens, {

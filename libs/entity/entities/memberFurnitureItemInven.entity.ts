@@ -19,7 +19,7 @@ import { MemberFrameImage } from './memberFrameImage.entity';
 @Index('num', ['num'], {})
 @Entity('member_furniture_item_inven')
 export class MemberFurnitureItemInven {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @PrimaryColumn('int', { name: 'itemId' })
@@ -41,7 +41,7 @@ export class MemberFurnitureItemInven {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
   @ManyToOne(() => Item, (item) => item.MemberFurnitureItemInvens, {
@@ -51,6 +51,9 @@ export class MemberFurnitureItemInven {
   @JoinColumn([{ name: 'itemId', referencedColumnName: 'id' }])
   Item: Item;
 
-  @OneToMany(() => MemberMyRoomInfo, (membermyroominfo) => membermyroominfo.MemberFurnitureItemInven)
+  @OneToMany(
+    () => MemberMyRoomInfo,
+    (membermyroominfo) => membermyroominfo.MemberFurnitureItemInven,
+  )
   MemberMyRoomInfos: MemberMyRoomInfo[];
 }

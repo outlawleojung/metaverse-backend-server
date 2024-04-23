@@ -16,7 +16,7 @@ import { ItemUseEffect } from './itemUseEffect.entity';
 @Index('avatarPartsType_itemId', ['avatarPartsType', 'itemId'], {})
 @Entity('member_avatar_info')
 export class MemberAvatarInfo {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @PrimaryColumn('int', { name: 'avatarPartsType' })
@@ -35,7 +35,7 @@ export class MemberAvatarInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
   @ManyToOne(() => ItemUseEffect, (effect) => effect.MemberAvatarInfos, {

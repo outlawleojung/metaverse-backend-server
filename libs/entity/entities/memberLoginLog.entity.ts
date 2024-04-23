@@ -1,4 +1,12 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Member } from './member.entity';
 import { ProviderType } from './providerType.entity';
 
@@ -6,7 +14,7 @@ import { ProviderType } from './providerType.entity';
 @Index('providerType', ['providerType'], {})
 @Entity('member_login_log')
 export class MemberLoginLog {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+  @PrimaryGeneratedColumn('uuid')
   id: number;
 
   @Column('varchar', { name: 'memberId', length: 100 })
@@ -25,13 +33,17 @@ export class MemberLoginLog {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
-  @ManyToOne(() => ProviderType, (providertype) => providertype.MemberLoginLogs, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => ProviderType,
+    (providertype) => providertype.MemberLoginLogs,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'providerType', referencedColumnName: 'type' }])
   ProviderType: ProviderType;
 }

@@ -18,7 +18,6 @@ import { VideoPlayInfo } from './videoPlayInfo.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { MemberInquiryAnswer } from './memberInquiryAnswer.entity';
 import { InquiryTemplate } from './inquiryTemplate.entity';
-import { MemberReportInfo } from './memberReportInfo.entity';
 import { OfficeLicenseDomainInfo } from './officeLicenseDomainInfo.entity';
 import { LicenseGroupInfo } from './licenseGroupInfo.entity';
 import { PostalLog } from './postalLog.entity';
@@ -29,18 +28,13 @@ import { SelectVoteInfo } from './selectVoteInfo.entity';
 import { AdminType } from './adminType.entity';
 import { CSAFEventInfo } from './csafEventInfo.entity';
 import { NoticeInfo } from './noticeInfo.entity';
+import { BaseModelEntity } from './baseModelEntity.entity';
+import { MemberReportInfo } from './memberReportInfo.entity';
 
 @Index('email', ['email'], { unique: true })
 @Index('roleType', ['roleType'], {})
 @Entity('admin')
-export class Admin {
-  @ApiProperty({
-    example: 1,
-    description: '관리자 아이디',
-  })
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
-  id: number;
-
+export class Admin extends BaseModelEntity {
   @Column('varchar', { name: 'email', unique: true, length: 64 })
   email: string;
 
@@ -76,12 +70,6 @@ export class Admin {
 
   @Column('datetime', { name: 'loginedAt' })
   loginedAt: Date;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 
   @OneToMany(() => AdminLog, (adminlog) => adminlog.admin)
   AdminLogs: AdminLog[];

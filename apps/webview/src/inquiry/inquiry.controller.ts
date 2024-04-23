@@ -43,7 +43,10 @@ export class InquiryController {
   @ApiOperation({ summary: '문의 내역 목록 조회' })
   @UseGuards(LoggedInGuard)
   @Get()
-  async getInquiries(@MemberDecorator() member, @Query('lastId') lastId: number) {
+  async getInquiries(
+    @MemberDecorator() member,
+    @Query('lastId') lastId: number,
+  ) {
     return await this.inquiryService.getInquiries(member.memberId, lastId);
   }
 
@@ -51,8 +54,16 @@ export class InquiryController {
   @ApiOperation({ summary: '문의 내역 조회' })
   @UseGuards(LoggedInGuard)
   @Get('/:groupId')
-  async getInquiry(@MemberDecorator() member, @Param('groupId') groupId: number, @Query('lastId') lastId: number) {
-    return await this.inquiryService.getInquiry(member.memberId, groupId, lastId);
+  async getInquiry(
+    @MemberDecorator() member,
+    @Param('groupId') groupId: number,
+    @Query('lastId') lastId: number,
+  ) {
+    return await this.inquiryService.getInquiry(
+      member.memberId,
+      groupId,
+      lastId,
+    );
   }
 
   // 문의 하기
@@ -85,7 +96,10 @@ export class InquiryController {
   @ApiOperation({ summary: '문의 삭제' })
   @UseGuards(LoggedInGuard)
   @Delete(':groupId')
-  async deleteInquiry(@MemberDecorator() member, @Param('groupId') groupId: number) {
+  async deleteInquiry(
+    @MemberDecorator() member,
+    @Param('groupId') groupId: number,
+  ) {
     return await this.inquiryService.deleteInquiry(member.memberId, groupId);
   }
 }

@@ -49,7 +49,7 @@ export class OthersService {
       //  타인 존재 여부 확인
       const exMember = await this.memberRepository.findOne({
         select: [
-          'memberId',
+          'id',
           'memberCode',
           'nickname',
           'stateMessage',
@@ -69,7 +69,7 @@ export class OthersService {
         .getRepository(MemberDefaultCardInfo)
         .findOne({
           where: {
-            memberId: exMember.memberId,
+            memberId: exMember.id,
           },
         });
 
@@ -91,7 +91,7 @@ export class OthersService {
               'intro',
             ],
             where: {
-              memberId: exMember.memberId,
+              memberId: exMember.id,
               templateId: defaultBizCard.templateId,
               num: defaultBizCard.num,
             },
@@ -114,7 +114,7 @@ export class OthersService {
               'intro',
             ],
             where: {
-              memberId: exMember.memberId,
+              memberId: exMember.id,
             },
             order: {
               num: 'DESC',

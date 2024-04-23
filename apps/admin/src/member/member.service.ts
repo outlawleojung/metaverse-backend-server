@@ -331,7 +331,7 @@ export class MemberService {
     try {
       const member = await this.memberRepository.findOne({
         where: {
-          memberId: memberId,
+          id: memberId,
         },
       });
 
@@ -344,7 +344,7 @@ export class MemberService {
       }
 
       const newMember = new Member();
-      newMember.memberId = memberId;
+      newMember.id = memberId;
       newMember.officeGradeType = officeGradeType;
 
       await queryRunner.manager.getRepository(Member).save(newMember);

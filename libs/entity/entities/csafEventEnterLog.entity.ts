@@ -21,7 +21,7 @@ export class CSAFEventEnterLog {
   @Column('int', { name: 'eventId' })
   eventId: number;
 
-  @Column('varchar', { name: 'memberId', length: 100 })
+  @Column('uuid')
   memberId: string;
 
   @CreateDateColumn()
@@ -34,7 +34,7 @@ export class CSAFEventEnterLog {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
   @ManyToOne(() => CSAFEventInfo, (info) => info.CSAFEventEnterLogs, {

@@ -12,9 +12,8 @@ import {
   StartMyRoom,
   StartInventory,
 } from '@libs/entity';
-import { CommonModule, CommonService } from '@libs/common';
+import { CommonModule } from '@libs/common';
 import { MailModule } from '../mail/mail.module';
-import { AuthService } from '../auth/auth.service';
 
 @Module({
   imports: [
@@ -32,7 +31,7 @@ import { AuthService } from '../auth/auth.service';
     EntityModule,
   ],
   controllers: [AccountController],
-  providers: [AccountService, AuthService],
-  exports: [AccountService, AuthService],
+  providers: [AccountService],
+  exports: [AccountService],
 })
 export class AccountModule {}

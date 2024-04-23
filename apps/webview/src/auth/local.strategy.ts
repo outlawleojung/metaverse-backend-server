@@ -1,7 +1,7 @@
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { AuthService } from '@libs/common';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -9,14 +9,14 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     super({ usernameField: 'token', passwordField: 'password' });
   }
 
-  async validate(token: string, password: string, done: CallableFunction) {
+  async validate(token: string, _: string, done: CallableFunction) {
     console.log('validate token: ', token);
-    const user = await this.authService.validateUser(token, password);
-    console.log('validate user: ', user);
+    const member = await this.authService.validateUser(token);
+    console.log('validate user: ', member);
 
-    if (!user) {
+    if (!member) {
       throw new UnauthorizedException('이메일 또는 패스워드를 확인해 주세요.');
     }
-    return done(null, user);
+    return done(null, member);
   }
 }

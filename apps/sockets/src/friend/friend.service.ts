@@ -123,7 +123,7 @@ export class FriendService {
     // memberId가 존재하는지 확인
     const memberInfo = await this.memberRepository.findOne({
       where: {
-        memberId: data.friendMemberId,
+        id: data.friendMemberId,
       },
     });
 
@@ -219,13 +219,13 @@ export class FriendService {
     // memberId가 존재하는지 확인
     const friendMemberInfo = await this.memberRepository.findOne({
       where: {
-        memberId: data.friendMemberId,
+        id: data.friendMemberId,
       },
     });
 
     const memberInfo = await this.memberRepository.findOne({
       where: {
-        memberId: client.data.memberId,
+        id: client.data.memberId,
       },
     });
 

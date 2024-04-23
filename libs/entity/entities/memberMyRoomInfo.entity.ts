@@ -74,10 +74,14 @@ export class MemberMyRoomInfo {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => MemberFurnitureItemInven, (inven) => inven.MemberMyRoomInfos, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => MemberFurnitureItemInven,
+    (inven) => inven.MemberMyRoomInfos,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([
     { name: 'memberId', referencedColumnName: 'memberId' },
     { name: 'itemId', referencedColumnName: 'itemId' },

@@ -1,8 +1,9 @@
 import { DeleteResult, IsNull, Not, QueryRunner, Repository } from 'typeorm';
-import { Member } from '../entities/member.entity';
+
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseRepository } from './base-repository';
 import { FRND_REQUEST_TYPE } from '@libs/constants';
+import { Member } from '../entities/member.entity';
 
 export class MemberRepository extends BaseRepository<Member> {
   constructor(
@@ -12,7 +13,7 @@ export class MemberRepository extends BaseRepository<Member> {
   }
 
   async findByMemberId(memberId: string): Promise<Member | null> {
-    return await this.repository.findOneBy({ memberId });
+    return await this.repository.findOneBy({ id: memberId });
   }
 
   async findByMemberCode(memberCode: string): Promise<Member | null> {
@@ -28,7 +29,7 @@ export class MemberRepository extends BaseRepository<Member> {
     queryRunner?: QueryRunner,
   ): Promise<Member[] | null> {
     return await this.getRepository(queryRunner).find({
-      select: { memberId: true, deletedAt: true },
+      select: { id: true, deletedAt: true },
       where: {
         deletedAt: Not(IsNull()),
       },
@@ -55,7 +56,7 @@ export class MemberRepository extends BaseRepository<Member> {
     }
 
     const member = await this.getRepository(queryRunner).findOne({
-      select: { memberId: true },
+      select: { id: true },
       where,
     });
 
@@ -126,11 +127,11 @@ export class MemberRepository extends BaseRepository<Member> {
     data: Partial<Member>,
     queryRunner?: QueryRunner,
   ): Promise<void> {
-    const { memberId, ...updateData } = data;
+    const { id, ...updateData } = data;
 
     const member = await this.getRepository(queryRunner).findOne({
       where: {
-        memberId,
+        id,
       },
     });
 

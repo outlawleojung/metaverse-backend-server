@@ -50,9 +50,7 @@ export class MyRoomService {
       };
     }
 
-    const othersRoomList = await this.commonService.getMyRoomInfo(
-      exMember.memberId,
-    );
+    const othersRoomList = await this.commonService.getMyRoomInfo(exMember.id);
 
     return {
       othersRoomList: othersRoomList,
@@ -78,12 +76,10 @@ export class MyRoomService {
       );
     }
 
-    const othersRoomList = await this.commonService.getMyRoomInfo(
-      exMember.memberId,
-    );
+    const othersRoomList = await this.commonService.getMyRoomInfo(exMember.id);
     // 마이룸 액자 정보
     const othersMyRoomFrameImages =
-      await this.commonService.getMyRoomFrameImages(exMember.memberId);
+      await this.commonService.getMyRoomFrameImages(exMember.id);
 
     return {
       othersRoomList: othersRoomList,
@@ -97,7 +93,7 @@ export class MyRoomService {
   async createMyRoom(memberId: string, data: CreateMyRoomDto) {
     const member = await this.memberRepository.findOne({
       where: {
-        memberId,
+        id: memberId,
       },
     });
     if (!member) {
@@ -328,7 +324,7 @@ export class MyRoomService {
   async updateStateType(memberId: string, data: UpdateStateTypeDto) {
     const exMember = await this.memberRepository.findOne({
       where: {
-        memberId: memberId,
+        id: memberId,
       },
     });
 
@@ -340,7 +336,7 @@ export class MyRoomService {
     }
 
     const member = new Member();
-    member.memberId = memberId;
+    member.id = memberId;
     member.myRoomStateType = data.myRoomStateType;
 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -380,7 +376,7 @@ export class MyRoomService {
 
     const member = await this.memberRepository.findOne({
       where: {
-        memberId: memberId,
+        id: memberId,
       },
     });
     if (!member) {
@@ -497,7 +493,7 @@ export class MyRoomService {
     const items = JSON.parse(itemString);
     const member = await this.memberRepository.findOne({
       where: {
-        memberId: memberId,
+        id: memberId,
       },
     });
     if (!member) {

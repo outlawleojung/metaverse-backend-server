@@ -495,7 +495,7 @@ export class OfficeService {
     // 사용자 조회
     const member = await this.memberRepository.findOne({
       where: {
-        memberId: memberId,
+        id: memberId,
       },
     });
 
@@ -844,7 +844,7 @@ export class OfficeService {
     // 사용자 조회
     const member = await this.memberRepository.findOne({
       where: {
-        memberId: memberId,
+        id: memberId,
       },
     });
 

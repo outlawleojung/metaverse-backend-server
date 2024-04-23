@@ -40,8 +40,8 @@ export class FriendService {
   //         'mf.bookmark as bookmark',
   //         'mf.bookmarkedAt as bookmarkedAt',
   //       ])
-  //       .innerJoin('member', 'm', 'm.memberId = mf.friendMemberId')
-  //       .where('mf.memberId = :memberId', { memberId })
+  //       .innerJoin('member', 'm', 'm.id = mf.friendMemberId')
+  //       .where('mf.id = :memberId', { memberId })
   //       .getRawMany();
 
   //     for (const f of friends) {
@@ -96,7 +96,7 @@ export class FriendService {
     }
 
     // 자기 자신은 친구로 추가 할 수 없음.
-    if (friend.memberId === memberId) {
+    if (friend.id === memberId) {
       throw new HttpException(
         {
           error: ERRORCODE.NET_E_CANNOT_REQUEST_MYSELF,
@@ -109,7 +109,7 @@ export class FriendService {
     // 차단된 회원인지 확인
     const blockmember = await this.memberBlockRepository.exists(
       memberId,
-      friend.memberId,
+      friend.id,
     );
 
     if (blockmember) {
@@ -125,7 +125,7 @@ export class FriendService {
     // 이미 친구 인지 확인
     const myFriend = await this.memberFriendRepository.exists(
       memberId,
-      friend.memberId,
+      friend.id,
     );
 
     // 이미 친구 이다.
@@ -142,7 +142,7 @@ export class FriendService {
     // 이미 친구 요청을 보냈는지 확인
     const myRequest = await this.memberFriendRequestRepository.exists(
       memberId,
-      friend.memberId,
+      friend.id,
     );
 
     // 이미 요청을 보낸 사용자
@@ -158,7 +158,7 @@ export class FriendService {
 
     // 이미 나에게 요청을 보낸 사용자인지 확인
     const requstMe = await this.memberFriendRequestRepository.exists(
-      friend.memberId,
+      friend.id,
       memberId,
     );
 
@@ -181,7 +181,7 @@ export class FriendService {
 
     await this.memberFriendRequestRepository.managerFriendRequest(
       memberId,
-      friend.memberId,
+      friend.id,
       maxCount.value,
       queryRunner,
     );
@@ -263,7 +263,7 @@ export class FriendService {
 
     // 친구 요청을 받았는지 확인
     const friendRequest = await this.memberFriendRequestRepository.exists(
-      exFriend.memberId,
+      exFriend.id,
       memberId,
     );
     if (!friendRequest) {
@@ -280,7 +280,7 @@ export class FriendService {
     const friend =
       await this.memberFriendRepository.findByMemberIdAndFriendMemberId(
         memberId,
-        exFriend.memberId,
+        exFriend.id,
       );
     if (friend) {
       throw new HttpException(
@@ -313,7 +313,7 @@ export class FriendService {
 
     // 상대 친구 수 확인
     const targetFrinedCount = await this.memberFriendRepository.count(
-      exFriend.memberId,
+      exFriend.id,
     );
 
     // 상대의 친구 수 초과 시
@@ -329,18 +329,18 @@ export class FriendService {
 
     const memberFriendMe = new MemberFriend();
     memberFriendMe.memberId = memberId;
-    memberFriendMe.friendMemberId = exFriend.memberId;
+    memberFriendMe.friendMemberId = exFriend.id;
 
     await this.memberFriendRepository.create(memberFriendMe, queryRunner);
 
     const memberFriendYou = new MemberFriend();
-    memberFriendYou.memberId = exFriend.memberId;
+    memberFriendYou.memberId = exFriend.id;
     memberFriendYou.friendMemberId = memberId;
 
     await this.memberFriendRepository.create(memberFriendYou, queryRunner);
 
     await this.memberFriendRequestRepository.delete(
-      exFriend.memberId,
+      exFriend.id,
       memberId,
       queryRunner,
     );
@@ -373,7 +373,7 @@ export class FriendService {
 
     const result = await this.memberFriendRequestRepository.delete(
       memberId,
-      exFriend.memberId,
+      exFriend.id,
       queryRunner,
     );
 
@@ -416,7 +416,7 @@ export class FriendService {
     }
 
     const result = await this.memberFriendRequestRepository.delete(
-      exFriend.memberId,
+      exFriend.id,
       memberId,
       queryRunner,
     );
@@ -475,7 +475,7 @@ export class FriendService {
     // 차단 여부 확인
     const preBlock = await this.memberBlockRepository.exists(
       memberId,
-      exFrnd.memberId,
+      exFrnd.id,
     );
 
     // 이미 차단 됨.
@@ -490,22 +490,14 @@ export class FriendService {
     }
 
     // 친구 상태 해제
-    await this.memberFriendRepository.delete(
-      memberId,
-      exFrnd.memberId,
-      queryRunner,
-    );
+    await this.memberFriendRepository.delete(memberId, exFrnd.id, queryRunner);
 
-    await this.memberFriendRepository.delete(
-      exFrnd.memberId,
-      memberId,
-      queryRunner,
-    );
+    await this.memberFriendRepository.delete(exFrnd.id, memberId, queryRunner);
 
     // 차단 목록에 등록
     const memberBlock = new MemberBlock();
     memberBlock.memberId = memberId;
-    memberBlock.blockMemberId = exFrnd.memberId;
+    memberBlock.blockMemberId = exFrnd.id;
 
     await this.memberBlockRepository.create(memberBlock, queryRunner);
 
@@ -540,7 +532,7 @@ export class FriendService {
     const memberFriend =
       await this.memberFriendRepository.findByMemberIdAndFriendMemberId(
         memberId,
-        exFrnd.memberId,
+        exFrnd.id,
       );
 
     if (!memberFriend) {
@@ -553,17 +545,9 @@ export class FriendService {
       );
     }
 
-    await this.memberFriendRepository.delete(
-      memberId,
-      exFrnd.memberId,
-      queryRunner,
-    );
+    await this.memberFriendRepository.delete(memberId, exFrnd.id, queryRunner);
 
-    await this.memberFriendRepository.delete(
-      exFrnd.memberId,
-      memberId,
-      queryRunner,
-    );
+    await this.memberFriendRepository.delete(exFrnd.id, memberId, queryRunner);
 
     return {
       error: ERRORCODE.NET_E_SUCCESS,
@@ -594,7 +578,7 @@ export class FriendService {
 
     const blockMember = await this.memberBlockRepository.exists(
       memberId,
-      exFrnd.memberId,
+      exFrnd.id,
     );
 
     // 차단 목록에 없다.
@@ -608,11 +592,7 @@ export class FriendService {
       );
     }
 
-    await this.memberBlockRepository.delete(
-      memberId,
-      exFrnd.memberId,
-      queryRunner,
-    );
+    await this.memberBlockRepository.delete(memberId, exFrnd.id, queryRunner);
 
     return {
       error: ERRORCODE.NET_E_SUCCESS,
@@ -654,7 +634,7 @@ export class FriendService {
     }
 
     const member = await this.memberRepository.findByMemberIdForMemberInfo(
-      friend.memberId,
+      friend.id,
     );
 
     return {
@@ -688,7 +668,7 @@ export class FriendService {
 
     const memberFriend = await this.memberFriendRepository.toggleBookmark(
       memberId,
-      exfriend.memberId,
+      exfriend.id,
       queryRunner,
     );
 

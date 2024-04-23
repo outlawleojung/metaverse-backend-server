@@ -14,7 +14,7 @@ import { MoneyType } from './moneyType.entity';
 @Index('moneyType', ['moneyType'], {})
 @Entity('member_money')
 export class MemberMoney {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @PrimaryColumn('int', { name: 'moneyType' })
@@ -33,7 +33,7 @@ export class MemberMoney {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
   @ManyToOne(() => MoneyType, (type) => type.MemberMoney, {

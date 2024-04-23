@@ -14,7 +14,7 @@ import { Member } from './member.entity';
 @Index('token', ['token'], {})
 @Entity('member_password_auth')
 export class MemberPasswordAuth {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @Column('varchar', { name: 'token', length: 128 })
@@ -33,6 +33,6 @@ export class MemberPasswordAuth {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 }

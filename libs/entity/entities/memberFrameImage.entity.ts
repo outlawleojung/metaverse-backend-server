@@ -39,10 +39,14 @@ export class MemberFrameImage {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToOne(() => MemberFurnitureItemInven, (member) => member.MemberFrameImage, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
+  @OneToOne(
+    () => MemberFurnitureItemInven,
+    (member) => member.MemberFrameImage,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([
     { name: 'memberId', referencedColumnName: 'memberId' },
     { name: 'itemId', referencedColumnName: 'itemId' },

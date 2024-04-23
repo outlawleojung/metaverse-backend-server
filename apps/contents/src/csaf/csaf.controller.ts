@@ -138,7 +138,7 @@ export class CsafController {
     status: HttpStatus.OK,
   })
   @Post('event')
-  async boothEnter(@MemberDeco('memberId') memberId: string) {
+  async boothEnter(@MemberDeco('id') memberId: string) {
     return await this.csafService.evnetEnter(memberId);
   }
 

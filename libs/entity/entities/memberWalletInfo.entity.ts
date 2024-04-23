@@ -13,7 +13,7 @@ import { Member } from './member.entity';
 @Index('walletAddr', ['walletAddr'], { unique: true })
 @Entity('member_wallet_info')
 export class MemberWalletInfo {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @Column('varchar', { name: 'walletAddr', length: 128 })
@@ -29,6 +29,6 @@ export class MemberWalletInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 }

@@ -1,3 +1,4 @@
+import { GetItemDto } from './../../../apps/admin/src/postbox/dto/req/get.item.dto';
 import {
   Member,
   MemberAvatarInfo,
@@ -395,7 +396,7 @@ export class CommonService {
     try {
       return await this.memberRepository.findOne({
         select: [
-          'memberId',
+          'id',
           'memberCode',
           'providerType',
           'officeGradeType',
@@ -404,7 +405,7 @@ export class CommonService {
           'stateMessage',
         ],
         where: {
-          memberId: memberId,
+          id: memberId,
         },
       });
     } catch (error) {
@@ -798,9 +799,9 @@ export class CommonService {
     });
 
     return await this.memberRepository.findOne({
-      select: ['memberId', 'memberCode', 'nickname', 'email'],
+      select: ['id', 'memberCode', 'nickname', 'email'],
       where: {
-        memberId: memberAccount.memberId,
+        id: memberAccount.memberId,
       },
     });
   }
@@ -828,7 +829,7 @@ export class CommonService {
     const memberCode = await this.gnenerateMemberCode();
 
     const member = new Member();
-    member.memberId = memberId;
+    member.id = memberId;
     member.memberCode = memberCode;
     member.firstProviderType = providerType;
     member.regPathType = regPathType;
@@ -840,20 +841,17 @@ export class CommonService {
     await queryRunner.manager.getRepository(Member).save(member);
 
     // 기본 인벤토리 설정 ( 인테리어)
-    await this.createMemberInteriorInventoryInit(member.memberId, queryRunner);
+    await this.createMemberInteriorInventoryInit(member.id, queryRunner);
 
     // 기본 마이룸 설정
-    await this.createMemberMyRoomInit(member.memberId, queryRunner);
+    await this.createMemberMyRoomInit(member.id, queryRunner);
 
     // 기본 아바타 파츠 설정
-    await this.createMemberAvatarPartsInventoryInit(
-      member.memberId,
-      queryRunner,
-    );
+    await this.createMemberAvatarPartsInventoryInit(member.id, queryRunner);
 
     // 계정 생성
     const memberAccount = new MemberAccount();
-    memberAccount.memberId = member.memberId;
+    memberAccount.memberId = member.id;
     memberAccount.providerType = providerType;
     memberAccount.accountToken = accountToken;
 

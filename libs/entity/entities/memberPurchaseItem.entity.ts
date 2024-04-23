@@ -18,7 +18,7 @@ export class MemberPurchaseItem {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column('varchar', { name: 'memberId', length: 100 })
+  @Column('uuid')
   memberId: string;
 
   @Column('int', { name: 'productId' })
@@ -34,13 +34,17 @@ export class MemberPurchaseItem {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
-  @ManyToOne(() => PaymentProductManager, (manager) => manager.MemberPurchaseItems, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => PaymentProductManager,
+    (manager) => manager.MemberPurchaseItems,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'productId', referencedColumnName: 'id' }])
   PaymentProductManager: PaymentProductManager;
 }

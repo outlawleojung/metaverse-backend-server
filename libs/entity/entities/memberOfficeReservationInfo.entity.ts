@@ -38,7 +38,7 @@ export class MemberOfficeReservationInfo {
   @Column('varchar', { name: 'roomCode', length: 20 })
   roomCode: string;
 
-  @Column('varchar', { name: 'memberId', length: 100 })
+  @Column('uuid')
   memberId: string;
 
   @ApiProperty({
@@ -166,34 +166,52 @@ export class MemberOfficeReservationInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
-  @ManyToOne(() => OfficeModeType, (modeType) => modeType.MemberOfficeReservationInfos, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => OfficeModeType,
+    (modeType) => modeType.MemberOfficeReservationInfos,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'modeType', referencedColumnName: 'type' }])
   OfficeModeType: OfficeModeType;
 
-  @ManyToOne(() => OfficeTopicType, (topicType) => topicType.MemberOfficeReservationInfos, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => OfficeTopicType,
+    (topicType) => topicType.MemberOfficeReservationInfos,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'topicType', referencedColumnName: 'type' }])
   OfficeTopicType: OfficeTopicType;
 
-  @ManyToOne(() => OfficeAlarmType, (modeType) => modeType.MemberOfficeReservationInfos, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => OfficeAlarmType,
+    (modeType) => modeType.MemberOfficeReservationInfos,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'alarmType', referencedColumnName: 'type' }])
   OfficeAlarmType: OfficeAlarmType;
 
-  @OneToMany(() => MemberOfficeReservationWaitingInfo, (info) => info.MemberOfficeReservationInfo)
+  @OneToMany(
+    () => MemberOfficeReservationWaitingInfo,
+    (info) => info.MemberOfficeReservationInfo,
+  )
   MemberOfficeReservationWaitingInfos: MemberOfficeReservationWaitingInfo[];
 
-  @OneToMany(() => CSAFEventBoothInfo, (info) => info.MemberOfficeReservationInfo)
+  @OneToMany(
+    () => CSAFEventBoothInfo,
+    (info) => info.MemberOfficeReservationInfo,
+  )
   CSAFEventBoothInfos: CSAFEventBoothInfo[];
 
   @OneToMany(() => BoothFileBoxInfo, (info) => info.BoothInfo)

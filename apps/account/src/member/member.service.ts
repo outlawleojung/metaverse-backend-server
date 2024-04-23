@@ -196,7 +196,7 @@ export class MemberService {
     }
 
     const newMember = new Member();
-    newMember.memberId = memberId;
+    newMember.id = memberId;
     newMember.nickname = data.nickname;
     newMember.stateMessage = data.stateMessage;
 
@@ -517,7 +517,7 @@ export class MemberService {
 
     for (const member of members) {
       if (new Date(member.deletedAt) <= new Date(oneMonthAgo)) {
-        await this.memberRepository.delete(member.memberId, queryRunner);
+        await this.memberRepository.delete(member.id, queryRunner);
       }
     }
 
@@ -598,7 +598,7 @@ export class MemberService {
 
     // 닉네임, 상태메시지 업데이트
     const mac = new Member();
-    mac.memberId = memberId;
+    mac.id = memberId;
     mac.nickname = nickname;
     mac.stateMessage = stateMessage;
 
@@ -690,9 +690,7 @@ export class MemberService {
       await this.commonService.getDefaultCardInfo(memberId);
 
     // 아바타 정보
-    const avatarInfos = await this.commonService.getAvatarInfo(
-      exMember.memberId,
-    );
+    const avatarInfos = await this.commonService.getAvatarInfo(exMember.id);
 
     // 마이룸 정보
     const myRoomList = await this.commonService.getMyRoomInfo(memberId);
@@ -710,7 +708,7 @@ export class MemberService {
       await this.commonService.getAvatarPartsItemInven(memberId);
 
     // 재화 정보
-    const moneyInfos = await this.commonService.getMoneyInfo(exMember.memberId);
+    const moneyInfos = await this.commonService.getMoneyInfo(exMember.id);
 
     // // 지갑 정보
     // const walletAddr = await this.commonService.GetWalletInfo(exMember.memberId);

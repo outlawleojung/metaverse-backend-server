@@ -41,7 +41,7 @@ export class ReportService {
   ) {
     const member = await this.memberRepository.findOne({
       where: {
-        memberId: memberId,
+        id: memberId,
       },
     });
 
@@ -66,7 +66,7 @@ export class ReportService {
     }
 
     const newReport = new MemberReportInfo();
-    newReport.targetMemberId = targetMember.memberId;
+    newReport.targetMemberId = targetMember.id;
     newReport.targetNickname = targetMember.nickname;
     newReport.reportMemberId = memberId;
     newReport.reportNickname = nickname;

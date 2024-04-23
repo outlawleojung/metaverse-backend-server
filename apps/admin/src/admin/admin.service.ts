@@ -20,6 +20,7 @@ import { EndedUnixTimestamp, StartedUnixTimestamp } from '@libs/common';
 import { ForbiddenException } from '@nestjs/common/exceptions';
 import { ChangeRoleTypeDto } from './dto/request/changeroletype.dto';
 import { PaginateAdminDto } from './dto/request/paginate-admin.dto';
+import { CommonService } from '../common/common.service';
 
 @Injectable()
 export class AdminService {
@@ -28,15 +29,22 @@ export class AdminService {
     @InjectRepository(Admin) private adminRepository: Repository<Admin>,
     @InjectRepository(RoleType)
     private roleTypeRepository: Repository<RoleType>,
+    private readonly commonService: CommonService,
     @Inject(DataSource) private dataSource: DataSource,
   ) {}
 
   async paginateAdmins(dto: PaginateAdminDto) {
-    if (dto.page) {
-      return this.pagePaginateAdmins(dto);
-    } else {
-      return this.cursorPaginateAdmins(dto);
-    }
+    // if (dto.page) {
+    //   return this.pagePaginateAdmins(dto);
+    // } else {
+    //   return this.cursorPaginateAdmins(dto);
+    // }
+    return await this.commonService.paginate(
+      dto,
+      this.adminRepository,
+      {},
+      'admin',
+    );
   }
 
   async pagePaginateAdmins(dto: PaginateAdminDto) {
@@ -56,10 +64,10 @@ export class AdminService {
   async cursorPaginateAdmins(dto: PaginateAdminDto) {
     const where: FindOptionsWhere<Admin> = {};
 
-    if (dto.where__id_less_than) {
-      where.id = LessThan(dto.where__id_less_than);
-    } else if (dto.where__id_more_than) {
-      where.id = MoreThan(dto.where__id_more_than);
+    if (dto.where__id__less_than) {
+      where.id = LessThan(dto.where__id__less_than);
+    } else if (dto.where__id__more_than) {
+      where.id = MoreThan(dto.where__id__more_than);
     }
 
     const admins = await this.adminRepository.find({
@@ -81,7 +89,10 @@ export class AdminService {
     if (nextUrl) {
       for (const key of Object.keys(dto)) {
         if (dto[key]) {
-          if (key !== 'where__id_more_than' && key !== 'where__id_less_than') {
+          if (
+            key !== 'where__id__more_than' &&
+            key !== 'where__id__less_than'
+          ) {
             nextUrl.searchParams.append(key, dto[key].toString());
           }
         }
@@ -90,9 +101,9 @@ export class AdminService {
       let key = null;
 
       if (dto.order__createdAt === 'ASC') {
-        key = 'where__id_more_than';
+        key = 'where__id__more_than';
       } else {
-        key = 'where__id_less_than';
+        key = 'where__id__less_than';
       }
 
       nextUrl.searchParams.append(key, lastItem.id.toString());

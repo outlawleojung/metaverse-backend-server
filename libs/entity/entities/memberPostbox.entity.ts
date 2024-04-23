@@ -8,7 +8,6 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
-  PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
@@ -25,7 +24,7 @@ export class MemberPostbox {
   @PrimaryColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @Column('int', { name: 'postboxId', nullable: true })
@@ -50,7 +49,7 @@ export class MemberPostbox {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 
   @ManyToOne(() => Postbox, (postbox) => postbox.MemberPostboxes, {

@@ -14,7 +14,7 @@ import { Member } from './member.entity';
 @Index('CI', ['CI'], { unique: true })
 @Entity('member_identification')
 export class MemberIdentification {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @Column('varchar', { name: 'name', length: 32 })
@@ -42,6 +42,6 @@ export class MemberIdentification {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId', referencedColumnName: 'memberId' }])
+  @JoinColumn([{ name: 'memberId' }])
   Member: Member;
 }
