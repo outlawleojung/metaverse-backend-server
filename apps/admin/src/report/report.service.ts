@@ -9,11 +9,11 @@ import {
   MemberReportInfo,
   ReportReasonType,
   ReportType,
-  User,
   ReportCategory,
   ReportStateType,
   Member,
   DisciplineReview,
+  Admin,
 } from '@libs/entity';
 import {
   Injectable,
@@ -31,7 +31,7 @@ import { PatchReportDto } from './dto/req/patch.report.dto';
 @Injectable()
 export class ReportService {
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Admin) private adminRepository: Repository<Admin>,
     @InjectRepository(Member) private memberRepository: Repository<Member>,
     @InjectRepository(MemberReportInfo)
     private memberReportInfoRepository: Repository<MemberReportInfo>,
@@ -65,7 +65,7 @@ export class ReportService {
     reasonType: number,
     stateType: number,
   ) {
-    const admin = await this.userRepository.findOne({
+    const admin = await this.adminRepository.findOne({
       where: {
         id: adminId,
       },

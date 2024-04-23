@@ -2,28 +2,28 @@ import { ADMIN_TYPE, ROLE_TYPE } from '@libs/constants';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '@libs/entity';
+import { Admin } from '@libs/entity';
 
 @Injectable()
 export class RolesService {
   constructor(
-    @InjectRepository(User) private usersRepository: Repository<User>,
+    @InjectRepository(Admin) private adminRepository: Repository<Admin>,
   ) {}
   private readonly logger = new Logger(RolesService.name);
 
-  async matchRoles(roles: number[], user: User) {
-    const currentUser = await this.usersRepository.findOne({
+  async matchRoles(roles: number[], admin: Admin) {
+    const currentAdmin = await this.adminRepository.findOne({
       where: {
-        id: user.id,
+        id: admin.id,
         adminType: ADMIN_TYPE.ARZMETA_ADMIN,
       },
     });
 
-    if (currentUser.roleType === ROLE_TYPE.SYSTEM_ADMIN) {
+    if (currentAdmin.roleType === ROLE_TYPE.SYSTEM_ADMIN) {
       return true;
     }
 
-    if (currentUser.roleType === ROLE_TYPE.UNAUTHORIZED) {
+    if (currentAdmin.roleType === ROLE_TYPE.UNAUTHORIZED) {
       this.logger.debug('미인증 관리자 입니다.');
       throw new UnauthorizedException({
         message: {
@@ -35,11 +35,11 @@ export class RolesService {
 
     const highestRole = Math.min(...roles);
 
-    if (currentUser.roleType <= highestRole) {
+    if (currentAdmin.roleType <= highestRole) {
       return true;
     }
 
-    if (roles.length === 0 && currentUser.roleType !== ROLE_TYPE.UNAUTHORIZED)
+    if (roles.length === 0 && currentAdmin.roleType !== ROLE_TYPE.UNAUTHORIZED)
       return true;
 
     throw new UnauthorizedException({

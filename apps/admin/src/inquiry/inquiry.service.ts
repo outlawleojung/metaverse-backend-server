@@ -11,7 +11,7 @@ import {
   MemberInquiry,
   MemberInquiryAnswer,
   MemberInquiryManager,
-  User,
+  Admin,
 } from '@libs/entity';
 import { ADMIN_PAGE, SEARCH_TYPE, INQUIRY_ANSWER_TYPE } from '@libs/constants';
 import { CreateInquiryTemplateDto } from './dto/req/create.inquiry.template.dto';
@@ -25,7 +25,7 @@ import { GetTableDto } from '../common/dto/get.table.dto';
 @Injectable()
 export class InquiryService {
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Admin) private adminRepository: Repository<Admin>,
     @InjectRepository(MemberInquiryManager)
     private memberInquiryManagerRepository: Repository<MemberInquiryManager>,
     @InjectRepository(MemberInquiry)

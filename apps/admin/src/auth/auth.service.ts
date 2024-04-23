@@ -1,22 +1,21 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import bcryptjs from 'bcryptjs';
-import { DataSource, Repository } from 'typeorm';
-import { User } from '@libs/entity';
+import { Repository } from 'typeorm';
+import { Admin } from '@libs/entity';
 import { ADMIN_TYPE } from '@libs/constants';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User) private usersRepository: Repository<User>,
-    @Inject(DataSource) private dataSource: DataSource,
+    @InjectRepository(Admin) private adminRepository: Repository<Admin>,
   ) {}
   private readonly logger = new Logger(AuthService.name);
 
   async validateUser(email: string, password: string) {
-    const user = await this.dataSource.getRepository(User).findOne({
+    const user = await this.adminRepository.findOne({
       where: { email: email, adminType: ADMIN_TYPE.ARZMETA_ADMIN },
-      select: ['id', 'email', 'password'],
+      select: { id: true, email: true, password: true },
     });
 
     this.logger.debug(email, password, user);

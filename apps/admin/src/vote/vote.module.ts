@@ -4,7 +4,7 @@ import { VoteService } from './vote.service';
 import { AzureBlobService } from '@libs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
-  User,
+  Admin,
   VoteInfo,
   VoteDivType,
   VoteAlterResType,
@@ -16,7 +16,7 @@ import {
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      User,
+      Admin,
       VoteInfo,
       VoteDivType,
       VoteAlterResType,

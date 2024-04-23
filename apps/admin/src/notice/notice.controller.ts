@@ -22,7 +22,7 @@ import { ROLE_TYPE } from '@libs/constants';
 import { GetNoticesDto } from './dto/req/get.notices.dto';
 import { ResponseGetNoticesDto } from './dto/res/response.get.notices.dto';
 import { CreateNoticeDto } from './dto/req/create.notice.dto';
-import { UserDecorator } from '../common/decorators/user.decorator';
+import { AdminDecorator } from '../common/decorators/admin.decorator';
 import { UpdateNoticeDto } from './dto/req/update.notice.dto';
 
 @ApiTags('NOTICE - 공지사항')
@@ -72,11 +72,11 @@ export class NoticeController {
   @Roles(ROLE_TYPE.SUPER_ADMIN)
   @Post()
   async createNotice(
-    @UserDecorator() user,
+    @AdminDecorator() admin,
     @Body() data: CreateNoticeDto,
     @Res() res,
   ) {
-    const result = await this.noticeService.createNotice(user.id, data);
+    const result = await this.noticeService.createNotice(admin.id, data);
 
     if (result) {
       res.redirect(HttpStatus.SEE_OTHER, `/api/notice?page=1`);
@@ -90,14 +90,14 @@ export class NoticeController {
   @Roles(ROLE_TYPE.SUPER_ADMIN)
   @Patch(':id')
   async updateNotice(
-    @UserDecorator() user,
+    @AdminDecorator() admin,
     @Param('id') noticeId: number,
     @Body() data: UpdateNoticeDto,
     @Query() query: GetNoticesDto,
     @Res() res,
   ) {
     const result = await this.noticeService.updateNotice(
-      user.id,
+      admin.id,
       noticeId,
       data,
     );
@@ -121,7 +121,7 @@ export class NoticeController {
   @UseGuards(LoggedInGuard)
   @Roles(ROLE_TYPE.SUPER_ADMIN)
   @Delete(':id')
-  async deleteNotice(@UserDecorator() user, @Param('id') noticeId: number) {
+  async deleteNotice(@AdminDecorator() admin, @Param('id') noticeId: number) {
     return await this.noticeService.deleteNotice(noticeId);
   }
 }

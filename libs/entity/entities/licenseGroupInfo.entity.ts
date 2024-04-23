@@ -13,8 +13,8 @@ import {
 } from 'typeorm';
 import { OfficeLicenseDomainInfo } from './officeLicenseDomainInfo.entity';
 import { LicenseInfo } from './licenseInfo.entity';
-import { User } from './user.entity';
 import { CSAFEventInfo } from './csafEventInfo.entity';
+import { Admin } from './admin.entity';
 
 @Index('domainId', ['domainId'], {})
 @Index('adminId', ['adminId'], {})
@@ -42,6 +42,9 @@ export class LicenseGroupInfo {
   @Column('int', { name: 'useCount', default: () => "'0'" })
   useCount: number;
 
+  @Column({ nullable: true })
+  adminId: number | null;
+
   @Column('datetime', { name: 'startedAt' })
   startedAt: Date;
 
@@ -50,9 +53,6 @@ export class LicenseGroupInfo {
 
   @Column('int', { name: 'expirationDay', nullable: true })
   expirationDay: number | null;
-
-  @Column('int', { name: 'adminId', nullable: true })
-  adminId: number | null;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -74,12 +74,13 @@ export class LicenseGroupInfo {
   @JoinColumn([{ name: 'eventId', referencedColumnName: 'id' }])
   CSAFEventInfo: CSAFEventInfo;
 
-  @ManyToOne(() => User, (user) => user.LicenseGroupInfos, {
+  @ManyToOne(() => Admin, (admin) => admin.LicenseGroupInfos, {
+    nullable: true,
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId', referencedColumnName: 'id' }])
-  Admin: User;
+  @JoinColumn([{ name: 'adminId' }])
+  admin: Admin;
 
   @ManyToOne(() => LicenseType, (type) => type.LicenseGroupInfos, {
     onDelete: 'CASCADE',

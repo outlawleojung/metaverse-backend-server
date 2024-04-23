@@ -18,7 +18,7 @@ import {
   PostalType,
   Postbox,
   PostboxAppend,
-  User,
+  Admin,
 } from '@libs/entity';
 import {
   BadGatewayException,
@@ -52,7 +52,7 @@ import { GetItemDto } from './dto/req/get.item.dto';
 @Injectable()
 export class PostboxService {
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Admin) private adminRepository: Repository<Admin>,
     @InjectRepository(Postbox) private postboxRepository: Repository<Postbox>,
     @InjectRepository(PostboxAppend)
     private postboxAppendRepository: Repository<PostboxAppend>,

@@ -14,8 +14,8 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MorganInterceptor } from 'nest-morgan';
 import { ReportService } from './report.service';
-import { UserDecorator } from '../common/decorators/user.decorator';
-import { User } from '@libs/entity';
+import { AdminDecorator } from '../common/decorators/admin.decorator';
+import { Admin } from '@libs/entity';
 import { GetReportListDto } from './dto/req/get.report.list.dto';
 import { GetConstantsDto } from './dto/res/get.constants.dto';
 import { GetDetailResponseDto } from './dto/res/get.detail.response.dto';
@@ -65,11 +65,11 @@ export class ReportController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Get()
   async getReports(
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Query() data: GetReportListDto,
   ) {
     return await this.reportService.getReports(
-      user.id,
+      admin.id,
       data.page,
       data.searchType,
       data.searchValue,
@@ -89,10 +89,10 @@ export class ReportController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Get(':reportId')
   async getReport(
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Param('reportId') reportId: number,
   ) {
-    return await this.reportService.getReport(user.id, reportId);
+    return await this.reportService.getReport(admin.id, reportId);
   }
 
   @ApiOperation({ summary: '신고 처리 하기' })
@@ -100,10 +100,10 @@ export class ReportController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Patch()
   async patchReport(
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Body() data: PatchReportDto,
     @Param('reportId') reportId: number,
   ) {
-    return await this.reportService.patchReport(user.id, reportId, data);
+    return await this.reportService.patchReport(admin.id, reportId, data);
   }
 }

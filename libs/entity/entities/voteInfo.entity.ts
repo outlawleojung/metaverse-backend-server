@@ -10,13 +10,13 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
 import { VoteDivType } from './voteDivType.entity';
 import { VoteResType } from './voteResType.entity';
 import { VoteResultExposureType } from './voteResultExposureType.entity';
 import { BooleanType } from './booleanType.entity';
 import { VoteInfoExample } from './voteInfoExample.entity';
 import { VoteAlterResType } from './voteAlterResType.entity';
+import { Admin } from './admin.entity';
 
 @Index('divType', ['divType'], {})
 @Index('resType', ['resType'], {})
@@ -57,6 +57,9 @@ export class VoteInfo {
   @Column('int', { name: 'isEnabledEdit', default: () => "'0'" })
   isEnabledEdit: number;
 
+  @Column()
+  adminId: number;
+
   @Column('datetime', { name: 'startedAt' })
   startedAt: Date;
 
@@ -65,9 +68,6 @@ export class VoteInfo {
 
   @Column('datetime', { name: 'resultEndedAt' })
   resultEndedAt: Date;
-
-  @Column('int', { name: 'adminId' })
-  adminId: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -85,10 +85,14 @@ export class VoteInfo {
   @JoinColumn([{ name: 'divType', referencedColumnName: 'type' }])
   VoteDivType: VoteDivType;
 
-  @ManyToOne(() => VoteAlterResType, (voteAlterRestype) => voteAlterRestype.VoteInfos, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => VoteAlterResType,
+    (voteAlterRestype) => voteAlterRestype.VoteInfos,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'alterResType', referencedColumnName: 'type' }])
   VoteAlterResType: VoteAlterResType;
 
@@ -99,34 +103,49 @@ export class VoteInfo {
   @JoinColumn([{ name: 'resType', referencedColumnName: 'type' }])
   VoteResType: VoteResType;
 
-  @ManyToOne(() => VoteResultExposureType, (voteresulttype) => voteresulttype.VoteInfos, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => VoteResultExposureType,
+    (voteresulttype) => voteresulttype.VoteInfos,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'resultExposureType', referencedColumnName: 'type' }])
   VoteResultExposureType: VoteResultExposureType;
 
-  @ManyToOne(() => BooleanType, (booleantype) => booleantype.IsExposingResultVoteInfos, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => BooleanType,
+    (booleantype) => booleantype.IsExposingResultVoteInfos,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'isExposingResult', referencedColumnName: 'type' }])
   isExposingResultBool: BooleanType;
 
-  @ManyToOne(() => BooleanType, (booleantype) => booleantype.IsEnabledEditVoteInfos, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => BooleanType,
+    (booleantype) => booleantype.IsEnabledEditVoteInfos,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'isEnabledEdit', referencedColumnName: 'type' }])
   isEnabledEditBool: BooleanType;
 
-  @ManyToOne(() => User, (user) => user.VoteInfos, {
+  @ManyToOne(() => Admin, (admin) => admin.VoteInfos, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId', referencedColumnName: 'id' }])
-  Admin: User;
+  @JoinColumn({ name: 'adminId' })
+  admin: Admin;
 
-  @OneToMany(() => VoteInfoExample, (voteinfoexample) => voteinfoexample.VoteInfo)
+  @OneToMany(
+    () => VoteInfoExample,
+    (voteinfoexample) => voteinfoexample.VoteInfo,
+  )
   VoteInfoExamples: VoteInfoExample[];
 }

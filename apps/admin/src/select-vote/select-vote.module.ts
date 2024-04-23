@@ -6,14 +6,14 @@ import {
   MemberSelectVoteInfo,
   SelectVoteInfo,
   SelectVoteItem,
-  User,
+  Admin,
 } from '@libs/entity';
 import { AzureBlobService } from '@libs/common';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      User,
+      Admin,
       SelectVoteInfo,
       SelectVoteItem,
       MemberSelectVoteInfo,

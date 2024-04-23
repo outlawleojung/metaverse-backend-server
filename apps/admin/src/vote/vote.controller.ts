@@ -19,8 +19,8 @@ import {
 
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AzureBlobService } from '@libs/common';
-import { UserDecorator } from '../common/decorators/user.decorator';
-import { User } from '@libs/entity';
+import { AdminDecorator } from '../common/decorators/admin.decorator';
+import { Admin } from '@libs/entity';
 import { VoteService } from './vote.service';
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { ErrorDto } from './dto/res/error.response.dto';
@@ -61,8 +61,11 @@ export class VoteController {
   @UseGuards(LoggedInGuard)
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Get()
-  async getVoteList(@UserDecorator() user: User, @Query() data: GetTableDto) {
-    return await this.voteService.getVoteList(user.id, data);
+  async getVoteList(
+    @AdminDecorator() admin: Admin,
+    @Query() data: GetTableDto,
+  ) {
+    return await this.voteService.getVoteList(admin.id, data);
   }
 
   //투표 추가
@@ -82,7 +85,7 @@ export class VoteController {
   @Post()
   async postVoteRegister(
     @UploadedFile() file: Express.Multer.File,
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Body() data: AddVoteRegisterDto,
     @Res() res,
   ) {
@@ -92,7 +95,11 @@ export class VoteController {
     const { buffer, ...fileWithoutBuffer } = file;
     this.logger.log(fileWithoutBuffer);
 
-    const result = await this.voteService.postVoteRegister(user.id, file, data);
+    const result = await this.voteService.postVoteRegister(
+      admin.id,
+      file,
+      data,
+    );
     if (result) {
       res.redirect(HttpStatus.MOVED_PERMANENTLY, `/api/vote?page=1`);
     } else {
@@ -114,7 +121,7 @@ export class VoteController {
   @UseGuards(LoggedInGuard)
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Get('dateInfo')
-  async getVoteDateInfo(@UserDecorator() user: User) {
+  async getVoteDateInfo() {
     return await this.voteService.getVoteDateInfo();
   }
 
@@ -133,12 +140,12 @@ export class VoteController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Delete('/:voteId/:page')
   async deleteVoteInfo(
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Param() param,
     @Res() res,
   ) {
     const result = await this.voteService.deleteVoteInfo(
-      user.id,
+      admin.id,
       param.voteId,
       param.page,
     );
@@ -167,14 +174,14 @@ export class VoteController {
   @Patch('/:voteId')
   async patchVoteInfo(
     @UploadedFile() file: Express.Multer.File,
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Body() data: UpdateVoteInfoDto,
     @Param('voteId') voteId: number,
     @Res() res,
   ) {
     const result = await this.voteService.patchVoteInfo(
       file,
-      user.id,
+      admin.id,
       voteId,
       data,
     );
@@ -200,7 +207,7 @@ export class VoteController {
   @UseGuards(LoggedInGuard)
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Get('constants')
-  async getVoteConstants(@UserDecorator() user: User) {
+  async getVoteConstants() {
     return await this.voteService.getVoteConstants();
   }
 
@@ -218,10 +225,7 @@ export class VoteController {
   @UseGuards(LoggedInGuard)
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Get('/resultInfo/:voteId')
-  async getVoteResultInfo(
-    @UserDecorator() user: User,
-    @Param('voteId') voteId: number,
-  ) {
+  async getVoteResultInfo(@Param('voteId') voteId: number) {
     return await this.voteService.getVoteResultInfo(voteId);
   }
 
@@ -240,7 +244,6 @@ export class VoteController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Get('/resultList/:voteId')
   async getVoteResultListInfo(
-    @UserDecorator() user: User,
     @Param('voteId') voteId: number,
     @Query() data: GetVoteResultListInfoDto,
   ) {

@@ -10,7 +10,7 @@ import {
   MemberInquiryAnswer,
   MemberInquiryGroup,
   MemberInquiryManager,
-  User,
+  Admin,
 } from '@libs/entity';
 import { MailModule } from '../mail/mail.module';
 import { InquiryController } from './inquiry.controller';
@@ -18,7 +18,7 @@ import { InquiryController } from './inquiry.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      User,
+      Admin,
       MemberInquiry,
       MemberInquiryAnswer,
       MemberInquiryGroup,

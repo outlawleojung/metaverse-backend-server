@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { User } from '@libs/entity';
+import { Admin } from '@libs/entity';
 import { AuthService } from './auth.service';
 import { LocalSerializer } from './local.serializer';
 import { LocalStrategy } from './local.strategy';
@@ -10,7 +10,7 @@ import { LocalStrategy } from './local.strategy';
 @Module({
   imports: [
     PassportModule.register({ session: true }),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([Admin]),
   ],
   providers: [AuthService, LocalStrategy, LocalSerializer],
 })

@@ -18,8 +18,8 @@ import { MorganInterceptor } from 'nest-morgan';
 import { SelectVoteService } from './select-vote.service';
 import { Roles } from '../common/decorators/roles.decorator';
 import { LoggedInGuard } from '../auth/logged-in.guard';
-import { UserDecorator } from '../common/decorators/user.decorator';
-import { User } from '@libs/entity';
+import { AdminDecorator } from '../common/decorators/admin.decorator';
+import { Admin } from '@libs/entity';
 import { GetTableDto } from '../common/dto/get.table.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateSelectVoteDto } from './dto/req/create.select.vote.dto';
@@ -88,10 +88,10 @@ export class SelectVoteController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Post()
   async createSelectVote(
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Body() data: CreateSelectVoteDto,
   ) {
-    return await this.selectVoteService.createSelectVote(user.id, data);
+    return await this.selectVoteService.createSelectVote(admin.id, data);
   }
 
   //투표 편집
@@ -103,11 +103,15 @@ export class SelectVoteController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Patch(':voteId')
   async updateSelectVote(
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Body() data: UpdateSelectVoteDto,
     @Param('voteId') voteId: number,
   ) {
-    return await this.selectVoteService.updateSelectVote(user.id, voteId, data);
+    return await this.selectVoteService.updateSelectVote(
+      admin.id,
+      voteId,
+      data,
+    );
   }
 
   // 투표 항목 상세 조회
@@ -135,12 +139,12 @@ export class SelectVoteController {
   @Post('create-item/:voteId')
   async createSelectVoteItem(
     @UploadedFile() file: Express.Multer.File,
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Body() data: CreateSelectVoteItemDto,
     @Param('voteId') voteId: number,
   ) {
     return await this.selectVoteService.createSelectVoteItem(
-      user.id,
+      admin.id,
       voteId,
       data,
       file,
@@ -155,12 +159,12 @@ export class SelectVoteController {
   @Patch('update-item/:voteId')
   async updateSelectVoteItem(
     @UploadedFile() file: Express.Multer.File,
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Param('voteId') voteId: number,
     @Body() data: UpdateSelectVoteItemDto,
   ) {
     return await this.selectVoteService.updateSelectVoteItem(
-      user.id,
+      admin.id,
       voteId,
       data,
       file,
@@ -173,12 +177,12 @@ export class SelectVoteController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Patch('update-item-list/:voteId')
   async updateVoteItemList(
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Param('voteId') voteId: number,
     @Body() data: UpdateSelectVoteItemListDto,
   ) {
     return await this.selectVoteService.updateVoteItemList(
-      user.id,
+      admin.id,
       voteId,
       data,
     );
@@ -194,7 +198,7 @@ export class SelectVoteController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Delete(':voteId')
   async deleteSelectVote(
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Param('voteId') voteId: number,
   ) {
     return await this.selectVoteService.deleteSelectVote(voteId);

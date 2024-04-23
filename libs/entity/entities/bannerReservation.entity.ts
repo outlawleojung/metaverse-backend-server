@@ -8,9 +8,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
 import { BannerInfo } from './bannerInfo.entity';
 import { UploadType } from './uploadType.entity';
+import { Admin } from './admin.entity';
 
 @Index('bannerId', ['bannerId'], {})
 @Index('uploadType', ['uploadType'], {})
@@ -32,8 +32,8 @@ export class BannerReservation {
   @Column('varchar', { name: 'description', length: 64, nullable: true })
   description: string;
 
-  @Column('int', { name: 'adminId', nullable: true })
-  adminId: number;
+  @Column({ nullable: true })
+  adminId: number | null;
 
   @Column('datetime', { name: 'startedAt' })
   startedAt: Date;
@@ -61,10 +61,11 @@ export class BannerReservation {
   @JoinColumn([{ name: 'uploadType', referencedColumnName: 'type' }])
   UploadType: UploadType;
 
-  @ManyToOne(() => User, (user) => user.BannerReservations, {
+  @ManyToOne(() => Admin, (admin) => admin.BannerReservations, {
+    nullable: true,
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId', referencedColumnName: 'id' }])
-  Admin: User;
+  @JoinColumn([{ name: 'adminId' }])
+  admin: Admin;
 }

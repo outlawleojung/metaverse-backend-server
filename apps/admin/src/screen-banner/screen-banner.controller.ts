@@ -21,7 +21,7 @@ import { GetScreenBannerConstantsResponseDto } from './dto/res/get.constants.res
 import { CreateScreenReservationDTO } from './dto/req/create.screen.dto';
 import { GetScreenResponseDto } from './dto/res/get.screen.response.dto';
 import { CreateBannerReservationDTO } from './dto/req/create.banner.dto';
-import { UserDecorator } from '../common/decorators/user.decorator';
+import { AdminDecorator } from '../common/decorators/admin.decorator';
 import { UpdateBannerReservationDTO } from './dto/req/update.banner.dto';
 import { UpdateScreenReservationDTO } from './dto/req/update.screen.dto';
 import { GetScreenBannerDTO } from './dto/req/get.screen.dto';
@@ -65,11 +65,11 @@ export class ScreenBannerController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Post('createScreen')
   async createScreen(
-    @UserDecorator() user,
+    @AdminDecorator() admin,
     @Body() data: CreateScreenReservationDTO,
   ) {
     return await this.screenBannerService.createScreenReservation(
-      user.id,
+      admin.id,
       data,
     );
   }
@@ -84,12 +84,12 @@ export class ScreenBannerController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Patch('updateScreen/:reservId')
   async updateScreen(
-    @UserDecorator() user,
+    @AdminDecorator() admin,
     @Body() data: UpdateScreenReservationDTO,
     @Param('reservId') reservId: number,
   ) {
     return await this.screenBannerService.updateScreenReservation(
-      user.id,
+      admin.id,
       data,
       reservId,
     );
@@ -137,11 +137,11 @@ export class ScreenBannerController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Post('createBanner')
   async createBanner(
-    @UserDecorator() user,
+    @AdminDecorator() admin,
     @Body() data: CreateBannerReservationDTO,
   ) {
     return await this.screenBannerService.createBannerReservation(
-      user.id,
+      admin.id,
       data,
     );
   }
@@ -151,12 +151,12 @@ export class ScreenBannerController {
   // @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Patch('updateBanner/:reservId')
   async updateBanner(
-    @UserDecorator() user,
+    @AdminDecorator() admin,
     @Body() data: UpdateBannerReservationDTO,
     @Param('reservId') reservId: number,
   ) {
     return await this.screenBannerService.updateBannerReservation(
-      user.id,
+      admin.id,
       data,
       reservId,
     );

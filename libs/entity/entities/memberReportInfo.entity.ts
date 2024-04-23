@@ -11,7 +11,7 @@ import {
 import { Member } from './member.entity';
 import { ReportCategory } from './reportCategory.entity';
 import { ReportStateType } from './reportStateType.entity';
-import { User } from './user.entity';
+import { Admin } from './admin.entity';
 
 @Index('adminId', ['adminId'], {})
 @Index('stateType', ['stateType'], {})
@@ -59,8 +59,8 @@ export class MemberReportInfo {
   @Column('varchar', { name: 'comment', length: 256 })
   comment: string;
 
-  @Column('int', { name: 'adminId', nullable: true })
-  adminId: number;
+  @Column({ nullable: true })
+  adminId: number | null;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -75,10 +75,14 @@ export class MemberReportInfo {
   @JoinColumn([{ name: 'reportMemberId', referencedColumnName: 'memberId' }])
   ReportMember: Member;
 
-  @ManyToOne(() => ReportCategory, (reportCategory) => reportCategory.MemberReportInfos, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => ReportCategory,
+    (reportCategory) => reportCategory.MemberReportInfos,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([
     { name: 'reportType', referencedColumnName: 'reportType' },
     { name: 'reasonType', referencedColumnName: 'reasonType' },
@@ -99,10 +103,11 @@ export class MemberReportInfo {
   @JoinColumn([{ name: 'stateType', referencedColumnName: 'type' }])
   ReportStateType: ReportStateType;
 
-  @ManyToOne(() => User, (user) => user.MemberReportInfos, {
+  @ManyToOne(() => Admin, (admin) => admin.MemberReportInfos, {
+    nullable: true,
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId', referencedColumnName: 'id' }])
-  Admin: User;
+  @JoinColumn([{ name: 'adminId' }])
+  admin: Admin;
 }

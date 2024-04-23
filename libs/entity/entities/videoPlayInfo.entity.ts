@@ -12,7 +12,7 @@ import {
 import { VideoScreenInfo } from './videoScreenInfo.entity';
 import { VideoStateType } from './videoStateType.entity';
 import { EnabledType } from './enabledType.entity';
-import { User } from './user.entity';
+import { Admin } from './admin.entity';
 
 @Index('videoPlayType', ['videoPlayType'], {})
 @Index('enabledType', ['enabledType'], {})
@@ -52,17 +52,25 @@ export class VideoPlayInfo {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToOne(() => VideoScreenInfo, (videoscreeninfo) => videoscreeninfo.VideoPlayInfo, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
+  @OneToOne(
+    () => VideoScreenInfo,
+    (videoscreeninfo) => videoscreeninfo.VideoPlayInfo,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'videoScreenType', referencedColumnName: 'id' }])
   VideoScreenInfo: VideoScreenInfo;
 
-  @ManyToOne(() => VideoStateType, (videostatetype) => videostatetype.VideoPlayInfos, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => VideoStateType,
+    (videostatetype) => videostatetype.VideoPlayInfos,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'videoPlayType', referencedColumnName: 'type' }])
   VideoStateType: VideoStateType;
 
@@ -73,10 +81,9 @@ export class VideoPlayInfo {
   @JoinColumn([{ name: 'enabledType', referencedColumnName: 'type' }])
   EnabledType: EnabledType;
 
-  @ManyToOne(() => User, (user) => user.VideoPlayInfos, {
+  @ManyToOne(() => Admin, (admin) => admin.VideoPlayInfos, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId', referencedColumnName: 'id' }])
-  Admin: User;
+  admin: Admin;
 }

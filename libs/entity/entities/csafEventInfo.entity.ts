@@ -10,11 +10,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
 import { LicenseGroupInfo } from './licenseGroupInfo.entity';
 import { EventSpaceType } from './eventSpaceType.entity';
 import { CSAFEventBoothInfo } from './csafEventBoothInfo.entity';
 import { CSAFEventEnterLog } from './csafEventEnterLog.entity';
+import { Admin } from './admin.entity';
 
 @Index('adminId', ['adminId'], {})
 @Index('eventSpaceType', ['eventSpaceType'], {})
@@ -29,14 +29,14 @@ export class CSAFEventInfo {
   @Column('int', { name: 'eventSpaceType' })
   eventSpaceType: number;
 
+  @Column({ nullable: true })
+  adminId: number | null;
+
   @Column('datetime', { name: 'startedAt' })
   startedAt: Date;
 
   @Column('datetime', { name: 'endedAt' })
   endedAt: Date;
-
-  @Column('int', { name: 'adminId', nullable: true })
-  adminId: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -53,12 +53,13 @@ export class CSAFEventInfo {
   @OneToMany(() => CSAFEventEnterLog, (log) => log.CSAFEventInfo)
   CSAFEventEnterLogs: CSAFEventEnterLog[];
 
-  @ManyToOne(() => User, (user) => user.CSAFEventInfos, {
+  @ManyToOne(() => Admin, (admin) => admin.CSAFEventInfos, {
+    nullable: true,
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId', referencedColumnName: 'id' }])
-  Admin: User;
+  @JoinColumn([{ name: 'adminId' }])
+  admin: Admin;
 
   @ManyToOne(() => EventSpaceType, (type) => type.CSAFEventInfos, {
     onDelete: 'SET NULL',

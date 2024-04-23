@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   Member,
   ProviderType,
-  User,
+  Admin,
   OfficeGradeType,
   MemberAccount,
   RegPathType,
@@ -31,7 +31,7 @@ import { PaginateMemberDto } from './dto/req/paginate-member.dto';
 export class MemberService {
   private readonly logger = new Logger(MemberService.name);
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Admin) private adminRepository: Repository<Admin>,
     @InjectRepository(Member) private memberRepository: Repository<Member>,
     @InjectRepository(ProviderType)
     private roleTypeRepository: Repository<ProviderType>,

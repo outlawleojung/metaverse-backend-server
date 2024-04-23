@@ -1,4 +1,4 @@
-import { UserDecorator } from '../common/decorators/user.decorator';
+import { AdminDecorator } from '../common/decorators/admin.decorator';
 import {
   Controller,
   UseInterceptors,
@@ -17,7 +17,7 @@ import {
 } from '@nestjs/common';
 import { MorganInterceptor } from 'nest-morgan';
 import { GetTableDto } from '../common/dto/get.table.dto';
-import { User } from '@libs/entity';
+import { Admin } from '@libs/entity';
 import { GatewayService } from './gateway.service';
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { ErrorDto } from './dto/res/error.response.dto';
@@ -50,9 +50,9 @@ export class GatewayController {
   @UseGuards(LoggedInGuard)
   @Roles(ROLE_TYPE.DEV_ADMIN)
   @Get()
-  async getGatewayList(@UserDecorator() user, @Query() data: GetTableDto) {
+  async getGatewayList(@AdminDecorator() admin, @Query() data: GetTableDto) {
     console.log('################# 게이트웨이 조회 ####################');
-    return await this.gatewayService.getGatewayList(user.id, data);
+    return await this.gatewayService.getGatewayList(admin.id, data);
   }
 
   //게이트웨이 추가
@@ -70,11 +70,14 @@ export class GatewayController {
   @Roles(ROLE_TYPE.DEV_ADMIN)
   @Post()
   async postGatewayRegister(
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Body() data: AddGateWayRegisterDto,
     @Res() res,
   ) {
-    const result = await this.gatewayService.postGatewayRegister(user.id, data);
+    const result = await this.gatewayService.postGatewayRegister(
+      admin.id,
+      data,
+    );
     if (result) {
       this.logger.debug('success');
       res.redirect(
@@ -101,11 +104,11 @@ export class GatewayController {
   @Roles(ROLE_TYPE.DEV_ADMIN)
   @Patch()
   async postGatewayEdit(
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Body() data: EditGateWayDto,
     @Res() res,
   ) {
-    const result = await this.gatewayService.postGatewayEdit(user.id, data);
+    const result = await this.gatewayService.postGatewayEdit(admin.id, data);
     if (result) {
       this.logger.debug('success');
       res.method = 'GET';
@@ -133,11 +136,11 @@ export class GatewayController {
   @Roles(ROLE_TYPE.DEV_ADMIN)
   @Delete('/:osType/:appVersion/:page')
   async deleteGateway(
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Param() data: DeleteGateWayDto,
     @Res() res,
   ) {
-    const result = await this.gatewayService.deleteGateway(user.id, data);
+    const result = await this.gatewayService.deleteGateway(admin.id, data);
     if (result) {
       this.logger.debug('success');
       res.method = 'GET';

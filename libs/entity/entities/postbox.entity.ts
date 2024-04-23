@@ -15,9 +15,9 @@ import { PostalState } from './postalState.entity';
 import { PostboxAppend } from './postboxAppend.entity';
 import { PostReceiveMemberInfo } from './postReceiveMemberInfo.entity';
 import { MemberPostbox } from './memberPostbox.entity';
-import { User } from './user.entity';
 import { PostalSendType } from './postalSendType.entity';
 import { PostalLog } from './postalLog.entity';
+import { Admin } from './admin.entity';
 
 @Index('postalType', ['postalType'], {})
 @Index('postalSendype', ['postalSendType'], {})
@@ -55,7 +55,7 @@ export class Postbox {
   @Column('int', { name: 'isSended', default: () => "'0'" })
   isSended: number;
 
-  @Column('int', { name: 'adminId' })
+  @Column()
   adminId: number;
 
   @Column('datetime', { name: 'sendedAt' })
@@ -100,10 +100,10 @@ export class Postbox {
   @JoinColumn([{ name: 'postalState', referencedColumnName: 'type' }])
   PostalState: PostalState;
 
-  @ManyToOne(() => User, (user) => user.Postboxes, {
+  @ManyToOne(() => Admin, (admin) => admin.Postboxes, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId', referencedColumnName: 'id' }])
-  Admin: User;
+  @JoinColumn([{ name: 'adminId' }])
+  admin: Admin;
 }

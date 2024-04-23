@@ -6,13 +6,13 @@ import {
   EntityModule,
   BannerReservation,
   ScreenReservation,
-  User,
+  Admin,
 } from '@libs/entity';
 import { CommonModule } from '@libs/common';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, ScreenReservation, BannerReservation]),
+    TypeOrmModule.forFeature([Admin, ScreenReservation, BannerReservation]),
     EntityModule,
     CommonModule,
   ],

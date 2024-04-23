@@ -9,8 +9,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { LogActionType } from './logActionType.entity';
-import { User } from './user.entity';
 import { LogContentType } from './logContentType.entity';
+import { Admin } from './admin.entity';
 
 @Index('contentType', ['contentType'], {})
 @Index('actionType', ['actionType'], {})
@@ -32,7 +32,7 @@ export class AdminLog {
   @Column('text', { name: 'afterData', nullable: true })
   afterData: string | null;
 
-  @Column('int', { name: 'adminId' })
+  @Column()
   adminId: number;
 
   @CreateDateColumn()
@@ -41,21 +41,21 @@ export class AdminLog {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.AdminLogs, {
+  @ManyToOne(() => Admin, (admin) => admin.AdminLogs, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId', referencedColumnName: 'id' }])
-  Admin: User;
+  @JoinColumn([{ name: 'adminId' }])
+  admin: Admin;
 
-  @ManyToOne(() => LogContentType, (user) => user.AdminLogs, {
+  @ManyToOne(() => LogContentType, (type) => type.AdminLogs, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
   @JoinColumn([{ name: 'contentType', referencedColumnName: 'type' }])
   LogContentType: LogContentType;
 
-  @ManyToOne(() => LogActionType, (user) => user.AdminLogs, {
+  @ManyToOne(() => LogActionType, (type) => type.AdminLogs, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

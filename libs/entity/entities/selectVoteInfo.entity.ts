@@ -9,10 +9,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
 import { VoteResultExposureType } from './voteResultExposureType.entity';
 import { VoteResultType } from './voteResultType.entity';
 import { SelectVoteItem } from './selectVoteItem.entity';
+import { Admin } from './admin.entity';
 
 @Index('resultType', ['resultType'], {})
 @Index('resultExposureType', ['resultExposureType'], {})
@@ -34,6 +34,9 @@ export class SelectVoteInfo {
   @Column('int', { name: 'resultExposureType' })
   resultExposureType: number;
 
+  @Column()
+  adminId: number;
+
   @Column('datetime', { name: 'startedAt' })
   startedAt: Date;
 
@@ -45,9 +48,6 @@ export class SelectVoteInfo {
 
   @Column('datetime', { name: 'resultEndedAt' })
   resultEndedAt: Date;
-
-  @Column('int', { name: 'adminId' })
-  adminId: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -69,12 +69,12 @@ export class SelectVoteInfo {
   @JoinColumn([{ name: 'resultType', referencedColumnName: 'type' }])
   VoteResultType: VoteResultType;
 
-  @ManyToOne(() => User, (user) => user.SelectVoteInfos, {
+  @ManyToOne(() => Admin, (admin) => admin.SelectVoteInfos, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId', referencedColumnName: 'id' }])
-  Admin: User;
+  @JoinColumn({ name: 'adminId' })
+  admin: Admin;
 
   @OneToMany(() => SelectVoteItem, (item) => item.SelectVoteInfo)
   SelectVoteItems: SelectVoteItem[];

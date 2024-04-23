@@ -1,6 +1,7 @@
 import { DataSource } from 'typeorm';
 
 import { AdContents } from '../entities/adContents.entity';
+import { Admin } from '../entities/admin.entity';
 import { AdminLog } from '../entities/adminLog.entity';
 import { AdminType } from '../entities/adminType.entity';
 import { AppendType } from '../entities/appendType.entity';
@@ -207,7 +208,6 @@ import { StateMessage } from '../entities/stateMessage.entity';
 import { StoreType } from '../entities/storeType.entity';
 import { Terms } from '../entities/terms.entity';
 import { TestMember } from '../entities/testMember.entity';
-import { User } from '../entities/user.entity';
 import { UploadType } from '../entities/uploadType.entity';
 import { VideoPlayInfo } from '../entities/videoPlayInfo.entity';
 import { VideoScreenInfo } from '../entities/videoScreenInfo.entity';
@@ -246,6 +246,7 @@ export const entityProviders = [
         database: process.env.DB_DATABASE,
         entities: [
           AdContents,
+          Admin,
           AdminLog,
           AdminType,
           AppendType,
@@ -457,7 +458,6 @@ export const entityProviders = [
           StoreType,
           Terms,
           TestMember,
-          User,
           UploadType,
           VideoPlayInfo,
           VideoScreenInfo,

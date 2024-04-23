@@ -24,8 +24,8 @@ import { LicenseService } from './license.service';
 import { LoggedInGuard } from '../auth/logged-in.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { ROLE_TYPE } from '@libs/constants';
-import { UserDecorator } from '../common/decorators/user.decorator';
-import { User } from '@libs/entity';
+import { AdminDecorator } from '../common/decorators/admin.decorator';
+import { Admin } from '@libs/entity';
 import { GetTableDto } from '../common/dto/get.table.dto';
 import { CreateDomainDto } from './req/create.domain.dto';
 import { UpdateDomainDto } from './req/update.domain.dto';
@@ -62,8 +62,8 @@ export class LicenseController {
   @UseGuards(LoggedInGuard)
   @Roles(ROLE_TYPE.MIDDLE_ADMIN, ROLE_TYPE.SUPER_ADMIN)
   @Post()
-  async createLicense(@UserDecorator() user, @Body() data: CreateLicenseDto) {
-    return await this.licenseService.createLicense(user.id, data);
+  async createLicense(@AdminDecorator() admin, @Body() data: CreateLicenseDto) {
+    return await this.licenseService.createLicense(admin.id, data);
   }
 
   @ApiOperation({ summary: '소속별 라이선스 목록 조회 - 다운로드용' })
@@ -121,13 +121,13 @@ export class LicenseController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Patch(':id')
   async updateLicense(
-    @UserDecorator() user,
+    @AdminDecorator() admin,
     @Body() data: UpdateLicenseDto,
     @Param('id') id: number,
     @Query() query: GetLicenseDto,
     @Res() res,
   ) {
-    const result = await this.licenseService.updateLicense(user.id, id, data);
+    const result = await this.licenseService.updateLicense(admin.id, id, data);
     if (result) {
       let searchType = '';
       let searchValue = '';
@@ -201,11 +201,11 @@ export class LicenseController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Post('domain')
   async createDomain(
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Body() data: CreateDomainDto,
     @Res() res,
   ) {
-    const result = await this.licenseService.createDomain(user.id, data);
+    const result = await this.licenseService.createDomain(admin.id, data);
     if (result) {
       console.log(result);
       if (data.callType === 0) {
@@ -224,12 +224,12 @@ export class LicenseController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Patch('domain/:id')
   async updateDomain(
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Body() data: UpdateDomainDto,
     @Param('id') id: number,
     @Res() res,
   ) {
-    const result = this.licenseService.updateDomain(user.id, id, data);
+    const result = this.licenseService.updateDomain(admin.id, id, data);
     if (result) {
       let searchType = '';
       let searchValue = '';
@@ -252,12 +252,12 @@ export class LicenseController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Post('deleteDomain')
   async deleteDomain(
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Body() data: DeleteDomainDto,
     @Query() query: GetTableDto,
     @Res() res,
   ) {
-    // const result = await this.licenseService.deleteDomain(user.id, data.domainIds);
+    // const result = await this.licenseService.deleteDomain(admin.id, data.domainIds);
     // if (result) {
     //   res.redirect(
     //     HttpStatus.SEE_OTHER,

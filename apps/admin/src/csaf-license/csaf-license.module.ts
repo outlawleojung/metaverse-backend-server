@@ -11,7 +11,7 @@ import {
   MemberLicenseInfo,
   LicenseGroupInfo,
   LicenseInfo,
-  User,
+  Admin,
   CSAFEventInfo,
   MemberWalletInfo,
   MemberFurnitureItemInven,
@@ -35,7 +35,7 @@ import { RoomDataLogSchema, WorldChattingLogSchema } from '@libs/mongodb';
       },
     ]),
     TypeOrmModule.forFeature([
-      User,
+      Admin,
       Member,
       MemberAccount,
       CSAFEventInfo,

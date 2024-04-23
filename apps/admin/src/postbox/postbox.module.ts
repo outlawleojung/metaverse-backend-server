@@ -17,7 +17,7 @@ import {
   PostalSendType,
   PostalType,
   PostalTypeProperty,
-  User,
+  Admin,
   PostReceiveMemberInfo,
   MemberPostbox,
 } from '@libs/entity';
@@ -26,7 +26,7 @@ import { PostalLogService } from './postal.log.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      User,
+      Admin,
       Postbox,
       PostboxAppend,
       PostalType,

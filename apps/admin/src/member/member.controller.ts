@@ -12,7 +12,7 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MorganInterceptor } from 'nest-morgan';
 import { MemberService } from './member.service';
-import { UserDecorator } from '../common/decorators/user.decorator';
+import { AdminDecorator } from '../common/decorators/admin.decorator';
 import { OfficeGradeType, ProviderType } from '@libs/entity';
 import { LoggedInGuard } from '../auth/logged-in.guard';
 import { MemberListResponseDto } from './dto/res/get.member.list.response.dto';
@@ -55,8 +55,8 @@ export class MemberController {
   @UseGuards(LoggedInGuard)
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Get()
-  async getMemberList(@UserDecorator() user, @Query() data: GetTableDto) {
-    return await this.memberService.getMemberList(user.id, data);
+  async getMemberList(@AdminDecorator() admin, @Query() data: GetTableDto) {
+    return await this.memberService.getMemberList(admin.id, data);
   }
 
   // 회원 상세 정보 조회
@@ -107,12 +107,12 @@ export class MemberController {
   @UseGuards(LoggedInGuard)
   @Patch('office-grade-type/:memberId/:type')
   async updateMemberOfficeGradeType(
-    @UserDecorator() user,
+    @AdminDecorator() admin,
     @Param('memberId') memberId: string,
     @Param('type') type: number,
   ) {
     return await this.memberService.updateMemberOfficeGradeType(
-      user.id,
+      admin.id,
       memberId,
       type,
     );

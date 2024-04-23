@@ -13,8 +13,8 @@ import {
 } from '@nestjs/common';
 import { JoinRequestDto } from './dto/join.request.dto';
 import { UserService } from './user.service';
-import { User } from '@libs/entity';
-import { UserDecorator } from '../common/decorators/user.decorator';
+import { Admin } from '@libs/entity';
+import { AdminDecorator } from '../common/decorators/admin.decorator';
 import { LocalAuthGuard } from '../auth/local-auth.guard';
 import {
   ApiCookieAuth,
@@ -38,15 +38,15 @@ export class UserController {
   @ApiOperation({ summary: '관리자 조회' })
   @ApiCookieAuth('connect.sid')
   @Get()
-  getUsers(@UserDecorator() user) {
-    return user || false;
+  getUsers(@AdminDecorator() admin) {
+    return admin || false;
   }
 
   @ApiOperation({ summary: '관리자 상세 정보 조회' })
   @UseGuards(new LoggedInGuard())
   @Get('getDetailInfo')
-  getUserDetail(@UserDecorator() user) {
-    return this.userService.getDetailInfo(user.id);
+  getUserDetail(@AdminDecorator() admin) {
+    return this.userService.getDetailInfo(admin.id);
   }
 
   @ApiOperation({ summary: '이메일 중복 확인' })
@@ -60,14 +60,14 @@ export class UserController {
   @Post()
   @UseGuards(new NotLoggedInGuard())
   async createUsers(@Body() data: JoinRequestDto) {
-    this.userService.createUsers(data);
+    this.userService.createAdmin(data);
   }
 
   @ApiOperation({ summary: '로그인' })
   @Post('login')
   @UseGuards(LocalAuthGuard)
-  logIn(@UserDecorator() user: User) {
-    return user;
+  logIn(@AdminDecorator() admin: Admin) {
+    return admin;
   }
 
   @ApiExcludeEndpoint()
@@ -98,17 +98,20 @@ export class UserController {
   @ApiOperation({ summary: '패스워드 변경' })
   @UseGuards(new LoggedInGuard())
   @Patch('changePassword')
-  async changePassword(@UserDecorator() user, @Body() data: ChangePasswordDto) {
-    return await this.userService.changePassword(user.id, data);
+  async changePassword(
+    @AdminDecorator() admin,
+    @Body() data: ChangePasswordDto,
+  ) {
+    return await this.userService.changePassword(admin.id, data);
   }
 
   @ApiOperation({ summary: '계정 정보 변경' })
   @UseGuards(new LoggedInGuard())
   @Patch('changeAdminInfo')
   async changeAdminInfo(
-    @UserDecorator() user,
+    @AdminDecorator() admin,
     @Body() data: ChangeAdminInfoDto,
   ) {
-    return await this.userService.changeAdminInfo(user.id, data);
+    return await this.userService.changeAdminInfo(admin.id, data);
   }
 }

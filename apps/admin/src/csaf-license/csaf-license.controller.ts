@@ -1,6 +1,6 @@
 import { CreateEventDto } from './dto/req/create.event.dto';
 import { GetLicenseDto } from './../license/req/get.license.dto';
-import { UserDecorator } from '../common/decorators/user.decorator';
+import { AdminDecorator } from '../common/decorators/admin.decorator';
 import { LoggedInGuard } from '../auth/logged-in.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import {
@@ -24,7 +24,7 @@ import { CsafLicenseService } from './csaf-license.service';
 import { GetConstantsResponseDto } from '../license/res/get.constants.response.dto';
 import { ROLE_TYPE } from '@libs/constants';
 import { CreateLicenseDto } from './dto/req/create.license.dto';
-import { User } from '@libs/entity';
+import { Admin } from '@libs/entity';
 import { UpdateEventDto } from './dto/req/update.event.dto';
 import { DeleteLicenseDto } from '../license/req/delete.license.dto';
 import { UpdateLicenseDto } from './dto/req/update.license.dto';
@@ -54,8 +54,11 @@ export class CsafLicenseController {
   @UseGuards(LoggedInGuard)
   @Roles(ROLE_TYPE.SUPER_ADMIN)
   @Post()
-  async createLicense(@UserDecorator() user, @Body() data: CreateLicenseDto) {
-    return await this.csafLicenseService.createLicense(user.id, data);
+  async createLicense(
+    @AdminDecorator() admin: Admin,
+    @Body() data: CreateLicenseDto,
+  ) {
+    return await this.csafLicenseService.createLicense(admin.id, data);
   }
 
   @ApiOperation({ summary: '전체 라이선스 목록 조회' })
@@ -99,14 +102,14 @@ export class CsafLicenseController {
   @Roles(ROLE_TYPE.SUPER_ADMIN)
   @Patch(':id')
   async updateLicense(
-    @UserDecorator() user,
+    @AdminDecorator() admin: Admin,
     @Body() data: UpdateLicenseDto,
     @Param('id') id: number,
     @Query() query: GetLicenseDto,
     @Res() res,
   ) {
     const result = await this.csafLicenseService.updateLicense(
-      user.id,
+      admin.id,
       id,
       data,
     );
@@ -185,11 +188,11 @@ export class CsafLicenseController {
   @Roles(ROLE_TYPE.SUPER_ADMIN)
   @Post('event')
   async createDomain(
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Body() data: CreateEventDto,
     @Res() res,
   ) {
-    const result = await this.csafLicenseService.createEvent(user.id, data);
+    const result = await this.csafLicenseService.createEvent(admin.id, data);
     if (result) {
       console.log(result);
       if (data.callType === 0) {
@@ -208,12 +211,16 @@ export class CsafLicenseController {
   @Roles(ROLE_TYPE.SUPER_ADMIN)
   @Patch('event/:id')
   async updateDomain(
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Body() data: UpdateEventDto,
     @Param('id') id: number,
     @Res() res,
   ) {
-    const result = await this.csafLicenseService.updateEvent(user.id, id, data);
+    const result = await this.csafLicenseService.updateEvent(
+      admin.id,
+      id,
+      data,
+    );
     if (result) {
       let searchType = '';
       let searchValue = '';

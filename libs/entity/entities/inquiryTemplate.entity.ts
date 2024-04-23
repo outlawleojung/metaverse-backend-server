@@ -5,12 +5,11 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { InquiryType } from './inquiryType.entity';
-import { User } from './user.entity';
+import { Admin } from './admin.entity';
 
 @Index('inquiryType', ['inquiryType'], {})
 @Index('adminId', ['adminId'], {})
@@ -22,9 +21,6 @@ export class InquiryTemplate {
   @Column('int', { name: 'inquiryType' })
   inquiryType: number;
 
-  @Column('int', { name: 'adminId' })
-  adminId: number;
-
   @Column('varchar', { name: 'name', length: 64 })
   name: string;
 
@@ -33,6 +29,9 @@ export class InquiryTemplate {
 
   @Column('varchar', { name: 'content', length: 512 })
   content: string;
+
+  @Column()
+  adminId: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -47,10 +46,10 @@ export class InquiryTemplate {
   @JoinColumn([{ name: 'inquiryType', referencedColumnName: 'type' }])
   InquiryType: InquiryType;
 
-  @ManyToOne(() => User, (user) => user.InquiryTemplates, {
+  @ManyToOne(() => Admin, (admin) => admin.InquiryTemplates, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId', referencedColumnName: 'id' }])
-  Admin: User;
+  @JoinColumn([{ name: 'adminId' }])
+  admin: Admin;
 }

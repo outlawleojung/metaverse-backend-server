@@ -1,6 +1,7 @@
 export * from './entity.module';
 
 export { AdContents } from '../entities/adContents.entity';
+export { Admin } from '../entities/admin.entity';
 export { AdminLog } from '../entities/adminLog.entity';
 export { AdminType } from '../entities/adminType.entity';
 export { AppendType } from '../entities/appendType.entity';
@@ -214,7 +215,6 @@ export { SystemPostboxAppend } from '../entities/systemPostboxAppend.entity';
 export { StoreType } from '../entities/storeType.entity';
 export { Terms } from '../entities/terms.entity';
 export { TestMember } from '../entities/testMember.entity';
-export { User } from '../entities/user.entity';
 export { UploadType } from '../entities/uploadType.entity';
 export { VideoPlayInfo } from '../entities/videoPlayInfo.entity';
 export { VideoScreenInfo } from '../entities/videoScreenInfo.entity';

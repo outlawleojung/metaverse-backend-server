@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   Member,
   RoleType,
-  User,
+  Admin,
   MemberAccount,
   ProviderType,
   OfficeGradeType,
@@ -14,7 +14,7 @@ import {
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      User,
+      Admin,
       RoleType,
       Member,
       MemberAccount,

@@ -11,7 +11,7 @@ import { ROLE_TYPE, SEARCH_TYPE, SERVER_TYPE } from '@libs/constants';
 import { ForbiddenException, HttpException } from '@nestjs/common/exceptions';
 import {
   Gateway,
-  User,
+  Admin,
   OsType,
   ServerType,
   ServerState,
@@ -24,7 +24,7 @@ import { DeleteGateWayDto } from './dto/req/delete.gateway.dto';
 export class GatewayService {
   private readonly logger = new Logger(GatewayService.name);
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Admin) private adminRepository: Repository<Admin>,
     @InjectRepository(Gateway) private gatewayRepository: Repository<Gateway>,
     @InjectRepository(OsType) private osTypeRepository: Repository<OsType>,
     @InjectRepository(ServerType)

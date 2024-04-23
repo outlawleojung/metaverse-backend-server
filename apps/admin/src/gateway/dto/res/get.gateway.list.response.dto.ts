@@ -5,7 +5,7 @@ import {
   OsType,
   ServerState,
   StateMessage,
-  User,
+  Admin,
 } from '@libs/entity';
 
 export class Gateway {
@@ -64,10 +64,10 @@ export class Gateway {
   public StateMessage: StateMessage;
 
   @ApiProperty({
-    type: User,
+    type: Admin,
     description: 'Admin',
   })
-  public Admin: User;
+  public Admin: Admin;
 }
 
 export class GatewayList {

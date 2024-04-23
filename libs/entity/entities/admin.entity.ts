@@ -32,8 +32,8 @@ import { NoticeInfo } from './noticeInfo.entity';
 
 @Index('email', ['email'], { unique: true })
 @Index('roleType', ['roleType'], {})
-@Entity('user')
-export class User {
+@Entity('admin')
+export class Admin {
   @ApiProperty({
     example: 1,
     description: '관리자 아이디',
@@ -54,12 +54,6 @@ export class User {
   @Column('varchar', { name: 'password', length: 100 })
   password: string;
 
-  @Column('int', { name: 'roleType' })
-  roleType: number;
-
-  @Column('int', { name: 'adminType' })
-  adminType: number;
-
   @Column('varchar', { name: 'department', nullable: true, length: 64 })
   department: string | null;
 
@@ -74,6 +68,12 @@ export class User {
   @Column('varchar', { name: 'phoneNumber', length: 64 })
   phoneNumber: string;
 
+  @Column()
+  roleType: number;
+
+  @Column()
+  adminType: number;
+
   @Column('datetime', { name: 'loginedAt' })
   loginedAt: Date;
 
@@ -83,10 +83,10 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToMany(() => AdminLog, (adminlog) => adminlog.Admin)
+  @OneToMany(() => AdminLog, (adminlog) => adminlog.admin)
   AdminLogs: AdminLog[];
 
-  @OneToMany(() => Gateway, (gateway) => gateway.Admin)
+  @OneToMany(() => Gateway, (gateway) => gateway.admin)
   gateways: Gateway[];
 
   @OneToMany(() => Terms, (terms) => terms.admin)
@@ -96,55 +96,61 @@ export class User {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'roleType', referencedColumnName: 'type' }])
+  @JoinColumn([{ name: 'roleType' }])
   RoleType: RoleType;
 
   @ManyToOne(() => AdminType, (type) => type.Admins, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminType', referencedColumnName: 'type' }])
+  @JoinColumn([{ name: 'adminType' }])
   AdminType: AdminType;
 
-  @OneToMany(() => VideoPlayInfo, (videoplayinfo) => videoplayinfo.Admin)
+  @OneToMany(() => VideoPlayInfo, (videoplayinfo) => videoplayinfo.admin)
   VideoPlayInfos: VideoPlayInfo[];
 
-  @OneToMany(() => InquiryTemplate, (inquirytemplate) => inquirytemplate.Admin)
+  @OneToMany(() => InquiryTemplate, (inquirytemplate) => inquirytemplate.admin)
   InquiryTemplates: InquiryTemplate[];
 
-  @OneToMany(() => VoteInfo, (voteinfo) => voteinfo.Admin)
+  @OneToMany(() => VoteInfo, (voteinfo) => voteinfo.admin)
   VoteInfos: VoteInfo[];
 
-  @OneToMany(() => MemberInquiryAnswer, (memberinquiryanswer) => memberinquiryanswer.Admin)
+  @OneToMany(
+    () => MemberInquiryAnswer,
+    (memberinquiryanswer) => memberinquiryanswer.admin,
+  )
   MemberInquiryAnswers: MemberInquiryAnswer[];
 
-  @OneToMany(() => MemberReportInfo, (memberreportinfo) => memberreportinfo.Admin)
+  @OneToMany(
+    () => MemberReportInfo,
+    (memberreportinfo) => memberreportinfo.admin,
+  )
   MemberReportInfos: MemberReportInfo[];
 
-  @OneToMany(() => OfficeLicenseDomainInfo, (info) => info.Admin)
+  @OneToMany(() => OfficeLicenseDomainInfo, (info) => info.admin)
   OfficeLicenseDomainInfos: OfficeLicenseDomainInfo[];
 
-  @OneToMany(() => LicenseGroupInfo, (info) => info.Admin)
+  @OneToMany(() => LicenseGroupInfo, (info) => info.admin)
   LicenseGroupInfos: LicenseGroupInfo[];
 
-  @OneToMany(() => PostalLog, (log) => log.Admin)
+  @OneToMany(() => PostalLog, (log) => log.admin)
   PostalLogs: PostalLog[];
 
-  @OneToMany(() => Postbox, (postbox) => postbox.Admin)
+  @OneToMany(() => Postbox, (postbox) => postbox.admin)
   Postboxes: Postbox[];
 
-  @OneToMany(() => ScreenReservation, (param) => param.Admin)
+  @OneToMany(() => ScreenReservation, (param) => param.admin)
   ScreenReservations: ScreenReservation[];
 
-  @OneToMany(() => BannerReservation, (param) => param.Admin)
+  @OneToMany(() => BannerReservation, (param) => param.admin)
   BannerReservations: BannerReservation[];
 
-  @OneToMany(() => SelectVoteInfo, (info) => info.Admin)
+  @OneToMany(() => SelectVoteInfo, (info) => info.admin)
   SelectVoteInfos: SelectVoteInfo[];
 
-  @OneToMany(() => SelectVoteInfo, (info) => info.Admin)
+  @OneToMany(() => SelectVoteInfo, (info) => info.admin)
   CSAFEventInfos: CSAFEventInfo[];
 
-  @OneToMany(() => NoticeInfo, (info) => info.Admin)
+  @OneToMany(() => NoticeInfo, (info) => info.admin)
   NoticeInfos: NoticeInfo[];
 }

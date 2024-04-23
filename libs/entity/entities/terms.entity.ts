@@ -8,7 +8,7 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { Admin } from './admin.entity';
 
 @Index('adminId', ['adminId'], {})
 @Entity('terms')
@@ -34,10 +34,9 @@ export class Terms {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.terms, {
+  @ManyToOne(() => Admin, (admin) => admin.terms, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId', referencedColumnName: 'id' }])
-  admin: User;
+  admin: Admin;
 }

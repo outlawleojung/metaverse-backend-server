@@ -1,8 +1,16 @@
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { PostalLogType } from './postalLogType.entity';
 import { LogActionType } from './logActionType.entity';
-import { User } from './user.entity';
 import { Postbox } from './postbox.entity';
+import { Admin } from './admin.entity';
 
 @Index('postalLogType', ['postalLogType'], {})
 @Index('logActionType', ['logActionType'], {})
@@ -26,9 +34,6 @@ export class PostalLog {
 
   @Column('text', { name: 'changeData', nullable: true })
   changeData: string;
-
-  @Column('int', { name: 'adminId', nullable: true })
-  adminId: number | null;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -54,10 +59,10 @@ export class PostalLog {
   @JoinColumn([{ name: 'logActionType', referencedColumnName: 'type' }])
   LogActionType: LogActionType;
 
-  @ManyToOne(() => User, (box) => box.PostalLogs, {
+  @ManyToOne(() => Admin, (admin) => admin.PostalLogs, {
+    nullable: true,
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId', referencedColumnName: 'id' }])
-  Admin: User;
+  admin: Admin;
 }

@@ -1,9 +1,9 @@
 import { Entity, OneToMany } from 'typeorm';
-import { User } from './user.entity';
 import { BaseTypeEntity } from './baseTypeEntity.entity';
+import { Admin } from './admin.entity';
 
 @Entity('admin_type')
 export class AdminType extends BaseTypeEntity {
-  @OneToMany(() => User, (user) => user.AdminType)
-  Admins: User[];
+  @OneToMany(() => Admin, (admin) => admin.AdminType)
+  Admins: Admin[];
 }

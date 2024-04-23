@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { ScreenContentType } from './screenContentType.entity';
 import { ScreenInfo } from './screenInfo.entity';
-import { User } from './user.entity';
+import { Admin } from './admin.entity';
 
 @Index('screenId', ['screenId'], {})
 @Index('screenContentType', ['screenContentType'], {})
@@ -32,8 +32,8 @@ export class ScreenReservation {
   @Column('varchar', { name: 'description', length: 64, nullable: true })
   description: string;
 
-  @Column('int', { name: 'adminId', nullable: true })
-  adminId: number;
+  @Column({ nullable: true })
+  adminId: number | null;
 
   @Column('datetime', { name: 'startedAt' })
   startedAt: Date;
@@ -61,10 +61,11 @@ export class ScreenReservation {
   @JoinColumn([{ name: 'screenContentType', referencedColumnName: 'type' }])
   ScreenContentType: ScreenContentType;
 
-  @ManyToOne(() => User, (user) => user.ScreenReservations, {
+  @ManyToOne(() => Admin, (admin) => admin.ScreenReservations, {
+    nullable: true,
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId', referencedColumnName: 'id' }])
-  Admin: User;
+  @JoinColumn([{ name: 'adminId' }])
+  admin: Admin;
 }

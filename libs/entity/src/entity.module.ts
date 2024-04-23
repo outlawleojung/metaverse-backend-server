@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
 import { AdContents } from '../entities/adContents.entity';
+import { Admin } from '../entities/admin.entity';
 import { AdminLog } from '../entities/adminLog.entity';
 import { AdminType } from '../entities/adminType.entity';
 import { AppendType } from '../entities/appendType.entity';
@@ -211,7 +212,6 @@ import { StoreType } from '../entities/storeType.entity';
 import { Terms } from '../entities/terms.entity';
 import { TestMember } from '../entities/testMember.entity';
 import { UploadType } from '../entities/uploadType.entity';
-import { User } from '../entities/user.entity';
 import { VideoPlayInfo } from '../entities/videoPlayInfo.entity';
 import { VideoScreenInfo } from '../entities/videoScreenInfo.entity';
 import { VideoScreenStats } from '../entities/videoScreenStats.entity';
@@ -246,6 +246,7 @@ import { LicenseGroupInfo } from '../entities/licenseGroupInfo.entity';
       database: process.env.DB_DATABASE,
       entities: [
         AdContents,
+        Admin,
         AdminLog,
         AdminType,
         AppendType,
@@ -457,7 +458,6 @@ import { LicenseGroupInfo } from '../entities/licenseGroupInfo.entity';
         StoreType,
         Terms,
         TestMember,
-        User,
         UploadType,
         VideoPlayInfo,
         VideoScreenInfo,

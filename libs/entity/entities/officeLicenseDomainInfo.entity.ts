@@ -9,8 +9,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
 import { LicenseGroupInfo } from './licenseGroupInfo.entity';
+import { Admin } from './admin.entity';
 
 @Index('adminId', ['adminId'], {})
 @Entity('office_license_domain_info')
@@ -36,7 +36,7 @@ export class OfficeLicenseDomainInfo {
   @Column('varchar', { name: 'chargePhone', length: 32, nullable: true })
   chargePhone: string | null;
 
-  @Column('int', { name: 'adminId', nullable: true })
+  @Column()
   adminId: number;
 
   @CreateDateColumn()
@@ -48,10 +48,10 @@ export class OfficeLicenseDomainInfo {
   @OneToOne(() => LicenseGroupInfo, (info) => info.OfficeLicenseDomainInfo)
   LicenseGroupInfo: LicenseGroupInfo;
 
-  @ManyToOne(() => User, (user) => user.OfficeLicenseDomainInfos, {
+  @ManyToOne(() => Admin, (user) => user.OfficeLicenseDomainInfos, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId', referencedColumnName: 'id' }])
-  Admin: User;
+  @JoinColumn([{ name: 'adminId' }])
+  admin: Admin;
 }

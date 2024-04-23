@@ -17,12 +17,14 @@ import {
   FunctionTableRepository,
   FunctionTable,
   MemberConnectInfoRepository,
+  MemberConnectInfo,
 } from '@libs/entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Member,
+      MemberConnectInfo,
       MemberFriend,
       MemberFriendRequest,
       MemberBlock,

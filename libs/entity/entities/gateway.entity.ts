@@ -11,8 +11,8 @@ import {
 import { OsType } from './osType.entity';
 import { ServerType } from './serverType.entity';
 import { ServerState } from './serverState.entity';
-import { User } from './user.entity';
 import { StateMessage } from './stateMessage.entity';
+import { Admin } from './admin.entity';
 
 @Index('serverType', ['serverType'], {})
 @Index('stateType', ['stateType'], {})
@@ -32,11 +32,11 @@ export class Gateway {
   @Column('int', { name: 'stateType' })
   stateType: number;
 
-  @Column('int', { name: 'adminId', nullable: true })
-  adminId: number | null;
-
   @Column('int', { name: 'msgId', default: () => "'1'" })
   msgId: number;
+
+  @Column({ nullable: true })
+  adminId: number | null;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -65,12 +65,12 @@ export class Gateway {
   @JoinColumn([{ name: 'stateType', referencedColumnName: 'state' }])
   ServerState: ServerState;
 
-  @ManyToOne(() => User, (user) => user.gateways, {
+  @ManyToOne(() => Admin, (admin) => admin.gateways, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId', referencedColumnName: 'id' }])
-  Admin: User;
+  @JoinColumn([{ name: 'adminId' }])
+  admin: Admin;
 
   @ManyToOne(() => StateMessage, (statemessage) => statemessage.gateways, {
     onDelete: 'NO ACTION',

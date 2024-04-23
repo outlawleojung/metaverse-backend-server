@@ -1,5 +1,5 @@
 import { ROLE_TYPE } from '@libs/constants';
-import { UserDecorator } from '../common/decorators/user.decorator';
+import { AdminDecorator } from '../common/decorators/admin.decorator';
 import { AdminService } from './admin.service';
 import {
   Controller,
@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { MorganInterceptor } from 'nest-morgan';
 import { GetTableDto } from '../common/dto/get.table.dto';
-import { User } from '@libs/entity';
+import { Admin } from '@libs/entity';
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { ErrorDto } from './dto/response/error.response.dto';
 import { GetAdminListResponseDto } from './dto/response/getadminlist.response.dto';
@@ -58,8 +58,11 @@ export class AdminController {
   @UseGuards(LoggedInGuard)
   @Roles(ROLE_TYPE.SUPER_ADMIN)
   @Get()
-  async getAdminList(@UserDecorator() user: User, @Query() data: GetTableDto) {
-    return await this.adminService.getAdminList(user.id, data);
+  async getAdminList(
+    @AdminDecorator() admin: Admin,
+    @Query() data: GetTableDto,
+  ) {
+    return await this.adminService.getAdminList(admin.id, data);
   }
 
   // 관리자 역할 타입 목록 조회
@@ -76,8 +79,8 @@ export class AdminController {
   @UseGuards(LoggedInGuard)
   @Roles(ROLE_TYPE.SUPER_ADMIN)
   @Get('roleType')
-  async getRoleTypeList(@UserDecorator() user: User) {
-    return await this.adminService.getRoleTypeList(user.id);
+  async getRoleTypeList(@AdminDecorator() admin: Admin) {
+    return await this.adminService.getRoleTypeList(admin.id);
   }
 
   // 관리자 역할 타입 조회
@@ -94,8 +97,8 @@ export class AdminController {
   @UseGuards(LoggedInGuard)
   @Roles(ROLE_TYPE.SUPER_ADMIN)
   @Get('searchRoleType')
-  async searchRoleType(@UserDecorator() user: User) {
-    return await this.adminService.searchRoleType(user.id);
+  async searchRoleType(@AdminDecorator() admin: Admin) {
+    return await this.adminService.searchRoleType(admin.id);
   }
 
   // 관리자 역할 변경 하기
@@ -113,9 +116,9 @@ export class AdminController {
   @Roles(ROLE_TYPE.SUPER_ADMIN)
   @Patch('changeRoleType')
   async changeRoleType(
-    @UserDecorator() user: User,
+    @AdminDecorator() admin: Admin,
     @Body() data: ChangeRoleTypeDto,
   ) {
-    return await this.adminService.changeRoleType(user.id, data);
+    return await this.adminService.changeRoleType(admin.id, data);
   }
 }

@@ -13,7 +13,7 @@ import {
   MoreThan,
   Repository,
 } from 'typeorm';
-import { AdminType, RoleType, User } from '@libs/entity';
+import { AdminType, RoleType, Admin } from '@libs/entity';
 import { GetTableDto } from '../common/dto/get.table.dto';
 import { ROLE_TYPE } from '@libs/constants';
 import { EndedUnixTimestamp, StartedUnixTimestamp } from '@libs/common';
@@ -25,7 +25,7 @@ import { PaginateAdminDto } from './dto/request/paginate-admin.dto';
 export class AdminService {
   private readonly logger = new Logger(AdminService.name);
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Admin) private adminRepository: Repository<Admin>,
     @InjectRepository(RoleType)
     private roleTypeRepository: Repository<RoleType>,
     @Inject(DataSource) private dataSource: DataSource,
@@ -33,16 +33,28 @@ export class AdminService {
 
   async paginateAdmins(dto: PaginateAdminDto) {
     if (dto.page) {
-      this.pagePaginateAdmins(dto);
+      return this.pagePaginateAdmins(dto);
     } else {
-      this.cursorPaginateAdmins(dto);
+      return this.cursorPaginateAdmins(dto);
     }
   }
 
-  async pagePaginateAdmins(dto: PaginateAdminDto) {}
+  async pagePaginateAdmins(dto: PaginateAdminDto) {
+    const skip = dto.take * (dto.page - 1);
+    const [admins, count] = await this.adminRepository.findAndCount({
+      order: {
+        createdAt: dto.order__createdAt,
+      },
+      relations: { AdminType: true, RoleType: true },
+      take: dto.take,
+      skip: skip,
+    });
+
+    return { data: admins, total: count };
+  }
 
   async cursorPaginateAdmins(dto: PaginateAdminDto) {
-    const where: FindOptionsWhere<User> = {};
+    const where: FindOptionsWhere<Admin> = {};
 
     if (dto.where__id_less_than) {
       where.id = LessThan(dto.where__id_less_than);
@@ -50,7 +62,7 @@ export class AdminService {
       where.id = MoreThan(dto.where__id_more_than);
     }
 
-    const admins = await this.userRepository.find({
+    const admins = await this.adminRepository.find({
       where,
       order: {
         createdAt: dto.order__createdAt,
@@ -113,64 +125,64 @@ export class AdminService {
     let endedAt = new Date();
     try {
       const adminList = await this.dataSource
-        .getRepository(User)
+        .getRepository(Admin)
         .createQueryBuilder('user')
         .select([
-          'user.id',
-          'user.email',
-          'user.roleType',
-          'user.adminType',
+          'admin.id',
+          'admin.email',
+          'admin.roleType',
+          'admin.adminType',
           'adminType.name',
-          'user.name',
-          'user.department',
-          'user.company',
-          'user.phoneNumber',
-          'user.loginedAt',
+          'admin.name',
+          'admin.department',
+          'admin.company',
+          'admin.phoneNumber',
+          'admin.loginedAt',
         ])
-        .innerJoinAndSelect('user.RoleType', 'roleType')
-        .leftJoin('user.AdminType', 'adminType')
-        .where(`user.roleType > :roleType`, {
+        .innerJoinAndSelect('admin.RoleType', 'roleType')
+        .leftJoin('admin.AdminType', 'adminType')
+        .where(`admin.roleType > :roleType`, {
           roleType: ROLE_TYPE.SYSTEM_ADMIN,
         })
         .offset(offset)
         .limit(limit);
 
       const adminCount = await this.dataSource
-        .getRepository(User)
-        .createQueryBuilder('user')
-        .where(`user.roleType > :roleType`, {
+        .getRepository(Admin)
+        .createQueryBuilder('admin')
+        .where(`admin.roleType > :roleType`, {
           roleType: ROLE_TYPE.SYSTEM_ADMIN,
         });
       switch (searchType) {
         case 'EMAIL':
-          adminList.andWhere('user.email like :email', {
+          adminList.andWhere('admin.email like :email', {
             email: `%${searchValue}%`,
           });
-          adminCount.andWhere('user.email like :email', {
+          adminCount.andWhere('admin.email like :email', {
             email: `%${searchValue}%`,
           });
           break;
         case 'NAME':
-          adminList.andWhere('user.name like :name', {
+          adminList.andWhere('admin.name like :name', {
             name: `%${searchValue}%`,
           });
-          adminCount.andWhere('user.name like :name', {
+          adminCount.andWhere('admin.name like :name', {
             name: `%${searchValue}%`,
           });
           break;
         case 'PHONENUMBER':
-          adminList.andWhere('user.phoneNumber like :phoneNumber', {
+          adminList.andWhere('admin.phoneNumber like :phoneNumber', {
             phoneNumber: `%${searchValue}%`,
           });
-          adminCount.andWhere('user.phoneNumber like :phoneNumber', {
+          adminCount.andWhere('admin.phoneNumber like :phoneNumber', {
             phoneNumber: `%${searchValue}%`,
           });
           break;
         case 'ROLE_TYPE':
-          adminList.andWhere('user.roleType = :searchValue', {
+          adminList.andWhere('admin.roleType = :searchValue', {
             searchValue,
           });
-          adminCount.andWhere('user.roleType = :searchValue', {
+          adminCount.andWhere('admin.roleType = :searchValue', {
             searchValue,
           });
           break;
@@ -178,19 +190,19 @@ export class AdminService {
           startedAt = new Date(StartedUnixTimestamp(Number(searchValueArr[0])));
           endedAt = new Date(EndedUnixTimestamp(Number(searchValueArr[1])));
 
-          adminList.andWhere('user.createdAt <= :endedAt', { endedAt });
-          adminList.andWhere('user.createdAt >= :startedAt', { startedAt });
+          adminList.andWhere('admin.createdAt <= :endedAt', { endedAt });
+          adminList.andWhere('admin.createdAt >= :startedAt', { startedAt });
 
-          adminCount.andWhere('user.createdAt <= :endedAt', { endedAt });
-          adminCount.andWhere('user.createdAt >= :startedAt', {
+          adminCount.andWhere('admin.createdAt <= :endedAt', { endedAt });
+          adminCount.andWhere('admin.createdAt >= :startedAt', {
             startedAt,
           });
           break;
         case 'ADMIN_TYPE':
-          adminList.andWhere('user.adminType = :searchValue', {
+          adminList.andWhere('admin.adminType = :searchValue', {
             searchValue: Number(searchValue),
           });
-          adminCount.andWhere('user.adminType = :searchValue', {
+          adminCount.andWhere('admin.adminType = :searchValue', {
             searchValue: Number(searchValue),
           });
           break;
@@ -210,23 +222,23 @@ export class AdminService {
   async getRoleTypeList(myId: number) {
     if (myId) {
       try {
-        const user = await this.dataSource.getRepository(User).findOne({
+        const admin = await this.dataSource.getRepository(Admin).findOne({
           where: {
             id: myId,
           },
         });
 
-        if (!user) {
+        if (!admin) {
           throw new UnauthorizedException('사용자를 찾을 수 없습니다');
         }
 
         let roleTypes = null;
-        if (user.roleType > ROLE_TYPE.SYSTEM_ADMIN) {
+        if (admin.roleType > ROLE_TYPE.SYSTEM_ADMIN) {
           roleTypes = await this.dataSource
             .getRepository(RoleType)
             .createQueryBuilder('role_type')
             .select(['roleType.type', 'roleType.name'])
-            .where(`roleType.type > :roleType `, { roleType: user.roleType })
+            .where(`roleType.type > :roleType `, { roleType: admin.roleType })
             .getMany();
         } else {
           roleTypes = await this.dataSource
@@ -253,13 +265,13 @@ export class AdminService {
   async searchRoleType(myId: number) {
     if (myId) {
       try {
-        const user = await this.dataSource.getRepository(User).findOne({
+        const admin = await this.dataSource.getRepository(Admin).findOne({
           where: {
             id: myId,
           },
         });
 
-        if (!user) {
+        if (!admin) {
           throw new UnauthorizedException('사용자를 찾을 수 없습니다');
         }
 
@@ -289,7 +301,7 @@ export class AdminService {
     const roleType = data.roleType;
 
     if (myId) {
-      const admin = await this.userRepository.findOne({
+      const admin = await this.adminRepository.findOne({
         where: {
           id: myId,
         },
@@ -320,36 +332,36 @@ export class AdminService {
         throw new BadRequestException('잘못된 요청입니다.');
       }
     }
-    const user = await this.dataSource
-      .getRepository(User)
-      .createQueryBuilder('user')
+    const admin = await this.dataSource
+      .getRepository(Admin)
+      .createQueryBuilder('admin')
       .select([
-        'user.id',
-        'user.email',
-        'user.roleType',
-        'user.name',
-        'user.department',
-        'user.company',
-        'user.phoneNumber',
-        'user.loginedAt',
+        'admin.id',
+        'admin.email',
+        'admin.roleType',
+        'admin.name',
+        'admin.department',
+        'admin.company',
+        'admin.phoneNumber',
+        'admin.loginedAt',
       ])
-      .innerJoinAndSelect('user.RoleType', 'roleType')
+      .innerJoinAndSelect('admin.RoleType', 'roleType')
       .where({
         id: data.userId,
       })
       .getOne();
 
-    if (user) {
-      const newUser = new User();
-      newUser.id = user.id;
-      newUser.roleType = data.roleType;
+    if (admin) {
+      const newAdmin = new Admin();
+      newAdmin.id = admin.id;
+      newAdmin.roleType = data.roleType;
 
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
       await queryRunner.startTransaction();
 
       try {
-        await queryRunner.manager.getRepository(User).save(newUser);
+        await queryRunner.manager.getRepository(Admin).save(newAdmin);
         await queryRunner.commitTransaction();
       } catch (error) {
         this.logger.error({ error });
@@ -365,19 +377,19 @@ export class AdminService {
 
       if (Role_Type) {
         const result = await this.dataSource
-          .getRepository(User)
-          .createQueryBuilder('user')
+          .getRepository(Admin)
+          .createQueryBuilder('admin')
           .select([
-            'user.id',
-            'user.email',
-            'user.roleType',
-            'user.name',
-            'user.department',
-            'user.company',
-            'user.phoneNumber',
-            'user.loginedAt',
+            'admin.id',
+            'admin.email',
+            'admin.roleType',
+            'admin.name',
+            'admin.department',
+            'admin.company',
+            'admin.phoneNumber',
+            'admin.loginedAt',
           ])
-          .innerJoinAndSelect('user.RoleType', 'roleType')
+          .innerJoinAndSelect('admin.RoleType', 'roleType')
           .where({
             id: data.userId,
           });

@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { NoticeType } from './noticeType.entity';
 import { NoticeExposureType } from './noticeExposureType.entity';
-import { User } from './user.entity';
+import { Admin } from './admin.entity';
 
 @Index('noticeType', ['noticeType'], {})
 @Index('noticeExposureType', ['noticeExposureType'], {})
@@ -35,7 +35,7 @@ export class NoticeInfo {
   @Column('varchar', { name: 'enLink', length: 128, nullable: true })
   enLink: string;
 
-  @Column('int', { name: 'adminId', nullable: true })
+  @Column()
   adminId: number;
 
   @Column('datetime', { name: 'startedAt' })
@@ -64,10 +64,10 @@ export class NoticeInfo {
   @JoinColumn([{ name: 'noticeExposureType', referencedColumnName: 'type' }])
   NoticeExposureType: NoticeExposureType;
 
-  @ManyToOne(() => User, (user) => user.NoticeInfos, {
+  @ManyToOne(() => Admin, (admin) => admin.NoticeInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId', referencedColumnName: 'id' }])
-  Admin: User;
+  @JoinColumn([{ name: 'adminId' }])
+  admin: Admin;
 }

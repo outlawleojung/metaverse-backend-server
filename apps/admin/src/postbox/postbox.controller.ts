@@ -22,7 +22,7 @@ import { PostboxService } from './postbox.service';
 import { GetConstantsResponseDto } from './dto/res/get.constants.response.dto';
 import { Roles } from '../common/decorators/roles.decorator';
 import { SendFullMailingDto } from './dto/req/send.full.mailing.dto';
-import { UserDecorator } from '../common/decorators/user.decorator';
+import { AdminDecorator } from '../common/decorators/admin.decorator';
 import { SendEachMailingDto } from './dto/req/send.each.mailing.dto';
 import { GetItemsResponseDTO } from './dto/res/get.items.response.dto';
 import { GetMemberResponseDTO } from './dto/res/get.member.response.dto';
@@ -105,11 +105,11 @@ export class PostboxController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Post('full-mailing')
   async fullMailing(
-    @UserDecorator() user,
+    @AdminDecorator() admin,
     @Body() data: SendFullMailingDto,
     @Res() res,
   ) {
-    const result = await this.postboxService.fullMailing(user.id, data);
+    const result = await this.postboxService.fullMailing(admin.id, data);
     if (result) {
       return res.redirect(HttpStatus.SEE_OTHER, `/api/postbox?page=1`);
     }
@@ -121,11 +121,11 @@ export class PostboxController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Post('each-mailing')
   async eachMailing(
-    @UserDecorator() user,
+    @AdminDecorator() admin,
     @Body() data: SendEachMailingDto,
     @Res() res,
   ) {
-    const result = await this.postboxService.eachMailing(user.id, data);
+    const result = await this.postboxService.eachMailing(admin.id, data);
     if (result) {
       return res.redirect(HttpStatus.SEE_OTHER, `/api/postbox?page=1`);
     }
@@ -138,13 +138,13 @@ export class PostboxController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Patch('/:postboxId')
   async updatePostbox(
-    @UserDecorator() user,
+    @AdminDecorator() admin,
     @Body() data: UpdteMailingDto,
     @Param('postboxId') postboxId: number,
     @Res() res,
   ) {
     const result = await this.postboxService.updatePostbox(
-      user.id,
+      admin.id,
       data,
       postboxId,
     );
@@ -163,13 +163,13 @@ export class PostboxController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Delete('/:postboxId')
   async deletePostbox(
-    @UserDecorator() user,
+    @AdminDecorator() admin,
     @Param('postboxId') postboxId: number,
     @Query('page') page: number,
     @Res() res,
   ) {
     const result = await this.postboxService.deletePostbox(
-      user.id,
+      admin.id,
       postboxId,
       page,
     );
@@ -185,10 +185,10 @@ export class PostboxController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Patch('pending/:postboxId')
   async pendingPostbox(
-    @UserDecorator() user,
+    @AdminDecorator() admin,
     @Param('postboxId') postboxId: number,
   ) {
-    return await this.postboxService.pendingPostbox(user.id, postboxId);
+    return await this.postboxService.pendingPostbox(admin.id, postboxId);
   }
 
   // 우편 보류 해제 하기
@@ -197,10 +197,10 @@ export class PostboxController {
   @Roles(ROLE_TYPE.MIDDLE_ADMIN)
   @Patch('release-pending/:postboxId')
   async releasePendingPostbox(
-    @UserDecorator() user,
+    @AdminDecorator() admin,
     @Param('postboxId') postboxId: number,
   ) {
-    return await this.postboxService.releasePendingPostbox(user.id, postboxId);
+    return await this.postboxService.releasePendingPostbox(admin.id, postboxId);
   }
 
   // 발송 로그 보기

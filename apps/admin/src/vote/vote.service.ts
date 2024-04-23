@@ -18,7 +18,6 @@ import path from 'path';
 import { DataSource, Repository } from 'typeorm';
 import {
   VoteInfo,
-  User,
   VoteDivType,
   VoteResType,
   VoteAlterResType,
@@ -28,6 +27,7 @@ import {
   VoteInfoExample,
   VoteAlterResponse,
   VoteResultType,
+  Admin,
 } from '@libs/entity';
 import { AddVoteRegisterDto } from './dto/req/add.vote.dto';
 import dayjs from 'dayjs';
@@ -39,7 +39,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 @Injectable()
 export class VoteService {
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Admin) private adminRepository: Repository<Admin>,
     private azureBlobService: AzureBlobService,
     @Inject(DataSource) private dataSource: DataSource,
   ) {}
@@ -526,7 +526,7 @@ export class VoteService {
           },
         });
 
-      let voteInfoExample: any = [];
+      const voteInfoExample: any = [];
 
       for (let index = 0; index < _voteInfoExample.length; index++) {
         const e = _voteInfoExample[index];

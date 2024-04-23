@@ -9,7 +9,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import bcryptjs from 'bcryptjs';
-import { User } from '@libs/entity';
+import { Admin } from '@libs/entity';
 import { JoinRequestDto } from './dto/join.request.dto';
 import { ADMIN_TYPE, ROLE_TYPE } from '@libs/constants';
 import { ForgetPasswordDto } from './dto/forget.password.dto';
@@ -21,30 +21,30 @@ import { ChangeAdminInfoDto } from './dto/change.admin.info.dto';
 export class UserService {
   private readonly logger = new Logger(UserService.name);
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    @InjectRepository(Admin)
+    private adminRepository: Repository<Admin>,
     private mailService: MailService,
     @Inject(DataSource) private dataSource,
   ) {}
 
-  async createUsers(data: JoinRequestDto) {
-    const user = new User();
-    user.email = data.email;
-    user.name = data.name;
-    user.password = await bcryptjs.hashSync(data.password, 12);
-    user.company = data.company;
-    user.department = data.department;
-    user.phoneNumber = data.phoneNumber;
-    user.roleType = ROLE_TYPE.UNAUTHORIZED;
-    user.adminType = ADMIN_TYPE.ARZMETA_ADMIN;
-    user.loginedAt = new Date();
+  async createAdmin(data: JoinRequestDto) {
+    const admin = new Admin();
+    admin.email = data.email;
+    admin.name = data.name;
+    admin.password = await bcryptjs.hashSync(data.password, 12);
+    admin.company = data.company;
+    admin.department = data.department;
+    admin.phoneNumber = data.phoneNumber;
+    admin.roleType = ROLE_TYPE.UNAUTHORIZED;
+    admin.adminType = ADMIN_TYPE.ARZMETA_ADMIN;
+    admin.loginedAt = new Date();
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      await queryRunner.manager.getRepository(User).save(user);
+      await queryRunner.manager.getRepository(Admin).save(admin);
       await queryRunner.commitTransaction();
       return HttpStatus.OK;
     } catch (error) {
@@ -57,7 +57,7 @@ export class UserService {
   }
 
   async getDetailInfo(adminId: number) {
-    const admin = await this.userRepository.findOne({
+    const admin = await this.adminRepository.findOne({
       where: {
         id: adminId,
       },
@@ -69,14 +69,14 @@ export class UserService {
   }
 
   async forgetPassword(data: ForgetPasswordDto) {
-    const user = await this.userRepository.findOne({
+    const admin = await this.adminRepository.findOne({
       where: {
         name: data.name,
         email: data.email,
       },
     });
 
-    if (!user) {
+    if (!admin) {
       throw new ForbiddenException('사용자를 찾을 수 없습니다.');
     }
 
@@ -88,15 +88,15 @@ export class UserService {
     await queryRunner.startTransaction();
 
     try {
-      const newUser = new User();
-      newUser.id = user.id;
-      newUser.password = hashedPassword;
+      const newAdmin = new Admin();
+      newAdmin.id = admin.id;
+      newAdmin.password = hashedPassword;
 
-      await queryRunner.manager.getRepository(User).save(newUser);
+      await queryRunner.manager.getRepository(Admin).save(newAdmin);
 
       // 이메일 발송
       const emailOptions: EmailOptions = {
-        to: user.email,
+        to: admin.email,
         subject: '[a:rzmeta] 패스워드 재설정 이메일',
         html: 'passwordReset',
         text: '패스워드 재설정 이메일 입니다.',
@@ -121,7 +121,7 @@ export class UserService {
 
   async changeAdminInfo(adminId: number, data: ChangeAdminInfoDto) {
     // 사용자 존재 여부 확인
-    const exUser = await this.userRepository.findOne({
+    const exUser = await this.adminRepository.findOne({
       where: { id: adminId },
     });
 
@@ -129,20 +129,17 @@ export class UserService {
       throw new ForbiddenException('존재하지 않는 사용자');
     }
 
-    const newUser = new User();
-    newUser.id = adminId;
+    const newAdmin = new Admin();
+    newAdmin.id = adminId;
 
-    if (data.name) newUser.name = data.name;
-    if (data.phoneNumber) newUser.phoneNumber = data.phoneNumber;
-    if (data.company) newUser.company = data.company;
-    if (data.department) newUser.department = data.department;
+    Object.assign(newAdmin, data);
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      await queryRunner.manager.getRepository(User).save(newUser);
+      await queryRunner.manager.getRepository(Admin).save(newAdmin);
       await queryRunner.commitTransaction();
 
       return HttpStatus.OK;
@@ -157,7 +154,7 @@ export class UserService {
 
   async changePassword(adminId: number, data: ChangePasswordDto) {
     // 사용자 존재 여부 확인
-    const exUser = await this.userRepository.findOne({
+    const exUser = await this.adminRepository.findOne({
       where: { id: adminId },
     });
 
@@ -190,7 +187,7 @@ export class UserService {
 
     try {
       await queryRunner.manager.update(
-        User,
+        Admin,
         { id: adminId },
 
         {
@@ -214,7 +211,7 @@ export class UserService {
     if (!this.checkEmail(email)) {
       throw new ForbiddenException('이메일 형식이 아닙니다.');
     }
-    const admin = await this.userRepository.findOne({
+    const admin = await this.adminRepository.findOne({
       where: {
         email: email,
       },
@@ -228,7 +225,7 @@ export class UserService {
   }
 
   async getTest() {
-    return this.userRepository
+    return this.adminRepository
       .createQueryBuilder('user')
       .innerJoinAndSelect('user.RoleType', 'roleType')
       .getMany();

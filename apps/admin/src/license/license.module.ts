@@ -11,14 +11,14 @@ import {
   OfficeLicenseDomainInfo,
   LicenseGroupInfo,
   LicenseInfo,
-  User,
+  Admin,
 } from '@libs/entity';
 import { CommonService } from '../common/common.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      User,
+      Admin,
       Member,
       OfficeLicenseDomainInfo,
       LicenseInfo,

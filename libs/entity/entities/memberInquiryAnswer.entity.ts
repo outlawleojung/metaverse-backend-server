@@ -9,8 +9,8 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
 import { MemberInquiryManager } from './memberInquiryManager.entity';
+import { Admin } from './admin.entity';
 
 @Entity('member_inquiry_answer')
 export class MemberInquiryAnswer {
@@ -20,7 +20,7 @@ export class MemberInquiryAnswer {
   @Column('varchar', { name: 'content', length: 512 })
   content: string;
 
-  @Column('int', { name: 'adminId' })
+  @Column()
   adminId: number;
 
   @CreateDateColumn()
@@ -32,17 +32,21 @@ export class MemberInquiryAnswer {
   @DeleteDateColumn()
   deletedAt: Date | null;
 
-  @OneToOne(() => MemberInquiryManager, (inquiry) => inquiry.MemberInquiryAnswer, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
+  @OneToOne(
+    () => MemberInquiryManager,
+    (inquiry) => inquiry.MemberInquiryAnswer,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'inquiryId', referencedColumnName: 'id' }])
   MemberInquiryManager: MemberInquiryManager;
 
-  @ManyToOne(() => User, (user) => user.MemberInquiryAnswers, {
+  @ManyToOne(() => Admin, (admin) => admin.MemberInquiryAnswers, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId', referencedColumnName: 'id' }])
-  Admin: User;
+  @JoinColumn([{ name: 'adminId' }])
+  admin: Admin;
 }

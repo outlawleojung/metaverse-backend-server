@@ -4,7 +4,7 @@ import { GatewayService } from './gateway.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   Gateway,
-  User,
+  Admin,
   OsType,
   ServerType,
   ServerState,
@@ -14,7 +14,7 @@ import {
   imports: [
     TypeOrmModule.forFeature([
       Gateway,
-      User,
+      Admin,
       OsType,
       ServerType,
       ServerState,
