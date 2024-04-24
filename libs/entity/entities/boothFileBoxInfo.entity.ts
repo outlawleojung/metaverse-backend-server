@@ -1,12 +1,10 @@
 import {
   Column,
-  CreateDateColumn,
   Entity,
   Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { FileBoxType } from './fileBoxType.entity';
 import { MemberOfficeReservationInfo } from './memberOfficeReservationInfo.entity';

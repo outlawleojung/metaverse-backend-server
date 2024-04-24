@@ -1,6 +1,5 @@
 import {
   Column,
-  CreateDateColumn,
   DeleteDateColumn,
   Entity,
   Index,
@@ -8,7 +7,6 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { VoteDivType } from './voteDivType.entity';
 import { VoteResType } from './voteResType.entity';

@@ -1,4 +1,4 @@
-import { Entity, Index, OneToMany } from 'typeorm';
+import { Entity, OneToMany } from 'typeorm';
 import { Member } from './member.entity';
 import { BaseTypeEntity } from './baseTypeEntity.entity';
 

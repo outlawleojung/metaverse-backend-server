@@ -1,11 +1,4 @@
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  OneToOne,
-  PrimaryColumn,
-} from 'typeorm';
+import { Entity, Index, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { Item } from './item.entity';
 import { KtmfNftToken } from './ktmfNftToken.entiry';
 

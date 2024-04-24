@@ -1,11 +1,4 @@
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  PrimaryColumn,
-} from 'typeorm';
+import { Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { MapExposulInfo } from './mapExposulInfo.entity';
 
 @Index('mapExposulInfoId', ['mapExposulInfoId'], {})

@@ -11,7 +11,6 @@ import { SpaceType } from './spaceType.entity';
 import { SpaceDetailType } from './spaceDetailType.entity';
 import { MediaRollingType } from './mediaRollingType.entity';
 import { EachBoothScreenInfo } from './eachBoothScreenInfo.entity';
-import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Index('spaceType', ['spaceType'], {})
 @Index('spaceDetailType', ['spaceDetailType'], {})

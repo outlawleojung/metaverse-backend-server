@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+import { Entity, OneToMany } from 'typeorm';
 import { KtmfSpecialMoney } from './ktmfSpecialMoney.entity';
 import { KtmfNftToken } from './ktmfNftToken.entiry';
 import { BaseTypeEntity } from './baseTypeEntity.entity';

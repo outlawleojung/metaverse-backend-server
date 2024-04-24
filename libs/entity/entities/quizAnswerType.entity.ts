@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Entity, OneToMany } from 'typeorm';
 import { QuizQuestionAnswer } from './quizQuestionAnswer.entity';
 import { BaseTypeEntity } from './baseTypeEntity.entity';
 

@@ -1,11 +1,9 @@
 import {
   Column,
-  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { MediaExposureType } from './mediaExposureType.entity';
 import { BaseModelEntity } from './baseModelEntity.entity';

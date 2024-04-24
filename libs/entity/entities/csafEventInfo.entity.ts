@@ -1,6 +1,5 @@
 import {
   Column,
-  CreateDateColumn,
   Entity,
   Index,
   JoinColumn,
@@ -8,7 +7,6 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { LicenseGroupInfo } from './licenseGroupInfo.entity';
 import { EventSpaceType } from './eventSpaceType.entity';

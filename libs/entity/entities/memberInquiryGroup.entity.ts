@@ -1,6 +1,5 @@
 import {
   Column,
-  CreateDateColumn,
   DeleteDateColumn,
   Entity,
   Index,
@@ -8,7 +7,6 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { InquiryType } from './inquiryType.entity';
 import { MemberInquiry } from './memberInquiry.entity';
