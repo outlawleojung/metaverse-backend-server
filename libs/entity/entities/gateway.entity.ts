@@ -48,34 +48,34 @@ export class Gateway {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'osType' }])
+  @JoinColumn({ name: 'osType' })
   OsType: OsType;
 
   @ManyToOne(() => ServerType, (servertype) => servertype.gateways, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'serverType' }])
+  @JoinColumn({ name: 'serverType' })
   ServerType: ServerType;
 
   @ManyToOne(() => ServerState, (serverstate) => serverstate.gateways, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'stateType' }])
+  @JoinColumn({ name: 'stateType' })
   ServerState: ServerState;
 
   @ManyToOne(() => Admin, (admin) => admin.gateways, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId' }])
+  @JoinColumn({ name: 'adminId' })
   admin: Admin;
 
   @ManyToOne(() => StateMessage, (statemessage) => statemessage.gateways, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'msgId' }])
+  @JoinColumn({ name: 'msgId' })
   StateMessage: StateMessage;
 }
