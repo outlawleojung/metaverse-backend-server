@@ -13,7 +13,7 @@ import { Member } from './member.entity';
 @Index('memberId', ['memberId'], {})
 @Entity('member_infinite_code_rank')
 export class MemberInfiniteCodeRank {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
   @Column('uuid')

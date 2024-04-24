@@ -33,16 +33,26 @@ export class MemberInquiryManager {
   @DeleteDateColumn()
   deletedAt: Date | null;
 
-  @OneToOne(() => MemberInquiry, (memberinquiry) => memberinquiry.MemberInquiryManager)
+  @OneToOne(
+    () => MemberInquiry,
+    (memberinquiry) => memberinquiry.MemberInquiryManager,
+  )
   MemberInquiry: MemberInquiry;
 
-  @OneToOne(() => MemberInquiryAnswer, (memberinquiryanswer) => memberinquiryanswer.MemberInquiryManager)
+  @OneToOne(
+    () => MemberInquiryAnswer,
+    (memberinquiryanswer) => memberinquiryanswer.MemberInquiryManager,
+  )
   MemberInquiryAnswer: MemberInquiryAnswer;
 
-  @ManyToOne(() => InquiryAnswerType, (inquiryanswertype) => inquiryanswertype.MemberInquiryManagers, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => InquiryAnswerType,
+    (inquiryanswertype) => inquiryanswertype.MemberInquiryManagers,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'answerType', referencedColumnName: 'type' }])
   InquiryAnswerType: InquiryAnswerType;
 }

@@ -46,10 +46,14 @@ export class MemberInquiry {
   @DeleteDateColumn()
   deletedAt: Date | null;
 
-  @ManyToOne(() => MemberInquiryGroup, (inquirygroup) => inquirygroup.MemberInquiries, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => MemberInquiryGroup,
+    (inquirygroup) => inquirygroup.MemberInquiries,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn([{ name: 'groupId', referencedColumnName: 'id' }])
   MemberInquiryGroup: MemberInquiryGroup;
 

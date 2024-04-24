@@ -14,10 +14,10 @@ import { ProviderType } from './providerType.entity';
 @Index('providerType', ['providerType'], {})
 @Entity('member_login_log')
 export class MemberLoginLog {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('varchar', { name: 'memberId', length: 100 })
+  @Column('uuid')
   memberId: string;
 
   @Column('int', { name: 'providerType' })

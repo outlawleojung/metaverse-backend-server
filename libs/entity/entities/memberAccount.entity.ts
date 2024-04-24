@@ -15,7 +15,7 @@ import { ProviderType } from './providerType.entity';
 @Index('accountToken', ['accountToken'], { unique: true })
 @Entity('member_account')
 export class MemberAccount {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @Column('uuid')
   memberId: string;
 
   @PrimaryColumn('int', { name: 'providerType' })

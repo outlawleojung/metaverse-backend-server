@@ -18,7 +18,7 @@ import { UploadType } from './uploadType.entity';
 @Index('uploadType', ['uploadType'], {})
 @Entity('member_frame_image')
 export class MemberFrameImage {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @PrimaryColumn('uuid')
   memberId: string;
 
   @PrimaryColumn('int', { name: 'itemId' })

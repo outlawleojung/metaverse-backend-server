@@ -17,7 +17,7 @@ export class MemberNftRewardLog {
   @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
-  @Column('varchar', { name: 'memberId', length: 100 })
+  @Column('uuid')
   memberId: string;
 
   @Column('varchar', { name: 'tokenId', length: 64 })

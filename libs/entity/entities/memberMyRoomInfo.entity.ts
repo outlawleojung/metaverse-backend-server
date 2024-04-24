@@ -18,7 +18,7 @@ import { MemberFurnitureItemInven } from './memberFurnitureItemInven.entity';
 @Index('layerType', ['layerType'], {})
 @Entity('member_my_room_info')
 export class MemberMyRoomInfo {
-  @PrimaryColumn('varchar', { name: 'memberId', length: 100 })
+  @Column('uuid')
   memberId: string;
 
   @ApiProperty({

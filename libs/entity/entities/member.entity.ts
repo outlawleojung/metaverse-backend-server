@@ -6,7 +6,6 @@ import { MemberBusinessCardInfo } from './memberBusinessCardInfo.entity';
 import { OfficeGradeType } from './officeGradeType.entity';
 import {
   Column,
-  CreateDateColumn,
   DeleteDateColumn,
   Entity,
   Index,
@@ -14,9 +13,7 @@ import {
   ManyToOne,
   OneToMany,
   OneToOne,
-  PrimaryColumn,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { MemberBlock } from './memberBlock.entity';
 import { MemberFriendRequest } from './memberFriendRequest.entity';
@@ -51,6 +48,7 @@ import { MemberAdContents } from './memberAdContents.entity';
 import { MemberWalletInfo } from './memberWalletInfo.entity';
 import { MemberLoginRewardLog } from './memberLoginRewardLog.entity';
 import { CSAFEventEnterLog } from './csafEventEnterLog.entity';
+import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Index('memberCode', ['memberCode'], { unique: true })
 @Index('email', ['email'], {})
@@ -58,63 +56,57 @@ import { CSAFEventEnterLog } from './csafEventEnterLog.entity';
 @Index('officeGradeType', ['officeGradeType'], {})
 @Index('firstProviderType', ['firstProviderType'], {})
 @Entity('member')
-export class Member {
+export class Member extends BaseModelEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('varchar', { name: 'memberCode', unique: true, length: 100 })
+  @Column('varchar', { unique: true, length: 100 })
   memberCode: string;
 
-  @Column('varchar', { name: 'email', nullable: true, length: 64 })
+  @Column('varchar', { nullable: true, length: 64 })
   email: string | null;
 
-  @Column('varchar', { name: 'nickname', nullable: true, length: 64 })
+  @Column('varchar', { nullable: true, length: 64 })
   nickname: string | null;
 
-  @Column('varchar', { name: 'stateMessage', nullable: true, length: 128 })
+  @Column('varchar', { nullable: true, length: 128 })
   stateMessage: string | null;
 
-  @Column('int', { name: 'myRoomStateType', default: () => "'1'" })
+  @Column('int', { default: 1 })
   myRoomStateType: number;
 
-  @Column('int', { name: 'seqLoginCnt', default: () => "'0'" })
+  @Column('int', { default: 0 })
   seqLoginCnt: number;
 
-  @Column('int', { name: 'totalLoginCnt', default: () => "'0'" })
+  @Column('int', { default: 0 })
   totalLoginCnt: number;
 
-  @Column('int', { name: 'officeGradeType', default: () => "'1'" })
+  @Column('int', { default: 1 })
   officeGradeType: number;
 
-  @Column('int', { name: 'providerType', default: () => "'1'" })
+  @Column('int', { default: 1 })
   providerType: number;
 
-  @Column('int', { name: 'firstProviderType', default: () => "'1'" })
+  @Column('int', { default: 1 })
   firstProviderType: number;
 
-  @Column('varchar', { name: 'refreshToken', nullable: true })
+  @Column('varchar', { nullable: true })
   refreshToken: string;
 
-  @Column('int', { name: 'regPathType' })
+  @Column('int')
   regPathType: number;
 
-  @Column('datetime', { name: 'loginedAt' })
+  @Column('datetime')
   loginedAt: Date;
 
-  @Column('datetime', { name: 'passwdUpdatedAt', nullable: true })
+  @Column('datetime', { nullable: true })
   passwdUpdatedAt: Date | null;
 
-  @Column('datetime', { name: 'emailUpdatedAt', nullable: true })
+  @Column('datetime', { nullable: true })
   emailUpdatedAt: Date | null;
 
   @DeleteDateColumn()
   deletedAt?: Date;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 
   @OneToMany(() => MemberBlock, (blockmember) => blockmember.Member)
   Members: MemberBlock[];
@@ -256,28 +248,28 @@ export class Member {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'officeGradeType', referencedColumnName: 'type' }])
+  @JoinColumn([{ name: 'officeGradeType' }])
   OfficeGradeType: OfficeGradeType;
 
   @ManyToOne(() => ProviderType, (type) => type.Members, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'firstProviderType', referencedColumnName: 'type' }])
+  @JoinColumn([{ name: 'firstProviderType' }])
   ProviderType: ProviderType;
 
   @ManyToOne(() => MyRoomStateType, (type) => type.Members, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'myRoomStateType', referencedColumnName: 'type' }])
+  @JoinColumn([{ name: 'myRoomStateType' }])
   MyRoomStateType: MyRoomStateType;
 
   @ManyToOne(() => RegPathType, (type) => type.Members, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'regPathType', referencedColumnName: 'type' }])
+  @JoinColumn([{ name: 'regPathType' }])
   RegPathType: RegPathType;
 
   @OneToOne(() => SessionInfo, (sessioninfo) => sessioninfo.Member)

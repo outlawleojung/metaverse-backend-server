@@ -1,4 +1,10 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Index('roomCode', ['roomCode'], {})
 @Index('memberId', ['memberId'], {})
@@ -10,7 +16,7 @@ export class MemberOfficeVisitLog {
   @Column('varchar', { name: 'roomCode', length: 20 })
   roomCode: string;
 
-  @Column('varchar', { name: 'memberId', length: 100 })
+  @Column('uuid')
   memberId: string;
 
   @CreateDateColumn()

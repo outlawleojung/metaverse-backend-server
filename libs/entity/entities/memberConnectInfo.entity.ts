@@ -13,7 +13,7 @@ import { Member } from './member.entity';
 @Index('roomId', ['roomId'], {})
 @Entity('member_connect_info')
 export class MemberConnectInfo {
-  @PrimaryColumn('varchar', { name: 'memberCode', length: 16 })
+  @PrimaryColumn('varchar', { length: 16 })
   memberCode: string;
 
   @Column('varchar', { name: 'roomId', length: 32 })
