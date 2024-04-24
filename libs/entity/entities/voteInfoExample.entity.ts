@@ -13,13 +13,13 @@ import { MemberVoteInfo } from './memberVoteInfo.entity';
 
 @Entity('vote_info_example')
 export class VoteInfoExample {
-  @PrimaryColumn('int', { name: 'voteId' })
+  @PrimaryColumn('int')
   voteId: number;
 
-  @PrimaryColumn('int', { name: 'num' })
+  @PrimaryColumn('int')
   num: number;
 
-  @Column('varchar', { name: 'contents', length: 128 })
+  @Column('varchar', { length: 128 })
   contents: string;
 
   @CreateDateColumn()
@@ -32,9 +32,12 @@ export class VoteInfoExample {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'voteId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'voteId' })
   VoteInfo: VoteInfo;
 
-  @OneToMany(() => MemberVoteInfo, (membervoteinfo) => membervoteinfo.VoteInfoExample)
+  @OneToMany(
+    () => MemberVoteInfo,
+    (membervoteinfo) => membervoteinfo.VoteInfoExample,
+  )
   MemberVoteInfos: MemberVoteInfo[];
 }

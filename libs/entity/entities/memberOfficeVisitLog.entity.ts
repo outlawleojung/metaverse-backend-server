@@ -10,10 +10,10 @@ import {
 @Index('memberId', ['memberId'], {})
 @Entity('member_office_visit_log')
 export class MemberOfficeVisitLog {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('varchar', { name: 'roomCode', length: 20 })
+  @Column('varchar', { length: 20 })
   roomCode: string;
 
   @Column('uuid')

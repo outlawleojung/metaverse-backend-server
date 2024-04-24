@@ -1,8 +1,15 @@
 import { MediaRollingType } from './mediaRollingType.entity';
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
 import { SpaceType } from './spaceType.entity';
 import { SpaceDetailType } from './spaceDetailType.entity';
-import { BannerReservation } from './bannerReservation.entity';
 import { BannerType } from './bannerType.entity';
 import { EachBoothBannerInfo } from './eachBoothBannerInfo.entity';
 
@@ -12,25 +19,25 @@ import { EachBoothBannerInfo } from './eachBoothBannerInfo.entity';
 @Index('bannerType', ['bannerType'], {})
 @Entity('booth_banner_info')
 export class BoothBannerInfo {
-  @PrimaryColumn('int', { name: 'id' })
+  @PrimaryColumn('int')
   id: number;
 
-  @Column('int', { name: 'spaceType' })
+  @Column('int')
   spaceType: number;
 
-  @Column('int', { name: 'spaceDetailType' })
+  @Column('int')
   spaceDetailType: number;
 
-  @Column('int', { name: 'width' })
+  @Column('int')
   width: number;
 
-  @Column('int', { name: 'height' })
+  @Column('int')
   height: number;
 
-  @Column('int', { name: 'mediaRollingType' })
+  @Column('int')
   mediaRollingType: number;
 
-  @Column('int', { name: 'bannerType' })
+  @Column('int')
   bannerType: number;
 
   @OneToMany(() => EachBoothBannerInfo, (info) => info.BoothBannerInfo)
@@ -40,27 +47,27 @@ export class BoothBannerInfo {
     onDelete: 'CASCADE',
     onUpdate: 'NO ACTION',
   })
-  @JoinColumn([{ name: 'spaceType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'spaceType' })
   SpaceType: SpaceType;
 
   @ManyToOne(() => MediaRollingType, (type) => type.BoothBannerInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'NO ACTION',
   })
-  @JoinColumn([{ name: 'mediaRollingType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'mediaRollingType' })
   MediaRollingType: MediaRollingType;
 
   @ManyToOne(() => BannerType, (type) => type.BoothBannerInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'NO ACTION',
   })
-  @JoinColumn([{ name: 'bannerType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'bannerType' })
   BannerType: BannerType;
 
   @ManyToOne(() => SpaceDetailType, (type) => type.BoothBannerInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'NO ACTION',
   })
-  @JoinColumn([{ name: 'spaceDetailType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'spaceDetailType' })
   SpaceDetailType: SpaceDetailType;
 }

@@ -14,13 +14,13 @@ import { AvatarPartsType } from './avatarPartsType.entity';
 @Index('itemId', ['itemId'], {})
 @Entity('avatar_preset')
 export class AvatarPreset {
-  @PrimaryColumn('int', { name: 'presetType' })
+  @PrimaryColumn('int')
   presetType: number;
 
-  @PrimaryColumn('int', { name: 'partsType' })
+  @PrimaryColumn('int')
   partsType: number;
 
-  @Column('int', { name: 'itemId' })
+  @Column('int')
   itemId: number;
 
   @ManyToOne(
@@ -31,7 +31,7 @@ export class AvatarPreset {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'presetType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'presetType' })
   AvatarPresetType: AvatarPresetType;
 
   @ManyToOne(
@@ -42,13 +42,13 @@ export class AvatarPreset {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'partsType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'partsType' })
   AvatarPartsType: AvatarPartsType;
 
   @ManyToOne(() => Item, (item) => item.AvatarPresets, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'itemId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'itemId' })
   Item: Item;
 }

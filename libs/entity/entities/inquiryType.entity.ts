@@ -6,9 +6,15 @@ import { BaseTypeEntity } from './baseTypeEntity.entity';
 
 @Entity('inquiry_type')
 export class InquiryType extends BaseTypeEntity {
-  @OneToMany(() => InquiryTemplate, (inquirytemplate) => inquirytemplate.InquiryType)
+  @OneToMany(
+    () => InquiryTemplate,
+    (inquirytemplate) => inquirytemplate.InquiryType,
+  )
   InquiryTemplates: InquiryTemplate[];
 
-  @OneToMany(() => MemberInquiryGroup, (memberinquirygroup) => memberinquirygroup.InquiryType)
+  @OneToMany(
+    () => MemberInquiryGroup,
+    (memberinquirygroup) => memberinquirygroup.InquiryType,
+  )
   MemberInquiryGroups: MemberInquiryGroup[];
 }

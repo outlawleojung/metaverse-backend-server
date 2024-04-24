@@ -1,16 +1,11 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Entity('test_member')
-export class TestMember {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+export class TestMember extends BaseModelEntity {
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('varchar', { name: 'deviceId', nullable: true, length: 100 })
+  @Column('varchar', { nullable: true, length: 100 })
   deviceId: string | null;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }

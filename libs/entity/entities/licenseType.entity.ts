@@ -1,5 +1,5 @@
 import { LicenseGroupInfo } from './licenseGroupInfo.entity';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Entity, OneToMany } from 'typeorm';
 import { LicenseTypeInfo } from './licenseTypeInfo.entity';
 import { BaseTypeEntity } from './baseTypeEntity.entity';
 

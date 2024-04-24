@@ -10,37 +10,32 @@ import {
 } from 'typeorm';
 import { Member } from './member.entity';
 import { CSAFEventInfo } from './csafEventInfo.entity';
+import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Index('eventId', ['eventId'], {})
 @Index('memberId', ['memberId'], { unique: true })
 @Entity('csaf_event_enter_log')
-export class CSAFEventEnterLog {
-  @PrimaryGeneratedColumn({ name: 'id' })
+export class CSAFEventEnterLog extends BaseModelEntity {
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('int', { name: 'eventId' })
+  @Column('int')
   eventId: number;
 
   @Column('uuid')
   memberId: string;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
   @ManyToOne(() => Member, (member) => member.CSAFEventEnterLogs, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(() => CSAFEventInfo, (info) => info.CSAFEventEnterLogs, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'eventId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'eventId' })
   CSAFEventInfo: CSAFEventInfo;
 }

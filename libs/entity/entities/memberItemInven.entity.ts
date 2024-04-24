@@ -17,13 +17,13 @@ export class MemberItemInven {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @PrimaryColumn('int', { name: 'itemId' })
+  @PrimaryColumn('int')
   itemId: number;
 
-  @Column('int', { name: 'num' })
+  @Column('int')
   num: number;
 
-  @Column('int', { name: 'count' })
+  @Column('int')
   count: number;
 
   @CreateDateColumn()
@@ -36,13 +36,13 @@ export class MemberItemInven {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(() => Item, (item) => item.MemberItemInvens, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'itemId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'itemId' })
   Item: Item;
 }

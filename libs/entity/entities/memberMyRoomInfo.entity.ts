@@ -26,14 +26,14 @@ export class MemberMyRoomInfo {
     description: '아이템 아이디',
     required: true,
   })
-  @PrimaryColumn('int', { name: 'itemId' })
+  @PrimaryColumn('int')
   itemId: number;
 
   @ApiProperty({
     example: 12,
     description: '아이템 번호',
   })
-  @PrimaryColumn('int', { name: 'num' })
+  @PrimaryColumn('int')
   num: number;
 
   @ApiProperty({
@@ -41,7 +41,7 @@ export class MemberMyRoomInfo {
     description: '레이어 타입',
     required: true,
   })
-  @Column('int', { name: 'layerType' })
+  @Column('int')
   layerType: number;
 
   @ApiProperty({
@@ -49,7 +49,7 @@ export class MemberMyRoomInfo {
     description: 'x 좌표',
     required: true,
   })
-  @Column('int', { name: 'x' })
+  @Column('int')
   x: number;
 
   @ApiProperty({
@@ -57,7 +57,7 @@ export class MemberMyRoomInfo {
     description: 'y 좌표',
     required: true,
   })
-  @Column('int', { name: 'y' })
+  @Column('int')
   y: number;
 
   @ApiProperty({
@@ -65,7 +65,7 @@ export class MemberMyRoomInfo {
     description: '회전',
     required: true,
   })
-  @Column('int', { name: 'rotation' })
+  @Column('int')
   rotation: number;
 
   @CreateDateColumn()
@@ -93,6 +93,6 @@ export class MemberMyRoomInfo {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'layerType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'layerType' })
   LayerType: LayerType;
 }

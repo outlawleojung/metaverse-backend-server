@@ -29,13 +29,13 @@ export class MemberBlock {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(() => Member, (member) => member.MemberBlocks, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'blockMemberId' }])
+  @JoinColumn({ name: 'blockMemberId' })
   MemberBlock: Member;
 }

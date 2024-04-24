@@ -19,10 +19,10 @@ export class MemberAvatarInfo {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @PrimaryColumn('int', { name: 'avatarPartsType' })
+  @PrimaryColumn('int')
   avatarPartsType: number;
 
-  @Column('int', { name: 'itemId' })
+  @Column('int')
   itemId: number;
 
   @CreateDateColumn()
@@ -35,7 +35,7 @@ export class MemberAvatarInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(() => ItemUseEffect, (effect) => effect.MemberAvatarInfos, {

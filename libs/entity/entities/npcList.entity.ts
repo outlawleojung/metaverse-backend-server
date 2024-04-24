@@ -1,4 +1,12 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
 import { NpcArrange } from './npcArrange.entity';
 import { NpcType } from './npcType.entity';
 import { NpcLookType } from './npcLookType.entity';
@@ -10,19 +18,19 @@ import { NpcCostume } from './npcCostume.entity';
 @Index('name', ['name'], {})
 @Entity('npc_list')
 export class NpcList {
-  @PrimaryColumn('int', { name: 'id' })
+  @PrimaryColumn('int')
   id: number;
 
-  @Column('int', { name: 'npcType' })
+  @Column('int')
   npcType: number;
 
-  @Column('int', { name: 'npcLookType' })
+  @Column('int')
   npcLookType: number;
 
-  @Column('varchar', { name: 'name', length: 64 })
+  @Column('varchar', { length: 64 })
   name: string;
 
-  @Column('varchar', { name: 'prefab', length: 64 })
+  @Column('varchar', { length: 64 })
   prefab: string;
 
   @OneToMany(() => NpcArrange, (npcarrange) => npcarrange.NpcList)
@@ -35,20 +43,20 @@ export class NpcList {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'npcType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'npcType' })
   NpcType: NpcType;
 
   @ManyToOne(() => NpcLookType, (type) => type.NpcLists, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'npcLookType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'npcLookType' })
   NpcLookType: NpcLookType;
 
   @ManyToOne(() => Localization, (local) => local.NpcLists, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'name', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'name' })
   LocalizationName: Localization;
 }

@@ -3,43 +3,47 @@ import { OfficeGradeType } from './officeGradeType.entity';
 
 @Entity('office_grade_authority')
 export class OfficeGradeAuthority {
-  @PrimaryColumn('int', { name: 'gradeType' })
+  @PrimaryColumn('int')
   gradeType: number;
 
-  @Column('int', { name: 'isUsePaidRoom' })
+  @Column('int')
   isUsePaidRoom: number;
 
-  @Column('int', { name: 'capacityLimit' })
+  @Column('int')
   capacityLimit: number;
 
-  @Column('int', { name: 'reserveLimit' })
+  @Column('int')
   reserveLimit: number;
 
-  @Column('int', { name: 'isThumbnail' })
+  @Column('int')
   isThumbnail: number;
 
-  @Column('int', { name: 'isWaitingRoom' })
+  @Column('int')
   isWaitingRoom: number;
 
-  @Column('int', { name: 'isAdvertising' })
+  @Column('int')
   isAdvertising: number;
 
-  @Column('int', { name: 'isObserver' })
+  @Column('int')
   isObserver: number;
 
-  @Column('int', { name: 'isChangeAdmin' })
+  @Column('int')
   isChangeAdmin: number;
 
-  @Column('int', { name: 'timeLimit' })
+  @Column('int')
   timeLimit: number;
 
-  @Column('int', { name: 'isChangeTime' })
+  @Column('int')
   isChangeTime: number;
 
-  @ManyToOne(() => OfficeGradeType, (officeGradeType) => officeGradeType.OfficeGradeAuthorities, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'gradeType', referencedColumnName: 'type' }])
+  @ManyToOne(
+    () => OfficeGradeType,
+    (officeGradeType) => officeGradeType.OfficeGradeAuthorities,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'gradeType' })
   OfficeGradeType: OfficeGradeType;
 }

@@ -16,25 +16,25 @@ import { MemberInquiryManager } from './memberInquiryManager.entity';
 @Index('groupId', ['groupId'], {})
 @Entity('member_inquiry')
 export class MemberInquiry {
-  @PrimaryColumn('int', { name: 'inquiryId' })
+  @PrimaryColumn('int')
   inquiryId: number;
 
-  @Column('int', { name: 'groupId' })
+  @Column('int')
   groupId: number;
 
-  @Column('varchar', { name: 'content', length: 512 })
+  @Column('varchar', { length: 512 })
   content: string;
 
-  @Column('varchar', { name: 'images', length: 1024, nullable: true })
+  @Column('varchar', { length: 1024, nullable: true })
   images: string;
 
-  @Column('varchar', { name: 'appVersion', length: 32 })
+  @Column('varchar', { length: 32 })
   appVersion: string;
 
-  @Column('varchar', { name: 'deviceModel', length: 32 })
+  @Column('varchar', { length: 32 })
   deviceModel: string;
 
-  @Column('varchar', { name: 'deviceOS', length: 64 })
+  @Column('varchar', { length: 64 })
   deviceOS: string;
 
   @CreateDateColumn()
@@ -54,13 +54,13 @@ export class MemberInquiry {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'groupId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'groupId' })
   MemberInquiryGroup: MemberInquiryGroup;
 
   @OneToOne(() => MemberInquiryManager, (state) => state.MemberInquiry, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'inquiryId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'inquiryId' })
   MemberInquiryManager: MemberInquiryManager;
 }

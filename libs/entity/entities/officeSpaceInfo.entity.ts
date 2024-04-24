@@ -1,4 +1,12 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
 import { OfficeModeType } from './officeModeType.entity';
 import { Localization } from './localization.entity';
 import { OfficeSeatInfo } from './officeSeatInfo.entity';
@@ -8,40 +16,40 @@ import { OfficeSeatInfo } from './officeSeatInfo.entity';
 @Index('spacename', ['spaceName'], {})
 @Entity('office_space_info')
 export class OfficeSpaceInfo {
-  @PrimaryColumn('int', { name: 'id' })
+  @PrimaryColumn('int')
   id: number;
 
-  @Column('int', { name: 'modeType' })
+  @Column('int')
   modeType: number;
 
-  @Column('int', { name: 'exposureOrder' })
+  @Column('int')
   exposureOrder: number;
 
-  @Column('varchar', { name: 'description', length: 64 })
+  @Column('varchar', { length: 64 })
   description: string;
 
-  @Column('varchar', { name: 'spaceName', length: 64 })
+  @Column('varchar', { length: 64 })
   spaceName: string;
 
-  @Column('varchar', { name: 'thumbnail', nullable: true, length: 64 })
+  @Column('varchar', { nullable: true, length: 64 })
   thumbnail: string | null;
 
-  @Column('varchar', { name: 'sceneName', nullable: true, length: 64 })
+  @Column('varchar', { nullable: true, length: 64 })
   sceneName: string | null;
 
-  @Column('int', { name: 'defaultCapacity' })
+  @Column('int')
   defaultCapacity: number;
 
-  @Column('int', { name: 'minCapacity' })
+  @Column('int')
   minCapacity: number;
 
-  @Column('int', { name: 'maxCapacity' })
+  @Column('int')
   maxCapacity: number;
 
-  @Column('int', { name: 'maxObserver' })
+  @Column('int')
   maxObserver: number;
 
-  @Column('int', { name: 'sitCapacity' })
+  @Column('int')
   sitCapacity: number;
 
   @OneToMany(() => OfficeSeatInfo, (info) => info.OfficeSpaceInfo)
@@ -51,20 +59,28 @@ export class OfficeSpaceInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'modeType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'modeType' })
   OfficeModeType: OfficeModeType;
 
-  @ManyToOne(() => Localization, (localization) => localization.OfficeSpaceInfoDescs, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'description', referencedColumnName: 'id' }])
+  @ManyToOne(
+    () => Localization,
+    (localization) => localization.OfficeSpaceInfoDescs,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'description' })
   LocalizationDesc: Localization;
 
-  @ManyToOne(() => Localization, (localization) => localization.OfficeSpaceInfoNames, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'spaceName', referencedColumnName: 'id' }])
+  @ManyToOne(
+    () => Localization,
+    (localization) => localization.OfficeSpaceInfoNames,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'spaceName' })
   LocalizationName: Localization;
 }

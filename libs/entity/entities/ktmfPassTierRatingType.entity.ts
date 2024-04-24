@@ -1,15 +1,10 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { KtmfSpecialMoney } from './ktmfSpecialMoney.entity';
 import { KtmfNftToken } from './ktmfNftToken.entiry';
+import { BaseTypeEntity } from './baseTypeEntity.entity';
 
 @Entity('ktmf_pass_tier_rating_type')
-export class KtmfPassTierRatingType {
-  @PrimaryColumn('int', { name: 'type' })
-  type: number;
-
-  @Column('varchar', { name: 'name', length: 20 })
-  name: string;
-
+export class KtmfPassTierRatingType extends BaseTypeEntity {
   @OneToMany(() => KtmfSpecialMoney, (param) => param.KtmfPassTierRatingType)
   KtmfSpecialMoney: KtmfSpecialMoney[];
 

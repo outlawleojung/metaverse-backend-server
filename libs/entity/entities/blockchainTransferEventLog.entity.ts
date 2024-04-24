@@ -1,25 +1,26 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Entity('blopckchain_transfer_eventLog')
-export class BlockchainTransferEventLog {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+export class BlockchainTransferEventLog extends BaseModelEntity {
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('varchar', { name: 'from', length: 100 })
+  @Column('varchar', { length: 100 })
   from: string;
 
-  @Column('varchar', { name: 'to', length: 100 })
+  @Column('varchar', { length: 100 })
   to: string;
 
-  @Column('varchar', { name: 'tokenId', length: 100 })
+  @Column('varchar', { length: 100 })
   tokenId: string;
 
-  @Column('text', { name: 'event' })
+  @Column('text')
   event: string;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }

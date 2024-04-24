@@ -1,35 +1,14 @@
 import { OfficeGradeAuthority } from './officeGradeAuthority.entity';
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-} from 'typeorm';
+import { Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
-import { ApiProperty } from '@nestjs/swagger';
 import { OfficeProductItem } from './officeProductItem.entity';
 import { Localization } from './localization.entity';
 import { Member } from './member.entity';
+import { BaseTypeEntity } from './baseTypeEntity.entity';
 
 @Index('name', ['name'], {})
 @Entity('office_grade_type')
-export class OfficeGradeType {
-  @ApiProperty({
-    example: 1,
-    description: '오피스 등급 타입',
-  })
-  @Column('int', { primary: true, name: 'type' })
-  type: number;
-
-  @ApiProperty({
-    example: '일반',
-    description: '타입 이름',
-  })
-  @Column('varchar', { name: 'name', length: 64 })
-  name: string;
-
+export class OfficeGradeType extends BaseTypeEntity {
   @OneToMany(() => Member, (member) => member.OfficeGradeType)
   Members: Member[];
 
@@ -53,6 +32,6 @@ export class OfficeGradeType {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'name', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'name' })
   LocalizationName: Localization;
 }

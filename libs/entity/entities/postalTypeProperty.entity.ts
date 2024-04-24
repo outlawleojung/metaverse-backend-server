@@ -2,9 +2,9 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('postal_type_property')
 export class PostalTypeProperty {
-  @PrimaryColumn('int', { name: 'postalType' })
+  @PrimaryColumn('int')
   postalType: number;
 
-  @Column('int', { name: 'period' })
+  @Column('int')
   period: number;
 }

@@ -21,22 +21,22 @@ import { Postbox } from './postbox.entity';
   '("postboxId" IS NOT NULL AND "systemPostboxId" IS NULL) OR ("postboxId" IS NULL AND "systemPostboxId" IS NOT NULL)',
 )
 export class MemberPostbox {
-  @PrimaryColumn({ type: 'int', name: 'id' })
+  @PrimaryColumn({ type: 'int' })
   id: number;
 
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @Column('int', { name: 'postboxId', nullable: true })
+  @Column('int', { nullable: true })
   postboxId: number;
 
-  @Column('int', { name: 'systemPostboxId', nullable: true })
+  @Column('int', { nullable: true })
   systemPostboxId: number;
 
-  @Column('int', { name: 'isReceived', default: () => "'0'" })
+  @Column('int', { default: 0 })
   isReceived: number;
 
-  @Column('datetime', { name: 'receivedAt', nullable: true })
+  @Column('datetime', { nullable: true })
   receivedAt: Date | null;
 
   @CreateDateColumn()
@@ -49,20 +49,20 @@ export class MemberPostbox {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(() => Postbox, (postbox) => postbox.MemberPostboxes, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'postboxId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'postboxId' })
   Postbox: Postbox;
 
   @ManyToOne(() => Postbox, (postbox) => postbox.MemberPostboxes, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'systemPostboxId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'systemPostboxId' })
   SystemPostbox: SystemPostbox;
 }

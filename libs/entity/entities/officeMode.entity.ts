@@ -1,4 +1,11 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { OfficeModeType } from './officeModeType.entity';
 import { Localization } from './localization.entity';
 
@@ -7,61 +14,77 @@ import { Localization } from './localization.entity';
 @Index('modeDesc', ['modeDesc'], {})
 @Entity('office_mode')
 export class OfficeMode {
-  @PrimaryColumn('int', { name: 'modeType' })
+  @PrimaryColumn('int')
   modeType: number;
 
-  @Column('varchar', { name: 'icon', length: 64 })
+  @Column('varchar', { length: 64 })
   icon: string;
 
-  @Column('varchar', { name: 'modeDesc', length: 64 })
+  @Column('varchar', { length: 64 })
   modeDesc: string;
 
-  @Column('int', { name: 'privateYn' })
+  @Column('int')
   privateYn: number;
 
-  @Column('int', { name: 'passwordYn' })
+  @Column('int')
   passwordYn: number;
 
-  @Column('varchar', { name: 'roomName', length: 64 })
+  @Column('varchar', { length: 64 })
   roomName: string;
 
-  @Column('varchar', { name: 'roomDesc', length: 64 })
+  @Column('varchar', { length: 64 })
   roomDesc: string;
 
-  @Column('int', { name: 'startMin' })
+  @Column('int')
   startMin: number;
 
-  @Column('int', { name: 'minGap' })
+  @Column('int')
   minGap: number;
 
-  @Column('int', { name: 'timeCount' })
+  @Column('int')
   timeCount: number;
 
-  @ManyToOne(() => OfficeModeType, (officemodetype) => officemodetype.OfficeModes, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'modeType', referencedColumnName: 'type' }])
+  @ManyToOne(
+    () => OfficeModeType,
+    (officemodetype) => officemodetype.OfficeModes,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'modeType' })
   OfficeModeType: OfficeModeType;
 
-  @ManyToOne(() => Localization, (localization) => localization.OfficeModeRoomName, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'roomName', referencedColumnName: 'id' }])
+  @ManyToOne(
+    () => Localization,
+    (localization) => localization.OfficeModeRoomName,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'roomName' })
   LocalizationRoomName: Localization;
 
-  @ManyToOne(() => Localization, (localization) => localization.OfficeModeRoomDesc, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'roomDesc', referencedColumnName: 'id' }])
+  @ManyToOne(
+    () => Localization,
+    (localization) => localization.OfficeModeRoomDesc,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'roomDesc' })
   LocalizationRoomDesc: Localization;
 
-  @ManyToOne(() => Localization, (localization) => localization.OfficeModeDesc, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'modeDesc', referencedColumnName: 'id' }])
+  @ManyToOne(
+    () => Localization,
+    (localization) => localization.OfficeModeDesc,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'modeDesc' })
   LocalizationModeDesc: Localization;
 }

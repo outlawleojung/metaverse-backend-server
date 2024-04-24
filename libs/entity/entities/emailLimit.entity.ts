@@ -1,11 +1,17 @@
-import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('email_limit')
 export class EmailLimit {
-  @PrimaryColumn('varchar', { name: 'email', length: 64 })
+  @PrimaryColumn('varchar', { length: 64 })
   email: string;
 
-  @Column('int', { name: 'count' })
+  @Column('int')
   count: number;
 
   @CreateDateColumn()

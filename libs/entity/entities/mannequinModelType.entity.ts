@@ -5,9 +5,15 @@ import { BaseTypeEntity } from './baseTypeEntity.entity';
 
 @Entity('mannequin_model_type')
 export class MannequinModelType extends BaseTypeEntity {
-  @OneToMany(() => CommerceZoneMannequin, (commercezonemannequin) => commercezonemannequin.MannequinModelType)
+  @OneToMany(
+    () => CommerceZoneMannequin,
+    (commercezonemannequin) => commercezonemannequin.MannequinModelType,
+  )
   CommerceZoneMannequins: CommerceZoneMannequin[];
 
-  @OneToOne(() => MannequinPurchaseState, (mannequinpurchasestate) => mannequinpurchasestate.MannequinModelType)
+  @OneToOne(
+    () => MannequinPurchaseState,
+    (mannequinpurchasestate) => mannequinpurchasestate.MannequinModelType,
+  )
   MannequinPurchaseState: MannequinPurchaseState;
 }

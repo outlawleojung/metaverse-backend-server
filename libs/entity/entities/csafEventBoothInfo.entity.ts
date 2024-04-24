@@ -1,4 +1,12 @@
-import { CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import {
+  CreateDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { CSAFEventInfo } from './csafEventInfo.entity';
 import { MemberOfficeReservationInfo } from './memberOfficeReservationInfo.entity';
 
@@ -6,10 +14,10 @@ import { MemberOfficeReservationInfo } from './memberOfficeReservationInfo.entit
 @Index('boothId', ['boothId'], {})
 @Entity('csaf_event_booth_info')
 export class CSAFEventBoothInfo {
-  @PrimaryColumn('int', { name: 'eventId' })
+  @PrimaryColumn('int')
   eventId: number;
 
-  @PrimaryColumn('int', { name: 'boothId' })
+  @PrimaryColumn('int')
   boothId: number;
 
   @CreateDateColumn()
@@ -22,13 +30,17 @@ export class CSAFEventBoothInfo {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'eventId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'eventId' })
   CSAFEventInfo: CSAFEventInfo;
 
-  @ManyToOne(() => MemberOfficeReservationInfo, (info) => info.CSAFEventBoothInfos, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'boothId', referencedColumnName: 'id' }])
+  @ManyToOne(
+    () => MemberOfficeReservationInfo,
+    (info) => info.CSAFEventBoothInfos,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'boothId' })
   MemberOfficeReservationInfo: MemberOfficeReservationInfo;
 }

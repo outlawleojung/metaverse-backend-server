@@ -1,38 +1,24 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  PrimaryColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Admin } from './admin.entity';
+import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Index('adminId', ['adminId'], {})
 @Entity('terms')
-export class Terms {
-  @PrimaryColumn('int', { name: 'id' })
+export class Terms extends BaseModelEntity {
+  @PrimaryColumn('int')
   id: number;
 
-  @Column('text', { name: 'service' })
+  @Column('text')
   service: string;
 
-  @Column('text', { name: 'policy' })
+  @Column('text')
   policy: string;
 
-  @Column('text', { name: 'privacy' })
+  @Column('text')
   privacy: string;
 
-  @Column('int', { name: 'adminId', nullable: true })
+  @Column('int', { nullable: true })
   adminId: number | null;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 
   @ManyToOne(() => Admin, (admin) => admin.terms, {
     onDelete: 'SET NULL',

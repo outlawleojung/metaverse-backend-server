@@ -16,7 +16,7 @@ export class MemberConnectInfo {
   @PrimaryColumn('varchar', { length: 16 })
   memberCode: string;
 
-  @Column('varchar', { name: 'roomId', length: 32 })
+  @Column('varchar', { length: 32 })
   roomId: string;
 
   @CreateDateColumn()
@@ -29,6 +29,6 @@ export class MemberConnectInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberCode', referencedColumnName: 'memberCode' }])
+  @JoinColumn({ name: 'memberCode', referencedColumnName: 'memberCode' })
   Member: Member;
 }

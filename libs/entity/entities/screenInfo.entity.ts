@@ -1,4 +1,12 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
 import { SpaceType } from './spaceType.entity';
 import { SpaceDetailType } from './spaceDetailType.entity';
 import { ScreenReservation } from './screenReservation.entity';
@@ -10,31 +18,31 @@ import { MediaExposureType } from './mediaExposureType.entity';
 @Index('mediaRollingType', ['mediaRollingType'], {})
 @Entity('screen_info')
 export class ScreenInfo {
-  @PrimaryColumn('int', { name: 'id' })
+  @PrimaryColumn('int')
   id: number;
 
-  @Column('int', { name: 'spaceType' })
+  @Column('int')
   spaceType: number;
 
-  @Column('int', { name: 'spaceDetailType' })
+  @Column('int')
   spaceDetailType: number;
 
-  @Column('varchar', { name: 'description', length: 64 })
+  @Column('varchar', { length: 64 })
   description: string;
 
-  @Column('varchar', { name: 'positionImage', length: 64 })
+  @Column('varchar', { length: 64 })
   positionImage: string;
 
-  @Column('int', { name: 'width' })
+  @Column('int')
   width: number;
 
-  @Column('int', { name: 'height' })
+  @Column('int')
   height: number;
 
-  @Column('int', { name: 'mediaRollingType' })
+  @Column('int')
   mediaRollingType: number;
 
-  @Column('int', { name: 'mediaExposureType' })
+  @Column('int')
   mediaExposureType: number;
 
   @OneToMany(() => ScreenReservation, (param) => param.ScreenInfo)
@@ -44,27 +52,27 @@ export class ScreenInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'spaceType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'spaceType' })
   SpaceType: SpaceType;
 
   @ManyToOne(() => MediaRollingType, (type) => type.ScreenInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'mediaRollingType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'mediaRollingType' })
   MediaRollingType: MediaRollingType;
 
   @ManyToOne(() => MediaExposureType, (type) => type.ScreenInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'mediaExposureType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'mediaExposureType' })
   MediaExposureType: MediaExposureType;
 
   @ManyToOne(() => SpaceDetailType, (type) => type.ScreenInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'spaceDetailType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'spaceDetailType' })
   SpaceDetailType: SpaceDetailType;
 }

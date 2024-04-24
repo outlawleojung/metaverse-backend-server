@@ -15,13 +15,13 @@ import { InquiryAnswerType } from './inquiryAnswerType.entity';
 
 @Entity('member_inquiry_manager')
 export class MemberInquiryManager {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('int', { name: 'answerType' })
+  @Column('int')
   answerType: number;
 
-  @Column('datetime', { name: 'reservationAt', nullable: true })
+  @Column('datetime', { nullable: true })
   reservationAt: Date;
 
   @CreateDateColumn()
@@ -53,6 +53,6 @@ export class MemberInquiryManager {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'answerType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'answerType' })
   InquiryAnswerType: InquiryAnswerType;
 }

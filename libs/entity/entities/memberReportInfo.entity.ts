@@ -12,6 +12,7 @@ import { Member } from './member.entity';
 import { ReportCategory } from './reportCategory.entity';
 import { ReportStateType } from './reportStateType.entity';
 import { Admin } from './admin.entity';
+import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Index('adminId', ['adminId'], {})
 @Index('stateType', ['stateType'], {})
@@ -19,8 +20,8 @@ import { Admin } from './admin.entity';
 @Index('reportcategory', ['reportType', 'reasonType'], {})
 @Index('targetMemberId', ['targetMemberId'], {})
 @Entity('member_report_info')
-export class MemberReportInfo {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+export class MemberReportInfo extends BaseModelEntity {
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
   @Column('int', { name: 'stateType' })
@@ -29,50 +30,44 @@ export class MemberReportInfo {
   @Column('uuid')
   reportMemberId: string | null;
 
-  @Column('varchar', { name: 'reportNickname', length: 64 })
+  @Column('varchar', { length: 64 })
   reportNickname: string;
 
-  @Column('int', { name: 'reportType' })
+  @Column('int')
   reportType: number;
 
-  @Column('int', { name: 'reasonType' })
+  @Column('int')
   reasonType: number;
 
-  @Column('varchar', { name: 'content', length: 1024 })
+  @Column('varchar', { length: 1024 })
   content: string;
 
   @Column('uuid')
   targetMemberId: string | null;
 
-  @Column('varchar', { name: 'targetNickname', length: 64 })
+  @Column('varchar', { length: 64 })
   targetNickname: string;
 
-  @Column('varchar', { name: 'images', length: 1024 })
+  @Column('varchar', { length: 1024 })
   images: string;
 
-  @Column('datetime', { name: 'reportedAt' })
+  @Column('datetime')
   reportedAt: Date;
 
-  @Column('datetime', { name: 'completedAt' })
+  @Column('datetime')
   completedAt: Date;
 
-  @Column('varchar', { name: 'comment', length: 256 })
+  @Column('varchar', { length: 256 })
   comment: string;
 
   @Column({ nullable: true })
   adminId: number | null;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
   @ManyToOne(() => Member, (member) => member.MemberReportInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'reportMemberId' }])
+  @JoinColumn({ name: 'reportMemberId' })
   ReportMember: Member;
 
   @ManyToOne(
@@ -93,14 +88,14 @@ export class MemberReportInfo {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'targetMemberId' }])
+  @JoinColumn({ name: 'targetMemberId' })
   TargetMember: Member;
 
   @ManyToOne(() => ReportStateType, (type) => type.MemberReportInfos, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'stateType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'stateType' })
   ReportStateType: ReportStateType;
 
   @ManyToOne(() => Admin, (admin) => admin.MemberReportInfos, {
@@ -108,6 +103,6 @@ export class MemberReportInfo {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId' }])
+  @JoinColumn({ name: 'adminId' })
   admin: Admin;
 }

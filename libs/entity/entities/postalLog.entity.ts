@@ -17,22 +17,22 @@ import { Admin } from './admin.entity';
 @Index('postboxId', ['postboxId'], {})
 @Entity('postal_log')
 export class PostalLog {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('int', { name: 'postboxId' })
+  @Column('int')
   postboxId: number;
 
-  @Column('int', { name: 'logActionType', nullable: true })
+  @Column('int', { nullable: true })
   logActionType: number;
 
-  @Column('int', { name: 'postalLogType' })
+  @Column('int')
   postalLogType: number;
 
-  @Column('text', { name: 'prevData', nullable: true })
+  @Column('text', { nullable: true })
   prevData: string;
 
-  @Column('text', { name: 'changeData', nullable: true })
+  @Column('text', { nullable: true })
   changeData: string;
 
   @CreateDateColumn()
@@ -42,21 +42,21 @@ export class PostalLog {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'postboxId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'postboxId' })
   Postbox: Postbox;
 
   @ManyToOne(() => PostalLogType, (box) => box.PostalLogs, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'postalLogType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'postalLogType' })
   PostalLogType: PostalLogType;
 
   @ManyToOne(() => LogActionType, (box) => box.PostalLogs, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'logActionType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'logActionType' })
   LogActionType: LogActionType;
 
   @ManyToOne(() => Admin, (admin) => admin.PostalLogs, {

@@ -12,10 +12,10 @@ import { AvatarPartsType } from './avatarPartsType.entity';
 @Index('itemId', ['itemId'], {})
 @Entity('avatar_reset_info')
 export class AvatarResetInfo {
-  @PrimaryColumn('int', { name: 'partsType' })
+  @PrimaryColumn('int')
   partsType: number;
 
-  @Column('int', { name: 'itemId' })
+  @Column('int')
   itemId: number;
 
   @ManyToOne(
@@ -26,13 +26,13 @@ export class AvatarResetInfo {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'partsType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'partsType' })
   AvatarPartsType: AvatarPartsType;
 
   @ManyToOne(() => Item, (item) => item.AvatarResetInfos, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'itemId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'itemId' })
   Item: Item;
 }

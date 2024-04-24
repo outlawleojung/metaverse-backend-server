@@ -29,13 +29,13 @@ export class MemberFriendRequest {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'requestMemberId' }])
+  @JoinColumn({ name: 'requestMemberId' })
   RequestMember: Member;
 
   @ManyToOne(() => Member, (member) => member.ReceivedMembers, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'receivedMemberId' }])
+  @JoinColumn({ name: 'receivedMemberId' })
   ReceivedMember: Member;
 }

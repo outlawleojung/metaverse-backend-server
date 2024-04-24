@@ -16,7 +16,7 @@ export class PostReceiveMemberInfo {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @PrimaryColumn('int', { name: 'postboxId' })
+  @PrimaryColumn('int')
   postboxId: number;
 
   @CreateDateColumn()
@@ -29,13 +29,13 @@ export class PostReceiveMemberInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(() => Postbox, (postbox) => postbox.PostReceiveMemberInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'postboxId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'postboxId' })
   Postbox: Postbox;
 }

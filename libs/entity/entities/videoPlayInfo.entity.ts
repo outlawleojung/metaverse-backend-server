@@ -19,31 +19,31 @@ import { Admin } from './admin.entity';
 @Index('adminId', ['adminId'], {})
 @Entity('video_play_info')
 export class VideoPlayInfo {
-  @PrimaryColumn('int', { name: 'videoScreenType' })
+  @PrimaryColumn('int')
   videoScreenType: number;
 
-  @Column('int', { name: 'videoPlayType' })
+  @Column('int')
   videoPlayType: number;
 
-  @Column('int', { name: 'enabledType' })
+  @Column('int')
   enabledType: number;
 
-  @Column('longtext', { name: 'playList', nullable: true })
+  @Column('longtext', { nullable: true })
   playList: string | null;
 
-  @Column('longtext', { name: 'liveLink', nullable: true })
+  @Column('longtext', { nullable: true })
   liveLink: string | null;
 
-  @Column('longtext', { name: 'liveLink2', nullable: true })
+  @Column('longtext', { nullable: true })
   liveLink2: string | null;
 
-  @Column('datetime', { name: 'startDate', nullable: true })
+  @Column('datetime', { nullable: true })
   startDate: Date | null;
 
-  @Column('datetime', { name: 'endDate', nullable: true })
+  @Column('datetime', { nullable: true })
   endDate: Date | null;
 
-  @Column('int', { name: 'adminId', nullable: true })
+  @Column('int', { nullable: true })
   adminId: number | null;
 
   @CreateDateColumn()
@@ -60,7 +60,7 @@ export class VideoPlayInfo {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'videoScreenType', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'videoScreenType' })
   VideoScreenInfo: VideoScreenInfo;
 
   @ManyToOne(
@@ -71,14 +71,14 @@ export class VideoPlayInfo {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'videoPlayType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'videoPlayType' })
   VideoStateType: VideoStateType;
 
   @ManyToOne(() => EnabledType, (enabledtype) => enabledtype.VideoPlayInfos, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'enabledType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'enabledType' })
   EnabledType: EnabledType;
 
   @ManyToOne(() => Admin, (admin) => admin.VideoPlayInfos, {

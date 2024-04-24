@@ -17,6 +17,7 @@ import { BooleanType } from './booleanType.entity';
 import { VoteInfoExample } from './voteInfoExample.entity';
 import { VoteAlterResType } from './voteAlterResType.entity';
 import { Admin } from './admin.entity';
+import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Index('divType', ['divType'], {})
 @Index('resType', ['resType'], {})
@@ -26,54 +27,48 @@ import { Admin } from './admin.entity';
 @Index('adminId', ['adminId'], {})
 @Index('alterResType', ['alterResType'], {})
 @Entity('vote_info')
-export class VoteInfo {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+export class VoteInfo extends BaseModelEntity {
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('varchar', { name: 'name', length: 64 })
+  @Column('varchar', { length: 64 })
   name: string;
 
-  @Column('varchar', { name: 'question', length: 256 })
+  @Column('varchar', { length: 256 })
   question: string;
 
-  @Column('varchar', { name: 'imageName', nullable: true, length: 128 })
+  @Column('varchar', { nullable: true, length: 128 })
   imageName: string | null;
 
-  @Column('int', { name: 'divType' })
+  @Column('int')
   divType: number;
 
-  @Column('int', { name: 'resType' })
+  @Column('int')
   resType: number;
 
-  @Column('int', { name: 'alterResType' })
+  @Column('int')
   alterResType: number;
 
-  @Column('int', { name: 'resultExposureType' })
+  @Column('int')
   resultExposureType: number;
 
-  @Column('int', { name: 'isExposingResult', default: () => "'0'" })
+  @Column('int', { default: 0 })
   isExposingResult: number;
 
-  @Column('int', { name: 'isEnabledEdit', default: () => "'0'" })
+  @Column('int', { default: 0 })
   isEnabledEdit: number;
 
   @Column()
   adminId: number;
 
-  @Column('datetime', { name: 'startedAt' })
+  @Column('datetime')
   startedAt: Date;
 
-  @Column('datetime', { name: 'endedAt' })
+  @Column('datetime')
   endedAt: Date;
 
-  @Column('datetime', { name: 'resultEndedAt' })
+  @Column('datetime')
   resultEndedAt: Date;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 
   @DeleteDateColumn({ select: false })
   deletedAt: Date | null;
@@ -82,7 +77,7 @@ export class VoteInfo {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'divType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'divType' })
   VoteDivType: VoteDivType;
 
   @ManyToOne(
@@ -93,14 +88,14 @@ export class VoteInfo {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'alterResType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'alterResType' })
   VoteAlterResType: VoteAlterResType;
 
   @ManyToOne(() => VoteResType, (voterestype) => voterestype.VoteInfos, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'resType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'resType' })
   VoteResType: VoteResType;
 
   @ManyToOne(
@@ -111,7 +106,7 @@ export class VoteInfo {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'resultExposureType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'resultExposureType' })
   VoteResultExposureType: VoteResultExposureType;
 
   @ManyToOne(
@@ -122,7 +117,7 @@ export class VoteInfo {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'isExposingResult', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'isExposingResult' })
   isExposingResultBool: BooleanType;
 
   @ManyToOne(
@@ -133,7 +128,7 @@ export class VoteInfo {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'isEnabledEdit', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'isEnabledEdit' })
   isEnabledEditBool: BooleanType;
 
   @ManyToOne(() => Admin, (admin) => admin.VoteInfos, {

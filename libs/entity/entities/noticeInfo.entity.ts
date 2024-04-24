@@ -11,63 +11,58 @@ import {
 import { NoticeType } from './noticeType.entity';
 import { NoticeExposureType } from './noticeExposureType.entity';
 import { Admin } from './admin.entity';
+import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Index('noticeType', ['noticeType'], {})
 @Index('noticeExposureType', ['noticeExposureType'], {})
 @Index('adminId', ['adminId'], {})
 @Entity('notice_info')
-export class NoticeInfo {
+export class NoticeInfo extends BaseModelEntity {
   @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
-  @Column('int', { name: 'noticeType' })
+  @Column('int')
   noticeType: number;
 
-  @Column('int', { name: 'noticeExposureType' })
+  @Column('int')
   noticeExposureType: number;
 
-  @Column('varchar', { name: 'subject', length: 32 })
+  @Column('varchar', { length: 32 })
   subject: string;
 
-  @Column('varchar', { name: 'koLink', length: 128 })
+  @Column('varchar', { length: 128 })
   koLink: string;
 
-  @Column('varchar', { name: 'enLink', length: 128, nullable: true })
+  @Column('varchar', { length: 128, nullable: true })
   enLink: string;
 
   @Column()
   adminId: number;
 
-  @Column('datetime', { name: 'startedAt' })
+  @Column('datetime')
   startedAt: Date;
 
-  @Column('datetime', { name: 'endedAt' })
+  @Column('datetime')
   endedAt: Date;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 
   @ManyToOne(() => NoticeType, (type) => type.NoticeInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'noticeType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'noticeType' })
   NoticeType: NoticeType;
 
   @ManyToOne(() => NoticeExposureType, (type) => type.NoticeInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'noticeExposureType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'noticeExposureType' })
   NoticeExposureType: NoticeExposureType;
 
   @ManyToOne(() => Admin, (admin) => admin.NoticeInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId' }])
+  @JoinColumn({ name: 'adminId' })
   admin: Admin;
 }

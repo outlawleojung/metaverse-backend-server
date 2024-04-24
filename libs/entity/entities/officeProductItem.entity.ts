@@ -1,4 +1,12 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
 import { PaymentProductManager } from './paymentProductManager.entity';
 import { Localization } from './localization.entity';
 import { OfficeGradeType } from './officeGradeType.entity';
@@ -7,36 +15,44 @@ import { OfficeGradeType } from './officeGradeType.entity';
 @Index('officeGradeType', ['officeGradeType'], {})
 @Entity('office_product_item')
 export class OfficeProductItem {
-  @PrimaryColumn({ type: 'int', name: 'productId' })
+  @PrimaryColumn({ type: 'int' })
   productId: number;
 
-  @Column('varchar', { name: 'name', length: 32 })
+  @Column('varchar', { length: 32 })
   name: string;
 
-  @Column('int', { name: 'officeGradeType' })
+  @Column('int')
   officeGradeType: number;
 
-  @Column('int', { name: 'period' })
+  @Column('int')
   period: number;
 
-  @ManyToOne(() => PaymentProductManager, (manager) => manager.OfficeProductItems, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'productId', referencedColumnName: 'id' }])
+  @ManyToOne(
+    () => PaymentProductManager,
+    (manager) => manager.OfficeProductItems,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'productId' })
   PaymentProductManager: PaymentProductManager;
 
-  @ManyToOne(() => Localization, (localization) => localization.OfficeProductItems, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'name', referencedColumnName: 'id' }])
+  @ManyToOne(
+    () => Localization,
+    (localization) => localization.OfficeProductItems,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'name' })
   LocalizationName: Localization;
 
   @ManyToOne(() => OfficeGradeType, (type) => type.OfficeProductItems, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'officeGradeType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'officeGradeType' })
   OfficeGradeType: OfficeGradeType;
 }

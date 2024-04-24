@@ -1,4 +1,4 @@
-import { Column, Entity } from 'typeorm';
+import { Entity } from 'typeorm';
 import { BaseTypeEntity } from './baseTypeEntity.entity';
 
 @Entity('select_vote_state_type')

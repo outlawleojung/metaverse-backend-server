@@ -11,54 +11,49 @@ import {
 import { BannerInfo } from './bannerInfo.entity';
 import { UploadType } from './uploadType.entity';
 import { Admin } from './admin.entity';
+import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Index('bannerId', ['bannerId'], {})
 @Index('uploadType', ['uploadType'], {})
 @Index('adminId', ['adminId'], {})
 @Entity('banner_reservation')
-export class BannerReservation {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+export class BannerReservation extends BaseModelEntity {
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('int', { name: 'bannerId' })
+  @Column('int')
   bannerId: number;
 
-  @Column('int', { name: 'uploadType' })
+  @Column('int')
   uploadType: number;
 
-  @Column('text', { name: 'contents' })
+  @Column('text')
   contents: string;
 
-  @Column('varchar', { name: 'description', length: 64, nullable: true })
-  description: string;
+  @Column('varchar', { length: 64, nullable: true })
+  description: string | null;
 
   @Column({ nullable: true })
   adminId: number | null;
 
-  @Column('datetime', { name: 'startedAt' })
+  @Column('datetime')
   startedAt: Date;
 
-  @Column('datetime', { name: 'endedAt' })
+  @Column('datetime')
   endedAt: Date;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 
   @ManyToOne(() => BannerInfo, (info) => info.BannerReservations, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'bannerId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'bannerId' })
   BannerInfo: BannerInfo;
 
   @ManyToOne(() => UploadType, (type) => type.BannerReservations, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'uploadType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'uploadType' })
   UploadType: UploadType;
 
   @ManyToOne(() => Admin, (admin) => admin.BannerReservations, {
@@ -66,6 +61,6 @@ export class BannerReservation {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId' }])
+  @JoinColumn({ name: 'adminId' })
   admin: Admin;
 }

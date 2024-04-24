@@ -15,13 +15,13 @@ import { LicenseGroupInfo } from './licenseGroupInfo.entity';
 @Index('groupId', ['groupId'], {})
 @Entity('license_info')
 export class LicenseInfo {
-  @PrimaryColumn('varchar', { name: 'licenseSerial', length: 16 })
+  @PrimaryColumn('varchar', { length: 16 })
   licenseSerial: string;
 
-  @Column('int', { name: 'groupId' })
+  @Column('int')
   groupId: number;
 
-  @Column('int', { name: 'isCompleted', default: () => "'0'" })
+  @Column('int', { default: 0 })
   isCompleted: number;
 
   @CreateDateColumn()
@@ -37,6 +37,6 @@ export class LicenseInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'groupId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'groupId' })
   LicenseGroupInfo: LicenseGroupInfo;
 }

@@ -20,19 +20,19 @@ import { Admin } from './admin.entity';
 @Index('msgId', ['msgId'], {})
 @Entity('gateway')
 export class Gateway {
-  @PrimaryColumn('int', { name: 'osType' })
+  @PrimaryColumn('int')
   osType: number;
 
-  @PrimaryColumn('varchar', { name: 'appVersion', length: 30 })
+  @PrimaryColumn('varchar', { length: 16 })
   appVersion: string;
 
-  @Column('int', { name: 'serverType' })
+  @Column('int')
   serverType: number;
 
-  @Column('int', { name: 'stateType' })
+  @Column('int')
   stateType: number;
 
-  @Column('int', { name: 'msgId', default: () => "'1'" })
+  @Column('int', { default: 1 })
   msgId: number;
 
   @Column({ nullable: true })
@@ -48,21 +48,21 @@ export class Gateway {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'osType', referencedColumnName: 'type' }])
+  @JoinColumn([{ name: 'osType' }])
   OsType: OsType;
 
   @ManyToOne(() => ServerType, (servertype) => servertype.gateways, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'serverType', referencedColumnName: 'type' }])
+  @JoinColumn([{ name: 'serverType' }])
   ServerType: ServerType;
 
   @ManyToOne(() => ServerState, (serverstate) => serverstate.gateways, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'stateType', referencedColumnName: 'state' }])
+  @JoinColumn([{ name: 'stateType' }])
   ServerState: ServerState;
 
   @ManyToOne(() => Admin, (admin) => admin.gateways, {
@@ -76,6 +76,6 @@ export class Gateway {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'msgId', referencedColumnName: 'id' }])
+  @JoinColumn([{ name: 'msgId' }])
   StateMessage: StateMessage;
 }

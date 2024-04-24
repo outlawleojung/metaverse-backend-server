@@ -13,31 +13,26 @@ import {
 import { InquiryType } from './inquiryType.entity';
 import { MemberInquiry } from './memberInquiry.entity';
 import { Member } from './member.entity';
+import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Index('inquiryType', ['inquiryType'], {})
 @Index('memberId', ['memberId'], {})
 @Entity('member_inquiry_group')
-export class MemberInquiryGroup {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+export class MemberInquiryGroup extends BaseModelEntity {
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('int', { name: 'inquiryType' })
+  @Column('int')
   inquiryType: number;
 
   @Column('uuid')
   memberId: string;
 
-  @Column('varchar', { name: 'subject', length: 64 })
+  @Column('varchar', { length: 64 })
   subject: string;
 
-  @Column('varchar', { name: 'email', length: 64 })
+  @Column('varchar', { length: 64 })
   email: string;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 
   @DeleteDateColumn()
   deletedAt: Date | null;
@@ -50,14 +45,14 @@ export class MemberInquiryGroup {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'inquiryType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'inquiryType' })
   InquiryType: InquiryType;
 
   @ManyToOne(() => Member, (member) => member.MemberInquiryGroups, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @OneToMany(() => MemberInquiry, (inquiry) => inquiry.MemberInquiryGroup)

@@ -17,10 +17,10 @@ export class MemberMoney {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @PrimaryColumn('int', { name: 'moneyType' })
+  @PrimaryColumn('int')
   moneyType: number;
 
-  @Column('int', { name: 'count' })
+  @Column('int')
   count: number;
 
   @CreateDateColumn()
@@ -33,13 +33,13 @@ export class MemberMoney {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(() => MoneyType, (type) => type.MemberMoney, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'moneyType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'moneyType' })
   MoneyType: MoneyType;
 }

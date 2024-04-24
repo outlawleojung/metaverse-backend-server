@@ -60,7 +60,7 @@ export class Member extends BaseModelEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('varchar', { unique: true, length: 100 })
+  @Column('varchar', { unique: true, length: 16 })
   memberCode: string;
 
   @Column('varchar', { nullable: true, length: 64 })
@@ -90,7 +90,7 @@ export class Member extends BaseModelEntity {
   @Column('int', { default: 1 })
   firstProviderType: number;
 
-  @Column('varchar', { nullable: true })
+  @Column('text', { nullable: true })
   refreshToken: string;
 
   @Column('int')
@@ -248,28 +248,28 @@ export class Member extends BaseModelEntity {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'officeGradeType' }])
+  @JoinColumn({ name: 'officeGradeType' })
   OfficeGradeType: OfficeGradeType;
 
   @ManyToOne(() => ProviderType, (type) => type.Members, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'firstProviderType' }])
+  @JoinColumn({ name: 'firstProviderType' })
   ProviderType: ProviderType;
 
   @ManyToOne(() => MyRoomStateType, (type) => type.Members, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'myRoomStateType' }])
+  @JoinColumn({ name: 'myRoomStateType' })
   MyRoomStateType: MyRoomStateType;
 
   @ManyToOne(() => RegPathType, (type) => type.Members, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'regPathType' }])
+  @JoinColumn({ name: 'regPathType' })
   RegPathType: RegPathType;
 
   @OneToOne(() => SessionInfo, (sessioninfo) => sessioninfo.Member)

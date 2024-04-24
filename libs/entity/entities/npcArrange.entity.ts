@@ -1,42 +1,49 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { NpcList } from './npcList.entity';
 import { SceneType } from './sceneType.entity';
 
 @Index('sceneType', ['sceneType'], {})
 @Entity('npc_arrange')
 export class NpcArrange {
-  @PrimaryColumn('int', { name: 'npcId' })
+  @PrimaryColumn('int')
   npcId: number;
 
-  @Column('int', { name: 'sceneType' })
+  @Column('int')
   sceneType: number;
 
-  @Column('int', { name: 'positionX' })
+  @Column('int')
   positionX: number;
 
-  @Column('int', { name: 'positionY' })
+  @Column('int')
   positionY: number;
 
-  @Column('int', { name: 'positionZ' })
+  @Column('int')
   positionZ: number;
 
-  @Column('int', { name: 'rotationY' })
+  @Column('int')
   rotationY: number;
 
-  @Column('varchar', { name: 'animation', length: 64 })
+  @Column('varchar', { length: 64 })
   animation: string;
 
   @ManyToOne(() => NpcList, (npc) => npc.NpcArranges, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'npcId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'npcId' })
   NpcList: NpcList;
 
   @ManyToOne(() => SceneType, (type) => type.NpcArranges, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'sceneType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'sceneType' })
   SceneType: SceneType;
 }

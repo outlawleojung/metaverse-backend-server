@@ -15,7 +15,7 @@ import { MemberOfficeReservationInfo } from './memberOfficeReservationInfo.entit
 @Index('memberId', ['memberId'], {})
 @Entity('member_office_reservation_waiting_info')
 export class MemberOfficeReservationWaitingInfo {
-  @PrimaryColumn('int', { name: 'reservationId' })
+  @PrimaryColumn('int')
   reservationId: number;
 
   @PrimaryColumn('uuid')
@@ -35,7 +35,7 @@ export class MemberOfficeReservationWaitingInfo {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(
@@ -46,6 +46,6 @@ export class MemberOfficeReservationWaitingInfo {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'reservationId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'reservationId' })
   MemberOfficeReservationInfo: MemberOfficeReservationInfo;
 }

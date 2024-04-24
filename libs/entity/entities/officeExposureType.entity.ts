@@ -1,14 +1,12 @@
-import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+import { Entity, OneToMany } from 'typeorm';
 import { OfficeExposure } from './officeExposure.entity';
+import { BaseTypeEntity } from './baseTypeEntity.entity';
 
 @Entity('office_exposure_type')
-export class OfficeExposureType {
-  @PrimaryColumn('int', { name: 'type' })
-  type: number;
-
-  @Column('varchar', { name: 'name', length: 20 })
-  name: string;
-
-  @OneToMany(() => OfficeExposure, (officeexposure) => officeexposure.OfficeExposureType)
+export class OfficeExposureType extends BaseTypeEntity {
+  @OneToMany(
+    () => OfficeExposure,
+    (officeexposure) => officeexposure.OfficeExposureType,
+  )
   OfficeExposures: OfficeExposure[];
 }

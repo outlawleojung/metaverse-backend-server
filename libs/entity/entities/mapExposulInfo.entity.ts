@@ -1,6 +1,14 @@
 import { MapInfoType } from './mapInfoType.entity';
 import { LandType } from './landType.entity';
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
 import { Localization } from './localization.entity';
 import { MapExposulBrand } from './mapExposulBrand.entity';
 
@@ -8,67 +16,78 @@ import { MapExposulBrand } from './mapExposulBrand.entity';
 @Index('description', ['description'], {})
 @Entity('map_exposul_info')
 export class MapExposulInfo {
-  @PrimaryColumn('int', { name: 'id' })
+  @PrimaryColumn('int')
   id: number;
 
-  @Column('int', { name: 'landType' })
+  @Column('int')
   landType: number;
 
-  @Column('int', { name: 'mapInfoType' })
+  @Column('int')
   mapInfoType: number;
 
-  @Column('int', { name: 'sort' })
+  @Column('int')
   sort: number;
 
-  @Column('varchar', { name: 'image', length: 64 })
+  @Column('varchar', { length: 64 })
   image: string;
 
-  @Column('varchar', { name: 'name', length: 64 })
+  @Column('varchar', { length: 64 })
   name: string;
 
-  @Column('varchar', { name: 'description', length: 64 })
+  @Column('varchar', { length: 64 })
   description: string;
 
-  @Column('int', { name: 'positionX' })
+  @Column('int')
   positionX: number;
 
-  @Column('int', { name: 'positionY' })
+  @Column('int')
   positionY: number;
 
-  @Column('int', { name: 'positionZ' })
+  @Column('int')
   positionZ: number;
 
-  @Column('int', { name: 'rotationY' })
+  @Column('int')
   rotationY: number;
 
   @ManyToOne(() => LandType, (type) => type.MapExposulInfos, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'landType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'landType' })
   LandType: LandType;
 
   @ManyToOne(() => MapInfoType, (type) => type.MapExposulInfos, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'mapInfoType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'mapInfoType' })
   MapInfoType: MapInfoType;
 
-  @ManyToOne(() => Localization, (localization) => localization.MapExposulInfoNames, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'name', referencedColumnName: 'id' }])
+  @ManyToOne(
+    () => Localization,
+    (localization) => localization.MapExposulInfoNames,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'name' })
   LocalizationName: Localization;
 
-  @ManyToOne(() => Localization, (localization) => localization.MapExposulInfoDescs, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'name', referencedColumnName: 'id' }])
+  @ManyToOne(
+    () => Localization,
+    (localization) => localization.MapExposulInfoDescs,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'name' })
   LocalizationDesc: Localization;
 
-  @OneToMany(() => MapExposulBrand, (mapexposulbrand) => mapexposulbrand.MapExposulInfo)
+  @OneToMany(
+    () => MapExposulBrand,
+    (mapexposulbrand) => mapexposulbrand.MapExposulInfo,
+  )
   MapExposulBrands: MapExposulBrand[];
 }

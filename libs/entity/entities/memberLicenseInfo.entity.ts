@@ -17,10 +17,10 @@ export class MemberLicenseInfo {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @PrimaryColumn('varchar', { name: 'licenseSerial', length: 16 })
+  @PrimaryColumn('varchar', { length: 16 })
   licenseSerial: string;
 
-  @Column('varchar', { name: 'email', length: 64 })
+  @Column('varchar', { length: 64 })
   email: string;
 
   @CreateDateColumn()
@@ -33,15 +33,13 @@ export class MemberLicenseInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(() => LicenseInfo, (info) => info.MemberLicenseInfos, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([
-    { name: 'licenseSerial', referencedColumnName: 'licenseSerial' },
-  ])
+  @JoinColumn({ name: 'licenseSerial' })
   LicenseInfo: LicenseInfo;
 }

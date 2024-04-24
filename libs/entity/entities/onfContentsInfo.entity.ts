@@ -3,16 +3,20 @@ import { OnfContentsType } from './onfContentsType.entity';
 
 @Entity('onf_contents_info')
 export class OnfContentsInfo {
-  @PrimaryColumn('int', { name: 'onfContentsType' })
+  @PrimaryColumn('int')
   onfContentsType: number;
 
-  @Column('int', { name: 'isOn' })
+  @Column('int')
   isOn: number;
 
-  @ManyToOne(() => OnfContentsType, (onfContentsType) => onfContentsType.OnfContentsInfos, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'onfContentsType', referencedColumnName: 'type' }])
+  @ManyToOne(
+    () => OnfContentsType,
+    (onfContentsType) => onfContentsType.OnfContentsInfos,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'onfContentsType' })
   OnfContentsType: OnfContentsType;
 }

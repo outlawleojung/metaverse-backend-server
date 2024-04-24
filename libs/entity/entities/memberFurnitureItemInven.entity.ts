@@ -22,10 +22,10 @@ export class MemberFurnitureItemInven {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @PrimaryColumn('int', { name: 'itemId' })
+  @PrimaryColumn('int')
   itemId: number;
 
-  @PrimaryColumn('int', { name: 'num', default: () => "'1'" })
+  @PrimaryColumn('int', { default: 1 })
   num: number;
 
   @CreateDateColumn()
@@ -41,14 +41,14 @@ export class MemberFurnitureItemInven {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(() => Item, (item) => item.MemberFurnitureItemInvens, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'itemId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'itemId' })
   Item: Item;
 
   @OneToMany(

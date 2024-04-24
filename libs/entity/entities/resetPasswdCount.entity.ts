@@ -1,16 +1,11 @@
-import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Entity('reset_passwd_count')
-export class ResetPasswdCount {
-  @PrimaryColumn('varchar', { name: 'id', length: 256 })
+export class ResetPasswdCount extends BaseModelEntity {
+  @PrimaryColumn('varchar', { length: 256 })
   id: string;
 
-  @Column('int', { name: 'count' })
+  @Column('int')
   count: number;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }

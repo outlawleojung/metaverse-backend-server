@@ -1,4 +1,12 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
 import { MoneyType } from './moneyType.entity';
 import { OfficeProductItem } from './officeProductItem.entity';
 import { MemberPurchaseItem } from './memberPurchaseItem.entity';
@@ -6,19 +14,22 @@ import { MemberPurchaseItem } from './memberPurchaseItem.entity';
 @Index('moneyType', ['moneyType'], {})
 @Entity('payment_product_manager')
 export class PaymentProductManager {
-  @PrimaryColumn({ type: 'int', name: 'id' })
+  @PrimaryColumn({ type: 'int' })
   id: number;
 
-  @Column('int', { name: 'moneyType' })
+  @Column('int')
   moneyType: number;
 
-  @Column('int', { name: 'price' })
+  @Column('int')
   price: number;
 
-  @Column('int', { name: 'purchaseLimit' })
+  @Column('int')
   purchaseLimit: number;
 
-  @OneToMany(() => OfficeProductItem, (product) => product.PaymentProductManager)
+  @OneToMany(
+    () => OfficeProductItem,
+    (product) => product.PaymentProductManager,
+  )
   OfficeProductItems: OfficeProductItem[];
 
   @OneToMany(() => MemberPurchaseItem, (item) => item.PaymentProductManager)
@@ -28,6 +39,6 @@ export class PaymentProductManager {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'moneyType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'moneyType' })
   MoneyType: MoneyType;
 }

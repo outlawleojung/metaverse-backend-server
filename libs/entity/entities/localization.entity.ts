@@ -18,13 +18,13 @@ import { OfficeProductItem } from './officeProductItem.entity';
 
 @Entity('localization')
 export class Localization {
-  @PrimaryColumn('varchar', { name: 'id', length: 64 })
+  @PrimaryColumn('varchar', { length: 64 })
   id: string;
 
-  @Column('text', { name: 'kor', nullable: true })
+  @Column('text', { nullable: true })
   kor: string | null;
 
-  @Column('text', { name: 'eng', nullable: true })
+  @Column('text', { nullable: true })
   eng: string | null;
 
   @OneToMany(() => Item, (item) => item.name)
@@ -42,52 +42,97 @@ export class Localization {
   @OneToMany(() => OfficeMode, (officemode) => officemode.LocalizationModeDesc)
   OfficeModeDesc: OfficeMode[];
 
-  @OneToMany(() => OfficeSpaceInfo, (officespaceinfo) => officespaceinfo.LocalizationDesc)
+  @OneToMany(
+    () => OfficeSpaceInfo,
+    (officespaceinfo) => officespaceinfo.LocalizationDesc,
+  )
   OfficeSpaceInfoDescs: OfficeSpaceInfo[];
 
-  @OneToMany(() => OfficeSpaceInfo, (officespaceinfo) => officespaceinfo.LocalizationName)
+  @OneToMany(
+    () => OfficeSpaceInfo,
+    (officespaceinfo) => officespaceinfo.LocalizationName,
+  )
   OfficeSpaceInfoNames: OfficeSpaceInfo[];
 
-  @OneToMany(() => OfficeShowRoomInfo, (officeshowroominfo) => officeshowroominfo.LocalizationDesc)
+  @OneToMany(
+    () => OfficeShowRoomInfo,
+    (officeshowroominfo) => officeshowroominfo.LocalizationDesc,
+  )
   OfficeShowRoomInfoDescs: OfficeSpaceInfo[];
 
-  @OneToMany(() => OfficeShowRoomInfo, (officeshowroominfo) => officeshowroominfo.LocalizationName)
+  @OneToMany(
+    () => OfficeShowRoomInfo,
+    (officeshowroominfo) => officeshowroominfo.LocalizationName,
+  )
   OfficeShowRoomInfoNames: OfficeSpaceInfo[];
 
-  @OneToMany(() => ItemUseEffect, (itemuseeffect) => itemuseeffect.LocalizationChat)
+  @OneToMany(
+    () => ItemUseEffect,
+    (itemuseeffect) => itemuseeffect.LocalizationChat,
+  )
   ItemUseEffects: ItemUseEffect[];
 
-  @OneToMany(() => OfficeModeType, (officemodetype) => officemodetype.LocalizationModeType)
+  @OneToMany(
+    () => OfficeModeType,
+    (officemodetype) => officemodetype.LocalizationModeType,
+  )
   OfficeModeTypes: OfficeModeType[];
 
-  @OneToMany(() => OfficeGradeType, (officegradetype) => officegradetype.LocalizationName)
+  @OneToMany(
+    () => OfficeGradeType,
+    (officegradetype) => officegradetype.LocalizationName,
+  )
   OfficeGradeTypes: OfficeGradeType[];
 
-  @OneToMany(() => OfficeTopicType, (officetopictype) => officetopictype.LocalizationName)
+  @OneToMany(
+    () => OfficeTopicType,
+    (officetopictype) => officetopictype.LocalizationName,
+  )
   OfficeTopicTypes: OfficeTopicType[];
 
-  @OneToMany(() => OfficePermissionType, (officepermissiontype) => officepermissiontype.LocalizationName)
+  @OneToMany(
+    () => OfficePermissionType,
+    (officepermissiontype) => officepermissiontype.LocalizationName,
+  )
   OfficePermissionTypes: OfficePermissionType[];
 
-  @OneToMany(() => CategoryType, (categorytype) => categorytype.LocalizationName)
+  @OneToMany(
+    () => CategoryType,
+    (categorytype) => categorytype.LocalizationName,
+  )
   CategoryTypes: CategoryType[];
 
-  @OneToMany(() => OfficeAlarmType, (officealarmtype) => officealarmtype.LocalizationName)
+  @OneToMany(
+    () => OfficeAlarmType,
+    (officealarmtype) => officealarmtype.LocalizationName,
+  )
   OfficeAlarmTypes: OfficeAlarmType[];
 
-  @OneToMany(() => AvatarPartsGroupType, (officealarmtype) => officealarmtype.LocalizationName)
+  @OneToMany(
+    () => AvatarPartsGroupType,
+    (officealarmtype) => officealarmtype.LocalizationName,
+  )
   AvatarPartsGroupTypes: AvatarPartsGroupType[];
 
-  @OneToMany(() => MapExposulInfo, (mapexposulinfo) => mapexposulinfo.LocalizationName)
+  @OneToMany(
+    () => MapExposulInfo,
+    (mapexposulinfo) => mapexposulinfo.LocalizationName,
+  )
   MapExposulInfoNames: MapExposulInfo[];
 
-  @OneToMany(() => MapExposulInfo, (mapexposulinfo) => mapexposulinfo.LocalizationDesc)
+  @OneToMany(
+    () => MapExposulInfo,
+    (mapexposulinfo) => mapexposulinfo.LocalizationDesc,
+  )
   MapExposulInfoDescs: MapExposulInfo[];
 
   @OneToMany(() => NpcList, (npc) => npc.LocalizationName)
   NpcLists: NpcList[];
 
-  @OneToMany(() => QuizQuestionAnswer, (quetion) => quetion.LocalizationQuestion)
+  @OneToMany(
+    () => QuizQuestionAnswer,
+    (quetion) => quetion.LocalizationQuestion,
+  )
   QuizQuestionAnswer: QuizQuestionAnswer[];
 
   @OneToMany(() => OfficeProductItem, (product) => product.LocalizationName)

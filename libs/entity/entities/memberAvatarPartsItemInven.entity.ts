@@ -20,10 +20,10 @@ export class MemberAvatarPartsItemInven {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @PrimaryColumn('int', { name: 'itemId' })
+  @PrimaryColumn('int')
   itemId: number;
 
-  @Column('int', { name: 'itemType' })
+  @Column('int')
   itemType: number;
 
   @CreateDateColumn()
@@ -36,20 +36,20 @@ export class MemberAvatarPartsItemInven {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(() => Item, (item) => item.MemberAvatarPartsItemInvens, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'itemId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'itemId' })
   Item: Item;
 
   @ManyToOne(() => ItemType, (type) => type.MemberAvatarPartsItemInvens, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'itemType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'itemType' })
   ItemType: ItemType;
 }

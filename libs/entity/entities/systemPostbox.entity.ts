@@ -12,33 +12,28 @@ import {
 import { PostalType } from './postalType.entity';
 import { MemberPostbox } from './memberPostbox.entity';
 import { SystemPostboxAppend } from './systemPostboxAppend.entity';
+import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Index('postalType', ['postalType'], {})
 @Index('subject', ['subject'], {})
 @Index('summary', ['summary'], {})
 @Index('content', ['content'], {})
 @Entity('system_postbox')
-export class SystemPostbox {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+export class SystemPostbox extends BaseModelEntity {
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('int', { name: 'postalType' })
+  @Column('int')
   postalType: number;
 
-  @Column('varchar', { name: 'subject', length: 32 })
+  @Column('varchar', { length: 32 })
   subject: string;
 
-  @Column('varchar', { name: 'summary', length: 64 })
+  @Column('varchar', { length: 64 })
   summary: string;
 
-  @Column('varchar', { name: 'content', length: 640 })
+  @Column('varchar', { length: 640 })
   content: string;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 
   @OneToMany(() => SystemPostboxAppend, (append) => append.SystemPostbox)
   SystemPostboxAppends: SystemPostboxAppend[];
@@ -50,6 +45,6 @@ export class SystemPostbox {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'postalType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'postalType' })
   PostalType: PostalType;
 }

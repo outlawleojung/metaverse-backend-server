@@ -1,14 +1,20 @@
-import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('resign_purchase_info')
 export class ResignPurchaseInfo {
-  @PrimaryColumn('varchar', { name: 'orderId', length: 100 })
+  @PrimaryColumn('varchar', { length: 100 })
   orderId: string;
 
-  @Column('varchar', { name: 'memberId', length: 100 })
+  @Column('varchar', { length: 100 })
   memberId: string;
 
-  @Column('datetime', { name: 'purchasedAt' })
+  @Column('datetime')
   purchasedAt: Date;
 
   @CreateDateColumn()

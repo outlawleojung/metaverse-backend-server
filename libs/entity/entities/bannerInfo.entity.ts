@@ -1,5 +1,13 @@
 import { MediaRollingType } from './mediaRollingType.entity';
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
 import { SpaceType } from './spaceType.entity';
 import { SpaceDetailType } from './spaceDetailType.entity';
 import { BannerReservation } from './bannerReservation.entity';
@@ -12,66 +20,66 @@ import { MediaExposureType } from './mediaExposureType.entity';
 @Index('bannerType', ['bannerType'], {})
 @Entity('banner_info')
 export class BannerInfo {
-  @PrimaryColumn('int', { name: 'id' })
+  @PrimaryColumn('int')
   id: number;
 
-  @Column('int', { name: 'spaceType' })
+  @Column('int')
   spaceType: number;
 
-  @Column('int', { name: 'spaceDetailType' })
+  @Column('int')
   spaceDetailType: number;
 
-  @Column('varchar', { name: 'positionImage', length: 64 })
+  @Column('varchar', { length: 64 })
   positionImage: string;
 
-  @Column('int', { name: 'width' })
+  @Column('int')
   width: number;
 
-  @Column('int', { name: 'height' })
+  @Column('int')
   height: number;
 
-  @Column('int', { name: 'mediaRollingType' })
+  @Column('int')
   mediaRollingType: number;
 
-  @Column('int', { name: 'bannerType' })
+  @Column('int')
   bannerType: number;
 
-  @Column('int', { name: 'mediaExposureType' })
+  @Column('int')
   mediaExposureType: number;
 
   @ManyToOne(() => SpaceType, (type) => type.BannerInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'spaceType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'spaceType' })
   SpaceType: SpaceType;
 
   @ManyToOne(() => MediaRollingType, (type) => type.BannerInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'mediaRollingType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'mediaRollingType' })
   MediaRollingType: MediaRollingType;
 
   @ManyToOne(() => MediaExposureType, (type) => type.BannerInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'mediaExposureType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'mediaExposureType' })
   MediaExposureType: MediaExposureType;
 
   @ManyToOne(() => BannerType, (type) => type.BannerInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'bannerType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'bannerType' })
   BannerType: BannerType;
 
   @ManyToOne(() => SpaceDetailType, (type) => type.BannerInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'spaceDetailType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'spaceDetailType' })
   SpaceDetailType: SpaceDetailType;
 
   @OneToMany(() => BannerReservation, (param) => param.BannerInfo)

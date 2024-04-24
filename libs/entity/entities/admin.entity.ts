@@ -39,24 +39,23 @@ export class Admin extends BaseModelEntity {
     example: '송중기',
     description: '관리자 이름',
   })
-  @Column('varchar', { name: 'name', length: 30 })
+  @Column('varchar', { length: 16 })
   name: string;
 
-  @Column('varchar', { name: 'password', length: 100 })
+  @Column('varchar', { length: 256 })
   password: string;
 
-  @Column('varchar', { name: 'department', nullable: true, length: 64 })
+  @Column('varchar', { nullable: true, length: 64 })
   department: string | null;
 
   @Column('varchar', {
-    name: 'company',
     nullable: true,
     length: 64,
-    default: () => "'한컴프론티스'",
+    default: '한컴프론티스',
   })
   company: string | null;
 
-  @Column('varchar', { name: 'phoneNumber', length: 64 })
+  @Column('varchar', { length: 64 })
   phoneNumber: string;
 
   @Column()
@@ -65,7 +64,7 @@ export class Admin extends BaseModelEntity {
   @Column()
   adminType: number;
 
-  @Column('datetime', { name: 'loginedAt' })
+  @Column('datetime')
   loginedAt: Date;
 
   @OneToMany(() => AdminLog, (adminlog) => adminlog.admin)
@@ -81,14 +80,14 @@ export class Admin extends BaseModelEntity {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'roleType' }])
+  @JoinColumn({ name: 'roleType' })
   RoleType: RoleType;
 
   @ManyToOne(() => AdminType, (type) => type.Admins, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminType' }])
+  @JoinColumn({ name: 'adminType' })
   AdminType: AdminType;
 
   @OneToMany(() => VideoPlayInfo, (videoplayinfo) => videoplayinfo.admin)

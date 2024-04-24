@@ -7,56 +7,55 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryColumn,
 } from 'typeorm';
-import { Localization } from './localization.entity';
+
 import { MemberBusinessCardInfo } from './memberBusinessCardInfo.entity';
 
 @Index('purchaseType', ['purchaseType'], {})
 @Entity('business_card_template')
 export class BusinessCardTemplate {
-  @PrimaryColumn('int', { name: 'id' })
+  @PrimaryColumn('int')
   id: number;
 
-  @Column('int', { name: 'purchaseType' })
+  @Column('int')
   purchaseType: number;
 
-  @Column('int', { name: 'price' })
+  @Column('int')
   price: number;
 
-  @Column('int', { name: 'nameField' })
+  @Column('int')
   nameField: number;
 
-  @Column('int', { name: 'phoneField' })
+  @Column('int')
   phoneField: number;
 
-  @Column('int', { name: 'emailField' })
+  @Column('int')
   emailField: number;
 
-  @Column('int', { name: 'faxField' })
+  @Column('int')
   faxField: number;
 
-  @Column('int', { name: 'addrField' })
+  @Column('int')
   addrField: number;
 
-  @Column('int', { name: 'jobField' })
+  @Column('int')
   jobField: number;
 
-  @Column('int', { name: 'positionField' })
+  @Column('int')
   positionField: number;
 
-  @Column('int', { name: 'introField' })
+  @Column('int')
   introField: number;
 
-  @Column('varchar', { name: 'thumbnailName', length: 64 })
+  @Column('varchar', { length: 64 })
   thumbnailName: string;
 
   @ManyToOne(() => MoneyType, (type) => type.BusinessCardTemplates, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'purchaseType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'purchaseType' })
   PurchaseType: MoneyType;
 
   @OneToMany(

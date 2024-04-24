@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Entity, OneToMany } from 'typeorm';
 import { DisciplineReview } from './disciplineReview.entity';
 import { BaseTypeEntity } from './baseTypeEntity.entity';
 

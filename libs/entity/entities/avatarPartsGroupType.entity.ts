@@ -1,24 +1,11 @@
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryColumn,
-} from 'typeorm';
+import { Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { CommerceZoneItem } from './commerceZoneItem.entity';
 import { Localization } from './localization.entity';
+import { BaseTypeEntity } from './baseTypeEntity.entity';
 
 @Index('name', ['name'], {})
 @Entity('avatar_parts_group_type')
-export class AvatarPartsGroupType {
-  @PrimaryColumn('int', { name: 'type' })
-  type: number;
-
-  @Column('varchar', { name: 'name', length: 64 })
-  name: string;
-
+export class AvatarPartsGroupType extends BaseTypeEntity {
   @OneToMany(() => CommerceZoneItem, (item) => item.AvatarPartsGroupType)
   CommerceZoneItems: CommerceZoneItem[];
 
@@ -30,6 +17,6 @@ export class AvatarPartsGroupType {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'name', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'name', referencedColumnName: 'id' })
   LocalizationName: Localization;
 }

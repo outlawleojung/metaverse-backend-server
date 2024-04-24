@@ -17,13 +17,13 @@ export class MemberSelectVoteLike {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @PrimaryColumn('int', { name: 'voteId' })
+  @PrimaryColumn('int')
   voteId: number;
 
-  @PrimaryColumn('int', { name: 'itemNum' })
+  @PrimaryColumn('int')
   itemNum: number;
 
-  @Column('int', { name: 'isLike' })
+  @Column('int')
   isLike: number;
 
   @CreateDateColumn()
@@ -36,7 +36,7 @@ export class MemberSelectVoteLike {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(() => SelectVoteItem, (item) => item.MemberSelectVoteLikes, {

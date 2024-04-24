@@ -10,46 +10,41 @@ import {
 } from 'typeorm';
 import { AppendType } from './appendType.entity';
 import { SystemPostbox } from './systemPostbox.entity';
+import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Index('postboxId', ['postboxId'], {})
 @Index('appendType', ['appendType'], {})
 @Entity('system_postbox_append')
-export class SystemPostboxAppend {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+export class SystemPostboxAppend extends BaseModelEntity {
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('int', { name: 'postboxId' })
+  @Column('int')
   postboxId: number;
 
-  @Column('int', { name: 'appendType' })
+  @Column('int')
   appendType: number;
 
-  @Column('int', { name: 'appendValue' })
+  @Column('int')
   appendValue: number;
 
-  @Column('int', { name: 'count' })
+  @Column('int')
   count: number;
 
-  @Column('int', { name: 'orderNum' })
+  @Column('int')
   orderNum: number;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 
   @ManyToOne(() => SystemPostbox, (box) => box.SystemPostboxAppends, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'postboxId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'postboxId' })
   SystemPostbox: SystemPostbox;
 
   @ManyToOne(() => AppendType, (type) => type.PostboxAppends, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'appendType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'appendType' })
   AppendType: AppendType;
 }

@@ -1,4 +1,11 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { OfficeModeType } from './officeModeType.entity';
 import { Localization } from './localization.entity';
 
@@ -6,35 +13,43 @@ import { Localization } from './localization.entity';
 @Index('roomDesc', ['roomDesc'], {})
 @Entity('office_show_room_info')
 export class OfficeShowRoomInfo {
-  @PrimaryColumn('int', { name: 'id' })
+  @PrimaryColumn('int')
   id: number;
 
-  @Column('int', { name: 'roomId' })
+  @Column('int')
   roomId: number;
 
-  @Column('varchar', { name: 'roomName', length: 64 })
+  @Column('varchar', { length: 64 })
   roomName: string;
 
-  @Column('varchar', { name: 'roomDesc', length: 64 })
+  @Column('varchar', { length: 64 })
   roomDesc: string;
 
-  @Column('varchar', { name: 'thumbnail', length: 64 })
+  @Column('varchar', { length: 64 })
   thumbnail: string;
 
-  @JoinColumn([{ name: 'modeType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'modeType' })
   OfficeModeType: OfficeModeType;
 
-  @ManyToOne(() => Localization, (localization) => localization.OfficeShowRoomInfoDescs, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'roomDesc', referencedColumnName: 'id' }])
+  @ManyToOne(
+    () => Localization,
+    (localization) => localization.OfficeShowRoomInfoDescs,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'roomDesc' })
   LocalizationDesc: Localization;
 
-  @ManyToOne(() => Localization, (localization) => localization.OfficeShowRoomInfoNames, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'roomName', referencedColumnName: 'id' }])
+  @ManyToOne(
+    () => Localization,
+    (localization) => localization.OfficeShowRoomInfoNames,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'roomName' })
   LocalizationName: Localization;
 }

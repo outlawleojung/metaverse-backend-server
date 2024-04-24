@@ -1,63 +1,79 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { OfficePermissionType } from './officePermissionType.entity';
 import { OfficeSpawnType } from './officeSpawnType.entity';
 
 @Index('spawnType', ['spawnType'], {})
 @Entity('office_default_option')
 export class OfficeDefaultOption {
-  @PrimaryColumn('int', { name: 'permissionType' })
+  @PrimaryColumn('int')
   permissionType: number;
 
-  @Column('int', { name: 'charControl' })
+  @Column('int')
   charControl: number;
 
-  @Column('int', { name: 'camControl' })
+  @Column('int')
   camControl: number;
 
-  @Column('int', { name: 'actionEmotion' })
+  @Column('int')
   actionEmotion: number;
 
-  @Column('int', { name: 'chat' })
+  @Column('int')
   chat: number;
 
-  @Column('int', { name: 'voiceChat' })
+  @Column('int')
   voiceChat: number;
 
-  @Column('int', { name: 'videoChat' })
+  @Column('int')
   videoChat: number;
 
-  @Column('int', { name: 'web' })
+  @Column('int')
   web: number;
 
-  @Column('int', { name: 'webShare' })
+  @Column('int')
   webShare: number;
 
-  @Column('int', { name: 'videoPlayer' })
+  @Column('int')
   videoPlayer: number;
 
-  @Column('int', { name: 'videoPlayerShare' })
+  @Column('int')
   videoPlayerShare: number;
 
-  @Column('int', { name: 'spawnType' })
+  @Column('int')
   spawnType: number;
 
-  @Column('int', { name: 'movable' })
+  @Column('int')
   movable: number;
 
-  @Column('int', { name: 'selectSeat' })
+  @Column('int')
   selectSeat: number;
 
-  @OneToOne(() => OfficePermissionType, (officepermissiontype) => officepermissiontype.OfficeDefaultOption, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'permissionType', referencedColumnName: 'type' }])
+  @OneToOne(
+    () => OfficePermissionType,
+    (officepermissiontype) => officepermissiontype.OfficeDefaultOption,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'permissionType' })
   OfficePermissionType: OfficePermissionType;
 
-  @ManyToOne(() => OfficeSpawnType, (officespawntype) => officespawntype.OfficeDefaultOptions, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'spawnType', referencedColumnName: 'type' }])
+  @ManyToOne(
+    () => OfficeSpawnType,
+    (officespawntype) => officespawntype.OfficeDefaultOptions,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'spawnType' })
   OfficeSpawnType: OfficeSpawnType;
 }

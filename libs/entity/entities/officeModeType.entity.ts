@@ -1,4 +1,11 @@
-import { Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { OfficeAuthority } from './officeAuthority.entity';
 import { OfficeMode } from './officeMode.entity';
 import { OfficePermissionType } from './officePermissionType.entity';
@@ -11,32 +18,50 @@ import { BaseTypeEntity } from './baseTypeEntity.entity';
 
 @Entity('office_mode_type')
 export class OfficeModeType extends BaseTypeEntity {
-  @ManyToOne(() => Localization, (localization) => localization.OfficeModeTypes, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'name', referencedColumnName: 'id' }])
+  @ManyToOne(
+    () => Localization,
+    (localization) => localization.OfficeModeTypes,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'name' })
   LocalizationModeType: Localization;
 
-  @OneToMany(() => OfficeAuthority, (officeauthority) => officeauthority.OfficeModeType)
+  @OneToMany(
+    () => OfficeAuthority,
+    (officeauthority) => officeauthority.OfficeModeType,
+  )
   OfficeAuthorities: OfficeAuthority[];
 
   @OneToMany(() => OfficeMode, (officemode) => officemode.OfficeModeType)
   OfficeModes: OfficeMode[];
 
-  @OneToMany(() => OfficeModeSlot, (officemodeslot) => officemodeslot.OfficeModeType)
+  @OneToMany(
+    () => OfficeModeSlot,
+    (officemodeslot) => officemodeslot.OfficeModeType,
+  )
   OfficeModeSlots: OfficeModeSlot[];
 
-  @ManyToMany(() => OfficePermissionType, (officepermissiontype) => officepermissiontype.OfficeModeTypes)
+  @ManyToMany(
+    () => OfficePermissionType,
+    (officepermissiontype) => officepermissiontype.OfficeModeTypes,
+  )
   @JoinTable({
     name: 'officemodeslot',
     joinColumns: [{ name: 'modeType', referencedColumnName: 'type' }],
-    inverseJoinColumns: [{ name: 'permissionType', referencedColumnName: 'type' }],
+    inverseJoinColumns: [
+      { name: 'permissionType', referencedColumnName: 'type' },
+    ],
     schema: process.env.DB_DATABASE,
   })
   OfficePermissionTypes: OfficePermissionType[];
 
-  @OneToMany(() => OfficeSpaceInfo, (officespaceinfo) => officespaceinfo.OfficeModeType)
+  @OneToMany(
+    () => OfficeSpaceInfo,
+    (officespaceinfo) => officespaceinfo.OfficeModeType,
+  )
   OfficeSpaceInfos: OfficeSpaceInfo[];
 
   @OneToMany(
@@ -45,6 +70,9 @@ export class OfficeModeType extends BaseTypeEntity {
   )
   MemberOfficeReservationInfos: MemberOfficeReservationInfo[];
 
-  @OneToMany(() => OfficeExposure, (officeexposure) => officeexposure.OfficeModeType)
+  @OneToMany(
+    () => OfficeExposure,
+    (officeexposure) => officeexposure.OfficeModeType,
+  )
   OfficeExposures: OfficeExposure[];
 }

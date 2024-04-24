@@ -3,16 +3,16 @@ import { Item } from './item.entity';
 
 @Entity('start_inventory')
 export class StartInventory {
-  @PrimaryColumn('int', { name: 'itemId' })
+  @PrimaryColumn('int')
   itemId: number;
 
-  @Column('int', { name: 'count' })
+  @Column('int')
   count: number;
 
   @ManyToOne(() => Item, (item) => item.StartInventorys, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'itemId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'itemId' })
   Item: Item;
 }

@@ -21,16 +21,16 @@ export class MemberFrameImage {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @PrimaryColumn('int', { name: 'itemId' })
+  @PrimaryColumn('int')
   itemId: number;
 
-  @PrimaryColumn('int', { name: 'num' })
+  @PrimaryColumn('int')
   num: number;
 
-  @Column('int', { name: 'uploadType' })
+  @Column('int')
   uploadType: number;
 
-  @Column('text', { name: 'imageName' })
+  @Column('text')
   imageName: string;
 
   @CreateDateColumn()
@@ -58,6 +58,6 @@ export class MemberFrameImage {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'uploadType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'uploadType' })
   UploadType: UploadType;
 }

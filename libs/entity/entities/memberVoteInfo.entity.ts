@@ -17,10 +17,10 @@ export class MemberVoteInfo {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @PrimaryColumn('int', { name: 'voteId' })
+  @PrimaryColumn('int')
   voteId: number;
 
-  @PrimaryColumn('int', { name: 'num' })
+  @PrimaryColumn('int')
   num: number;
 
   @CreateDateColumn()
@@ -33,7 +33,7 @@ export class MemberVoteInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(() => VoteInfoExample, (voteinfo) => voteinfo.MemberVoteInfos, {

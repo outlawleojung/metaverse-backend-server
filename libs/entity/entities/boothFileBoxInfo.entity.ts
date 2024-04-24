@@ -10,43 +10,42 @@ import {
 } from 'typeorm';
 import { FileBoxType } from './fileBoxType.entity';
 import { MemberOfficeReservationInfo } from './memberOfficeReservationInfo.entity';
+import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Index('fileBoxType', ['fileBoxType'], {})
 @Index('boothId', ['boothId'], {})
 @Entity('booth_file_box_info')
-export class BoothFileBoxInfo {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+export class BoothFileBoxInfo extends BaseModelEntity {
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('int', { name: 'boothId' })
+  @Column('int')
   boothId: number;
 
-  @Column('int', { name: 'fileBoxType' })
+  @Column('int')
   fileBoxType: number;
 
-  @Column('varchar', { name: 'fileName', length: 64 })
+  @Column('varchar', { length: 64 })
   fileName: string;
 
-  @Column('varchar', { name: 'link', length: 128 })
+  @Column('varchar', { length: 128 })
   link: string;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @ManyToOne(() => MemberOfficeReservationInfo, (info) => info.BoothFileBoxInfos, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'boothId', referencedColumnName: 'id' }])
+  @ManyToOne(
+    () => MemberOfficeReservationInfo,
+    (info) => info.BoothFileBoxInfos,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'boothId' })
   BoothInfo: MemberOfficeReservationInfo;
 
   @ManyToOne(() => FileBoxType, (type) => type.BoothFileBoxInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'fileBoxType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'fileBoxType' })
   FileBoxType: FileBoxType;
 }

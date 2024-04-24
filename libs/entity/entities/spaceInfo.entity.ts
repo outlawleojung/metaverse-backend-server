@@ -4,23 +4,23 @@ import { SpaceType } from './spaceType.entity';
 
 @Entity('space_info')
 export class SpaceInfo {
-  @PrimaryColumn('int', { name: 'spaceType' })
+  @PrimaryColumn('int')
   spaceType: number;
 
-  @PrimaryColumn('int', { name: 'spaceDetailType' })
+  @PrimaryColumn('int')
   spaceDetailType: number;
 
   @ManyToOne(() => SpaceType, (info) => info.SpaceInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'spaceType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'spaceType' })
   SpaceType: SpaceType;
 
   @ManyToOne(() => SpaceDetailType, (type) => type.SpaceInfo, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'spaceDetailType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'spaceDetailType' })
   SpaceDetailType: SpaceDetailType;
 }

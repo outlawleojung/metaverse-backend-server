@@ -1,4 +1,11 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { NpcList } from './npcList.entity';
 import { AvatarPartsType } from './avatarPartsType.entity';
 import { Item } from './item.entity';
@@ -7,33 +14,33 @@ import { Item } from './item.entity';
 @Index('itemId', ['itemId'], {})
 @Entity('npc_costume')
 export class NpcCostume {
-  @PrimaryColumn('int', { name: 'npcId' })
+  @PrimaryColumn('int')
   npcId: number;
 
-  @PrimaryColumn('int', { name: 'partsType' })
+  @PrimaryColumn('int')
   partsType: number;
 
-  @Column('int', { name: 'itemId' })
+  @Column('int')
   itemId: number;
 
   @ManyToOne(() => NpcList, (npc) => npc.NpcCostumes, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'npcId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'npcId' })
   NpcList: NpcList;
 
   @ManyToOne(() => AvatarPartsType, (type) => type.NpcCostumes, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'partsType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'partsType' })
   AvatarPartsType: AvatarPartsType;
 
   @ManyToOne(() => Item, (item) => item.NpcCostumes, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'itemId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'itemId' })
   Item: Item;
 }

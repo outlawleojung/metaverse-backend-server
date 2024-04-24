@@ -1,4 +1,11 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { InteractionType } from './interactionType.entity';
 import { MemberOfficeReservationInfo } from './memberOfficeReservationInfo.entity';
 import { UploadType } from './uploadType.entity';
@@ -10,49 +17,53 @@ import { BoothBannerInfo } from './boothBannerInfo.entity';
 @Index('interactionType', ['interactionType'], {})
 @Entity('each_booth_banner_info')
 export class EachBoothBannerInfo {
-  @PrimaryColumn('int', { name: 'boothId' })
+  @PrimaryColumn('int')
   boothId: number;
 
-  @PrimaryColumn('int', { name: 'bannerId' })
+  @PrimaryColumn('int')
   bannerId: number;
 
-  @Column('int', { name: 'uploadType' })
+  @Column('int')
   uploadType: number;
 
-  @Column('text', { name: 'uploadValue' })
+  @Column('text')
   uploadValue: string;
 
-  @Column('int', { name: 'interactionType' })
+  @Column('int')
   interactionType: number;
 
-  @Column('text', { name: 'interactionValue' })
+  @Column('text')
   interactionValue: string;
 
-  @ManyToOne(() => MemberOfficeReservationInfo, (info) => info.EachBoothBannerInfos, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'boothId', referencedColumnName: 'id' }])
+  @ManyToOne(
+    () => MemberOfficeReservationInfo,
+    (info) => info.EachBoothBannerInfos,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'boothId' })
   BoothInfo: MemberOfficeReservationInfo;
 
   @ManyToOne(() => BoothBannerInfo, (info) => info.EachBoothBannerInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'bannerId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'bannerId' })
   BoothBannerInfo: BoothBannerInfo;
 
   @ManyToOne(() => UploadType, (type) => type.EachBoothBannerInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'uploadType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'uploadType' })
   UploadType: UploadType;
 
   @ManyToOne(() => InteractionType, (type) => type.EachBoothBannerInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'interactionType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'interactionType' })
   InteractionType: InteractionType;
 }

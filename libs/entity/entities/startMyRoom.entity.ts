@@ -1,4 +1,11 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Item } from './item.entity';
 import { LayerType } from './layerType.entity';
 
@@ -6,35 +13,35 @@ import { LayerType } from './layerType.entity';
 @Index('layerType', ['layerType'], {})
 @Entity('start_my_room')
 export class StartMyRoom {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('int', { name: 'itemId' })
+  @Column('int')
   itemId: number;
 
-  @Column('int', { name: 'layerType' })
+  @Column('int')
   layerType: number;
 
-  @Column('int', { name: 'x' })
+  @Column('int')
   x: number;
 
-  @Column('int', { name: 'y' })
+  @Column('int')
   y: number;
 
-  @Column('int', { name: 'rotation' })
+  @Column('int')
   rotation: number;
 
   @ManyToOne(() => Item, (item) => item.StartMyRooms, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'itemId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'itemId' })
   Item: Item;
 
   @ManyToOne(() => LayerType, (layertype) => layertype.StartMyRooms, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'layerType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'layerType' })
   LayerType: LayerType;
 }

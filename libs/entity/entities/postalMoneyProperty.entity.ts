@@ -1,30 +1,37 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { MoneyType } from './moneyType.entity';
 import { PostalEffectType } from './postalEffectType.entity';
 
 @Index('postalEffectType', ['postalEffectType'], {})
 @Entity('postal_money_property')
 export class PostalMoneyProperty {
-  @PrimaryColumn('int', { name: 'moneyType' })
-  moneyType: number | null;
+  @PrimaryColumn('int')
+  moneyType: number;
 
-  @Column('int', { name: 'postalEffectType' })
+  @Column('int')
   postalEffectType: number;
 
-  @Column('varchar', { name: 'effectResource', length: 32 })
+  @Column('varchar', { length: 32 })
   effectResource: string;
 
   @ManyToOne(() => MoneyType, (type) => type.PostalMoneyProperties, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'moneyType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'moneyType' })
   MoneyType: MoneyType;
 
   @ManyToOne(() => PostalEffectType, (type) => type.PostalMoneyProperties, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'postalEffectType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'postalEffectType' })
   PostalEffectType: PostalEffectType;
 }

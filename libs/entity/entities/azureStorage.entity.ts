@@ -8,10 +8,11 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { MediaExposureType } from './mediaExposureType.entity';
+import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Entity('azure_storage')
-export class AzureStorage {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+export class AzureStorage extends BaseModelEntity {
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
   @Column('int', { name: 'mediaExposureType' })
@@ -35,16 +36,10 @@ export class AzureStorage {
   @Column('varchar', { name: 'uploadFolder', length: 100 })
   uploadFolder: string;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
   @ManyToOne(() => MediaExposureType, (type) => type.AzureStorages, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'mediaExposureType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'mediaExposureType' })
   MediaExposureType: MediaExposureType;
 }

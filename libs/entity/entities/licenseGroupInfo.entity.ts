@@ -21,37 +21,37 @@ import { Admin } from './admin.entity';
 @Index('licenseType', ['licenseType'], {})
 @Entity('license_group_info')
 export class LicenseGroupInfo {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('int', { name: 'domainId', nullable: true })
+  @Column('int', { nullable: true })
   domainId: number;
 
-  @Column('int', { name: 'eventId', nullable: true })
+  @Column('int', { nullable: true })
   eventId: number;
 
-  @Column('varchar', { name: 'name', length: 64 })
+  @Column('varchar', { length: 64 })
   name: string;
 
-  @Column('int', { name: 'licenseType' })
+  @Column('int')
   licenseType: number;
 
-  @Column('int', { name: 'issueCount' })
+  @Column('int')
   issueCount: number;
 
-  @Column('int', { name: 'useCount', default: () => "'0'" })
+  @Column('int', { default: 0 })
   useCount: number;
 
   @Column({ nullable: true })
   adminId: number | null;
 
-  @Column('datetime', { name: 'startedAt' })
+  @Column('datetime')
   startedAt: Date;
 
-  @Column('datetime', { name: 'endedAt' })
+  @Column('datetime')
   endedAt: Date;
 
-  @Column('int', { name: 'expirationDay', nullable: true })
+  @Column('int', { nullable: true })
   expirationDay: number | null;
 
   @CreateDateColumn()
@@ -64,14 +64,14 @@ export class LicenseGroupInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'domainId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'domainId' })
   OfficeLicenseDomainInfo: OfficeLicenseDomainInfo;
 
   @OneToOne(() => CSAFEventInfo, (info) => info.LicenseGroupInfo, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'eventId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'eventId' })
   CSAFEventInfo: CSAFEventInfo;
 
   @ManyToOne(() => Admin, (admin) => admin.LicenseGroupInfos, {
@@ -79,14 +79,14 @@ export class LicenseGroupInfo {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId' }])
+  @JoinColumn({ name: 'adminId' })
   admin: Admin;
 
   @ManyToOne(() => LicenseType, (type) => type.LicenseGroupInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'licenseType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'licenseType' })
   LicenseType: LicenseType;
 
   @OneToMany(() => LicenseInfo, (info) => info.LicenseGroupInfo)

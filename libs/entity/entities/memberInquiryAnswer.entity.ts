@@ -14,10 +14,10 @@ import { Admin } from './admin.entity';
 
 @Entity('member_inquiry_answer')
 export class MemberInquiryAnswer {
-  @PrimaryColumn('int', { name: 'inquiryId' })
+  @PrimaryColumn('int')
   inquiryId: number;
 
-  @Column('varchar', { name: 'content', length: 512 })
+  @Column('varchar', { length: 512 })
   content: string;
 
   @Column()
@@ -40,13 +40,13 @@ export class MemberInquiryAnswer {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'inquiryId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'inquiryId' })
   MemberInquiryManager: MemberInquiryManager;
 
   @ManyToOne(() => Admin, (admin) => admin.MemberInquiryAnswers, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId' }])
+  @JoinColumn({ name: 'adminId' })
   admin: Admin;
 }

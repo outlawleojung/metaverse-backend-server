@@ -41,52 +41,52 @@ import { ItemMaterial } from './itemMaterial.entity';
 @Index('gradeType', ['gradeType'], {})
 @Entity('item')
 export class Item {
-  @PrimaryColumn('int', { name: 'id' })
+  @PrimaryColumn('int')
   id: number;
 
-  @Column('int', { name: 'itemType' })
+  @Column('int')
   itemType: number;
 
-  @Column('int', { name: 'categoryType' })
+  @Column('int')
   categoryType: number;
 
-  @Column('int', { name: 'packageType' })
+  @Column('int')
   packageType: number;
 
-  @Column('varchar', { name: 'name', length: 64 })
+  @Column('varchar', { length: 64 })
   name: string;
 
-  @Column('varchar', { name: 'description', length: 64 })
+  @Column('varchar', { length: 64 })
   description: string;
 
-  @Column('varchar', { name: 'prefab', length: 64 })
+  @Column('varchar', { length: 64 })
   prefab: string;
 
-  @Column('varchar', { name: 'thumbnail', length: 64 })
+  @Column('varchar', { length: 64 })
   thumbnail: string;
 
-  @Column('int', { name: 'isNesting' })
+  @Column('int')
   isNesting: number;
 
-  @Column('int', { name: 'capacity' })
+  @Column('int')
   capacity: number;
 
-  @Column('int', { name: 'purchaseType' })
+  @Column('int')
   purchaseType: number;
 
-  @Column('int', { name: 'purchasePrice' })
+  @Column('int')
   purchasePrice: number;
 
-  @Column('int', { name: 'saleType' })
+  @Column('int')
   saleType: number;
 
-  @Column('int', { name: 'salePrice' })
+  @Column('int')
   salePrice: number;
 
-  @Column('int', { name: 'gradeType' })
+  @Column('int')
   gradeType: number;
 
-  @Column('int', { name: 'buySellType' })
+  @Column('int')
   buySellType: number;
 
   @OneToOne(
@@ -99,21 +99,21 @@ export class Item {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'itemType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'itemType' })
   ItemType: ItemType;
 
   @ManyToOne(() => CategoryType, (categorytype) => categorytype.Items, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'categoryType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'categoryType' })
   CategoryType: CategoryType;
 
   @ManyToOne(() => PackageType, (packagetype) => packagetype.Items, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'packageType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'packageType' })
   PackageType: PackageType;
 
   @ManyToOne(
@@ -124,7 +124,7 @@ export class Item {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'name', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'name' })
   LocalizationName: Localization;
 
   @ManyToOne(
@@ -135,35 +135,35 @@ export class Item {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'description', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'description' })
   LocalizationDesc: Localization;
 
   @ManyToOne(() => MoneyType, (type) => type.ItemPurchases, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'purchaseType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'purchaseType' })
   PurchaseType: MoneyType;
 
   @ManyToOne(() => MoneyType, (type) => type.ItemSales, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'saleType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'saleType' })
   SaleType: MoneyType;
 
   @ManyToOne(() => GradeType, (gradetype) => gradetype.Items, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'gradeType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'gradeType' })
   GradeType: GradeType;
 
   @ManyToOne(() => BuySellType, (type) => type.Items, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'buySellType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'buySellType' })
   BuySellType: BuySellType;
 
   @OneToMany(() => MemberFurnitureItemInven, (inven) => inven.Item)

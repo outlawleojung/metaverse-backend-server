@@ -18,16 +18,16 @@ export class MemberAccount {
   @Column('uuid')
   memberId: string;
 
-  @PrimaryColumn('int', { name: 'providerType' })
+  @PrimaryColumn('int')
   providerType: number;
 
-  @Column('varchar', { unique: true, name: 'accountToken', length: 100 })
+  @Column('varchar', { unique: true, length: 100 })
   accountToken: string;
 
-  @Column('varchar', { name: 'password', nullable: true, length: 100 })
+  @Column('varchar', { nullable: true, length: 100 })
   password: string | null;
 
-  @Column('int', { name: 'regPathType', nullable: true })
+  @Column('int', { nullable: true })
   regPathType: number | null;
 
   @CreateDateColumn()
@@ -40,7 +40,7 @@ export class MemberAccount {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(
@@ -51,6 +51,6 @@ export class MemberAccount {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'providerType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'providerType' })
   ProviderType: ProviderType;
 }

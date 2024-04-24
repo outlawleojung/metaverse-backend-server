@@ -5,35 +5,29 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { Member } from './member.entity';
 import { ProviderType } from './providerType.entity';
+import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Index('memberId', ['memberId'], {})
 @Index('providerType', ['providerType'], {})
 @Entity('member_login_log')
-export class MemberLoginLog {
+export class MemberLoginLog extends BaseModelEntity {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
   @Column('uuid')
   memberId: string;
 
-  @Column('int', { name: 'providerType' })
+  @Column('int')
   providerType: number;
-
-  @Column('datetime', { name: 'createdAt' })
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 
   @ManyToOne(() => Member, (member) => member.MemberLoginLogs, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(
@@ -44,6 +38,6 @@ export class MemberLoginLog {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'providerType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'providerType' })
   ProviderType: ProviderType;
 }

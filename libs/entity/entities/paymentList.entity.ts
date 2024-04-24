@@ -1,47 +1,53 @@
-import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('payment_list')
 export class PaymentList {
-  @PrimaryColumn('varchar', { name: 'orderId', length: 100 })
+  @PrimaryColumn('varchar', { length: 100 })
   orderId: string;
 
-  @Column('varchar', { name: 'orderName', length: 100 })
+  @Column('varchar', { length: 100 })
   orderName: string;
 
-  @Column('varchar', { name: 'memberCode', length: 100 })
+  @Column('varchar', { length: 100 })
   memberCode: string;
 
-  @Column('varchar', { name: 'nickName', length: 100 })
+  @Column('varchar', { length: 100 })
   nickName: string;
 
-  @Column('int', { name: 'productId' })
+  @Column('int')
   productId: number;
 
-  @Column('int', { name: 'count' })
+  @Column('int')
   count: number;
 
-  @Column('int', { name: 'price' })
+  @Column('int')
   price: number;
 
-  @Column('int', { name: 'storeType' })
+  @Column('int')
   storeType: number;
 
-  @Column('json', { name: 'paymentsData' })
+  @Column('json')
   paymentsData: string;
 
-  @Column('int', { name: 'paymentStateType' })
+  @Column('int')
   paymentStateType: number;
 
-  @Column('datetime', { name: 'paymentCreateAt', nullable: true })
+  @Column('datetime', { nullable: true })
   paymentCreateAt: Date | null;
 
-  @Column('datetime', { name: 'paymentDeleteAt', nullable: true })
+  @Column('datetime', { nullable: true })
   paymentDeleteAt: Date | null;
 
-  @Column('datetime', { name: 'vBankCreateAt', nullable: true })
+  @Column('datetime', { nullable: true })
   vBankCreateAt: Date | null;
 
-  @Column('datetime', { name: 'vBankDeleteAt', nullable: true })
+  @Column('datetime', { nullable: true })
   vBankDeleteAt: Date | null;
 
   @CreateDateColumn()
@@ -49,6 +55,4 @@ export class PaymentList {
 
   @UpdateDateColumn()
   updatedAt: Date;
-  // @OneToMany(() => VoteInfo, (voteinfo) => voteinfo.VoteResType)
-  // VoteInfos: VoteInfo[];
 }

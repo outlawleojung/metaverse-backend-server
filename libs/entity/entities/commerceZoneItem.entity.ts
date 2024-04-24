@@ -1,4 +1,11 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 
 import { AvatarPartsGroupType } from './avatarPartsGroupType.entity';
 import { AvatarPartsColorType } from './avatarPartsColorType.entity';
@@ -9,42 +16,54 @@ import { AvatarPartsSizeType } from './avatarPartsSizeType.entity';
 @Index('sizeType', ['sizeType'], {})
 @Entity('commerce_zone_item')
 export class CommerceZoneItem {
-  @PrimaryColumn('int', { name: 'itemId' })
+  @PrimaryColumn('int')
   itemId: number;
 
-  @Column('int', { name: 'arwPrice' })
+  @Column('int')
   arwPrice: number;
 
-  @Column('int', { name: 'krwPrice' })
+  @Column('int')
   krwPrice: number;
 
-  @Column('int', { name: 'groupType' })
+  @Column('int')
   groupType: number;
 
-  @Column('int', { name: 'colorType' })
+  @Column('int')
   colorType: number;
 
-  @Column('int', { name: 'sizeType' })
+  @Column('int')
   sizeType: number;
 
-  @ManyToOne(() => AvatarPartsGroupType, (grouptype) => grouptype.CommerceZoneItems, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'groupType', referencedColumnName: 'type' }])
+  @ManyToOne(
+    () => AvatarPartsGroupType,
+    (grouptype) => grouptype.CommerceZoneItems,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'groupType' })
   AvatarPartsGroupType: AvatarPartsGroupType;
 
-  @ManyToOne(() => AvatarPartsColorType, (colortype) => colortype.CommerceZoneItems, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'colorType', referencedColumnName: 'type' }])
+  @ManyToOne(
+    () => AvatarPartsColorType,
+    (colortype) => colortype.CommerceZoneItems,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'colorType' })
   AvatarPartsColorType: AvatarPartsColorType;
 
-  @ManyToOne(() => AvatarPartsSizeType, (sizetype) => sizetype.CommerceZoneItems, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'sizeType', referencedColumnName: 'type' }])
+  @ManyToOne(
+    () => AvatarPartsSizeType,
+    (sizetype) => sizetype.CommerceZoneItems,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'sizeType' })
   AvatarPartsSizeType: AvatarPartsSizeType;
 }

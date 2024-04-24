@@ -18,6 +18,7 @@ import { MemberPostbox } from './memberPostbox.entity';
 import { PostalSendType } from './postalSendType.entity';
 import { PostalLog } from './postalLog.entity';
 import { Admin } from './admin.entity';
+import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Index('postalType', ['postalType'], {})
 @Index('postalSendype', ['postalSendType'], {})
@@ -27,45 +28,39 @@ import { Admin } from './admin.entity';
 @Index('content', ['content'], {})
 @Index('adminId', ['adminId'], {})
 @Entity('postbox')
-export class Postbox {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+export class Postbox extends BaseModelEntity {
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('int', { name: 'postalType' })
+  @Column('int')
   postalType: number;
 
-  @Column('int', { name: 'postalSendType' })
+  @Column('int')
   postalSendType: number;
 
-  @Column('int', { name: 'postalState', default: () => "'1'" })
+  @Column('int', { default: 1 })
   postalState: number;
 
-  @Column('varchar', { name: 'subject', length: 32 })
+  @Column('varchar', { length: 32 })
   subject: string;
 
-  @Column('varchar', { name: 'summary', length: 64 })
+  @Column('varchar', { length: 64 })
   summary: string;
 
-  @Column('varchar', { name: 'content', length: 640, nullable: true })
+  @Column('varchar', { length: 640, nullable: true })
   content: string | null;
 
-  @Column('int', { name: 'period' })
+  @Column('int')
   period: number;
 
-  @Column('int', { name: 'isSended', default: () => "'0'" })
+  @Column('int', { default: 0 })
   isSended: number;
 
   @Column()
   adminId: number;
 
-  @Column('datetime', { name: 'sendedAt' })
+  @Column('datetime')
   sendedAt: Date;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 
   @OneToOne(() => PostboxAppend, (append) => append.Postbox)
   PostboxAppend: PostboxAppend;
@@ -83,27 +78,27 @@ export class Postbox {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'postalType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'postalType' })
   PostalType: PostalType;
 
   @ManyToOne(() => PostalSendType, (type) => type.Postboxes, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'postalSendType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'postalSendType' })
   PostalSendType: PostalSendType;
 
   @ManyToOne(() => PostalState, (state) => state.Postboxes, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'postalState', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'postalState' })
   PostalState: PostalState;
 
   @ManyToOne(() => Admin, (admin) => admin.Postboxes, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'adminId' }])
+  @JoinColumn({ name: 'adminId' })
   admin: Admin;
 }

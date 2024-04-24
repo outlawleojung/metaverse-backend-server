@@ -3,36 +3,36 @@ import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 @Index('gameType', ['gameType'], {})
 @Entity('jumping_matching_level')
 export class JumpingMatchingLevel {
-  @PrimaryColumn('int', { name: 'id' })
+  @PrimaryColumn('int')
   id: number;
 
-  @Column('int', { name: 'tileToHintInt' })
+  @Column('int')
   tileToHintInt: number;
 
-  @Column('int', { name: 'hintInt' })
+  @Column('int')
   hintInt: number;
 
-  @Column('int', { name: 'quizeToDesInt' })
+  @Column('int')
   quizeToDesInt: number;
 
-  @Column('int', { name: 'desToFinInt' })
+  @Column('int')
   desToFinInt: number;
 
-  @Column('int', { name: 'nextRoundInt' })
+  @Column('int')
   nextRoundInt: number;
 
-  @Column('int', { name: 'showQuizeSec' })
+  @Column('int')
   showQuizeSec: number;
 
-  @Column('int', { name: 'gameType' })
+  @Column('int')
   gameType: number;
 
-  @Column('int', { name: 'spawnPaintCount' })
+  @Column('int')
   spawnPaintCount: number;
 
-  @Column('int', { name: 'paintCount' })
+  @Column('int')
   paintCount: number;
 
-  @Column('varchar', { name: 'hintLevel', length: 256 })
+  @Column('varchar', { length: 256 })
   hintLevel: string;
 }

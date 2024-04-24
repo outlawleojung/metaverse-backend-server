@@ -35,13 +35,13 @@ export class MemberFriend {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(() => Member, (member) => member.MemberFriends, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'friendMemberId' }])
+  @JoinColumn({ name: 'friendMemberId' })
   FriendMember: Member;
 }

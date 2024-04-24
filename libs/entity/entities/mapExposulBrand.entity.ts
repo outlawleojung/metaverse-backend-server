@@ -1,20 +1,27 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { MapExposulInfo } from './mapExposulInfo.entity';
 
 @Index('mapExposulInfoId', ['mapExposulInfoId'], {})
 @Index('brandName', ['brandName'], {})
 @Entity('map_exposul_brand')
 export class MapExposulBrand {
-  @PrimaryColumn('int', { name: 'mapExposulInfoId' })
+  @PrimaryColumn('int')
   mapExposulInfoId: number;
 
-  @PrimaryColumn('varchar', { name: 'brandName', length: 64 })
+  @PrimaryColumn('varchar', { length: 64 })
   brandName: string;
 
   @ManyToOne(() => MapExposulInfo, (info) => info.MapExposulBrands, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'mapExposulInfoId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'mapExposulInfoId' })
   MapExposulInfo: MapExposulInfo;
 }

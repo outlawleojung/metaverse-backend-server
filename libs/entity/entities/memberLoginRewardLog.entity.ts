@@ -14,7 +14,7 @@ export class MemberLoginRewardLog {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @Column('datetime', { name: 'loginedAt' })
+  @Column('datetime')
   loginedAt: Date;
 
   @CreateDateColumn()
@@ -27,6 +27,6 @@ export class MemberLoginRewardLog {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 }

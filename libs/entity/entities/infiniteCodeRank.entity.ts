@@ -14,7 +14,7 @@ export class InfiniteCodeRank {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @Column('float', { name: 'userScore', nullable: true, precision: 12 })
+  @Column('float', { nullable: true, precision: 12 })
   userScore: number | null;
 
   @CreateDateColumn()
@@ -27,6 +27,6 @@ export class InfiniteCodeRank {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 }

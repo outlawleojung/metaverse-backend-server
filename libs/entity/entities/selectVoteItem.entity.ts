@@ -15,25 +15,25 @@ import { MemberSelectVoteLike } from './memberSelectVoteLike.entity';
 
 @Entity('select_vote_item')
 export class SelectVoteItem {
-  @PrimaryColumn('int', { name: 'voteId' })
+  @PrimaryColumn('int')
   voteId: number;
 
-  @PrimaryColumn('int', { name: 'itemNum' })
+  @PrimaryColumn('int')
   itemNum: number;
 
-  @Column('int', { name: 'displayNum' })
+  @Column('int')
   displayNum: number;
 
-  @Column('varchar', { name: 'name', length: 32 })
+  @Column('varchar', { length: 32 })
   name: string;
 
-  @Column('varchar', { name: 'description', length: 128 })
+  @Column('varchar', { length: 128 })
   description: string;
 
-  @Column('varchar', { name: 'videoUrl', length: 256 })
+  @Column('varchar', { length: 256 })
   videoUrl: string;
 
-  @Column('varchar', { name: 'imageName', length: 128 })
+  @Column('varchar', { length: 128 })
   imageName: string;
 
   @CreateDateColumn()
@@ -46,7 +46,7 @@ export class SelectVoteItem {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'voteId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'voteId' })
   SelectVoteInfo: SelectVoteInfo;
 
   @OneToMany(() => MemberSelectVoteInfo, (info) => info.SelectVoteItem)

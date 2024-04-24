@@ -18,10 +18,10 @@ export class MemberDefaultCardInfo {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @Column('int', { name: 'templateId', default: () => "'1'" })
+  @Column('int', { default: 1 })
   templateId: number;
 
-  @Column('int', { name: 'num', default: () => "'1'" })
+  @Column('int', { default: 1 })
   num: number;
 
   @CreateDateColumn()
@@ -34,7 +34,7 @@ export class MemberDefaultCardInfo {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(
@@ -45,6 +45,6 @@ export class MemberDefaultCardInfo {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'templateId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'templateId' })
   BusinessCardTemplate: BusinessCardTemplate;
 }

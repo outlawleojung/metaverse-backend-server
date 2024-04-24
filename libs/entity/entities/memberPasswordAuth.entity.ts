@@ -17,10 +17,10 @@ export class MemberPasswordAuth {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @Column('varchar', { name: 'token', length: 128 })
+  @Column('varchar', { length: 128 })
   token: string;
 
-  @Column('int', { name: 'ttl' })
+  @Column('int')
   ttl: number;
 
   @CreateDateColumn()
@@ -33,6 +33,6 @@ export class MemberPasswordAuth {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 }

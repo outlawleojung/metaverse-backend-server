@@ -1,4 +1,11 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { MannequinModelType } from './mannequinModelType.entity';
 import { AvatarPartsType } from './avatarPartsType.entity';
 import { Item } from './item.entity';
@@ -7,36 +14,44 @@ import { Item } from './item.entity';
 @Index('partsType', ['partsType'], {})
 @Entity('commerce_zone_mannequin')
 export class CommerceZoneMannequin {
-  @PrimaryColumn('int', { name: 'id' })
+  @PrimaryColumn('int')
   id: number;
 
-  @Column('int', { name: 'modelType' })
+  @Column('int')
   modelType: number;
 
-  @Column('int', { name: 'partsType' })
+  @Column('int')
   partsType: number;
 
-  @Column('int', { name: 'itemId' })
+  @Column('int')
   itemId: number;
 
-  @ManyToOne(() => MannequinModelType, (mannequinmodeltype) => mannequinmodeltype.CommerceZoneMannequins, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'modelType', referencedColumnName: 'type' }])
+  @ManyToOne(
+    () => MannequinModelType,
+    (mannequinmodeltype) => mannequinmodeltype.CommerceZoneMannequins,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'modelType' })
   MannequinModelType: MannequinModelType;
 
-  @ManyToOne(() => AvatarPartsType, (avatarpartstype) => avatarpartstype.CommerceZoneMannequins, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'partsType', referencedColumnName: 'type' }])
+  @ManyToOne(
+    () => AvatarPartsType,
+    (avatarpartstype) => avatarpartstype.CommerceZoneMannequins,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'partsType' })
   AvatarPartsType: AvatarPartsType;
 
   @ManyToOne(() => Item, (item) => item.CommerceZoneMannequins, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'itemId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'itemId' })
   Item: Item;
 }

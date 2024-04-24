@@ -1,30 +1,37 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { LicenseType } from './licenseType.entity';
 import { LicenseFunction } from './licenseFunction.entity';
 
 @Index('licenseFunc', ['licenseFunc'], {})
 @Entity('license_type_info')
 export class LicenseTypeInfo {
-  @PrimaryColumn('int', { name: 'licenseType' })
+  @PrimaryColumn('int')
   licenseType: number;
 
-  @PrimaryColumn('int', { name: 'licenseFunc' })
+  @PrimaryColumn('int')
   licenseFunc: number;
 
-  @Column('int', { name: 'value' })
+  @Column('int')
   value: number;
 
   @ManyToOne(() => LicenseType, (type) => type.LicenseTypeInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'licenseType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'licenseType' })
   LicenseType: LicenseType;
 
   @ManyToOne(() => LicenseFunction, (type) => type.LicenseTypeInfos, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'licenseFunc', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'licenseFunc' })
   LicenseFunction: LicenseFunction;
 }

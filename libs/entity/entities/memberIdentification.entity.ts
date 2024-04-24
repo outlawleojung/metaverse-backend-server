@@ -4,7 +4,6 @@ import {
   Entity,
   Index,
   JoinColumn,
-  ManyToOne,
   OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
@@ -17,19 +16,19 @@ export class MemberIdentification {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @Column('varchar', { name: 'name', length: 32 })
+  @Column('varchar', { length: 32 })
   name: string;
 
-  @Column('date', { name: 'birthdate' })
+  @Column('date')
   birthdate: Date;
 
-  @Column('int', { name: 'gender' })
+  @Column('int')
   gender: number;
 
-  @Column('varchar', { name: 'CI', length: 100 })
+  @Column('varchar', { length: 128 })
   CI: string;
 
-  @Column('varchar', { name: 'phoneNumber', length: 32 })
+  @Column('varchar', { length: 32 })
   phoneNumber: string;
 
   @CreateDateColumn()
@@ -42,6 +41,6 @@ export class MemberIdentification {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 }

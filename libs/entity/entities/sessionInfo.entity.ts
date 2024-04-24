@@ -14,7 +14,7 @@ export class SessionInfo {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @Column('varchar', { name: 'sessionId', nullable: true, length: 100 })
+  @Column('varchar', { nullable: true, length: 100 })
   sessionId: string | null;
 
   @CreateDateColumn()
@@ -27,6 +27,6 @@ export class SessionInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 }

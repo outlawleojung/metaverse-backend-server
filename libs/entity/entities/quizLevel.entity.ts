@@ -2,12 +2,12 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('quiz_level')
 export class QuizLevel {
-  @PrimaryColumn('int', { name: 'level' })
+  @PrimaryColumn('int')
   level: number;
 
-  @Column('int', { name: 'waitTime' })
+  @Column('int')
   waitTime: number;
 
-  @Column('int', { name: 'playTime' })
+  @Column('int')
   playTime: number;
 }

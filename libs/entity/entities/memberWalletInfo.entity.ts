@@ -16,7 +16,7 @@ export class MemberWalletInfo {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @Column('varchar', { name: 'walletAddr', length: 128 })
+  @Column('varchar', { length: 128 })
   walletAddr: string;
 
   @CreateDateColumn()
@@ -29,6 +29,6 @@ export class MemberWalletInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 }

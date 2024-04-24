@@ -1,4 +1,4 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { MemberOfficeReservationInfo } from './memberOfficeReservationInfo.entity';
 import { Localization } from './localization.entity';
 import { BaseTypeEntity } from './baseTypeEntity.entity';
@@ -8,14 +8,19 @@ import { BaseTypeEntity } from './baseTypeEntity.entity';
 export class OfficeAlarmType extends BaseTypeEntity {
   @OneToMany(
     () => MemberOfficeReservationInfo,
-    (memberOfficeReservationInfo) => memberOfficeReservationInfo.OfficeAlarmType,
+    (memberOfficeReservationInfo) =>
+      memberOfficeReservationInfo.OfficeAlarmType,
   )
   MemberOfficeReservationInfos: MemberOfficeReservationInfo[];
 
-  @ManyToOne(() => Localization, (localization) => localization.OfficeAlarmTypes, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'name', referencedColumnName: 'id' }])
+  @ManyToOne(
+    () => Localization,
+    (localization) => localization.OfficeAlarmTypes,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'name' })
   LocalizationName: Localization;
 }

@@ -14,7 +14,7 @@ export class KtmfEventEmailInfo {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @Column('varchar', { name: 'email', length: 64 })
+  @Column('varchar', { length: 64 })
   email: string;
 
   @CreateDateColumn()
@@ -27,6 +27,6 @@ export class KtmfEventEmailInfo {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 }

@@ -18,21 +18,21 @@ export class ReportCategory {
     example: 1,
     description: '신고 유형 타입',
   })
-  @PrimaryColumn('int', { name: 'reportType' })
+  @PrimaryColumn('int')
   reportType: number;
 
   @ApiProperty({
     example: 1,
     description: '신고 상세 사유 타입',
   })
-  @PrimaryColumn('int', { name: 'reasonType' })
+  @PrimaryColumn('int')
   reasonType: number;
 
   @ManyToOne(() => ReportType, (reporttype) => reporttype.ReportCategorise, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'reportType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'reportType' })
   ReportType: ReportType;
 
   @ManyToOne(
@@ -43,7 +43,7 @@ export class ReportCategory {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn([{ name: 'reasonType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'reasonType' })
   ReportReasonType: ReportReasonType;
 
   @OneToMany(

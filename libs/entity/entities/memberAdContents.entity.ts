@@ -16,7 +16,7 @@ export class MemberAdContents {
   @PrimaryColumn('uuid')
   memberId: string;
 
-  @PrimaryColumn('int', { name: 'contentsId' })
+  @PrimaryColumn('int')
   contentsId: number;
 
   @CreateDateColumn()
@@ -29,13 +29,13 @@ export class MemberAdContents {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'memberId' }])
+  @JoinColumn({ name: 'memberId' })
   Member: Member;
 
   @ManyToOne(() => AdContents, (c) => c.MemberAdContents, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'contentsId', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'contentsId' })
   AdContents: AdContents;
 }

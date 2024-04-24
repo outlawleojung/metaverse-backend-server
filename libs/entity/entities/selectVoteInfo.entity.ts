@@ -19,34 +19,34 @@ import { Admin } from './admin.entity';
 @Index('adminId', ['adminId'], {})
 @Entity('select_vote_info')
 export class SelectVoteInfo {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('varchar', { name: 'name', length: 64 })
+  @Column('varchar', { length: 64 })
   name: string;
 
-  @Column('int', { name: 'voteCount' })
+  @Column('int')
   voteCount: number;
 
-  @Column('int', { name: 'resultType' })
+  @Column('int')
   resultType: number;
 
-  @Column('int', { name: 'resultExposureType' })
+  @Column('int')
   resultExposureType: number;
 
   @Column()
   adminId: number;
 
-  @Column('datetime', { name: 'startedAt' })
+  @Column('datetime')
   startedAt: Date;
 
-  @Column('datetime', { name: 'endedAt' })
+  @Column('datetime')
   endedAt: Date;
 
-  @Column('datetime', { name: 'resultStartedAt' })
+  @Column('datetime')
   resultStartedAt: Date;
 
-  @Column('datetime', { name: 'resultEndedAt' })
+  @Column('datetime')
   resultEndedAt: Date;
 
   @CreateDateColumn()
@@ -59,14 +59,14 @@ export class SelectVoteInfo {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'resultExposureType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'resultExposureType' })
   VoteResultExposureType: VoteResultExposureType;
 
   @ManyToOne(() => VoteResultType, (type) => type.SelectVoteInfos, {
     onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'resultType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'resultType' })
   VoteResultType: VoteResultType;
 
   @ManyToOne(() => Admin, (admin) => admin.SelectVoteInfos, {

@@ -11,7 +11,7 @@ export class CategoryType extends BaseTypeEntity {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'name', referencedColumnName: 'id' }])
+  @JoinColumn({ name: 'name' })
   LocalizationName: Localization;
 
   @OneToMany(() => Item, (item) => item.CategoryType)

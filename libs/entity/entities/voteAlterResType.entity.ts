@@ -1,16 +1,14 @@
-import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+import { Entity, OneToMany } from 'typeorm';
 import { VoteAlterResponse } from './voteAlterResponse.entity';
 import { VoteInfo } from './voteInfo.entity';
+import { BaseTypeEntity } from './baseTypeEntity.entity';
 
 @Entity('vote_alter_res_type')
-export class VoteAlterResType {
-  @PrimaryColumn('int', { name: 'type' })
-  type: number;
-
-  @Column('varchar', { name: 'name', length: 20 })
-  name: string;
-
-  @OneToMany(() => VoteAlterResponse, (votealterresponse) => votealterresponse.VoteAlterResType)
+export class VoteAlterResType extends BaseTypeEntity {
+  @OneToMany(
+    () => VoteAlterResponse,
+    (votealterresponse) => votealterresponse.VoteAlterResType,
+  )
   VoteAlterResponses: VoteAlterResponse[];
 
   @OneToMany(() => VoteInfo, (voteinfo) => voteinfo.VoteAlterResType)

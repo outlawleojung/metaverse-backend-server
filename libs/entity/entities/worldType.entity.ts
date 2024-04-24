@@ -5,7 +5,10 @@ import { BaseTypeEntity } from './baseTypeEntity.entity';
 
 @Entity('world_type')
 export class WorldType extends BaseTypeEntity {
-  @OneToMany(() => VideoScreenInfo, (videoscreeninfo) => videoscreeninfo.WorldType)
+  @OneToMany(
+    () => VideoScreenInfo,
+    (videoscreeninfo) => videoscreeninfo.WorldType,
+  )
   VideoScreenInfos: VideoScreenInfo[];
 
   @ManyToMany(() => AreaType, (areatype) => areatype.WorldTypes)

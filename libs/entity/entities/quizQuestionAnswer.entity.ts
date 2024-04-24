@@ -1,4 +1,11 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { QuizAnswerType } from './quizAnswerType.entity';
 import { Localization } from './localization.entity';
 
@@ -6,26 +13,34 @@ import { Localization } from './localization.entity';
 @Index('questionId', ['questionId'], {})
 @Entity('quiz_question_answer')
 export class QuizQuestionAnswer {
-  @PrimaryColumn('int', { name: 'id' })
+  @PrimaryColumn('int')
   id: number;
 
-  @Column('varchar', { name: 'questionId', length: 64 })
+  @Column('varchar', { length: 64 })
   questionId: string;
 
-  @Column('int', { name: 'answerType' })
+  @Column('int')
   answerType: number;
 
-  @ManyToOne(() => QuizAnswerType, (quizanswertype) => quizanswertype.QuizQuestionAnswers, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'answerType', referencedColumnName: 'type' }])
+  @ManyToOne(
+    () => QuizAnswerType,
+    (quizanswertype) => quizanswertype.QuizQuestionAnswers,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'answerType' })
   QuizAnswerType: QuizAnswerType;
 
-  @ManyToOne(() => Localization, (localization) => localization.QuizQuestionAnswer, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'questionId', referencedColumnName: 'id' }])
+  @ManyToOne(
+    () => Localization,
+    (localization) => localization.QuizQuestionAnswer,
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'questionId' })
   LocalizationQuestion: Localization;
 }

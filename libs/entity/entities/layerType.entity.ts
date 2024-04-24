@@ -6,10 +6,16 @@ import { BaseTypeEntity } from './baseTypeEntity.entity';
 
 @Entity('layertype')
 export class LayerType extends BaseTypeEntity {
-  @OneToMany(() => InteriorInstallInfo, (interiorinstallinfo) => interiorinstallinfo.LayerType)
+  @OneToMany(
+    () => InteriorInstallInfo,
+    (interiorinstallinfo) => interiorinstallinfo.LayerType,
+  )
   InteriorInstallInfos: InteriorInstallInfo[];
 
-  @OneToMany(() => MemberMyRoomInfo, (membermyroominfo) => membermyroominfo.LayerType)
+  @OneToMany(
+    () => MemberMyRoomInfo,
+    (membermyroominfo) => membermyroominfo.LayerType,
+  )
   MemberMyRoomInfos: MemberMyRoomInfo[];
 
   @OneToMany(() => StartMyRoom, (startmyroom) => startmyroom.LayerType)

@@ -13,20 +13,20 @@ import { MemberAdContents } from './memberAdContents.entity';
 @Index('moneyType', ['moneyType'], {})
 @Entity('ad_contents')
 export class AdContents {
-  @PrimaryColumn('int', { name: 'id' })
+  @PrimaryColumn('int')
   id: number;
 
-  @Column('int', { name: 'moneyType' })
+  @Column('int')
   moneyType: number;
 
-  @Column('int', { name: 'reward' })
+  @Column('int')
   reward: number;
 
   @ManyToOne(() => MoneyType, (type) => type.AdContents, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'moneyType', referencedColumnName: 'type' }])
+  @JoinColumn({ name: 'moneyType' })
   MoneyType: MoneyType;
 
   @OneToMany(() => MemberAdContents, (money) => money.AdContents)
