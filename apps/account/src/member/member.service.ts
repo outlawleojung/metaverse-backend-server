@@ -666,6 +666,7 @@ export class MemberService {
 
   // 회원 정보 조회
   async getMemberInfo(memberId: string) {
+    console.log('@@@@@@@@@@@@@@@@@@@@@@@ getMemberInfo.memberId :', memberId);
     // 사용자 존재 여부 확인
     const exMember = await this.memberRepository.findByMemberId(memberId);
 

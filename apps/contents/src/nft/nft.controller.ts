@@ -31,7 +31,7 @@ export class NftController {
     @MemberDeco() member: MemberDto,
     @Body() data: LinkedWalletDto,
   ) {
-    return await this.nftService.linkedWallet(member.memberId, data.walletAddr);
+    return await this.nftService.linkedWallet(member.id, data.walletAddr);
   }
 
   @ApiOperation({ summary: '지갑 해제 하기' })
@@ -41,6 +41,6 @@ export class NftController {
   @UseGuards(AccessTokenGuard)
   @Delete('unlinked-wallet')
   async unlinkedWallet(@MemberDeco() member: MemberDto) {
-    return await this.nftService.unLinkedWallet(member.memberId);
+    return await this.nftService.unLinkedWallet(member.id);
   }
 }

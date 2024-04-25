@@ -31,7 +31,7 @@ export class PostboxController {
   @UseGuards(AccessTokenGuard)
   @Get()
   async getPostboxes(@MemberDeco() member: MemberDto) {
-    return await this.postboxService.getPostboxes(member.memberId);
+    return await this.postboxService.getPostboxes(member.id);
   }
 
   // 우편함 수령하기
@@ -43,7 +43,7 @@ export class PostboxController {
   @UseGuards(AccessTokenGuard)
   @Post('recieve/:id')
   async receivePost(@MemberDeco() member: MemberDto, @Param('id') id: number) {
-    return await this.postboxService.receivePost(member.memberId, id);
+    return await this.postboxService.receivePost(member.id, id);
   }
 
   // 우편함 수령하기
@@ -55,6 +55,6 @@ export class PostboxController {
   @UseGuards(AccessTokenGuard)
   @Post('receive-all')
   async receiveAppPost(@MemberDeco() member: MemberDto) {
-    return await this.postboxService.receiveAllPost(member.memberId);
+    return await this.postboxService.receiveAllPost(member.id);
   }
 }

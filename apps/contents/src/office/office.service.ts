@@ -83,7 +83,7 @@ export class OfficeService {
       CASE WHEN password IS NULL then 0
         ELSE 1 END AS isPassword
       FROM memberOfficeReservationInfo mr 
-      INNER JOIN member member ON member.memberId = mr.memberId 
+      INNER JOIN member member ON member.id = mr.memberId 
       WHERE mr.roomCode = ?`,
       [roomCode],
     );
@@ -156,7 +156,7 @@ export class OfficeService {
       member.nickname AS nickname,
       member.memberCode AS memberCode
       FROM memberOfficeReservationInfo mr 
-      INNER JOIN member member ON member.memberId = mr.memberId 
+      INNER JOIN member member ON member.id = mr.memberId 
       WHERE mr.memberId = ? and modeType <> 5`,
       [memberId],
     );
@@ -192,7 +192,7 @@ export class OfficeService {
       member.nickname AS nickname,
       member.memberCode AS memberCode
         FROM memberOfficeReservationWaitingInfo mw INNER JOIN memberOfficeReservationInfo mr ON mw.reservationId = mr.id
-        INNER JOIN member member ON member.memberId = mr.memberId 
+        INNER JOIN member member ON member.id = mr.memberId 
         WHERE mw.memberId = ? and modeType <> 5`,
       [memberId],
     );
@@ -408,7 +408,7 @@ export class OfficeService {
       CASE WHEN password IS NULL then 0
         ELSE 1 END AS isPassword
       FROM memberOfficeReservationInfo mr 
-      INNER JOIN member member ON member.memberId = mr.memberId 
+      INNER JOIN member member ON member.id = mr.memberId 
       WHERE mr.isAdvertising = ?`,
       [1],
     );

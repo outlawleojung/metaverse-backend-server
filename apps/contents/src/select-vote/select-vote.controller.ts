@@ -31,7 +31,7 @@ export class SelectVoteController {
   @UseGuards(AccessTokenGuard)
   @Get()
   async getSelectVote(@MemberDeco() member: MemberDto) {
-    return await this.selectVoteService.getSelectVote(member.memberId);
+    return await this.selectVoteService.getSelectVote(member.id);
   }
 
   // 투표 하기
@@ -42,7 +42,7 @@ export class SelectVoteController {
   @UseGuards(AccessTokenGuard)
   @Post()
   async doVote(@MemberDeco() member: MemberDto, @Body() data: DoVoteDto) {
-    return await this.selectVoteService.doVote(member.memberId, data);
+    return await this.selectVoteService.doVote(member.id, data);
   }
 
   // 좋아요
@@ -53,7 +53,7 @@ export class SelectVoteController {
   @UseGuards(AccessTokenGuard)
   @Post('like')
   async doLike(@MemberDeco() member: MemberDto, @Body() data: DoVoteDto) {
-    return await this.selectVoteService.doLike(member.memberId, data);
+    return await this.selectVoteService.doLike(member.id, data);
   }
 
   // 투표 결과
@@ -67,7 +67,7 @@ export class SelectVoteController {
     @MemberDeco() member: MemberDto,
     @Param('voteId') voteId: number,
   ) {
-    return await this.selectVoteService.getVoteResult(member.memberId, voteId);
+    return await this.selectVoteService.getVoteResult(member.id, voteId);
   }
 
   // KTMF 이벤트 메일 확인
@@ -75,6 +75,6 @@ export class SelectVoteController {
   @Get('ktmf-email')
   @UseGuards(AccessTokenGuard)
   async getKtmfEmail(@MemberDeco() member: MemberDto) {
-    return await this.selectVoteService.getKtmfEmail(member.memberId);
+    return await this.selectVoteService.getKtmfEmail(member.id);
   }
 }

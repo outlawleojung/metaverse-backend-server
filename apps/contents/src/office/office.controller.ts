@@ -101,7 +101,7 @@ export class OfficeController {
   @UseGuards(AccessTokenGuard)
   @Get('getReservInfo')
   async getReservInfo(@MemberDeco() member: MemberDto) {
-    return await this.officeService.getReservInfo(member.memberId);
+    return await this.officeService.getReservInfo(member.id);
   }
 
   // 나의 대기 목록 조회
@@ -113,7 +113,7 @@ export class OfficeController {
   @UseGuards(AccessTokenGuard)
   @Get('getWaitInfo')
   async getWaitInfo(@MemberDeco() member: MemberDto) {
-    return await this.officeService.getWaitInfo(member.memberId);
+    return await this.officeService.getWaitInfo(member.id);
   }
 
   // 오피스 예약 하기
@@ -130,11 +130,7 @@ export class OfficeController {
     @UploadedFile() file: Express.Multer.File,
     @Body() data: CreateReservDto,
   ) {
-    const result = await this.officeService.CreateOffice(
-      member.memberId,
-      file,
-      data,
-    );
+    const result = await this.officeService.CreateOffice(member.id, file, data);
 
     return result;
   }
@@ -155,7 +151,7 @@ export class OfficeController {
     @Param('roomCode') roomCode: string,
   ) {
     const result = await this.officeService.UpdateOffice(
-      member.memberId,
+      member.id,
       file,
       roomCode,
       data,
@@ -176,10 +172,7 @@ export class OfficeController {
     @MemberDeco() member: MemberDto,
     @Body() data: CreateWaitDto,
   ) {
-    const result = await this.officeService.waitOfficeReserv(
-      member.memberId,
-      data,
-    );
+    const result = await this.officeService.waitOfficeReserv(member.id, data);
 
     return result;
   }
@@ -196,10 +189,7 @@ export class OfficeController {
     @MemberDeco() member: MemberDto,
     @Param('roomCode') roomCode: string,
   ) {
-    return await this.officeService.deleteReservation(
-      member.memberId,
-      roomCode,
-    );
+    return await this.officeService.deleteReservation(member.id, roomCode);
   }
 
   // 오피스 대기 취소
@@ -214,10 +204,7 @@ export class OfficeController {
     @MemberDeco() member: MemberDto,
     @Param('roomCode') roomCode: string,
   ) {
-    const result = await this.officeService.deleteWaiting(
-      member.memberId,
-      roomCode,
-    );
+    const result = await this.officeService.deleteWaiting(member.id, roomCode);
     // this.officeLogService.deleteWaiting(result);
     return result;
   }
@@ -243,7 +230,7 @@ export class OfficeController {
     @UploadedFile() file: Express.Multer.File,
     @MemberDeco() member: MemberDto,
   ) {
-    this.logger.debug('memberId : ', member.memberId);
+    this.logger.debug('memberId : ', member.id);
     this.logger.debug(file);
   }
 }

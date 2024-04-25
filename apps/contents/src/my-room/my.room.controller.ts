@@ -63,7 +63,7 @@ export class MyRoomController {
   @UseGuards(AccessTokenGuard)
   @Post('create')
   async create(@MemberDeco() member: MemberDto, @Body() data: CreateMyRoomDto) {
-    return await this.myRoomService.createMyRoom(member.memberId, data);
+    return await this.myRoomService.createMyRoom(member.id, data);
   }
 
   @ApiOperation({ summary: '마이룸 상태 타입 변경' })
@@ -77,7 +77,7 @@ export class MyRoomController {
     @MemberDeco() member: MemberDto,
     @Body() data: UpdateStateTypeDto,
   ) {
-    return await this.myRoomService.updateStateType(member.memberId, data);
+    return await this.myRoomService.updateStateType(member.id, data);
   }
 
   @ApiOperation({ summary: '마이룸 이미지 업로드' })
@@ -142,11 +142,7 @@ export class MyRoomController {
     }
 
     if (result.error === ERRORCODE.NET_E_SUCCESS) {
-      return await this.myRoomService.uploadIFrameImage(
-        member.memberId,
-        data,
-        file,
-      );
+      return await this.myRoomService.uploadIFrameImage(member.id, data, file);
     }
 
     return result;
@@ -163,6 +159,6 @@ export class MyRoomController {
     @MemberDeco() member: MemberDto,
     @Query('frameImages') items: string,
   ) {
-    return this.myRoomService.deleteFrameImage(member.memberId, items);
+    return this.myRoomService.deleteFrameImage(member.id, items);
   }
 }

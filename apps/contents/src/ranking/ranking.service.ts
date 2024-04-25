@@ -121,7 +121,7 @@ export class RankingService {
       .select(`(RANK() OVER (ORDER BY userScore ASC))`, 'rank')
       .addSelect([
         'r.userScore as userScore',
-        'member.memberId as memberId',
+        'member.id as memberId',
         'member.nickname as nickname',
       ])
       .leftJoin('r.Member', 'member')
@@ -134,7 +134,7 @@ export class RankingService {
       .select(`(RANK() OVER (ORDER BY userScore ASC))`, 'rank')
       .addSelect([
         'r.userScore as userScore',
-        'member.memberId as memberId',
+        'member.id as memberId',
         'member.nickname as nickname',
       ])
       .leftJoin('r.Member', 'member')

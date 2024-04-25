@@ -46,7 +46,7 @@ export class FriendController {
   // @UseGuards(AccessTokenGuard)
   // @Get()
   // async getFriends(@MemberDeco() member: MemberDto) {
-  //   return await this.friendService.getFriends(member.memberId);
+  //   return await this.friendService.getFriends(member.id);
   // }
 
   // 친구 요청 하기
@@ -63,11 +63,7 @@ export class FriendController {
     @MemberDeco() member: MemberDto,
     @Body() data: FindFriendDto,
   ) {
-    return await this.friendService.requestFriend(
-      member.memberId,
-      data,
-      queryRunner,
-    );
+    return await this.friendService.requestFriend(member.id, data, queryRunner);
   }
 
   // 친구 요청 목록 조회
@@ -79,7 +75,7 @@ export class FriendController {
   @UseGuards(AccessTokenGuard)
   @Get('/getRequestFriends')
   async getRequestFriends(@MemberDeco() member: MemberDto) {
-    return await this.friendService.getRequestFriends(member.memberId);
+    return await this.friendService.getRequestFriends(member.id);
   }
 
   // 친구 요청 받은 목록 조회
@@ -91,7 +87,7 @@ export class FriendController {
   @UseGuards(AccessTokenGuard)
   @Get('/receiveRequestFriends')
   async receiveRequestFriends(@MemberDeco() member: MemberDto) {
-    return await this.friendService.receiveRequestFriends(member.memberId);
+    return await this.friendService.receiveRequestFriends(member.id);
   }
 
   // 친구 수락 하기
@@ -109,7 +105,7 @@ export class FriendController {
     @Param('friendMemeberCode') friendMemeberCode: string,
   ) {
     return await this.friendService.acceptFriend(
-      member.memberId,
+      member.id,
       friendMemeberCode,
       queryRunner,
     );
@@ -130,7 +126,7 @@ export class FriendController {
     @Param('friendMemeberCode') friendMemeberCode: string,
   ) {
     return await this.friendService.cancelRequestFriend(
-      member.memberId,
+      member.id,
       friendMemeberCode,
       queryRunner,
     );
@@ -151,7 +147,7 @@ export class FriendController {
     @Param('friendMemeberCode') friendMemeberCode: string,
   ) {
     return this.friendService.refusalRequestFriend(
-      member.memberId,
+      member.id,
       friendMemeberCode,
       queryRunner,
     );
@@ -171,7 +167,7 @@ export class FriendController {
     @MemberDeco() member: MemberDto,
     @Body() data: CommonFriendDto,
   ) {
-    return this.friendService.blockFriend(member.memberId, data, queryRunner);
+    return this.friendService.blockFriend(member.id, data, queryRunner);
   }
 
   // 친구 삭제
@@ -189,7 +185,7 @@ export class FriendController {
     @Param('friendMemeberCode') friendMemeberCode: string,
   ) {
     return await this.friendService.deleteFriend(
-      member.memberId,
+      member.id,
       friendMemeberCode,
       queryRunner,
     );
@@ -210,7 +206,7 @@ export class FriendController {
     @Param('friendMemeberCode') friendMemeberCode: string,
   ) {
     return this.friendService.releaseBlockFriend(
-      member.memberId,
+      member.id,
       friendMemeberCode,
       queryRunner,
     );
@@ -225,7 +221,7 @@ export class FriendController {
   @UseGuards(AccessTokenGuard)
   @Get('/getBlockFriends')
   async getBlockFriends(@MemberDeco() member: MemberDto) {
-    return this.friendService.getBlockFriends(member.memberId);
+    return this.friendService.getBlockFriends(member.id);
   }
 
   // 친구 조회
@@ -257,7 +253,7 @@ export class FriendController {
     @MemberDeco() member: MemberDto,
     @Body() data: CommonFriendDto,
   ) {
-    return this.friendService.bookmark(member.memberId, data, queryRunner);
+    return this.friendService.bookmark(member.id, data, queryRunner);
   }
 
   // 친구 룸아이디 조회

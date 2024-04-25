@@ -32,7 +32,7 @@ export class RankingController {
     @MemberDeco() member: MemberDto,
     @Body() data: CreateRankingDto,
   ) {
-    return await this.rankingService.crreateRanking(member.memberId, data);
+    return await this.rankingService.crreateRanking(member.id, data);
   }
 
   @ApiOperation({ summary: '전체 랭킹, 나의 기록 모두 조회' })
@@ -43,7 +43,7 @@ export class RankingController {
   @UseGuards(AccessTokenGuard)
   @Get('allMyRanking')
   async getAllMyRanking(@MemberDeco() member: MemberDto) {
-    return await this.rankingService.getAllMyRanking(member.memberId);
+    return await this.rankingService.getAllMyRanking(member.id);
   }
 
   @ApiOperation({ summary: '전체 랭킹만 조회' })
@@ -65,6 +65,6 @@ export class RankingController {
   @UseGuards(AccessTokenGuard)
   @Get('myRanking')
   async getMyRanking(@MemberDeco() member: MemberDto) {
-    return await this.rankingService.getMyRanking(member.memberId);
+    return await this.rankingService.getMyRanking(member.id);
   }
 }

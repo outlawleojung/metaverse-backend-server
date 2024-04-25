@@ -27,7 +27,7 @@ export class VoteController {
   @UseGuards(AccessTokenGuard)
   @Get()
   async getVotes(@MemberDeco() member: MemberDto) {
-    return await this.voteService.getVotes(member.memberId);
+    return await this.voteService.getVotes(member.id);
   }
 
   // 투표 하기
@@ -35,6 +35,6 @@ export class VoteController {
   @UseGuards(AccessTokenGuard)
   @Post()
   async doVote(@MemberDeco() member: MemberDto, @Body() data: DoVoteDto) {
-    return await this.voteService.DoVote(member.memberId, data);
+    return await this.voteService.DoVote(member.id, data);
   }
 }

@@ -92,14 +92,10 @@ export class MemberController {
     @QueryRunner() queryRunner: QR,
     @Body() data: UpdateMyCardDto,
   ) {
-    await this.memberService.updateMyCardInfo(
-      member.memberId,
-      data,
-      queryRunner,
-    );
+    await this.memberService.updateMyCardInfo(member.id, data, queryRunner);
 
     const businessCardInfos = await this.memberService.getBusinessCardList(
-      member.memberId,
+      member.id,
       queryRunner,
     );
 
@@ -129,14 +125,10 @@ export class MemberController {
     @QueryRunner() queryRunner: QR,
     @Body() data: UpdateMyProfileDto,
   ) {
-    await this.memberService.updateMyProfile(
-      member.memberId,
-      data,
-      queryRunner,
-    );
+    await this.memberService.updateMyProfile(member.id, data, queryRunner);
 
     await this.memberService.updateNicknameLog(
-      member.memberId,
+      member.id,
       data.nickname,
       queryRunner,
     );
@@ -168,8 +160,8 @@ export class MemberController {
     @MemberDeco() member: MemberDto,
     @Body() data: SetAvatar,
   ) {
-    await this.memberService.setAvatar(member.memberId, data, queryRunner);
-    const avatarInfos = await this.commonService.getAvatarInfo(member.memberId);
+    await this.memberService.setAvatar(member.id, data, queryRunner);
+    const avatarInfos = await this.commonService.getAvatarInfo(member.id);
 
     return {
       avatarInfos: avatarInfos,
@@ -196,11 +188,7 @@ export class MemberController {
     @MemberDeco() member: MemberDto,
     @Body() data: UpdateEmailDto,
   ) {
-    return await this.memberService.updateEmail(
-      member.memberId,
-      data,
-      queryRunner,
-    );
+    return await this.memberService.updateEmail(member.id, data, queryRunner);
   }
 
   // 회원 탈퇴
@@ -221,7 +209,7 @@ export class MemberController {
     @QueryRunner() queryRunner: QR,
     @MemberDeco() member: MemberDto,
   ) {
-    return await this.memberService.withdrawal(member.memberId, queryRunner);
+    return await this.memberService.withdrawal(member.id, queryRunner);
   }
 
   // 아바타 프리셋 설정
@@ -243,17 +231,13 @@ export class MemberController {
     @MemberDeco() member: MemberDto,
     @Body() data: SetAvatarPresetDto,
   ) {
-    await this.memberService.setAvatarPreset(
-      member.memberId,
-      data,
-      queryRunner,
-    );
+    await this.memberService.setAvatarPreset(member.id, data, queryRunner);
     await this.memberService.updateNicknameLog(
-      member.memberId,
+      member.id,
       data.nickname,
       queryRunner,
     );
-    const avatarInfos = await this.commonService.getAvatarInfo(member.memberId);
+    const avatarInfos = await this.commonService.getAvatarInfo(member.id);
 
     return {
       avatarInfos: avatarInfos,
@@ -277,7 +261,8 @@ export class MemberController {
   @UseGuards(AccessTokenGuard)
   @Get('getMemberInfo')
   async getMemberInfo(@MemberDeco() member: MemberDto) {
-    return await this.memberService.getMemberInfo(member.memberId);
+    console.log('###################### member: ', member);
+    return await this.memberService.getMemberInfo(member.id);
   }
 
   // 앱 정보 조회
@@ -311,7 +296,7 @@ export class MemberController {
   @UseGuards(AccessTokenGuard)
   @Get('get-money-info')
   async getMoneyInfo(@MemberDeco() member: MemberDto) {
-    return await this.memberService.getMoneyInfo(member.memberId);
+    return await this.memberService.getMoneyInfo(member.id);
   }
 
   // 패스워드 변경
@@ -334,7 +319,7 @@ export class MemberController {
     @Body() data: ChangePasswordDto,
   ) {
     return await this.memberService.changePassword(
-      member.memberId,
+      member.id,
       data,
       queryRunner,
     );
@@ -354,7 +339,7 @@ export class MemberController {
     @Body() data: SetDefaultCardInfoDto,
   ) {
     return await this.memberService.setDefaultCardInfo(
-      member.memberId,
+      member.id,
       data,
       queryRunner,
     );
@@ -373,7 +358,7 @@ export class MemberController {
     @MemberDeco() member: MemberDto,
   ) {
     return await this.memberService.deleteDefaultCardInfo(
-      member.memberId,
+      member.id,
       queryRunner,
     );
   }

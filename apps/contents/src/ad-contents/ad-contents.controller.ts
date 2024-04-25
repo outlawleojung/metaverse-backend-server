@@ -41,7 +41,7 @@ export class AdContentsController {
     @Body() data: AdContentsRewardDto,
   ) {
     return await this.adContentsService.adContentsReward(
-      member.memberId,
+      member.id,
       data,
       queryRunner,
     );

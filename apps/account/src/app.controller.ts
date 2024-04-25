@@ -35,7 +35,10 @@ export class AppController {
   @ApiExcludeEndpoint()
   @Post('encrypt-auth')
   async encryptAuth(@Body() body) {
-    return await this.appService.encryptAuth(body.jwtAccessToken, body.sessionId);
+    return await this.appService.encryptAuth(
+      body.jwtAccessToken,
+      body.sessionId,
+    );
   }
 
   @Get('addItem')

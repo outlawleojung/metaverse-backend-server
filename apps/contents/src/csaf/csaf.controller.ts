@@ -97,7 +97,7 @@ export class CsafController {
     @MemberDeco() member: MemberDto,
     @Body() data: CreateBoothDto,
   ) {
-    return await this.csafService.createBooth(file, member.memberId, data);
+    return await this.csafService.createBooth(file, member.id, data);
   }
 
   @ApiOperation({ summary: '부스 편집' })
@@ -114,12 +114,7 @@ export class CsafController {
     @Param('boothId') boothId: number,
     @Body() data: UpdateBoothDto,
   ) {
-    return await this.csafService.updateBooth(
-      file,
-      member.memberId,
-      boothId,
-      data,
-    );
+    return await this.csafService.updateBooth(file, member.id, boothId, data);
   }
 
   @ApiOperation({ summary: '부스 삭제' })
@@ -129,7 +124,7 @@ export class CsafController {
     @MemberDeco() member: MemberDto,
     @Param('boothId') boothId: number,
   ) {
-    return await this.csafService.deleteBooth(member.memberId, boothId);
+    return await this.csafService.deleteBooth(member.id, boothId);
   }
 
   @ApiOperation({ summary: '행사 입장' })
@@ -155,11 +150,7 @@ export class CsafController {
     @MemberDeco() member: MemberDto,
     @Body() data: CreateBannerDto,
   ) {
-    return await this.csafService.createBoothBanner(
-      file,
-      member.memberId,
-      data,
-    );
+    return await this.csafService.createBoothBanner(file, member.id, data);
   }
 
   @ApiOperation({ summary: '부스 스크린 등록' })
@@ -175,11 +166,7 @@ export class CsafController {
     @MemberDeco() member: MemberDto,
     @Body() data: CreateScreenDto,
   ) {
-    return await this.csafService.createBoothScreen(
-      file,
-      member.memberId,
-      data,
-    );
+    return await this.csafService.createBoothScreen(file, member.id, data);
   }
 
   @ApiOperation({ summary: '부스 배너 편집' })
@@ -199,7 +186,7 @@ export class CsafController {
   ) {
     return await this.csafService.updateBoothBanner(
       file,
-      member.memberId,
+      member.id,
       boothId,
       bannerId,
       data,
@@ -223,7 +210,7 @@ export class CsafController {
   ) {
     return await this.csafService.updateBoothScreen(
       file,
-      member.memberId,
+      member.id,
       boothId,
       screenId,
       data,
@@ -239,7 +226,7 @@ export class CsafController {
     @Param('bannerId') bannerId: number,
   ) {
     return await this.csafService.deleteBoothBanner(
-      member.memberId,
+      member.id,
       boothId,
       bannerId,
     );
@@ -254,7 +241,7 @@ export class CsafController {
     @Param('screenId') screenId: number,
   ) {
     return await this.csafService.deleteBoothScreen(
-      member.memberId,
+      member.id,
       boothId,
       screenId,
     );
@@ -281,7 +268,7 @@ export class CsafController {
     @MemberDeco() member: MemberDto,
     @Body() data: CreateFileboxDto,
   ) {
-    return await this.csafService.createFilebox(member.memberId, data);
+    return await this.csafService.createFilebox(member.id, data);
   }
 
   @ApiOperation({ summary: '파일함 편집' })
@@ -298,7 +285,7 @@ export class CsafController {
     @Param('fileId') fileId: number,
   ) {
     return await this.csafService.updateFilebox(
-      member.memberId,
+      member.id,
       boothId,
       fileId,
       data,
@@ -316,10 +303,6 @@ export class CsafController {
     @Param('boothId') boothId: number,
     @Param('fileId') fileId: number,
   ) {
-    return await this.csafService.deleteFilebox(
-      member.memberId,
-      boothId,
-      fileId,
-    );
+    return await this.csafService.deleteFilebox(member.id, boothId, fileId);
   }
 }
