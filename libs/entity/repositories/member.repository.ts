@@ -13,10 +13,16 @@ export class MemberRepository extends BaseRepository<Member> {
   }
 
   async findByMemberId(memberId: string): Promise<Member | null> {
+    if (!memberId) {
+      return null;
+    }
     return await this.repository.findOneBy({ id: memberId });
   }
 
   async findByMemberCode(memberCode: string): Promise<Member | null> {
+    if (!memberCode) {
+      return null;
+    }
     return await this.repository.findOne({ where: { memberCode } });
   }
 
@@ -66,6 +72,10 @@ export class MemberRepository extends BaseRepository<Member> {
   async findByMemberIdForMemberInfo(
     memberId: string,
   ): Promise<Member[] | null> {
+    if (!memberId) {
+      return null;
+    }
+
     const rawResults = await this.memberRepository
       .createQueryBuilder('m')
       .select([
@@ -76,7 +86,7 @@ export class MemberRepository extends BaseRepository<Member> {
         'ai.itemId',
       ])
       .leftJoin('m.MemberAvatarInfos', 'ai')
-      .where('m.memberId = :memberId', { memberId })
+      .where('m.id = :memberId', { memberId })
       .getRawMany();
 
     // Reduce the raw results into structured friend objects

@@ -261,7 +261,6 @@ export class MemberController {
   @UseGuards(AccessTokenGuard)
   @Get('getMemberInfo')
   async getMemberInfo(@MemberDeco() member: MemberDto) {
-    console.log('###################### member: ', member);
     return await this.memberService.getMemberInfo(member.id);
   }
 
