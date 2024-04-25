@@ -50,7 +50,7 @@ export class SubscribeService {
       case PLAYER_SOCKET_S_MESSAGE.S_INTERACTION_REMOVE_ITEM_NOTICE:
         await this.playerService.removeInteraction(data);
         break;
-      case PLAYER_SOCKET_C_MESSAGE.C_BASE_REMOVE_OBJECT:
+      case PLAYER_SOCKET_S_MESSAGE.S_BASE_REMOVE_OBJECT:
         await this.playerService.removeGameObject(data);
         break;
       case PLAYER_SOCKET_S_MESSAGE.S_LEAVE:
