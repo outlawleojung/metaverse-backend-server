@@ -47,7 +47,7 @@ export class InquiryController {
     @MemberDecorator() member,
     @Query('lastId') lastId: number,
   ) {
-    return await this.inquiryService.getInquiries(member.memberId, lastId);
+    return await this.inquiryService.getInquiries(member.id, lastId);
   }
 
   // 문의 내역 조회
@@ -59,11 +59,7 @@ export class InquiryController {
     @Param('groupId') groupId: number,
     @Query('lastId') lastId: number,
   ) {
-    return await this.inquiryService.getInquiry(
-      member.memberId,
-      groupId,
-      lastId,
-    );
+    return await this.inquiryService.getInquiry(member.id, groupId, lastId);
   }
 
   // 문의 하기
@@ -76,7 +72,7 @@ export class InquiryController {
     @MemberDecorator() member,
     @Body() data: CreateInquiryDto,
   ) {
-    return await this.inquiryService.inquiry(files, member.memberId, data);
+    return await this.inquiryService.inquiry(files, member.id, data);
   }
 
   // 추가 문의 하기
@@ -89,7 +85,7 @@ export class InquiryController {
     @MemberDecorator() member,
     @Body() data: MoreInquiryDto,
   ) {
-    return await this.inquiryService.moreInquiry(files, member.memberId, data);
+    return await this.inquiryService.moreInquiry(files, member.id, data);
   }
 
   // 문의 삭제
@@ -100,6 +96,6 @@ export class InquiryController {
     @MemberDecorator() member,
     @Param('groupId') groupId: number,
   ) {
-    return await this.inquiryService.deleteInquiry(member.memberId, groupId);
+    return await this.inquiryService.deleteInquiry(member.id, groupId);
   }
 }

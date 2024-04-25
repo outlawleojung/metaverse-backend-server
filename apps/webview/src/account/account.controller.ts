@@ -80,7 +80,7 @@ export class AccountController {
   @UseGuards(LoggedInGuard)
   @Post('withdrawal')
   async withdrawal(@MemberDecorator() member, @Res() res) {
-    const result = await this.accountService.withdrawal(member.memberId);
+    const result = await this.accountService.withdrawal(member.id);
 
     if (result) {
       res.clearCookie('connect.sid', {
@@ -105,7 +105,7 @@ export class AccountController {
   @UseGuards(LoggedInGuard)
   @Post('ktmf-email')
   async ktmfEmail(@MemberDecorator() member, @Body() data: KtmfEmailDto) {
-    return await this.accountService.ktmfEmail(member.memberId, data);
+    return await this.accountService.ktmfEmail(member.id, data);
   }
 
   @ApiExcludeEndpoint()
@@ -114,7 +114,7 @@ export class AccountController {
   @Post('test')
   async test(@MemberDecorator() member, @Res() res) {
     // return HttpStatus.OK;
-    // const result = await this.accountService.withdrawal(member.memberId);
+    // const result = await this.accountService.withdrawal(member.id);
     // console.log('########################### delete result : ', result);
     // if (result) {
     //   res.clearCookie('connect.sid', { domain: process.env.DOMAIN, httpOnly: true });

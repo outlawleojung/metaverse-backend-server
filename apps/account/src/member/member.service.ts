@@ -711,7 +711,7 @@ export class MemberService {
     const moneyInfos = await this.commonService.getMoneyInfo(exMember.id);
 
     // // 지갑 정보
-    // const walletAddr = await this.commonService.GetWalletInfo(exMember.memberId);
+    // const walletAddr = await this.commonService.GetWalletInfo(exMember.id);
 
     // 소셜 로그인 연동 정보
     const socialLoginInfo =

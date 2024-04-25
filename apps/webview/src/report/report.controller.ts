@@ -35,7 +35,7 @@ export class ReportController {
   ) {
     return await this.reportService.createReport(
       files,
-      member.memberId,
+      member.id,
       member.nickname,
       data,
     );

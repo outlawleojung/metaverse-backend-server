@@ -94,8 +94,8 @@ export class CsafLicenseService {
         `CASE
       WHEN lg.endedAt < now() then ${ALL_LICENSE_STATE_TYPE.EXPIRED}
       WHEN o.isCompleted = 1 then ${ALL_LICENSE_STATE_TYPE.IS_USE_COMPLETED}
-      WHEN lg.endedAt > now() and member.memberId IS NOT NULL and o.isCompleted = 0 then ${ALL_LICENSE_STATE_TYPE.IS_USING}
-      WHEN member.memberId IS NULL and lg.endedAt > now() and o.isCompleted = 0 then ${ALL_LICENSE_STATE_TYPE.NOT_REGISTERED}
+      WHEN lg.endedAt > now() and member.id IS NOT NULL and o.isCompleted = 0 then ${ALL_LICENSE_STATE_TYPE.IS_USING}
+      WHEN member.id IS NULL and lg.endedAt > now() and o.isCompleted = 0 then ${ALL_LICENSE_STATE_TYPE.NOT_REGISTERED}
       END`,
         'stateType',
       )
@@ -103,8 +103,8 @@ export class CsafLicenseService {
         `CASE
         WHEN lg.endedAt < now() then '기간 만료'
         WHEN o.isCompleted = 1 then '사용 완료'
-        WHEN lg.endedAt > now() and member.memberId IS NOT NULL and o.isCompleted = 0 then '사용 중'
-        WHEN member.memberId IS NULL and lg.endedAt > now() and o.isCompleted = 0 then '미등록'  
+        WHEN lg.endedAt > now() and member.id IS NOT NULL and o.isCompleted = 0 then '사용 중'
+        WHEN member.id IS NULL and lg.endedAt > now() and o.isCompleted = 0 then '미등록'  
       END`,
         'stateTypeName',
       )
@@ -200,17 +200,17 @@ export class CsafLicenseService {
         licensesCount.andWhere('o.isCompleted = 1');
       } else if (stateType === ALL_LICENSE_STATE_TYPE.IS_USING) {
         licenses.andWhere(
-          'lg.endedAt > now() and member.memberId IS NOT NULL and o.isCompleted = 0',
+          'lg.endedAt > now() and member.id IS NOT NULL and o.isCompleted = 0',
         );
         licensesCount.andWhere(
-          'lg.endedAt > now() and member.memberId IS NOT NULL and o.isCompleted = 0',
+          'lg.endedAt > now() and member.id IS NOT NULL and o.isCompleted = 0',
         );
       } else if (stateType === ALL_LICENSE_STATE_TYPE.NOT_REGISTERED) {
         licenses.andWhere(
-          'member.memberId IS NULL and lg.endedAt > now() and o.isCompleted = 0',
+          'member.id IS NULL and lg.endedAt > now() and o.isCompleted = 0',
         );
         licensesCount.andWhere(
-          'member.memberId IS NULL and lg.endedAt > now() and o.isCompleted = 0',
+          'member.id IS NULL and lg.endedAt > now() and o.isCompleted = 0',
         );
       }
     }
@@ -444,7 +444,7 @@ export class CsafLicenseService {
     for (const id of licenseIds) {
       const license = await this.licenseGroupInfoRepository
         .createQueryBuilder('o')
-        .select(['member.memberId as memberId'])
+        .select(['member.id as memberId'])
         .leftJoin('o.LicenseInfos', 'li')
         .leftJoin('li.MemberLicenseInfos', 'member')
         .where('o.id= :id', { id })

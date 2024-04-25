@@ -33,6 +33,6 @@ export class RoomController {
     @MemberDeco() member: MemberDto,
     @Body() data: CreateRoomRequestDto,
   ) {
-    return await this.roomService.createRoom(member.memberId, data);
+    return await this.roomService.createRoom(member.id, data);
   }
 }

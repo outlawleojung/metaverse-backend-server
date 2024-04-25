@@ -331,7 +331,7 @@ export class PostboxService {
     const postboxReceiveMembers = await this.postReceiveMemberInfoRepository
       .createQueryBuilder('m')
       .select([
-        'member.memberId as memberId',
+        'member.id as memberId',
         'member.memberCode as memberCode',
         'member.nickname as nickname',
       ])
