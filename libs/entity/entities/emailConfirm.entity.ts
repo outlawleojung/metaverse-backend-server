@@ -6,6 +6,6 @@ export class EmailConfirm {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column('varchar', { unique: true, length: 30 })
+  @Column('varchar', { unique: true, length: 64 })
   email: string;
 }

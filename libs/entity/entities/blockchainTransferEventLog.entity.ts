@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { BaseModelEntity } from './baseModelEntity.entity';
 
-@Entity('blopckchain_transfer_eventLog')
+@Entity('blockchain_transfer_event_log')
 export class BlockchainTransferEventLog extends BaseModelEntity {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;

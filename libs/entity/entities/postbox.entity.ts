@@ -94,7 +94,7 @@ export class Postbox extends BaseModelEntity {
   PostalState: PostalState;
 
   @ManyToOne(() => Admin, (admin) => admin.Postboxes, {
-    onDelete: 'NO ACTION',
+    onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'adminId' })

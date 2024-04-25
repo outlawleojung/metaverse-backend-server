@@ -49,12 +49,17 @@ import { MemberWalletInfo } from './memberWalletInfo.entity';
 import { MemberLoginRewardLog } from './memberLoginRewardLog.entity';
 import { CSAFEventEnterLog } from './csafEventEnterLog.entity';
 import { BaseModelEntity } from './baseModelEntity.entity';
+import { MemberOfficeVisitLog } from './memberOfficeVisitLog.entity';
+import { MemberRestriction } from './memberRestriction.entity';
+import { MemberWalletLinkLog } from './memberWalletLinkLog.entity';
 
 @Index('memberCode', ['memberCode'], { unique: true })
 @Index('email', ['email'], {})
 @Index('nickname', ['nickname'], {})
 @Index('officeGradeType', ['officeGradeType'], {})
 @Index('firstProviderType', ['firstProviderType'], {})
+@Index('providerType', ['providerType'], {})
+@Index('myRoomStateType', ['myRoomStateType'], {})
 @Entity('member')
 export class Member extends BaseModelEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -243,6 +248,15 @@ export class Member extends BaseModelEntity {
 
   @OneToMany(() => CSAFEventEnterLog, (log) => log.Member)
   CSAFEventEnterLogs: CSAFEventEnterLog[];
+
+  @OneToMany(() => MemberOfficeVisitLog, (log) => log.Member)
+  MemberOfficeVisitLogs: MemberOfficeVisitLog[];
+
+  @OneToMany(() => MemberRestriction, (log) => log.Member)
+  MemberRestrictions: MemberRestriction[];
+
+  @OneToMany(() => MemberWalletLinkLog, (log) => log.Member)
+  MemberWalletLinkLogs: MemberWalletLinkLog[];
 
   @ManyToOne(() => OfficeGradeType, (type) => type.Members, {
     onDelete: 'NO ACTION',

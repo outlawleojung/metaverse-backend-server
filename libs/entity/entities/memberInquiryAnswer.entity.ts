@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToOne,
@@ -12,6 +13,7 @@ import {
 import { MemberInquiryManager } from './memberInquiryManager.entity';
 import { Admin } from './admin.entity';
 
+@Index('adminId', ['adminId'], {})
 @Entity('member_inquiry_answer')
 export class MemberInquiryAnswer {
   @PrimaryColumn('int')

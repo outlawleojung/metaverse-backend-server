@@ -64,8 +64,8 @@ export { JumpingMatchingGameType } from '../entities/jumpingMatchingGameType.ent
 export { JumpingMatchingLevel } from '../entities/jumpingMatchingLevel.entity';
 export { KtmfEventEmailInfo } from '../entities/ktmfEventEmailInfo.entiry';
 export { KtmfNftToken } from '../entities/ktmfNftToken.entiry';
-export { KtmfNftTokenToWallet } from '../entities/ktmfTokenToWallet.entity';
-export { KtmfNftTokenToWalletLog } from '../entities/ktmfTokenToWalletLog.entity';
+export { KtmfNftTokenToWallet } from '../entities/ktmfNftTokenToWallet.entity';
+export { KtmfNftTokenToWalletLog } from '../entities/ktmfNftTokenToWalletLog.entity';
 export { KtmfSpecialItem } from '../entities/ktmfSpecialItem.entiry';
 export { KtmfSpecialMoney } from '../entities/ktmfSpecialMoney.entity';
 export { KtmfPassTierRatingType } from '../entities/ktmfPassTierRatingType.entity';
@@ -120,6 +120,7 @@ export { MemberPasswordAuth } from '../entities/memberPasswordAuth.entity';
 export { MemberPostbox } from '../entities/memberPostbox.entity';
 export { MemberPurchaseItem } from '../entities/memberPurchaseItem.entity';
 export { MemberReportInfo } from '../entities/memberReportInfo.entity';
+export { MemberRestriction } from '../entities/memberRestriction.entity';
 export { MemberSelectVoteInfo } from '../entities/memberSelectVoteInfo.entity';
 export { MemberSelectVoteLike } from '../entities/memberSelectVoteLike.entity';
 export { MemberVoteInfo } from '../entities/memberVoteInfo.entity';

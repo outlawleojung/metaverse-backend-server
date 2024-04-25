@@ -1,5 +1,5 @@
 import { Entity } from 'typeorm';
 import { BaseTypeEntity } from './baseTypeEntity.entity';
 
-@Entity('departmenttype')
+@Entity('department_type')
 export class DepartmentType extends BaseTypeEntity {}

@@ -31,7 +31,7 @@ export class MemberDefaultCardInfo {
   updatedAt: Date;
 
   @OneToOne(() => Member, (member) => member.MemberDefaultCardInfo, {
-    onDelete: 'NO ACTION',
+    onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'memberId' })

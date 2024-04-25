@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToOne,
@@ -13,6 +14,7 @@ import { MemberInquiry } from './memberInquiry.entity';
 import { MemberInquiryAnswer } from './memberInquiryAnswer.entity';
 import { InquiryAnswerType } from './inquiryAnswerType.entity';
 
+@Index('answerType', ['answerType'], {})
 @Entity('member_inquiry_manager')
 export class MemberInquiryManager {
   @PrimaryGeneratedColumn({ type: 'int' })

@@ -8,7 +8,7 @@ import { BaseTypeEntity } from './baseTypeEntity.entity';
 @Entity('category_type')
 export class CategoryType extends BaseTypeEntity {
   @ManyToOne(() => Localization, (localization) => localization.CategoryTypes, {
-    onDelete: 'CASCADE',
+    onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'name' })

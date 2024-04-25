@@ -1,7 +1,6 @@
 import { Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { MapExposulInfo } from './mapExposulInfo.entity';
 
-@Index('mapExposulInfoId', ['mapExposulInfoId'], {})
 @Index('brandName', ['brandName'], {})
 @Entity('map_exposul_brand')
 export class MapExposulBrand {

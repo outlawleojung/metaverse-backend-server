@@ -13,7 +13,7 @@ import { ItemUseEffect } from './itemUseEffect.entity';
 
 @Index('avatarPartsType', ['avatarPartsType'], {})
 @Index('itemId', ['itemId'], {})
-@Index('avatarPartsType_itemId', ['avatarPartsType', 'itemId'], {})
+@Index('itemId_avatarPartsType', ['itemId', 'avatarPartsType'], {})
 @Entity('member_avatar_info')
 export class MemberAvatarInfo {
   @PrimaryColumn('uuid')
@@ -43,8 +43,8 @@ export class MemberAvatarInfo {
     onUpdate: 'CASCADE',
   })
   @JoinColumn([
-    { name: 'avatarPartsType', referencedColumnName: 'partsType' },
     { name: 'itemId', referencedColumnName: 'itemId' },
+    { name: 'avatarPartsType', referencedColumnName: 'partsType' },
   ])
   ItemUseEffect: ItemUseEffect;
 }

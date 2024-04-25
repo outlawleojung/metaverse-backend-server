@@ -14,6 +14,8 @@ import { MapExposulBrand } from './mapExposulBrand.entity';
 
 @Index('name', ['name'], {})
 @Index('description', ['description'], {})
+@Index('landType', ['landType'], {})
+@Index('mapInfoType', ['mapInfoType'], {})
 @Entity('map_exposul_info')
 export class MapExposulInfo {
   @PrimaryColumn('int')
@@ -82,7 +84,7 @@ export class MapExposulInfo {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn({ name: 'name' })
+  @JoinColumn({ name: 'description' })
   LocalizationDesc: Localization;
 
   @OneToMany(

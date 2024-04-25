@@ -12,8 +12,8 @@ import { Item } from './item.entity';
 import { KtmfSpecialItem } from './ktmfSpecialItem.entiry';
 import { KtmfPassTierRatingType } from './ktmfPassTierRatingType.entity';
 
-@Index('costumeId', ['costumeId'], {})
 @Index('tokenId', ['tokenId'], {})
+@Index('ratingType', ['ratingType'], {})
 @Entity('ktmf_nft_token')
 export class KtmfNftToken {
   @PrimaryColumn('int')

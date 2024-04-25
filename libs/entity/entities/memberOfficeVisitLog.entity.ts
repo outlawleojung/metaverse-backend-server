@@ -3,8 +3,11 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Member } from './member.entity';
 
 @Index('roomCode', ['roomCode'], {})
 @Index('memberId', ['memberId'], {})
@@ -21,4 +24,11 @@ export class MemberOfficeVisitLog {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @ManyToOne(() => Member, (member) => member.MemberOfficeVisitLogs, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'memberId' })
+  Member: Member;
 }

@@ -62,8 +62,8 @@ import { JumpingMatchingGameType } from '../entities/jumpingMatchingGameType.ent
 import { JumpingMatchingLevel } from '../entities/jumpingMatchingLevel.entity';
 import { KtmfEventEmailInfo } from '../entities/ktmfEventEmailInfo.entiry';
 import { KtmfNftToken } from '../entities/ktmfNftToken.entiry';
-import { KtmfNftTokenToWallet } from '../entities/ktmfTokenToWallet.entity';
-import { KtmfNftTokenToWalletLog } from '../entities/ktmfTokenToWalletLog.entity';
+import { KtmfNftTokenToWallet } from '../entities/ktmfNftTokenToWallet.entity';
+import { KtmfNftTokenToWalletLog } from '../entities/ktmfNftTokenToWalletLog.entity';
 import { KtmfSpecialItem } from '../entities/ktmfSpecialItem.entiry';
 import { KtmfSpecialMoney } from '../entities/ktmfSpecialMoney.entity';
 import { KtmfPassTierRatingType } from '../entities/ktmfPassTierRatingType.entity';
@@ -116,6 +116,7 @@ import { MemberPasswordAuth } from '../entities/memberPasswordAuth.entity';
 import { MemberPostbox } from '../entities/memberPostbox.entity';
 import { MemberPurchaseItem } from '../entities/memberPurchaseItem.entity';
 import { MemberReportInfo } from '../entities/memberReportInfo.entity';
+import { MemberRestriction } from '../entities/memberRestriction.entity';
 import { MemberSelectVoteInfo } from '../entities/memberSelectVoteInfo.entity';
 import { MemberSelectVoteLike } from '../entities/memberSelectVoteLike.entity';
 import { MemberVoteInfo } from '../entities/memberVoteInfo.entity';
@@ -364,6 +365,7 @@ export const entityProviders = [
           MemberPostbox,
           MemberPurchaseItem,
           MemberReportInfo,
+          MemberRestriction,
           MemberSelectVoteInfo,
           MemberSelectVoteLike,
           MemberVoteInfo,

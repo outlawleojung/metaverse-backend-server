@@ -17,6 +17,7 @@ import { CSAFEventInfo } from './csafEventInfo.entity';
 import { Admin } from './admin.entity';
 
 @Index('domainId', ['domainId'], {})
+@Index('eventId', ['eventId'], {})
 @Index('adminId', ['adminId'], {})
 @Index('licenseType', ['licenseType'], {})
 @Entity('license_group_info')

@@ -4,7 +4,7 @@ import { MemberMyRoomInfo } from './memberMyRoomInfo.entity';
 import { StartMyRoom } from './startMyRoom.entity';
 import { BaseTypeEntity } from './baseTypeEntity.entity';
 
-@Entity('layertype')
+@Entity('layer_type')
 export class LayerType extends BaseTypeEntity {
   @OneToMany(
     () => InteriorInstallInfo,

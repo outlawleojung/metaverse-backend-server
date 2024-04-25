@@ -1,5 +1,13 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { BaseModelEntity } from './baseModelEntity.entity';
+import { Member } from './member.entity';
 
 @Index('memberId', ['memberId'], {})
 @Index('walletAddr', ['walletAddr'], {})
@@ -16,4 +24,11 @@ export class MemberWalletLinkLog extends BaseModelEntity {
 
   @Column('int', { name: 'linkType' })
   linkType: number;
+
+  @ManyToOne(() => Member, (member) => member.MemberWalletLinkLogs, {
+    onDelete: 'NO ACTION',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'memberId' })
+  Member: Member;
 }

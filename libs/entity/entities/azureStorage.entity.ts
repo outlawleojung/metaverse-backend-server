@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -8,6 +9,7 @@ import {
 import { MediaExposureType } from './mediaExposureType.entity';
 import { BaseModelEntity } from './baseModelEntity.entity';
 
+@Index('mediaExposureType', ['mediaExposureType'], {})
 @Entity('azure_storage')
 export class AzureStorage extends BaseModelEntity {
   @PrimaryGeneratedColumn({ type: 'int' })

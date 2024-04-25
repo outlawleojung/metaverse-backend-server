@@ -1,7 +1,15 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { KtmfPassTierRatingType } from './ktmfPassTierRatingType.entity';
 import { MoneyType } from './moneyType.entity';
 
+@Index('moneyType', ['moneyType'], {})
 @Entity('ktmf_special_money')
 export class KtmfSpecialMoney {
   @PrimaryColumn('int')

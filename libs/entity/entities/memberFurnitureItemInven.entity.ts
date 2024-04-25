@@ -15,7 +15,6 @@ import { MemberMyRoomInfo } from './memberMyRoomInfo.entity';
 import { MemberFrameImage } from './memberFrameImage.entity';
 
 @Index('itemId', ['itemId'], {})
-@Index('num', ['num'], {})
 @Entity('member_furniture_item_inven')
 export class MemberFurnitureItemInven {
   @PrimaryColumn('uuid')

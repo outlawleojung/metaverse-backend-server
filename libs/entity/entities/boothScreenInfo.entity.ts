@@ -42,22 +42,22 @@ export class BoothScreenInfo {
   EachBoothScreenInfos: EachBoothScreenInfo[];
 
   @ManyToOne(() => SpaceType, (type) => type.BoothScreenInfos, {
-    onDelete: 'CASCADE',
-    onUpdate: 'NO ACTION',
+    onDelete: 'NO ACTION',
+    onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'spaceType' })
   SpaceType: SpaceType;
 
   @ManyToOne(() => MediaRollingType, (type) => type.BoothScreenInfos, {
-    onDelete: 'CASCADE',
-    onUpdate: 'NO ACTION',
+    onDelete: 'NO ACTION',
+    onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'mediaRollingType' })
   MediaRollingType: MediaRollingType;
 
   @ManyToOne(() => SpaceDetailType, (type) => type.BoothScreenInfos, {
-    onDelete: 'CASCADE',
-    onUpdate: 'NO ACTION',
+    onDelete: 'NO ACTION',
+    onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'spaceDetailType' })
   SpaceDetailType: SpaceDetailType;

@@ -28,6 +28,7 @@ import { BuySellType } from './buySellType.entity';
 import { KtmfSpecialItem } from './ktmfSpecialItem.entiry';
 import { KtmfNftToken } from './ktmfNftToken.entiry';
 import { ItemMaterial } from './itemMaterial.entity';
+import { ItemUseEffect } from './itemUseEffect.entity';
 
 @Index('unique_id_item_type', ['id', 'itemType'], { unique: true })
 @Index('itemType', ['itemType'], {})
@@ -38,7 +39,7 @@ import { ItemMaterial } from './itemMaterial.entity';
 @Index('purchaseType', ['purchaseType'], {})
 @Index('saleType', ['saleType'], {})
 @Index('gradeType', ['gradeType'], {})
-@Index('gradeType', ['gradeType'], {})
+@Index('buySellType', ['buySellType'], {})
 @Entity('item')
 export class Item {
   @PrimaryColumn('int')
@@ -103,7 +104,7 @@ export class Item {
   ItemType: ItemType;
 
   @ManyToOne(() => CategoryType, (categorytype) => categorytype.Items, {
-    onDelete: 'CASCADE',
+    onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'categoryType' })
@@ -204,4 +205,7 @@ export class Item {
 
   @OneToMany(() => ItemMaterial, (param) => param.Item)
   ItemMaterials: ItemMaterial[];
+
+  @OneToMany(() => ItemUseEffect, (param) => param.Item)
+  ItemUseEffects: ItemUseEffect[];
 }

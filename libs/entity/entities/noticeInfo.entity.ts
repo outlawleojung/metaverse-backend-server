@@ -59,7 +59,7 @@ export class NoticeInfo extends BaseModelEntity {
 
   @ManyToOne(() => Admin, (admin) => admin.NoticeInfos, {
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
+    onUpdate: 'SET NULL',
   })
   @JoinColumn({ name: 'adminId' })
   admin: Admin;

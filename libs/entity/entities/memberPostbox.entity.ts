@@ -15,6 +15,8 @@ import { Member } from './member.entity';
 import { Postbox } from './postbox.entity';
 
 @Index('postboxId', ['postboxId'], {})
+@Index('systemPostboxId', ['systemPostboxId'], {})
+@Index('memberId', ['memberId'], {})
 @Unique('unique_postbox_member', ['postboxId', 'systemPostboxId', 'memberId'])
 @Entity('member_postbox')
 @Check(
@@ -60,7 +62,7 @@ export class MemberPostbox {
   Postbox: Postbox;
 
   @ManyToOne(() => Postbox, (postbox) => postbox.MemberPostboxes, {
-    onDelete: 'NO ACTION',
+    onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'systemPostboxId' })

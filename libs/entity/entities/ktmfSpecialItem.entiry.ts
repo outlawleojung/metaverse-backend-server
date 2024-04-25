@@ -2,7 +2,6 @@ import { Entity, Index, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { Item } from './item.entity';
 import { KtmfNftToken } from './ktmfNftToken.entiry';
 
-@Index('costumeId', ['costumeId'], {})
 @Index('partsId', ['partsId'], {})
 @Entity('ktmf_special_item')
 export class KtmfSpecialItem {

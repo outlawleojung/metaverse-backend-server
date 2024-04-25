@@ -12,6 +12,7 @@ import { Item } from './item.entity';
 
 @Index('modelType', ['modelType'], {})
 @Index('partsType', ['partsType'], {})
+@Index('itemId', ['itemId'], {})
 @Entity('commerce_zone_mannequin')
 export class CommerceZoneMannequin {
   @PrimaryColumn('int')

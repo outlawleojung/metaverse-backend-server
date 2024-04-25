@@ -19,7 +19,7 @@ export class MemberNicknameLog extends BaseModelEntity {
   @Column('uuid')
   memberId: string;
 
-  @Column('varchar', { unique: true, length: 64 })
+  @Column('varchar', { length: 64 })
   nickname: string;
 
   @ManyToOne(() => Member, (member) => member.MemberNicknameLogs, {

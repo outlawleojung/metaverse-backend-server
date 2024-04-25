@@ -17,6 +17,6 @@ export class AvatarPartsGroupType extends BaseTypeEntity {
       onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn({ name: 'name', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'name' })
   LocalizationName: Localization;
 }

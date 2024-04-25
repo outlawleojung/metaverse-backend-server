@@ -13,10 +13,10 @@ export class WorldType extends BaseTypeEntity {
 
   @ManyToMany(() => AreaType, (areatype) => areatype.WorldTypes)
   @JoinTable({
-    name: 'worldareainfo',
+    name: 'world_area_info',
     joinColumns: [{ name: 'worldType', referencedColumnName: 'type' }],
     inverseJoinColumns: [{ name: 'areaType', referencedColumnName: 'type' }],
-    schema: 'dev_arzmeta_db',
+    schema: process.env.DB_DATABASE,
   })
   AreaTypes: AreaType[];
 }

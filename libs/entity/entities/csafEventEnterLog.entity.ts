@@ -11,7 +11,7 @@ import { CSAFEventInfo } from './csafEventInfo.entity';
 import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Index('eventId', ['eventId'], {})
-@Index('memberId', ['memberId'], { unique: true })
+@Index('memberId', ['memberId'], {})
 @Entity('csaf_event_enter_log')
 export class CSAFEventEnterLog extends BaseModelEntity {
   @PrimaryGeneratedColumn({ type: 'int' })

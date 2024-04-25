@@ -41,23 +41,23 @@ export class BannerReservation extends BaseModelEntity {
   endedAt: Date;
 
   @ManyToOne(() => BannerInfo, (info) => info.BannerReservations, {
-    onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
+    onDelete: 'NO ACTION',
   })
   @JoinColumn({ name: 'bannerId' })
   BannerInfo: BannerInfo;
 
   @ManyToOne(() => UploadType, (type) => type.BannerReservations, {
-    onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
+    onDelete: 'NO ACTION',
   })
   @JoinColumn({ name: 'uploadType' })
   UploadType: UploadType;
 
   @ManyToOne(() => Admin, (admin) => admin.BannerReservations, {
     nullable: true,
-    onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
+    onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'adminId' })
   admin: Admin;

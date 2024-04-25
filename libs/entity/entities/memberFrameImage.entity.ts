@@ -12,9 +12,6 @@ import {
 import { MemberFurnitureItemInven } from './memberFurnitureItemInven.entity';
 import { UploadType } from './uploadType.entity';
 
-@Index('memberId', ['memberId'], {})
-@Index('itemId', ['itemId'], {})
-@Index('num', ['num'], {})
 @Index('uploadType', ['uploadType'], {})
 @Entity('member_frame_image')
 export class MemberFrameImage {

@@ -41,7 +41,7 @@ export class MemberOfficeReservationWaitingInfo {
     () => MemberOfficeReservationInfo,
     (info) => info.MemberOfficeReservationWaitingInfos,
     {
-      onDelete: 'NO ACTION',
+      onDelete: 'CASCADE',
       onUpdate: 'CASCADE',
     },
   )

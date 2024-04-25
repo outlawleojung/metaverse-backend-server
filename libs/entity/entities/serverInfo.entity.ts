@@ -1,14 +1,6 @@
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  OneToOne,
-  PrimaryColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { ServerType } from './serverType.entity';
 
-@Index('serverType', ['serverType'], { unique: true })
 @Entity('server_info')
 export class ServerInfo {
   @PrimaryColumn('int')

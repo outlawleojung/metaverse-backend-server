@@ -12,9 +12,7 @@ import {
 } from 'typeorm';
 import { Member } from './member.entity';
 
-@Index('memberId', ['memberId'], {})
 @Index('templateId', ['templateId'], {})
-@Index('num', ['num'], {})
 @Entity('member_business_card_info')
 export class MemberBusinessCardInfo {
   @PrimaryColumn('uuid')

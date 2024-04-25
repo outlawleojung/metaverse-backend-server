@@ -52,7 +52,7 @@ export class BusinessCardTemplate {
   thumbnailName: string;
 
   @ManyToOne(() => MoneyType, (type) => type.BusinessCardTemplates, {
-    onDelete: 'CASCADE',
+    onDelete: 'NO ACTION',
     onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'purchaseType' })

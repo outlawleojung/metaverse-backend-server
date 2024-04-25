@@ -11,6 +11,7 @@ import { MoneyType } from './moneyType.entity';
 import { BaseModelEntity } from './baseModelEntity.entity';
 
 @Index('memberId', ['memberId'], {})
+@Index('moneyType', ['moneyType'], {})
 @Entity('member_nft_reward_log')
 export class MemberNftRewardLog extends BaseModelEntity {
   @PrimaryGeneratedColumn({ name: 'id' })

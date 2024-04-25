@@ -16,6 +16,7 @@ import { MediaExposureType } from './mediaExposureType.entity';
 @Index('spaceType', ['spaceType'], {})
 @Index('spaceDetailType', ['spaceDetailType'], {})
 @Index('mediaRollingType', ['mediaRollingType'], {})
+@Index('mediaExposureType', ['mediaExposureType'], {})
 @Entity('screen_info')
 export class ScreenInfo {
   @PrimaryColumn('int')

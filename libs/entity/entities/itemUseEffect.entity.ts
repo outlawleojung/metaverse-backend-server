@@ -10,9 +10,11 @@ import {
 import { Localization } from './localization.entity';
 import { AvatarPartsType } from './avatarPartsType.entity';
 import { MemberAvatarInfo } from './memberAvatarInfo.entity';
+import { Item } from './item.entity';
 
 @Index('chat', ['chat'], {})
 @Index('partsType', ['partsType'], {})
+@Index('itemId_partsType', ['itemId', 'partsType'], {})
 @Entity('item_use_effect')
 export class ItemUseEffect {
   @PrimaryColumn('int')
@@ -29,6 +31,13 @@ export class ItemUseEffect {
 
   @OneToMany(() => MemberAvatarInfo, (info) => info.ItemUseEffect)
   MemberAvatarInfos: MemberAvatarInfo[];
+
+  @ManyToOne(() => Item, (item) => item.ItemUseEffects, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'itemId' })
+  Item: Item;
 
   @ManyToOne(
     () => Localization,

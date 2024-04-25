@@ -44,29 +44,29 @@ export class BoothBannerInfo {
   EachBoothBannerInfos: EachBoothBannerInfo[];
 
   @ManyToOne(() => SpaceType, (type) => type.BoothBannerInfos, {
-    onDelete: 'CASCADE',
-    onUpdate: 'NO ACTION',
+    onUpdate: 'CASCADE',
+    onDelete: 'NO ACTION',
   })
   @JoinColumn({ name: 'spaceType' })
   SpaceType: SpaceType;
 
   @ManyToOne(() => MediaRollingType, (type) => type.BoothBannerInfos, {
-    onDelete: 'CASCADE',
-    onUpdate: 'NO ACTION',
+    onUpdate: 'CASCADE',
+    onDelete: 'NO ACTION',
   })
   @JoinColumn({ name: 'mediaRollingType' })
   MediaRollingType: MediaRollingType;
 
   @ManyToOne(() => BannerType, (type) => type.BoothBannerInfos, {
-    onDelete: 'CASCADE',
-    onUpdate: 'NO ACTION',
+    onUpdate: 'CASCADE',
+    onDelete: 'NO ACTION',
   })
   @JoinColumn({ name: 'bannerType' })
   BannerType: BannerType;
 
   @ManyToOne(() => SpaceDetailType, (type) => type.BoothBannerInfos, {
-    onDelete: 'CASCADE',
-    onUpdate: 'NO ACTION',
+    onUpdate: 'CASCADE',
+    onDelete: 'NO ACTION',
   })
   @JoinColumn({ name: 'spaceDetailType' })
   SpaceDetailType: SpaceDetailType;
