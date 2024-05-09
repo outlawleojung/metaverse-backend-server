@@ -11,17 +11,26 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import {
   EmailCheck,
+  EmailCheckRepository,
   EmailConfirm,
+  EmailConfirmRepository,
   JumpingMatchingLevel,
   Member,
   MemberAccount,
   MemberAccountRepository,
   MemberAvatarPartsItemInven,
+  MemberAvatarPartsItemInvenRepository,
   MemberFurnitureItemInven,
+  MemberFurnitureItemInvenRepository,
   MemberLoginLog,
+  MemberLoginLogRepository,
+  MemberMyRoomInfo,
+  MemberMyRoomInfoRepository,
   MemberOfficeVisitLog,
   MemberRepository,
   MemberWalletInfo,
+  StartInventory,
+  StartMyRoom,
 } from '@libs/entity';
 import { ClientService } from '../services/client.service';
 import { GameData } from '../game/game-data';
@@ -50,6 +59,10 @@ import { Repository } from 'typeorm';
       MemberAvatarPartsItemInven,
       MemberWalletInfo,
       JumpingMatchingLevel,
+      StartInventory,
+      StartMyRoom,
+      MemberMyRoomInfo,
+      MemberLoginLog,
     ]),
     MongooseModule.forFeature([
       {
@@ -93,6 +106,12 @@ import { Repository } from 'typeorm';
     GameData,
     MemberRepository,
     MemberAccountRepository,
+    MemberFurnitureItemInvenRepository,
+    MemberMyRoomInfoRepository,
+    MemberAvatarPartsItemInvenRepository,
+    EmailCheckRepository,
+    EmailConfirmRepository,
+    MemberLoginLogRepository,
     AuthService,
     JwtService,
     CommonService,
@@ -113,6 +132,12 @@ import { Repository } from 'typeorm';
     AuthService,
     JwtService,
     CommonService,
+    MemberFurnitureItemInvenRepository,
+    MemberMyRoomInfoRepository,
+    MemberAvatarPartsItemInvenRepository,
+    EmailCheckRepository,
+    EmailConfirmRepository,
+    MemberLoginLogRepository,
   ],
 })
 export class HubSocketModule {}

@@ -67,7 +67,7 @@ export class FriendService {
       const friends = await this.memberFriendRepository
         .createQueryBuilder('mf')
         .select([
-          'm.memberId as friendMemberId',
+          'm.id as friendMemberId',
           'm.memberCode as friendMemberCode',
           'm.nickname as friendNickname',
           'm.stateMessage as friendMessage',
@@ -75,7 +75,7 @@ export class FriendService {
           'mf.bookmark as bookmark',
           'mf.bookmarkedAt as bookmarkedAt',
         ])
-        .innerJoin('member', 'm', 'm.memberId = mf.friendMemberId')
+        .innerJoin('member', 'm', 'm.id = mf.friendMemberId')
         .where('mf.memberId = :memberId', { memberId })
         .getRawMany();
 
@@ -83,17 +83,21 @@ export class FriendService {
 
       // 2. 아바타 정보 조회
       const memberIds = friends.map((friend) => friend.friendMemberId);
-      const avatarInfos = await this.avatarRepository
-        .createQueryBuilder('avatar')
-        .where('avatar.memberId IN (:...memberIds)', { memberIds })
-        .getMany();
 
-      // 아바타 정보 매핑
-      const avatarMap = avatarInfos.reduce((acc, cur) => {
-        if (!acc[cur.memberId]) acc[cur.memberId] = {};
-        acc[cur.memberId][cur.avatarPartsType] = cur.itemId;
-        return acc;
-      }, {});
+      let avatarMap;
+      if (memberIds.length > 0) {
+        const avatarInfos = await this.avatarRepository
+          .createQueryBuilder('avatar')
+          .where('avatar.memberId IN (:...memberIds)', { memberIds })
+          .getMany();
+
+        // 아바타 정보 매핑
+        avatarMap = avatarInfos.reduce((acc, cur) => {
+          if (!acc[cur.memberId]) acc[cur.memberId] = {};
+          acc[cur.memberId][cur.avatarPartsType] = cur.itemId;
+          return acc;
+        }, {});
+      }
 
       // 3. Redis에서 온라인 여부 확인
       const onlineKeys = friends.map((friend) =>
