@@ -14,8 +14,8 @@ export class MemberBusinessCardInfoRepository extends BaseRepository<MemberBusin
   async findAllByMemberId(
     memberId: string,
     queryRunner?: QueryRunner,
-  ): Promise<MemberBusinessCardInfo | null> {
-    return await this.getRepository(queryRunner).findOne({
+  ): Promise<MemberBusinessCardInfo[] | null> {
+    return await this.getRepository(queryRunner).find({
       select: {
         templateId: true,
         num: true,
