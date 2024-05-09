@@ -19,12 +19,19 @@ import {
   EmailCheck,
   EmailConfirm,
   MemberLoginLog,
+  MemberRepository,
+  MemberAccountRepository,
+  MemberFurnitureItemInvenRepository,
+  MemberMyRoomInfoRepository,
+  MemberAvatarPartsItemInvenRepository,
+  EmailConfirmRepository,
+  MemberLoginLogRepository,
+  EmailCheckRepository,
 } from '@libs/entity';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RoomDataLogSchema, WorldChattingLogSchema } from '@libs/mongodb';
 import { AuthService } from './auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
-
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -57,7 +64,19 @@ import { JwtService } from '@nestjs/jwt';
     ]),
     EntityModule,
   ],
-  providers: [CommonService, JwtService, AuthService],
+  providers: [
+    CommonService,
+    JwtService,
+    AuthService,
+    MemberRepository,
+    MemberFurnitureItemInvenRepository,
+    MemberMyRoomInfoRepository,
+    MemberAvatarPartsItemInvenRepository,
+    MemberAccountRepository,
+    EmailConfirmRepository,
+    MemberLoginLogRepository,
+    EmailCheckRepository,
+  ],
   exports: [CommonService, JwtService, AuthService],
 })
 export class CommonModule {}

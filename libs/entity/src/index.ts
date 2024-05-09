@@ -247,9 +247,14 @@ export { MemberBusinessCardInfoRepository } from '../repositories/member-busines
 export { MemberDefaultCardInfoRepository } from '../repositories/member-default-card-info.repository';
 export { MemberPasswordAuthRepository } from '../repositories/member-password-auth.repository';
 export { MemberAvatarInfoRepository } from '../repositories/member-avatar-info.repository';
+export { MemberAvatarPartsItemInvenRepository } from '../repositories/member-avatar-parts-item-inven.repository';
 export { MemberBlockRepository } from '../repositories/member-block.repository';
 export { MemberAdContentsRepository } from '../repositories/member-ad-contents.repository';
 export { MemberMoneyRepository } from '../repositories/member-money.repository';
 export { MemberFriendRepository } from '../repositories/member-friend.repository';
 export { MemberFriendRequestRepository } from '../repositories/member-friend-request.repository';
+export { MemberFurnitureItemInvenRepository } from '../repositories/member-furniture-item-inven.repository';
 export { MemberConnectInfoRepository } from '../repositories/member-connect-info.repository';
+export { MemberMyRoomInfoRepository } from '../repositories/member-my-room-info.repository';
+export { MemberLoginLogRepository } from '../repositories/member-login-log.repository';
+export { MemberFrameImageRepository } from '../repositories/member-frame-image.repository';

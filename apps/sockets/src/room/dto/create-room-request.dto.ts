@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { RoomType } from '../room-type';
 
 export class CreateRoomRequestDto {
@@ -49,4 +49,12 @@ export class CreateRoomRequestDto {
   })
   @IsString()
   sceneName: string;
+
+  @ApiProperty({
+    example: 20,
+    description: '최대 인원 수',
+  })
+  @IsNumber()
+  @IsOptional()
+  maxPlayerNumber: number;
 }

@@ -11,6 +11,12 @@ export class EmailConfirmRepository extends BaseRepository<EmailConfirm> {
     super(emailConfirmrepository, EmailConfirm);
   }
 
+  async existsByEmail(email: string, queryRunner?: QueryRunner) {
+    return this.getRepository(queryRunner).existsBy({
+      email,
+    });
+  }
+
   async delete(id: number): Promise<DeleteResult> {
     return await this.repository.delete({ id });
   }

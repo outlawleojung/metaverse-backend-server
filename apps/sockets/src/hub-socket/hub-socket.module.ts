@@ -34,6 +34,8 @@ import {
   RoomDataLogSchema,
   WorldChattingLogSchema,
 } from '@libs/mongodb';
+import { GameDataService } from '../game/game-data.service';
+import { Repository } from 'typeorm';
 
 @Module({
   imports: [
@@ -78,8 +80,10 @@ import {
   ],
 
   providers: [
+    Repository,
     HubSocketService,
     GameObjectService,
+    GameDataService,
     RedisLockService,
     NatsMessageHandler,
     NatsService,
@@ -96,6 +100,7 @@ import {
   exports: [
     HubSocketService,
     GameObjectService,
+    GameDataService,
     NatsMessageHandler,
     RedisLockService,
     NatsService,

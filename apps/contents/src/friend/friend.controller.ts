@@ -49,6 +49,11 @@ export class FriendController {
   //   return await this.friendService.getFriends(member.id);
   // }
 
+  @Get()
+  async getFriend() {
+    return 'success';
+  }
+
   // 친구 요청 하기
   @ApiOperation({ summary: '친구 요청 하기' })
   @ApiResponse({
@@ -236,6 +241,8 @@ export class FriendController {
     @Param('requestType') requestType: number,
     @Param('friendId') friendId: string,
   ) {
+    console.log(requestType);
+    console.log(friendId);
     return this.friendService.findFriend(requestType, friendId);
   }
 

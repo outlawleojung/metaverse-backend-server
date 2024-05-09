@@ -25,6 +25,7 @@ export class S_MATCHING_FINISH implements PACKET {
 
 export class C_MATCHING_GET_HOST implements PACKET {
   eventName = MATCHING_SOCKET_C_MESSAGE.C_MATCHING_GET_HOST;
+  roomId: string;
 }
 
 export class S_MATCHING_HOST implements PACKET {

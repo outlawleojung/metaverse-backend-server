@@ -19,6 +19,41 @@ export class MemberRepository extends BaseRepository<Member> {
     return await this.repository.findOneBy({ id: memberId });
   }
 
+  async findByEmail(email: string): Promise<Member | null> {
+    if (!email) {
+      return null;
+    }
+    return await this.repository.findOneBy({ email });
+  }
+
+  async findByMemberIdForRefreshToken(
+    memberId: string,
+  ): Promise<Member | null> {
+    if (!memberId) {
+      return null;
+    }
+    return await this.repository.findOne({
+      select: ['id', 'memberCode', 'nickname', 'email', 'refreshToken'],
+      where: {
+        id: memberId,
+      },
+    });
+  }
+
+  async findByMemberIdForAuthenticate(
+    memberId: string,
+  ): Promise<Member | null> {
+    if (!memberId) {
+      return null;
+    }
+    return await this.repository.findOne({
+      select: ['id', 'memberCode', 'nickname', 'email'],
+      where: {
+        id: memberId,
+      },
+    });
+  }
+
   async findByMemberCode(memberCode: string): Promise<Member | null> {
     if (!memberCode) {
       return null;
@@ -69,9 +104,7 @@ export class MemberRepository extends BaseRepository<Member> {
     return member;
   }
 
-  async findByMemberIdForMemberInfo(
-    memberId: string,
-  ): Promise<Member[] | null> {
+  async findByMemberIdForMemberInfoAndAvatar(memberId: string) {
     if (!memberId) {
       return null;
     }
@@ -82,45 +115,24 @@ export class MemberRepository extends BaseRepository<Member> {
         'm.memberCode as memberCode',
         'm.nickname as nickname',
         'm.stateMessage as stateMessage',
-        'ai.avatarPartsType',
-        'ai.itemId',
+        'ai.avatarPartsType as avatarPartsType',
+        'ai.itemId as itemId',
       ])
       .leftJoin('m.MemberAvatarInfos', 'ai')
       .where('m.id = :memberId', { memberId })
       .getRawMany();
 
-    // Reduce the raw results into structured friend objects
-    const friends = rawResults.reduce((acc, item) => {
-      const { friendMemberCode, friendNickname, friendMessage, createdAt } =
-        item;
+    // 멤버 기본 정보 설정
+    const memberInfo = {
+      memberCode: rawResults[0].memberCode,
+      nickname: rawResults[0].nickname,
+      stateMessage: rawResults[0].stateMessage,
+      avatarInfos: rawResults.map((item) => ({
+        [item.avatarPartsType]: item.itemId,
+      })),
+    };
 
-      // Create a unique key for each friend
-      const key = friendMemberCode;
-
-      // Initialize if this friend is not already processed
-      if (!acc[key]) {
-        acc[key] = {
-          friendMemberCode,
-          friendNickname,
-          friendMessage,
-          createdAt,
-          avatarInfos: [],
-        };
-      }
-
-      // Add avatar info if available
-      if (item.ai_avatarPartsType !== null) {
-        acc[key].avatarInfos.push({
-          avatarPartsType: item.ai_avatarPartsType,
-          itemId: item.ai_itemId,
-        });
-      }
-
-      return acc;
-    }, {});
-
-    // Convert the accumulated object back to an array
-    return Object.values(friends);
+    return memberInfo;
   }
 
   /**
@@ -166,5 +178,54 @@ export class MemberRepository extends BaseRepository<Member> {
     queryRunner?: QueryRunner,
   ): Promise<DeleteResult> {
     return await this.getRepository(queryRunner).softDelete(memberId);
+  }
+
+  async findByMemberIdForMemberInfo(
+    memberId: string,
+    queryRunner?: QueryRunner,
+  ) {
+    return await this.getRepository(queryRunner).findOne({
+      select: [
+        'id',
+        'memberCode',
+        'providerType',
+        'officeGradeType',
+        'myRoomStateType',
+        'nickname',
+        'stateMessage',
+      ],
+      where: {
+        id: memberId,
+      },
+    });
+  }
+
+  async gnenerateMemberCode(queryRunner?: QueryRunner) {
+    // 유저코드 발급
+    let memberCode = '';
+    while (true) {
+      memberCode = await this.randomString(12);
+
+      const exMemberCode = await this.getRepository(queryRunner).findOne({
+        where: {
+          memberCode: memberCode,
+        },
+      });
+
+      if (!exMemberCode) {
+        return memberCode;
+      }
+    }
+  }
+
+  private randomString(num: number) {
+    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZ';
+    const stringLength = num;
+    let randomstring = '';
+    for (let i = 0; i < stringLength; i++) {
+      const rnum = Math.floor(Math.random() * chars.length);
+      randomstring += chars.substring(rnum, rnum + 1);
+    }
+    return randomstring;
   }
 }

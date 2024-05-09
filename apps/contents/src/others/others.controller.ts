@@ -14,6 +14,7 @@ import { MorganInterceptor } from 'nest-morgan';
 import { OthersService } from './others.service';
 import { GetOthersResponsesDto } from './dto/get.others.response.dto';
 import { AccessTokenGuard } from '@libs/common';
+import { GetOthersRequestDto } from './dto/get-others-request.dto';
 
 @UseInterceptors(MorganInterceptor('combined'))
 @ApiTags('OTHERS - 타인 정보')
@@ -28,10 +29,7 @@ export class OthersController {
   })
   @UseGuards(AccessTokenGuard)
   @Get('memberInfo')
-  async getOthersMemberInfo(
-    @Query('type') type: number,
-    @Query('othersId') othersId: string,
-  ) {
-    return await this.othersService.getOthersMemberInfo(type, othersId);
+  async getOthersMemberInfo(@Query() dto: GetOthersRequestDto) {
+    return await this.othersService.getOthersMemberInfo(dto.type, dto.othersId);
   }
 }

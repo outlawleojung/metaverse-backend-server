@@ -37,4 +37,19 @@ export class MemberAvatarInfoRepository extends BaseRepository<MemberAvatarInfo>
   async create(data: MemberAvatarInfo, queryRunner?: QueryRunner) {
     await this.getRepository(queryRunner).save(data);
   }
+
+  async findByMemberId(memberId: string, queryRunner?: QueryRunner) {
+    const avatarInfos = await this.getRepository(queryRunner)
+      .createQueryBuilder('avatar')
+      .where('avatar.memberId = :memberId', { memberId })
+      .getMany();
+
+    // 아바타 정보 매핑
+    const avatarMap = {};
+    avatarInfos.forEach((avatar) => {
+      avatarMap[avatar.avatarPartsType] = avatar.itemId;
+    });
+
+    return avatarMap;
+  }
 }

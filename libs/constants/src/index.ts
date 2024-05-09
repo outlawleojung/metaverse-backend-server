@@ -561,6 +561,11 @@ export const FRND_REQUEST_TYPE = Object.freeze({
   MEMBER_CODE: 2,
 });
 
+export const OTHER_FIND_TYPE = Object.freeze({
+  MEMBER_ID: 1,
+  MEMBER_CODE: 2,
+});
+
 export const BUSINISS_CARD_TYPE = Object.freeze({
   ARZMETA: 1,
   BUSINESS_1: 2,
@@ -955,6 +960,7 @@ export const NAMESPACE = Object.freeze({
   SCREEN_BANNER: 'screen-banner',
   UNIFICATION: 'main',
   COMMON: 'common',
+  MATCHING: 'matching',
 });
 
 export const HUB_SOCKET_C_MESSAGE = Object.freeze({

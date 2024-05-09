@@ -167,7 +167,8 @@ export class RoomService {
 
     const room = await this.roomFactory.createRoom(redisRoomId, req);
 
-    this.logger.debug('create Room : ', JSON.stringify({ room }));
+    this.logger.debug('create Room : ');
+    console.log(room);
 
     // 레디스에 룸아이디를 키로 저장 'rooms:{roomId}:roomData'
     await this.redisClient.hset(
@@ -182,12 +183,7 @@ export class RoomService {
       room.roomId,
     );
 
-    return {
-      type: room.type,
-      roomId: roomId,
-      sceneName: room.sceneName,
-      ownerId: member.memberCode,
-    };
+    return room;
   }
 
   async removeRoom(roomId: string): Promise<void> {

@@ -36,6 +36,7 @@ import { OfficeService } from '../office/office.service';
 import { HubSocketService } from '../hub-socket/hub-socket.service';
 import { CustomSocket } from '../interfaces/custom-socket';
 import { CommonService } from '../common/common.service';
+import { MatchingService } from '../matching/matching.service';
 
 @WebSocketGateway({
   cors: {
@@ -57,6 +58,7 @@ export class UnificationGateway
     private readonly screenBannerService: ScreenBannerService,
     private readonly friendService: FriendService,
     private readonly myRoomService: MyRoomService,
+    private readonly matchingService: MatchingService,
     private readonly blockchainService: BlockchainService,
     private readonly officeService: OfficeService,
     private readonly commonService: CommonService,
@@ -207,6 +209,7 @@ export class UnificationGateway
     await this.officeService.setServer(this.server);
     await this.friendService.setServer(this.server);
     await this.commonService.setServer(this.server);
+    await this.matchingService.setServer(this.server);
   }
 
   //소켓 해제

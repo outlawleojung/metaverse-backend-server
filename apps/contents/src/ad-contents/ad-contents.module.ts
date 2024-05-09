@@ -11,6 +11,7 @@ import {
   MemberAdContentsRepository,
   MemberMoneyRepository,
   MemberMoney,
+  MoneyType,
 } from '@libs/entity';
 import { CommonModule } from '@libs/common';
 
@@ -21,6 +22,7 @@ import { CommonModule } from '@libs/common';
       AdContents,
       MemberAdContents,
       MemberMoney,
+      MoneyType,
     ]),
     EntityModule,
     CommonModule,

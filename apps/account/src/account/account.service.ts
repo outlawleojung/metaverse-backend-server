@@ -32,6 +32,7 @@ import {
   EmailConfirmRepository,
   EmailLimitRepository,
   MemberPasswordAuthRepository,
+  MemberAvatarInfoRepository,
 } from '@libs/entity';
 import { MailService, EmailOptions } from '../mail/mail.service';
 import { AuthEmailDto } from './dto/request/auth.email.dto';
@@ -47,6 +48,7 @@ export class AccountService {
     private emailConfirmRepository: EmailConfirmRepository,
     private emailLimitRepository: EmailLimitRepository,
     private memberPasswordAuthRepository: MemberPasswordAuthRepository,
+    private avatarRepository: MemberAvatarInfoRepository,
     private commonService: CommonService,
     private mailService: MailService,
     @Inject(DataSource) private dataSource: DataSource,
@@ -82,9 +84,11 @@ export class AccountService {
           memberAccount.memberId,
         );
 
-      const avatarInfos = await this.commonService.getMemberAvatarInfo(
-        member.memberCode,
+      // 아바타 정보 조회
+      const avatarInfos = await this.avatarRepository.findByMemberId(
+        memberAccount.memberId,
       );
+
       const memberInfo: any = {
         nickname: member.nickname,
         stateMessage: member.stateMessage,
@@ -260,7 +264,7 @@ export class AccountService {
     // 이메일 발송
     const emailOptions: EmailOptions = {
       to: email,
-      subject: '[a:rzmeta] 패스워드 재설정 이메일',
+      subject: '[moasis] 패스워드 재설정 이메일',
       html: 'passwordReset',
       text: '패스워드 재설정 이메일 입니다.',
     };

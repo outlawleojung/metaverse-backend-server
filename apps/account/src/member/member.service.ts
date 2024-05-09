@@ -1,5 +1,4 @@
 import { UpdateMyProfileDto } from './dto/request/update.my.profile.dto';
-import { CommonService } from '@libs/common';
 import {
   PROVIDER_TYPE,
   ERRORCODE,
@@ -30,6 +29,12 @@ import {
   MemberBusinessCardInfoRepository,
   MemberAvatarInfoRepository,
   MemberDefaultCardInfoRepository,
+  MemberAvatarPartsItemInvenRepository,
+  MemberMyRoomInfoRepository,
+  MemberFrameImageRepository,
+  MemberFurnitureItemInvenRepository,
+  MemberMoneyRepository,
+  OnfContentsInfo,
 } from '@libs/entity';
 import {
   Inject,
@@ -65,20 +70,22 @@ import { CheckWidhDrawalDto } from './dto/request/check.withdrawal.dto';
 export class MemberService {
   private readonly logger = new Logger(MemberService.name);
   constructor(
-    private memberRepository: MemberRepository,
-    private memberAccountRepository: MemberAccountRepository,
-    private memberBusinessCardInfoRepository: MemberBusinessCardInfoRepository,
-    private memberDefaultCardInfoRepository: MemberDefaultCardInfoRepository,
+    private readonly memberRepository: MemberRepository,
+    private readonly memberAccountRepository: MemberAccountRepository,
+    private readonly memberBusinessCardInfoRepository: MemberBusinessCardInfoRepository,
+    private readonly memberDefaultCardInfoRepository: MemberDefaultCardInfoRepository,
+    private readonly memberAvatarPartsItemInvenRepository: MemberAvatarPartsItemInvenRepository,
+    private readonly memberMyRoomInfoRepository: MemberMyRoomInfoRepository,
+    private readonly memberFrameImageRepository: MemberFrameImageRepository,
+    private readonly memberFurnitureItemInvenRepository: MemberFurnitureItemInvenRepository,
+    private readonly memberMoneyRepository: MemberMoneyRepository,
     @InjectRepository(AvatarPartsType)
     private avatarPartsTypeRepository: Repository<AvatarPartsType>,
-    // @InjectRepository(MemberAvatarInfo)
-    // private memberAvatarInfoRepository: Repository<MemberAvatarInfo>,
     private memberAvatarInfoRepository: MemberAvatarInfoRepository,
     @InjectRepository(EmailConfirm)
     private emailConfirmRepository: Repository<EmailConfirm>,
     @InjectRepository(AvatarPreset)
     private avatarPresetRepository: Repository<AvatarPreset>,
-    private commonService: CommonService,
     @Inject(DataSource) private dataSource: DataSource,
   ) {}
 
@@ -608,7 +615,9 @@ export class MemberService {
   // 앱 정보 조회
   async getAppInfo() {
     // 컨텐츠 온오프 정보
-    const onfContentsInfo = await this.commonService.getOnfContentsInfo();
+    const onfContentsInfo = await this.dataSource
+      .getRepository(OnfContentsInfo)
+      .find();
 
     const noticeInfo = await this.getNotice();
 
@@ -655,7 +664,8 @@ export class MemberService {
   }
 
   async getMoneyInfo(memberId: string) {
-    const moneyInfos = await this.commonService.getMoneyInfo(memberId);
+    const moneyInfos =
+      await this.memberMoneyRepository.findAllByMemberId(memberId);
 
     return {
       error: ERRORCODE.NET_E_SUCCESS,
@@ -679,36 +689,39 @@ export class MemberService {
       );
     }
 
-    const membmerInfo = await this.commonService.getMemberInfo(memberId);
+    const membmerInfo =
+      await this.memberRepository.findByMemberIdForMemberInfo(memberId);
 
     // 비지니스 명함 정보
     const businessCardInfos =
-      await this.commonService.getBusinessCardList(memberId);
+      await this.memberBusinessCardInfoRepository.findAllByMemberId(memberId);
 
     // 기본 명함 정보
     const defaultCardInfo =
-      await this.commonService.getDefaultCardInfo(memberId);
+      await this.memberDefaultCardInfoRepository.findAllByMemberId(memberId);
 
     // 아바타 정보
-    const avatarInfos = await this.commonService.getAvatarInfo(exMember.id);
+    const avatarInfos = await this.getAvatarInfo(memberId);
 
     // 마이룸 정보
-    const myRoomList = await this.commonService.getMyRoomInfo(memberId);
+    const myRoomList =
+      await this.memberMyRoomInfoRepository.findByMemberId(memberId);
 
     // 마이룸 액자 정보
     const myRoomFrameImages =
-      await this.commonService.getMyRoomFrameImages(memberId);
+      await this.memberFrameImageRepository.findByMemberId(memberId);
 
     // 가구 인벤 정보
     const interiorItemInvens =
-      await this.commonService.getInteriorItemInven(memberId);
+      await this.memberFurnitureItemInvenRepository.findByMemberId(memberId);
 
     // 아바타 인벤 정보
     const avatarPartsInvens =
-      await this.commonService.getAvatarPartsItemInven(memberId);
+      await this.memberAvatarPartsItemInvenRepository.findByMemberId(memberId);
 
     // 재화 정보
-    const moneyInfos = await this.commonService.getMoneyInfo(exMember.id);
+    const moneyInfos =
+      await this.memberMoneyRepository.findAllByMemberId(memberId);
 
     // // 지갑 정보
     // const walletAddr = await this.commonService.GetWalletInfo(exMember.id);
@@ -939,6 +952,13 @@ export class MemberService {
       }
     }
     return noticeInfos;
+  }
+
+  async getAvatarInfo(memberId: string) {
+    const avatarInfos =
+      await this.memberAvatarInfoRepository.findByMemberId(memberId);
+
+    return avatarInfos;
   }
 
   checkUpdateOfficeGradeType = async () => {};

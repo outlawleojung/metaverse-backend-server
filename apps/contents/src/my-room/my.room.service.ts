@@ -1,9 +1,11 @@
+import { MemberFrameImageRepository } from './../../../../libs/entity/repositories/member-frame-image.repository';
 import {
   InteriorInstallInfo,
   Member,
   MemberFrameImage,
   MemberFurnitureItemInven,
   MemberMyRoomInfo,
+  MemberMyRoomInfoRepository,
 } from '@libs/entity';
 import {
   HttpException,
@@ -31,6 +33,8 @@ import { UpdateStateTypeDto } from './dto/request/update.state.dto';
 export class MyRoomService {
   constructor(
     @InjectRepository(Member) private memberRepository: Repository<Member>,
+    private readonly memberMyRoomInfoRepository: MemberMyRoomInfoRepository,
+    private readonly memberFrameImageRepository: MemberFrameImageRepository,
     private commonService: CommonService,
     private azureBlobService: AzureBlobService,
     @Inject(DataSource) private dataSource: DataSource,
@@ -50,7 +54,9 @@ export class MyRoomService {
       };
     }
 
-    const othersRoomList = await this.commonService.getMyRoomInfo(exMember.id);
+    const othersRoomList = await this.memberMyRoomInfoRepository.findByMemberId(
+      exMember.id,
+    );
 
     return {
       othersRoomList: othersRoomList,
@@ -76,10 +82,12 @@ export class MyRoomService {
       );
     }
 
-    const othersRoomList = await this.commonService.getMyRoomInfo(exMember.id);
+    const othersRoomList = await this.memberMyRoomInfoRepository.findByMemberId(
+      exMember.id,
+    );
     // 마이룸 액자 정보
     const othersMyRoomFrameImages =
-      await this.commonService.getMyRoomFrameImages(exMember.id);
+      await this.memberFrameImageRepository.findByMemberId(exMember.id);
 
     return {
       othersRoomList: othersRoomList,
@@ -299,7 +307,8 @@ export class MyRoomService {
       }
 
       await queryRunner.commitTransaction();
-      const myRoomInfos = await this.commonService.getMyRoomInfo(memberId);
+      const myRoomInfos =
+        await this.memberMyRoomInfoRepository.findByMemberId(memberId);
 
       return {
         myRoomInfos,

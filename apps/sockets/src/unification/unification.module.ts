@@ -1,5 +1,4 @@
 import { JwtService } from '@nestjs/jwt';
-import { MatchingRoomModule } from '../matching-room/matching-room.module';
 import {
   EmailConfirm,
   EntityModule,
@@ -36,6 +35,7 @@ import { SubscribeService } from '../nats/subscribe.service';
 import { CommonModule } from '../common/common.module';
 import { AuthService, CommonService } from '@libs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { MatchingModule } from '../matching/matching.module';
 
 @Module({
   imports: [
@@ -67,13 +67,13 @@ import { MongooseModule } from '@nestjs/mongoose';
     ScreenBannerModule,
     MyRoomModule,
     FriendModule,
+    MatchingModule,
     BlockchainModule,
     OfficeModule,
     CommonModule,
     EntityModule,
     SchemaModule,
     HubSocketModule,
-    MatchingRoomModule,
   ],
   providers: [
     {

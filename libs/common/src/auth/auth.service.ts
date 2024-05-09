@@ -1,17 +1,21 @@
 import { v1 } from 'uuid';
 import {
-  EmailCheck,
-  EmailConfirm,
   Member,
   MemberAccount,
+  MemberAccountRepository,
+  MemberAvatarPartsItemInvenRepository,
   MemberLoginLog,
+  MemberRepository,
+  MemberMyRoomInfoRepository,
+  MemberFurnitureItemInvenRepository,
+  EmailConfirmRepository,
+  MemberLoginLogRepository,
+  EmailCheckRepository,
 } from '@libs/entity';
 import {
   ForbiddenException,
-  forwardRef,
   HttpException,
   HttpStatus,
-  Inject,
   Injectable,
   Logger,
   UnauthorizedException,
@@ -19,9 +23,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import bcryptjs from 'bcryptjs';
 import { ERROR_MESSAGE, ERRORCODE, PROVIDER_TYPE } from '@libs/constants';
-import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
-import { CommonService } from '@libs/common';
+import { QueryRunner } from 'typeorm';
 import { Socket } from 'socket.io';
 
 @Injectable()
@@ -29,18 +31,15 @@ export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
   constructor(
-    @InjectRepository(Member)
-    private readonly memberRepository: Repository<Member>,
-    @InjectRepository(MemberAccount)
-    private readonly memberAccountRepository: Repository<MemberAccount>,
-    @InjectRepository(EmailConfirm)
-    private emailConfirmRepository: Repository<EmailConfirm>,
-    @InjectRepository(MemberLoginLog)
-    private memberLoginLogRepository: Repository<MemberLoginLog>,
+    private readonly memberRepository: MemberRepository,
+    private readonly memberFurnitureItemInvenRepository: MemberFurnitureItemInvenRepository,
+    private readonly memberMyRoomInfoRepository: MemberMyRoomInfoRepository,
+    private readonly memberAvatarPartsItemInvenRepository: MemberAvatarPartsItemInvenRepository,
+    private readonly memberAccountRepository: MemberAccountRepository,
+    private readonly emailCheckRepository: EmailCheckRepository,
+    private readonly emailConfirmRepository: EmailConfirmRepository,
+    private readonly memberLoginLogRepository: MemberLoginLogRepository,
     private readonly jwtService: JwtService,
-    private readonly dataSource: DataSource,
-    @Inject(forwardRef(() => CommonService))
-    private readonly commonService: CommonService,
   ) {}
 
   extractTokenFromHeader(header: string, isBearer: boolean) {
@@ -122,11 +121,12 @@ export class AuthService {
       }
 
       // 데이터베이스에 있는 토큰과 비교
-      const member = await this.memberRepository.findOne({
-        where: {
-          id: decoded.sub,
-        },
-      });
+      // const member = await this.memberRepository.findOne({
+      //   where: {
+      //     id: decoded.sub,
+      //   },
+      // });
+      const member = await this.memberRepository.findByMemberId(decoded.sub);
 
       const validToken = await bcryptjs.compareSync(token, member.refreshToken);
       console.log('validToken: ', validToken);
@@ -157,10 +157,11 @@ export class AuthService {
     const hashedRefreshToken = await bcryptjs.hash(token, 12);
 
     try {
-      await this.memberRepository.update(
-        { id: result.sub },
-        { refreshToken: hashedRefreshToken },
-      );
+      const member = new Member();
+      member.id = result.sub;
+      member.refreshToken = hashedRefreshToken;
+
+      await this.memberRepository.updateMember(member);
     } catch (e) {
       console.log(e.toString());
       throw new ForbiddenException('Refresh 토큰 DB 저장 실패');
@@ -182,12 +183,16 @@ export class AuthService {
   async validRefreshToken(token: string) {
     const result = this.verifyToken(token);
 
-    const member = await this.memberRepository.findOne({
-      select: ['id', 'memberCode', 'nickname', 'email', 'refreshToken'],
-      where: {
-        id: result.sub,
-      },
-    });
+    // const member = await this.memberRepository.findOne({
+    //   select: ['id', 'memberCode', 'nickname', 'email', 'refreshToken'],
+    //   where: {
+    //     id: result.sub,
+    //   },
+    // });
+
+    const member = await this.memberRepository.findByMemberIdForRefreshToken(
+      result.sub,
+    );
 
     const validToken = await bcryptjs.compareSync(token, member.refreshToken);
 
@@ -202,7 +207,8 @@ export class AuthService {
     memberAccount: Pick<MemberAccount, 'accountToken' | 'password'>,
   ) {
     const email = memberAccount.accountToken;
-    const exMember = await this.commonService.getMemberAccountByEmail(email);
+    const exMember =
+      await this.memberAccountRepository.findByAccountToken(email);
 
     if (!exMember) {
       throw new HttpException(
@@ -230,12 +236,9 @@ export class AuthService {
       );
     }
 
-    const member = await this.memberRepository.findOne({
-      select: ['id', 'memberCode', 'nickname', 'email'],
-      where: {
-        id: exMember.memberId,
-      },
-    });
+    const member = await this.memberRepository.findByMemberIdForAuthenticate(
+      exMember.memberId,
+    );
 
     return member;
   }
@@ -256,16 +259,16 @@ export class AuthService {
   // 자체 계정 생성
   async registerWithEmail(
     account: Pick<MemberAccount, 'accountToken' | 'password' | 'regPathType'>,
+    queryRunner: QueryRunner,
   ) {
     const accountToken = account.accountToken;
 
     // 이메일 중복 검증
-    const exAccount = await this.memberAccountRepository.exists({
-      where: {
-        accountToken: accountToken,
-        providerType: PROVIDER_TYPE.ARZMETA,
-      },
-    });
+    const exAccount =
+      await this.memberAccountRepository.existsByAccountTokenAndProviderType(
+        accountToken,
+        PROVIDER_TYPE.ARZMETA,
+      );
 
     if (exAccount) {
       this.logger.error(ERROR_MESSAGE(ERRORCODE.NET_E_ALREADY_EXIST_EMAIL));
@@ -279,11 +282,8 @@ export class AuthService {
     }
 
     // 이메일 인증 여부 확인
-    const emailConfirm = await this.emailConfirmRepository.findOne({
-      where: {
-        email: accountToken,
-      },
-    });
+    const emailConfirm =
+      await this.emailConfirmRepository.existsByEmail(accountToken);
 
     if (!emailConfirm) {
       this.logger.error(ERROR_MESSAGE(ERRORCODE.NET_E_NOT_AUTH_EMAIL));
@@ -302,51 +302,29 @@ export class AuthService {
       });
     }
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    const memberInfo = await this.createMember(
+      accountToken,
+      PROVIDER_TYPE.ARZMETA,
+      account.regPathType,
+      queryRunner,
+    );
 
-    try {
-      const memberInfo = await this.commonService.commonCreateAccount(
-        queryRunner,
-        accountToken,
-        PROVIDER_TYPE.ARZMETA,
-        account.regPathType,
-      );
+    // 인증 된 이메일 정보 삭제
+    await this.emailCheckRepository.deleteByExists(accountToken, queryRunner);
+    await this.emailConfirmRepository.deleteByExists(accountToken, queryRunner);
 
-      // 인증 된 이메일 정보 삭제
-      await queryRunner.manager.delete(EmailCheck, { email: accountToken });
-      await queryRunner.manager.delete(EmailConfirm, { email: accountToken });
+    //패스워드 설정
+    const password: string = account.password;
+    const hashedPassword = await bcryptjs.hash(password, 12);
 
-      //패스워드 설정
-      const password: string = account.password;
-      const hashedPassword = await bcryptjs.hash(password, 12);
+    const memberAccount = new MemberAccount();
+    memberAccount.memberId = memberInfo.id;
+    memberAccount.providerType = PROVIDER_TYPE.ARZMETA;
+    memberAccount.password = hashedPassword;
 
-      const memberAccount = new MemberAccount();
-      memberAccount.memberId = memberInfo.id;
-      memberAccount.providerType = PROVIDER_TYPE.ARZMETA;
-      memberAccount.password = hashedPassword;
+    await this.memberAccountRepository.create(memberAccount, queryRunner);
 
-      await queryRunner.manager
-        .getRepository(MemberAccount)
-        .save(memberAccount);
-
-      await queryRunner.commitTransaction();
-
-      return await this.loginMember(memberInfo);
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error({ err });
-      throw new HttpException(
-        {
-          error: ERRORCODE.NET_E_DB_FAILED,
-          message: ERROR_MESSAGE(ERRORCODE.NET_E_DB_FAILED),
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    } finally {
-      await queryRunner.release();
-    }
+    return await this.loginMember(memberInfo);
   }
 
   async loginCounting(memberId: string) {
@@ -356,14 +334,14 @@ export class AuthService {
     newMember.loginedAt = new Date();
     newMember.deletedAt = null;
 
-    await this.memberRepository.save(newMember);
+    await this.memberRepository.updateMember(newMember);
 
     // 로그인 로그
     const loginLog = new MemberLoginLog();
     loginLog.memberId = memberId;
     loginLog.providerType = PROVIDER_TYPE.ARZMETA;
 
-    await this.memberLoginLogRepository.save(loginLog);
+    await this.memberLoginLogRepository.create(loginLog);
   }
 
   async checkAccessTokenForSocket(client: Socket): Promise<Member> {
@@ -383,7 +361,7 @@ export class AuthService {
 
       const result = await this.verifyToken(accessToken);
 
-      return await this.commonService.getMemberByEmail(result.email);
+      return await this.memberRepository.findByEmail(result.email);
     } catch (error) {
       console.log('토큰 오류 :', error.toString());
 
@@ -394,11 +372,59 @@ export class AuthService {
   async validateUser(accessToken: string) {
     try {
       const result = await this.verifyToken(accessToken);
-      return await this.commonService.getMemberByEmail(result.email);
+      return await this.memberRepository.findByEmail(result.email);
     } catch (error) {
       console.log('토큰 오류 :', error.toString());
 
       throw error;
     }
+  }
+
+  async createMember(
+    accountToken,
+    providerType,
+    regPathType,
+    queryRunner: QueryRunner,
+  ) {
+    const memberId = v1();
+
+    const memberCode = await this.memberRepository.gnenerateMemberCode();
+
+    const member = new Member();
+    member.id = memberId;
+    member.memberCode = memberCode;
+    member.firstProviderType = providerType;
+    member.regPathType = regPathType;
+
+    if (providerType === PROVIDER_TYPE.ARZMETA) {
+      member.email = accountToken;
+    }
+
+    await queryRunner.manager.getRepository(Member).save(member);
+
+    // 기본 인벤토리 설정 ( 인테리어)
+    await this.memberFurnitureItemInvenRepository.create(
+      member.id,
+      queryRunner,
+    );
+
+    // 기본 마이룸 설정
+    await this.memberMyRoomInfoRepository.create(member.id, queryRunner);
+
+    // 기본 아바타 파츠 설정
+    await this.memberAvatarPartsItemInvenRepository.create(
+      member.id,
+      queryRunner,
+    );
+
+    // 계정 생성
+    const memberAccount = new MemberAccount();
+    memberAccount.memberId = member.id;
+    memberAccount.providerType = providerType;
+    memberAccount.accountToken = accountToken;
+
+    await queryRunner.manager.getRepository(MemberAccount).save(memberAccount);
+
+    return member;
   }
 }

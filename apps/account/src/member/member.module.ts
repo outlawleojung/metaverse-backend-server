@@ -22,9 +22,21 @@ import {
   MemberBusinessCardInfo,
   MemberAvatarInfoRepository,
   MemberDefaultCardInfoRepository,
+  MemberAvatarPartsItemInvenRepository,
   MemberDefaultCardInfo,
+  StartInventory,
+  MemberAvatarPartsItemInven,
+  MemberMyRoomInfoRepository,
+  StartMyRoom,
+  MemberMyRoomInfo,
+  MemberFurnitureItemInven,
+  MemberFrameImageRepository,
+  MemberFrameImage,
+  MemberFurnitureItemInvenRepository,
+  MemberMoneyRepository,
+  MemberMoney,
+  MoneyType,
 } from '@libs/entity';
-import { CommonModule } from '@libs/common';
 
 @Module({
   imports: [
@@ -44,9 +56,16 @@ import { CommonModule } from '@libs/common';
       NoticeInfo,
       MemberBusinessCardInfo,
       MemberDefaultCardInfo,
+      StartInventory,
+      MemberAvatarPartsItemInven,
+      StartMyRoom,
+      MemberMyRoomInfo,
+      MemberFurnitureItemInven,
+      MemberFrameImage,
+      MemberMoney,
+      MoneyType,
     ]),
     EntityModule,
-    CommonModule,
   ],
   providers: [
     MemberService,
@@ -55,6 +74,11 @@ import { CommonModule } from '@libs/common';
     MemberBusinessCardInfoRepository,
     MemberAvatarInfoRepository,
     MemberDefaultCardInfoRepository,
+    MemberAvatarPartsItemInvenRepository,
+    MemberMyRoomInfoRepository,
+    MemberFrameImageRepository,
+    MemberFurnitureItemInvenRepository,
+    MemberMoneyRepository,
   ],
   exports: [MemberService],
 })

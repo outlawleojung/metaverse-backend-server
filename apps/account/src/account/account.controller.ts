@@ -1,19 +1,8 @@
-import { SocialLoginResponseDto } from './dto/response/social.login.response.dto';
-import { AutoLoginResponseDto } from './dto/response/auto.login.response.dto';
-import { AutoLoginDto } from './dto/request/auto.login.dto';
 import { AuthEmailDto } from './dto/request/auth.email.dto';
-import { LoginAuthResponseDto } from './dto/response/login.auth.response.dto';
-import { SignUpResponseDto } from './dto/response/signup.response.dto';
-import {
-  ApiOperation,
-  ApiTags,
-  ApiResponse,
-  ApiExcludeEndpoint,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { MorganInterceptor } from 'nest-morgan';
 import {
   Controller,
-  Get,
   Post,
   Body,
   UseInterceptors,
@@ -28,7 +17,6 @@ import { ConfirmEmailDto } from './dto/request/confirm.email.dto';
 import { ResetPasswordDto } from './dto/request/reset.password.dto';
 import { SuccessDto } from '../dto/success.response.dto';
 import { AuthEmailResponseDto } from './dto/response/auth.email.response.dto';
-import { ArzmetaLogInMemberDto } from './dto/request/arzmeta.login.member.dto';
 import {
   AuthService,
   BasicTokenGuard,
@@ -112,13 +100,20 @@ export class AccountController {
     status: HttpStatus.OK,
     type: LoginResponseDto,
   })
+  @UseInterceptors(TransactionInterceptor)
   @Post('register/email')
-  async registerEmail(@Body() data: RegisterDto) {
-    return await this.authService.registerWithEmail({
-      accountToken: data.email,
-      password: data.password,
-      regPathType: data.regPathType,
-    });
+  async registerEmail(
+    @QueryRunner() queryRunner: QR,
+    @Body() data: RegisterDto,
+  ) {
+    return await this.authService.registerWithEmail(
+      {
+        accountToken: data.email,
+        password: data.password,
+        regPathType: data.regPathType,
+      },
+      queryRunner,
+    );
   }
 
   /**
@@ -143,7 +138,12 @@ export class AccountController {
     return await this.authService.autoLogin(token);
   }
 
-  // 이메일 인증 번호 받기
+  /**
+   * 이메일 인증 번호 받기
+   * @param queryRunner
+   * @param autoEmailDto
+   * @returns AuthEmailResponseDto
+   */
   @ApiResponse({
     status: HttpStatus.FORBIDDEN,
     type: ErrorDto,
@@ -161,13 +161,19 @@ export class AccountController {
   @UseInterceptors(TransactionInterceptor)
   @Post('authEmail')
   async authEmail(
-    @QueryRunner() queryRunner: QR,
     @Body() autoEmailDto: AuthEmailDto,
+    @QueryRunner() queryRunner: QR,
   ) {
     return await this.accountService.authEmail(autoEmailDto, queryRunner);
   }
 
-  // 이메일 인증 확인 받기
+  /**
+   * 이메일 인증 확인 받기
+   * @param queryRunner
+   * @param confirmEmailDto
+   * @returns
+   */
+
   @ApiResponse({
     status: HttpStatus.FORBIDDEN,
     type: ErrorDto,
@@ -187,7 +193,12 @@ export class AccountController {
     return await this.accountService.confirmEmail(confirmEmailDto, queryRunner);
   }
 
-  // 패스워드 재설정
+  /**
+   * 패스워드 재설정
+   * @param queryRunner
+   * @param resetPasswordDto
+   * @returns
+   */
   @ApiResponse({
     status: HttpStatus.FORBIDDEN,
     type: ErrorDto,

@@ -45,10 +45,7 @@ import { ERROR_MESSAGE, ERRORCODE } from '@libs/constants';
 @UseInterceptors(MorganInterceptor('combined'))
 @Controller('api/member')
 export class MemberController {
-  constructor(
-    private readonly memberService: MemberService,
-    private readonly commonService: CommonService,
-  ) {}
+  constructor(private readonly memberService: MemberService) {}
 
   // 탈퇴 진행 여부 확인
   @ApiOperation({ summary: '탈퇴 진행 여부 확인' })
@@ -161,7 +158,7 @@ export class MemberController {
     @Body() data: SetAvatar,
   ) {
     await this.memberService.setAvatar(member.id, data, queryRunner);
-    const avatarInfos = await this.commonService.getAvatarInfo(member.id);
+    const avatarInfos = await this.memberService.getAvatarInfo(member.id);
 
     return {
       avatarInfos: avatarInfos,
@@ -237,7 +234,7 @@ export class MemberController {
       data.nickname,
       queryRunner,
     );
-    const avatarInfos = await this.commonService.getAvatarInfo(member.id);
+    const avatarInfos = await this.memberService.getAvatarInfo(member.id);
 
     return {
       avatarInfos: avatarInfos,

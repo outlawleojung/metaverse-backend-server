@@ -24,7 +24,8 @@ import { SubscribeService } from '../nats/subscribe.service';
 import { RoomType } from '../room/room-type';
 import { ClientService } from '../services/client.service';
 import { CustomSocket } from '../interfaces/custom-socket';
-import { AuthService, CommonService } from '@libs/common';
+import { AuthService } from '@libs/common';
+import { GameDataService } from '../game/game-data.service';
 
 @Injectable()
 export class UnificationService {
@@ -33,6 +34,7 @@ export class UnificationService {
     @InjectRepository(Member)
     private memberRepository: Repository<Member>,
     private readonly gameObjectService: GameObjectService,
+    private readonly gameDataService: GameDataService,
     private readonly redisFunctionService: RedisFunctionService,
     private readonly socketService: HubSocketService,
     private readonly subscribeService: SubscribeService,
@@ -167,7 +169,8 @@ export class UnificationService {
       redisRoomId,
     );
 
-    this.logger.debug('Join Room exRoom : ', exRoom);
+    this.logger.debug('Join Room exRoom : ');
+    console.log(exRoom);
 
     if (!exRoom) {
       return client.emit(
@@ -214,6 +217,18 @@ export class UnificationService {
       'roomId',
       redisRoomId,
     );
+
+    // 게임 룸에 입장 && 게임 Host 인 경우
+    const roomData = JSON.parse(exRoom);
+
+    if (
+      (roomData.type === RoomType.JumpingMatching ||
+        roomData.type === RoomType.OXQuiz) &&
+      roomData.ownerId === client.data.clientId
+    ) {
+      await this.gameDataService.initGameData(roomData.roomId);
+      console.log(await this.gameDataService.getGameData(roomData.roomId));
+    }
 
     const response = new S_ENTER();
     response.result = 'success';

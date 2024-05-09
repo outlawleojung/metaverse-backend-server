@@ -1,20 +1,12 @@
-import { GetItemDto } from './../../../apps/admin/src/postbox/dto/req/get.item.dto';
 import {
   Member,
   MemberAvatarInfo,
   MemberAvatarPartsItemInven,
-  MemberMyRoomInfo,
-  OnfContentsInfo,
-  StartInventory,
-  StartMyRoom,
-  MemberBusinessCardInfo,
-  MemberDefaultCardInfo,
   ResetPasswdCount,
   FunctionTable,
   MemberFurnitureItemInven,
   MemberFrameImage,
   MemberMoney,
-  MoneyType,
   MemberWalletInfo,
   CSAFEventEnterLog,
   LicenseInfo,
@@ -42,7 +34,6 @@ import {
   ERRORCODE,
   ERROR_MESSAGE,
   FUNCTION_TABLE,
-  ITEM_TYPE,
   PROVIDER_TYPE,
 } from '@libs/constants';
 
@@ -54,10 +45,6 @@ export class CommonService {
     private memberAccountRepository: Repository<MemberAccount>,
     @InjectRepository(MemberWalletInfo)
     private memberWalletRepository: Repository<MemberWalletInfo>,
-    @InjectRepository(MemberFurnitureItemInven)
-    private memberFurnitureItemInvenRepository: Repository<MemberFurnitureItemInven>,
-    @InjectRepository(MemberAvatarPartsItemInven)
-    private memberAvatarPartsItemInvenRepository: Repository<MemberAvatarPartsItemInven>,
     @InjectModel('worldChattingLog')
     private readonly worldChattingLog: Model<WorldChattingLog>,
     @InjectModel('roomDataLog')
@@ -84,91 +71,71 @@ export class CommonService {
     }
   }
 
-  async getAvatarInfo(memberId: string) {
-    try {
-      const avatarInfo = await this.dataSource
-        .getRepository(MemberAvatarInfo)
-        .find({
-          where: {
-            memberId,
-          },
-        });
+  // async getMyRoomFrameImages(memberId: string) {
+  //   try {
+  //     const memberFrameImages = await this.dataSource
+  //       .getRepository(MemberFrameImage)
+  //       .find({
+  //         select: ['itemId', 'num', 'uploadType', 'imageName'],
+  //         where: {
+  //           memberId: memberId,
+  //         },
+  //       });
+  //     return memberFrameImages;
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // }
 
-      const avatarList: any = {};
-      for (const avatar of avatarInfo) {
-        avatarList[avatar.avatarPartsType] = avatar.itemId;
-      }
-      return avatarList;
-    } catch (err) {
-      console.error(err);
-    }
-  }
+  // async getMyRoomInfo(memberId: string) {
+  //   try {
+  //     const myRoomInfos = await this.dataSource
+  //       .getRepository(MemberMyRoomInfo)
+  //       .find({
+  //         select: {
+  //           itemId: true,
+  //           num: true,
+  //           layerType: true,
+  //           x: true,
+  //           y: true,
+  //           rotation: true,
+  //         },
+  //         where: {
+  //           memberId: memberId,
+  //         },
+  //       });
 
-  async getMyRoomFrameImages(memberId: string) {
-    try {
-      const memberFrameImages = await this.dataSource
-        .getRepository(MemberFrameImage)
-        .find({
-          select: ['itemId', 'num', 'uploadType', 'imageName'],
-          where: {
-            memberId: memberId,
-          },
-        });
-      return memberFrameImages;
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  async getMyRoomInfo(memberId: string) {
-    try {
-      const myRoomInfos = await this.dataSource
-        .getRepository(MemberMyRoomInfo)
-        .find({
-          select: {
-            itemId: true,
-            num: true,
-            layerType: true,
-            x: true,
-            y: true,
-            rotation: true,
-          },
-          where: {
-            memberId: memberId,
-          },
-        });
-
-      return myRoomInfos;
-    } catch (err) {
-      console.error(err);
-    }
-  }
+  //     return myRoomInfos;
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // }
 
   // 재화 정보 조회
-  async getMoneyInfo(memberId: string) {
-    try {
-      const memberMoney = await this.dataSource
-        .getRepository(MoneyType) // MoneyType을 기준으로 쿼리
-        .createQueryBuilder('moneyType')
-        .select([
-          'moneyType.type as moneyType',
-          'COALESCE(SUM(mm.count), 0) as count',
-        ])
-        .leftJoin('moneyType.MemberMoney', 'mm', 'mm.memberId = :memberId', {
-          memberId,
-        })
-        .groupBy('moneyType.type')
-        .getRawMany();
+  // async getMoneyInfo(memberId: string) {
+  //   try {
+  //     const memberMoney = await this.dataSource
+  //       .getRepository(MoneyType) // MoneyType을 기준으로 쿼리
+  //       .createQueryBuilder('moneyType')
+  //       .select([
+  //         'moneyType.type as moneyType',
+  //         'COALESCE(SUM(mm.count), 0) as count',
+  //       ])
+  //       .leftJoin('moneyType.MemberMoney', 'mm', 'mm.memberId = :memberId', {
+  //         memberId,
+  //       })
+  //       .groupBy('moneyType.type')
+  //       .getRawMany();
 
-      memberMoney.forEach((m) => {
-        m.count = parseInt(m.count, 10);
-      });
+  //     memberMoney.forEach((m) => {
+  //       m.count = parseInt(m.count, 10);
+  //     });
 
-      return memberMoney;
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  //     return memberMoney;
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // }
 
   // 재화 차감
   async subtractMemberMoney(
@@ -223,263 +190,213 @@ export class CommonService {
     }
   }
 
-  async getInteriorItemInven(memberId: string) {
-    try {
-      const interiorItemInvens = await this.dataSource
-        .getRepository(MemberFurnitureItemInven)
-        .find({
-          select: { itemId: true, num: true },
-          where: {
-            memberId: memberId,
-          },
-        });
+  // async getInteriorItemInven(memberId: string) {
+  //   try {
+  //     const interiorItemInvens = await this.dataSource
+  //       .getRepository(MemberFurnitureItemInven)
+  //       .find({
+  //         select: { itemId: true, num: true },
+  //         where: {
+  //           memberId: memberId,
+  //         },
+  //       });
 
-      return interiorItemInvens;
-    } catch (err) {
-      console.error(err);
-    }
-  }
+  //     return interiorItemInvens;
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // }
 
   // 아바타 인벤토리
-  async getAvatarPartsItemInven(memberId: string) {
-    try {
-      const avatarPartsItemInvens =
-        await this.memberAvatarPartsItemInvenRepository.find({
-          select: { itemId: true },
-          where: {
-            memberId: memberId,
-          },
-        });
+  // async getAvatarPartsItemInven(memberId: string) {
+  //   try {
+  //     const avatarPartsItemInvens =
+  //       await this.memberAvatarPartsItemInvenRepository.find({
+  //         select: { itemId: true },
+  //         where: {
+  //           memberId: memberId,
+  //         },
+  //       });
 
-      return avatarPartsItemInvens;
-    } catch (err) {
-      console.error(err);
-    }
-  }
+  //     return avatarPartsItemInvens;
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // }
 
-  async createMemberAvatarPartsInventoryInit(
-    memberId: string,
-    queryRunner: QueryRunner,
-  ) {
-    // 기본 아바타 인벤토리 설정
-    const memberAvatarPartsItemInven =
-      await this.memberAvatarPartsItemInvenRepository.find({
-        where: {
-          memberId: memberId,
-        },
-      });
+  // async createMemberAvatarPartsInventoryInit(
+  //   memberId: string,
+  //   queryRunner: QueryRunner,
+  // ) {
+  //   // 기본 아바타 인벤토리 설정
+  //   const memberAvatarPartsItemInven =
+  //     await this.memberAvatarPartsItemInvenRepository.find({
+  //       where: {
+  //         memberId: memberId,
+  //       },
+  //     });
 
-    if (memberAvatarPartsItemInven.length === 0) {
-      const avatarPartsItems = await this.dataSource
-        .getRepository(StartInventory)
-        .createQueryBuilder('startInventory')
-        .innerJoinAndSelect('startInventory.Item', 'item')
-        .where('Item.itemType = :itemType', { itemType: ITEM_TYPE.COSTUME })
-        .getMany();
+  //   if (memberAvatarPartsItemInven.length === 0) {
+  //     const avatarPartsItems = await this.dataSource
+  //       .getRepository(StartInventory)
+  //       .createQueryBuilder('startInventory')
+  //       .innerJoinAndSelect('startInventory.Item', 'item')
+  //       .where('Item.itemType = :itemType', { itemType: ITEM_TYPE.COSTUME })
+  //       .getMany();
 
-      // 레코드 배열 생성
-      const memberAvatarPartsItemInvens = avatarPartsItems.map((item) => {
-        const memberAvatarPartsItemInven = new MemberAvatarPartsItemInven();
-        memberAvatarPartsItemInven.memberId = memberId;
-        memberAvatarPartsItemInven.itemId = item.itemId;
-        return memberAvatarPartsItemInven;
-      });
+  //     // 레코드 배열 생성
+  //     const memberAvatarPartsItemInvens = avatarPartsItems.map((item) => {
+  //       const memberAvatarPartsItemInven = new MemberAvatarPartsItemInven();
+  //       memberAvatarPartsItemInven.memberId = memberId;
+  //       memberAvatarPartsItemInven.itemId = item.itemId;
+  //       return memberAvatarPartsItemInven;
+  //     });
 
-      // 한 번에 여러 레코드 저장
-      await queryRunner.manager
-        .getRepository(MemberAvatarPartsItemInven)
-        .insert(memberAvatarPartsItemInvens);
-    }
-  }
+  //     // 한 번에 여러 레코드 저장
+  //     await queryRunner.manager
+  //       .getRepository(MemberAvatarPartsItemInven)
+  //       .insert(memberAvatarPartsItemInvens);
+  //   }
+  // }
 
-  async createMemberInteriorInventoryInit(
-    memberId: string,
-    queryRunner: QueryRunner,
-  ) {
-    // 기본 인벤토리 설정 ( 인테리어)
-    const memberFurnitureItemInven =
-      await this.memberFurnitureItemInvenRepository.find({
-        where: {
-          memberId: memberId,
-        },
-      });
+  // async createMemberInteriorInventoryInit(
+  //   memberId: string,
+  //   queryRunner: QueryRunner,
+  // ) {
+  //   // 기본 인벤토리 설정 ( 인테리어)
+  //   const memberFurnitureItemInven =
+  //     await this.memberFurnitureItemInvenRepository.find({
+  //       where: {
+  //         memberId: memberId,
+  //       },
+  //     });
 
-    if (memberFurnitureItemInven.length === 0) {
-      const interiorItems = await this.dataSource
-        .getRepository(StartInventory)
-        .createQueryBuilder('startInventory')
-        .innerJoinAndSelect('startInventory.Item', 'item')
-        .where('Item.itemType = :itemType', { itemType: ITEM_TYPE.INTERIOR })
-        .getMany();
+  //   if (memberFurnitureItemInven.length === 0) {
+  //     const interiorItems = await this.dataSource
+  //       .getRepository(StartInventory)
+  //       .createQueryBuilder('startInventory')
+  //       .innerJoinAndSelect('startInventory.Item', 'item')
+  //       .where('Item.itemType = :itemType', { itemType: ITEM_TYPE.INTERIOR })
+  //       .getMany();
 
-      const invens = [];
+  //     const invens = [];
 
-      let num = 1;
-      for (const item of interiorItems) {
-        const inven = new MemberFurnitureItemInven();
-        inven.memberId = memberId;
-        inven.itemId = item.itemId;
-        inven.num = num;
+  //     let num = 1;
+  //     for (const item of interiorItems) {
+  //       const inven = new MemberFurnitureItemInven();
+  //       inven.memberId = memberId;
+  //       inven.itemId = item.itemId;
+  //       inven.num = num;
 
-        invens.push(inven);
+  //       invens.push(inven);
 
-        num++;
-      }
+  //       num++;
+  //     }
 
-      // 한 번의 쿼리로 저장
-      await queryRunner.manager
-        .getRepository(MemberFurnitureItemInven)
-        .insert(invens);
-    }
-  }
+  //     // 한 번의 쿼리로 저장
+  //     await queryRunner.manager
+  //       .getRepository(MemberFurnitureItemInven)
+  //       .insert(invens);
+  //   }
+  // }
 
-  async createMemberMyRoomInit(memberId: string, queryRunner: QueryRunner) {
-    const memberMyRoomInfo = await this.dataSource
-      .getRepository(MemberMyRoomInfo)
-      .find({
-        where: {
-          memberId: memberId,
-        },
-      });
+  // async createMemberMyRoomInit(memberId: string, queryRunner: QueryRunner) {
+  //   const memberMyRoomInfo = await this.dataSource
+  //     .getRepository(MemberMyRoomInfo)
+  //     .find({
+  //       where: {
+  //         memberId: memberId,
+  //       },
+  //     });
 
-    if (memberMyRoomInfo.length === 0) {
-      const defaultMyRoomItems = await this.dataSource
-        .getRepository(StartMyRoom)
-        .find();
-      const memberInvens = await queryRunner.manager
-        .getRepository(MemberFurnitureItemInven)
-        .find({
-          where: {
-            memberId: memberId,
-          },
-        });
+  //   if (memberMyRoomInfo.length === 0) {
+  //     const defaultMyRoomItems = await this.dataSource
+  //       .getRepository(StartMyRoom)
+  //       .find();
+  //     const memberInvens = await queryRunner.manager
+  //       .getRepository(MemberFurnitureItemInven)
+  //       .find({
+  //         where: {
+  //           memberId: memberId,
+  //         },
+  //       });
 
-      const myRoomInfosToInsert = [];
+  //     const myRoomInfosToInsert = [];
 
-      for (const item of defaultMyRoomItems) {
-        const matchingInvens = memberInvens.filter(
-          (inven) => inven.itemId === item.itemId,
-        );
+  //     for (const item of defaultMyRoomItems) {
+  //       const matchingInvens = memberInvens.filter(
+  //         (inven) => inven.itemId === item.itemId,
+  //       );
 
-        for (const inven of matchingInvens) {
-          const isDuplicated = myRoomInfosToInsert.some(
-            (item) =>
-              inven.memberId === memberId &&
-              inven.itemId === item.itemId &&
-              inven.num === item.num,
-          );
+  //       for (const inven of matchingInvens) {
+  //         const isDuplicated = myRoomInfosToInsert.some(
+  //           (item) =>
+  //             inven.memberId === memberId &&
+  //             inven.itemId === item.itemId &&
+  //             inven.num === item.num,
+  //         );
 
-          if (!isDuplicated) {
-            const myRoomInfo = new MemberMyRoomInfo();
-            myRoomInfo.memberId = memberId;
-            myRoomInfo.itemId = item.itemId;
-            myRoomInfo.num = inven.num;
-            myRoomInfo.layerType = item.layerType;
-            myRoomInfo.x = item.x;
-            myRoomInfo.y = item.y;
-            myRoomInfo.rotation = item.rotation;
-            myRoomInfosToInsert.push(myRoomInfo);
-            break;
-          }
-        }
-      }
+  //         if (!isDuplicated) {
+  //           const myRoomInfo = new MemberMyRoomInfo();
+  //           myRoomInfo.memberId = memberId;
+  //           myRoomInfo.itemId = item.itemId;
+  //           myRoomInfo.num = inven.num;
+  //           myRoomInfo.layerType = item.layerType;
+  //           myRoomInfo.x = item.x;
+  //           myRoomInfo.y = item.y;
+  //           myRoomInfo.rotation = item.rotation;
+  //           myRoomInfosToInsert.push(myRoomInfo);
+  //           break;
+  //         }
+  //       }
+  //     }
 
-      if (myRoomInfosToInsert.length > 0) {
-        await queryRunner.manager
-          .getRepository(MemberMyRoomInfo)
-          .insert(myRoomInfosToInsert);
-      }
-    }
-  }
+  //     if (myRoomInfosToInsert.length > 0) {
+  //       await queryRunner.manager
+  //         .getRepository(MemberMyRoomInfo)
+  //         .insert(myRoomInfosToInsert);
+  //     }
+  //   }
+  // }
 
-  async getMemberInfo(memberId: string) {
-    try {
-      return await this.memberRepository.findOne({
-        select: [
-          'id',
-          'memberCode',
-          'providerType',
-          'officeGradeType',
-          'myRoomStateType',
-          'nickname',
-          'stateMessage',
-        ],
-        where: {
-          id: memberId,
-        },
-      });
-    } catch (error) {
-      throw new ForbiddenException('DB 실패');
-    }
-  }
+  // async getBusinessCardList(memberId: string) {
+  //   const businessCardInfos = await this.dataSource
+  //     .getRepository(MemberBusinessCardInfo)
+  //     .createQueryBuilder('b')
+  //     .select([
+  //       'b.templateId',
+  //       'b.num',
+  //       'b.name',
+  //       'b.phone',
+  //       'b.email',
+  //       'b.addr',
+  //       'b.fax',
+  //       'b.job',
+  //       'b.position',
+  //       'b.intro',
+  //       'b.thumbnail',
+  //     ])
+  //     .where('b.memberId= :memberId', { memberId })
+  //     .getMany();
 
-  async getBusinessCardList(memberId: string) {
-    const businessCardInfos = await this.dataSource
-      .getRepository(MemberBusinessCardInfo)
-      .createQueryBuilder('b')
-      .select([
-        'b.templateId',
-        'b.num',
-        'b.name',
-        'b.phone',
-        'b.email',
-        'b.addr',
-        'b.fax',
-        'b.job',
-        'b.position',
-        'b.intro',
-        'b.thumbnail',
-      ])
-      .where('b.memberId= :memberId', { memberId })
-      .getMany();
+  //   return businessCardInfos;
+  // }
 
-    return businessCardInfos;
-  }
+  // async getDefaultCardInfo(memberId: string) {
+  //   const defaultCardInfo = await this.dataSource
+  //     .getRepository(MemberDefaultCardInfo)
+  //     .findOne({
+  //       select: ['templateId', 'num'],
+  //       where: {
+  //         memberId: memberId,
+  //       },
+  //     });
+  //   return defaultCardInfo;
+  // }
 
-  async getDefaultCardInfo(memberId: string) {
-    const defaultCardInfo = await this.dataSource
-      .getRepository(MemberDefaultCardInfo)
-      .findOne({
-        select: ['templateId', 'num'],
-        where: {
-          memberId: memberId,
-        },
-      });
-    return defaultCardInfo;
-  }
-
-  async getOnfContentsInfo() {
-    return await this.dataSource.getRepository(OnfContentsInfo).find();
-  }
-
-  async gnenerateMemberCode() {
-    // 유저코드 발급
-    let memberCode = '';
-    while (true) {
-      memberCode = await this.randomString(12);
-
-      const exMemberCode = await this.memberRepository.findOne({
-        where: {
-          memberCode: memberCode,
-        },
-      });
-
-      if (!exMemberCode) {
-        return memberCode;
-      }
-    }
-  }
-
-  randomString(num: number) {
-    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZ';
-    const stringLength = num;
-    let randomstring = '';
-    for (let i = 0; i < stringLength; i++) {
-      const rnum = Math.floor(Math.random() * chars.length);
-      randomstring += chars.substring(rnum, rnum + 1);
-    }
-    return randomstring;
-  }
+  // async getOnfContentsInfo() {
+  //   return await this.dataSource.getRepository(OnfContentsInfo).find();
+  // }
 
   // 이미지 처리
   getImageName(name: string) {
@@ -817,46 +734,46 @@ export class CommonService {
   }
 
   // 공용 계정 생성 모듈
-  async commonCreateAccount(
-    queryRunner: QueryRunner,
-    accountToken,
-    providerType,
-    regPathType,
-  ): Promise<Member> {
-    // 유니크 아이디 (memberId) 발급
-    const memberId = v1();
+  // async commonCreateAccount(
+  //   queryRunner: QueryRunner,
+  //   accountToken,
+  //   providerType,
+  //   regPathType,
+  // ): Promise<Member> {
+  //   // 유니크 아이디 (memberId) 발급
+  //   const memberId = v1();
 
-    const memberCode = await this.gnenerateMemberCode();
+  //   const memberCode = await this.gnenerateMemberCode();
 
-    const member = new Member();
-    member.id = memberId;
-    member.memberCode = memberCode;
-    member.firstProviderType = providerType;
-    member.regPathType = regPathType;
+  //   const member = new Member();
+  //   member.id = memberId;
+  //   member.memberCode = memberCode;
+  //   member.firstProviderType = providerType;
+  //   member.regPathType = regPathType;
 
-    if (providerType === PROVIDER_TYPE.ARZMETA) {
-      member.email = accountToken;
-    }
+  //   if (providerType === PROVIDER_TYPE.ARZMETA) {
+  //     member.email = accountToken;
+  //   }
 
-    await queryRunner.manager.getRepository(Member).save(member);
+  //   await queryRunner.manager.getRepository(Member).save(member);
 
-    // 기본 인벤토리 설정 ( 인테리어)
-    await this.createMemberInteriorInventoryInit(member.id, queryRunner);
+  //   // 기본 인벤토리 설정 ( 인테리어)
+  //   await this.createMemberInteriorInventoryInit(member.id, queryRunner);
 
-    // 기본 마이룸 설정
-    await this.createMemberMyRoomInit(member.id, queryRunner);
+  //   // 기본 마이룸 설정
+  //   await this.createMemberMyRoomInit(member.id, queryRunner);
 
-    // 기본 아바타 파츠 설정
-    await this.createMemberAvatarPartsInventoryInit(member.id, queryRunner);
+  //   // 기본 아바타 파츠 설정
+  //   await this.createMemberAvatarPartsInventoryInit(member.id, queryRunner);
 
-    // 계정 생성
-    const memberAccount = new MemberAccount();
-    memberAccount.memberId = member.id;
-    memberAccount.providerType = providerType;
-    memberAccount.accountToken = accountToken;
+  //   // 계정 생성
+  //   const memberAccount = new MemberAccount();
+  //   memberAccount.memberId = member.id;
+  //   memberAccount.providerType = providerType;
+  //   memberAccount.accountToken = accountToken;
 
-    await queryRunner.manager.getRepository(MemberAccount).save(memberAccount);
+  //   await queryRunner.manager.getRepository(MemberAccount).save(memberAccount);
 
-    return member;
-  }
+  //   return member;
+  // }
 }

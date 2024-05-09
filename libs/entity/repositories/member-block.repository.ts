@@ -18,8 +18,8 @@ export class MemberBlockRepository extends BaseRepository<MemberBlock> {
         'm.memberCode as memberCode',
         'm.nickname as nickname',
         'm.stateMessage as stateMessage',
-        'ai.avatarPartsType',
-        'ai.itemId',
+        'ai.avatarPartsType as avatarPartsType',
+        'ai.itemId as itemId',
       ])
       .innerJoin('mb.MemberBlock', 'm')
       .leftJoin('m.MemberAvatarInfos', 'ai')
@@ -28,7 +28,8 @@ export class MemberBlockRepository extends BaseRepository<MemberBlock> {
 
     // Reduce the raw results into structured friend objects
     const memberBlocks = rawResults.reduce((acc, item) => {
-      const { memberCode, nickname, stateMessage } = item;
+      const { memberCode, nickname, stateMessage, avatarPartsType, itemId } =
+        item;
 
       // Create a unique key for each friend
       const key = memberCode;
@@ -44,10 +45,9 @@ export class MemberBlockRepository extends BaseRepository<MemberBlock> {
       }
 
       // Add avatar info if available
-      if (item.ai_avatarPartsType !== null) {
+      if (avatarPartsType !== null) {
         acc[key].avatarInfos.push({
-          avatarPartsType: item.ai_avatarPartsType,
-          itemId: item.ai_itemId,
+          [avatarPartsType]: itemId,
         });
       }
 

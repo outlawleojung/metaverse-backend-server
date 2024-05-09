@@ -633,9 +633,10 @@ export class FriendService {
       );
     }
 
-    const member = await this.memberRepository.findByMemberIdForMemberInfo(
-      friend.id,
-    );
+    const member =
+      await this.memberRepository.findByMemberIdForMemberInfoAndAvatar(
+        friend.id,
+      );
 
     return {
       member,

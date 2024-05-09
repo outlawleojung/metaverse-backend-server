@@ -1,4 +1,3 @@
-import { MeetingRoom } from './rooms/meeting-room';
 import { Injectable, Logger } from '@nestjs/common';
 import { GameRoom } from './rooms/game-room';
 import { MyRoom } from './rooms/my-room';
@@ -6,13 +5,13 @@ import { IRoom } from './room';
 import { RoomType } from './room-type';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
-import { MY_ROOM_STATE_TYPE, RedisKey } from '@libs/constants';
-import { OfficeRoom } from './rooms/office-room';
+import { MY_ROOM_STATE_TYPE } from '@libs/constants';
 import { CreateRoomRequestDto } from './dto/create-room-request.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Member, MemberAvatarInfo } from '@libs/entity';
 import { Repository } from 'typeorm';
 import { MyRoomService } from '../my-room/my-room.service';
+import { JumpingMatchingRoom } from './rooms/jumping-matching-room';
 
 interface OwnerData {
   ownerNickname: string;
@@ -47,7 +46,7 @@ export class RoomFactory {
           roomId,
           sceneName: data.sceneName,
         });
-      case RoomType.MyRoom:
+      case RoomType.MyRoom: {
         const ownerData: OwnerData = await this.getOwnerInfo(data.ownerId);
 
         return new MyRoom({
@@ -58,6 +57,19 @@ export class RoomFactory {
           ownerAvatarInfo: ownerData.ownerAvatarInfo,
           isShutdown: ownerData.isShutdown,
         });
+      }
+      case RoomType.JumpingMatching: {
+        return new JumpingMatchingRoom({
+          roomId,
+
+          roomName: data.roomName,
+          ownerId: data.ownerId,
+
+          maxPlayerNumber: data.maxPlayerNumber,
+        });
+      }
+      case RoomType.OXQuiz:
+        break;
       case RoomType.Meeting:
       // return new MeetingRoom({
       //   roomId,

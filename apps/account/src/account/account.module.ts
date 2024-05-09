@@ -10,6 +10,7 @@ import {
   EmailLimitRepository,
   EmailLimit,
   MemberPasswordAuthRepository,
+  MemberAvatarInfoRepository,
 } from '@libs/entity';
 import { Module } from '@nestjs/common';
 import { AccountController } from './account.controller';
@@ -17,6 +18,7 @@ import { AccountService } from './account.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   Member,
+  MemberAvatarInfo,
   MemberAccount,
   MemberFurnitureItemInven,
   StartInventory,
@@ -32,6 +34,7 @@ import { MailModule } from '../mail/mail.module';
   imports: [
     TypeOrmModule.forFeature([
       Member,
+      MemberAvatarInfo,
       MemberAccount,
       MemberFurnitureItemInven,
       MemberMyRoomInfo,
@@ -58,6 +61,7 @@ import { MailModule } from '../mail/mail.module';
     EmailConfirmRepository,
     EmailLimitRepository,
     MemberPasswordAuthRepository,
+    MemberAvatarInfoRepository,
   ],
   exports: [AccountService],
 })

@@ -21,6 +21,7 @@ export enum RoundState {
 
 @Injectable()
 export class GameData {
+  levelRepository: Repository<JumpingMatchingLevel>;
   gameState: GameState;
   roundState: RoundState;
 
@@ -63,10 +64,8 @@ export class GameData {
   pictureNames: string[] = [];
   players: string[] = [];
 
-  constructor(
-    @InjectRepository(JumpingMatchingLevel)
-    private readonly levelRepository: Repository<JumpingMatchingLevel>,
-  ) {
+  constructor(repository: Repository<JumpingMatchingLevel>) {
+    this.levelRepository = repository;
     this.gameState = GameState.Idle;
     this.roundCount = 0;
     this.roundState = RoundState.Idle;

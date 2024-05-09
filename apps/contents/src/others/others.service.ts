@@ -13,11 +13,7 @@ import {
 } from '@libs/entity';
 import { DataSource, Repository } from 'typeorm';
 import { CommonService } from '@libs/common';
-import { ERRORCODE, ERROR_MESSAGE, BUSINISS_CARD_TYPE } from '@libs/constants';
-import {
-  GetOthersResponsesDto,
-  OhtersMemberData,
-} from './dto/get.others.response.dto';
+import { ERRORCODE, ERROR_MESSAGE, OTHER_FIND_TYPE } from '@libs/constants';
 
 @Injectable()
 export class OthersService {
@@ -30,33 +26,59 @@ export class OthersService {
 
   async getOthersMemberInfo(type: number, othersId: string) {
     try {
-      let where = {};
-      if (type === 1) {
-        where = {
-          memberId: othersId,
-        };
-      } else if (type === 2) {
-        where = {
-          memberCode: othersId,
-        };
-      } else {
-        return {
-          error: ERRORCODE.NET_E_NOT_EXIST_USER,
-          errorMessage: ERROR_MESSAGE(ERRORCODE.NET_E_NOT_EXIST_USER),
-        };
+      // let where: any = {};
+      // switch (type) {
+      //   case OTHER_FIND_TYPE.MEMBER_ID:
+      //     where = {
+      //       id: othersId,
+      //     };
+      //     break;
+      //   case OTHER_FIND_TYPE.MEMBER_CODE:
+      //     where = {
+      //       memberCode: othersId,
+      //     };
+      //     break;
+      //   default:
+      //     throw new Error('Type 이 잘목 됐습니다.');
+      // }
+
+      // //  타인 존재 여부 확인
+      // const exMember = await this.memberRepository.findOne({
+      //   select: [
+      //     'id',
+      //     'memberCode',
+      //     'nickname',
+      //     'stateMessage',
+      //     'myRoomStateType',
+      //   ],
+      //   where,
+      // });
+
+      const rawResults = await this.memberRepository
+        .createQueryBuilder('m')
+        .select([
+          'm.id as memberId',
+          'm.memberCode as memberCode',
+          'm.nickname as nickname',
+          'm.stateMessage as stateMessage',
+          'm.myRoomStateType as myRoomStateType',
+          'ai.avatarPartsType as avatarPartsType',
+          'ai.itemId as itemId',
+        ])
+        .leftJoin('m.MemberAvatarInfos', 'ai');
+
+      switch (type) {
+        case OTHER_FIND_TYPE.MEMBER_ID:
+          await rawResults.where('m.id = :othersId', { othersId });
+          break;
+        case OTHER_FIND_TYPE.MEMBER_CODE:
+          await rawResults.where('m.memberCode = :othersId', { othersId });
+          break;
+        default:
+          throw new Error('Type 이 잘목 됐습니다.');
       }
 
-      //  타인 존재 여부 확인
-      const exMember = await this.memberRepository.findOne({
-        select: [
-          'id',
-          'memberCode',
-          'nickname',
-          'stateMessage',
-          'myRoomStateType',
-        ],
-        where,
-      });
+      const exMember = await rawResults.getRawMany();
 
       if (!exMember) {
         return {
@@ -65,11 +87,13 @@ export class OthersService {
         };
       }
 
+      const memberId = exMember[0].memberId;
+
       const defaultBizCard = await this.dataSource
         .getRepository(MemberDefaultCardInfo)
         .findOne({
           where: {
-            memberId: exMember.id,
+            memberId,
           },
         });
 
@@ -91,7 +115,7 @@ export class OthersService {
               'intro',
             ],
             where: {
-              memberId: exMember.id,
+              memberId,
               templateId: defaultBizCard.templateId,
               num: defaultBizCard.num,
             },
@@ -114,7 +138,7 @@ export class OthersService {
               'intro',
             ],
             where: {
-              memberId: exMember.id,
+              memberId,
             },
             order: {
               num: 'DESC',
@@ -122,17 +146,17 @@ export class OthersService {
           });
       }
 
-      const othersMember: any = {};
-      othersMember.memberCode = exMember.memberCode;
-      othersMember.myRoomStateType = exMember.myRoomStateType;
-      othersMember.nickname = exMember.nickname || null;
-      othersMember.stateMessage = exMember.stateMessage || null;
-      othersMember.bizCard = bizCard;
+      const othersMember = {
+        memberCode: exMember[0].memberCode,
+        myRoomStateType: exMember[0].myRoomStateType,
+        nickname: exMember[0].nickname || null,
+        stateMessage: exMember[0].stateMessage || null,
+        bizCard: bizCard,
 
-      const avatarInfos = await this.commonService.getMemberAvatarInfo(
-        exMember.memberCode,
-      );
-      othersMember.avatarInfos = avatarInfos;
+        avatarInfos: exMember.map((item) => ({
+          [item.avatarPartsType]: item.itemId,
+        })),
+      };
 
       return {
         othersMember,

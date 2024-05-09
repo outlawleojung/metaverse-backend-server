@@ -7,14 +7,29 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   EntityModule,
   Member,
+  MemberFrameImage,
+  MemberFrameImageRepository,
+  MemberFurnitureItemInven,
+  MemberFurnitureItemInvenRepository,
   MemberMyRoomInfo,
+  MemberMyRoomInfoRepository,
   SessionInfo,
+  StartInventory,
+  StartMyRoom,
 } from '@libs/entity';
 import { AzureBlobService, CommonModule } from '@libs/common';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Member, MemberMyRoomInfo, SessionInfo]),
+    TypeOrmModule.forFeature([
+      Member,
+      MemberMyRoomInfo,
+      MemberFrameImage,
+      SessionInfo,
+      StartMyRoom,
+      StartInventory,
+      MemberFurnitureItemInven,
+    ]),
     EntityModule,
     CommonModule,
   ],
@@ -24,6 +39,9 @@ import { AzureBlobService, CommonModule } from '@libs/common';
     ImageAnalysisService,
     ImageResizeService,
     AzureBlobService,
+    MemberMyRoomInfoRepository,
+    MemberFrameImageRepository,
+    MemberFurnitureItemInvenRepository,
   ],
   exports: [MyRoomService],
 })
