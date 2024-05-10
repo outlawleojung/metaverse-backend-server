@@ -40,15 +40,13 @@ export class MemberBlockRepository extends BaseRepository<MemberBlock> {
           memberCode,
           nickname,
           stateMessage,
-          avatarInfos: [],
+          avatarInfos: {}, // Initialize as an object
         };
       }
 
       // Add avatar info if available
       if (avatarPartsType !== null) {
-        acc[key].avatarInfos.push({
-          [avatarPartsType]: itemId,
-        });
+        acc[key].avatarInfos[avatarPartsType] = itemId; // Assign directly to the object
       }
 
       return acc;

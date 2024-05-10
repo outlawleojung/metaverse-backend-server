@@ -127,9 +127,12 @@ export class MemberRepository extends BaseRepository<Member> {
       memberCode: rawResults[0].memberCode,
       nickname: rawResults[0].nickname,
       stateMessage: rawResults[0].stateMessage,
-      avatarInfos: rawResults.map((item) => ({
-        [item.avatarPartsType]: item.itemId,
-      })),
+      avatarInfos: rawResults.reduce((acc, item) => {
+        if (item.avatarPartsType !== null) {
+          acc[item.avatarPartsType] = item.itemId;
+        }
+        return acc;
+      }, {}), // 객체로 초기화
     };
 
     return memberInfo;

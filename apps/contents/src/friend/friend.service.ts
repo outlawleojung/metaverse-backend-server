@@ -441,19 +441,6 @@ export class FriendService {
     data: CommonFriendDto,
     queryRunner: QueryRunner,
   ) {
-    // 사용자 존재 여부 확인
-    // const me = await this.memberRepository.findByMemberId(memberId);
-
-    // if (me.memberCode === data.friendMemeberCode) {
-    //   throw new HttpException(
-    //     {
-    //       error: ERRORCODE.NET_E_CANNOT_BLOCK_MYSELF,
-    //       message: ERROR_MESSAGE(ERRORCODE.NET_E_CANNOT_BLOCK_MYSELF),
-    //     },
-    //     HttpStatus.FORBIDDEN,
-    //   );
-    // }
-
     // 차단할 친구 확인
     const exFrnd = await this.memberRepository.findByMemberCode(
       data.friendMemeberCode,
