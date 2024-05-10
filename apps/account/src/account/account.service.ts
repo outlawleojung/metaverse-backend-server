@@ -48,7 +48,7 @@ export class AccountService {
     private emailConfirmRepository: EmailConfirmRepository,
     private emailLimitRepository: EmailLimitRepository,
     private memberPasswordAuthRepository: MemberPasswordAuthRepository,
-    private avatarRepository: MemberAvatarInfoRepository,
+    private memberAvatarInfoRepository: MemberAvatarInfoRepository,
     private commonService: CommonService,
     private mailService: MailService,
     @Inject(DataSource) private dataSource: DataSource,
@@ -85,16 +85,16 @@ export class AccountService {
         );
 
       // 아바타 정보 조회
-      const avatarInfos = await this.avatarRepository.findByMemberId(
+      const avatarInfos = await this.memberAvatarInfoRepository.findByMemberId(
         memberAccount.memberId,
       );
 
       const memberInfo: any = {
         nickname: member.nickname,
         stateMessage: member.stateMessage,
-        socialLoginInfo: socialLoginInfo,
+        socialLoginInfo,
         memberCode: member.memberCode,
-        avatarInfos: avatarInfos,
+        avatarInfos,
       };
 
       return {

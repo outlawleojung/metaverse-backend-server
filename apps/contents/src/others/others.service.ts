@@ -153,9 +153,10 @@ export class OthersService {
         stateMessage: exMember[0].stateMessage || null,
         bizCard: bizCard,
 
-        avatarInfos: exMember.map((item) => ({
-          [item.avatarPartsType]: item.itemId,
-        })),
+        avatarInfos: exMember.reduce((acc, item) => {
+          acc[item.avatarPartsType] = item.itemId;
+          return acc;
+        }, {}),
       };
 
       return {

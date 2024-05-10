@@ -6,29 +6,18 @@ import {
   MemberAdContentsRepository,
   MemberMoneyRepository,
 } from '@libs/entity';
-import {
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, QueryRunner, Repository } from 'typeorm';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { QueryRunner } from 'typeorm';
 import { AdContentsRewardDto } from './dto/req/ad.contents.reward.dto';
 import { ERRORCODE, ERROR_MESSAGE } from '@libs/constants';
-import { CommonService } from '@libs/common';
 
 @Injectable()
 export class AdContentsService {
   private readonly logger = new Logger(AdContentsService.name);
   constructor(
-    @InjectRepository(Member) private memberRepository: Repository<Member>,
     private adContentsRepository: AdContentsRepository,
     private memberAdContentsRepository: MemberAdContentsRepository,
     private memberMoneyRepository: MemberMoneyRepository,
-    private commonService: CommonService,
-    @Inject(DataSource) private dataSource: DataSource,
   ) {}
 
   async adContentsReward(

@@ -10,7 +10,6 @@ import {
 } from '@libs/entity';
 import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { QueryRunner } from 'typeorm';
-import { CommonService } from '@libs/common';
 import { ERRORCODE, ERROR_MESSAGE, FUNCTION_TABLE } from '@libs/constants';
 import { CommonFriendDto } from './dto/request/common.friend.dto';
 import { FindFriendDto } from './dto/request/find.friend.dto';
@@ -25,7 +24,6 @@ export class FriendService {
     private memberBlockRepository: MemberBlockRepository,
     private functionTableRepository: FunctionTableRepository,
     private memberConnectInfoRepository: MemberConnectInfoRepository,
-    private readonly commonService: CommonService,
   ) {}
 
   // async getFriends(memberId: string) {
