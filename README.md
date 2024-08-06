@@ -5,69 +5,109 @@
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+# Metaverse NestJS Monorepo Project
 
-## Description
+## 프로젝트 소개
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+이 프로젝트는 NestJS를 사용하여 모노레포 구조로 구성된 백엔드 서버입니다. 여러 기능별 애플리케이션과 공용 라이브러리로 이루어져 있습니다.
 
-## Installation
+## 디렉토리 구조
 
-```bash
-$ yarn install
+```plaintext
+metaverse-backend-server/
+├── apps/
+│   ├── account/
+│   │   ├── src/
+│   │   │   └── main.ts
+│   ├── admin/
+│   │   ├── src/
+|   │   │   └── main.ts
+│   ├── contents/
+│   │   ├── src/
+|   │   │   └── main.ts
+│   ├── gateway/
+│   │   ├── src/
+|   │   │   └── main.ts
+│   ├── pass-auth/
+│   │   ├── src/
+|   │   │   └── main.ts
+│   ├── payments/
+│   │   ├── src/
+|   │   │   └── main.ts
+│   ├── sockets/
+│   │   ├── src/
+|   │   │   └── main.ts
+│   ├── webview/
+│   │   ├── src/
+|   │   │   └── main.ts
+├── libs/
+│   ├── common/
+│   ├── constants/
+│   ├── entity/
+│   ├── mongodb/
+│   ├── redis/
+├── package.json
+├── nest-cli.json
+├── tsconfig.json
+└── README.md
 ```
 
-## Running the app
+## 디렉토리 설명
+
+### `apps/`
+
+- **account/**
+  - **기능:** 사용자 인증 및 사용자 정보 관리
+  - **설명:** 계정 생성, 로그인, 사용자 정보 조회
+- **admin/**
+  - **기능:** 관리자 페이지 API
+  - **설명:** 관리자 페이지 API
+- **contents/**
+  - **기능:** 컨텐츠 관리
+  - **설명:** 친구, 마이룸, 오피스 회의, 우편함, 투표 등의 각종 컨텐츠 제공 서버
+- **gateway/**
+  - **기능:** 버전 및 서버 상태 체크
+  - **설명:** 애플리케이션 실행 시 버전 일치 여부 및 서버 상태를 확인하여 접속할 서버 URL과 상태 정보를 제공하는 서버
+- **pass-auth/**
+  - **기능:** pass 인증
+  - **설명:** pass 앱으로 본인 인증을 하는 서버
+- **payments/**
+  - **기능:** 결제 관리
+  - **설명:** 토스페이먼츠 결제 서버
+- **sockets/**
+  - **기능:** 웹소켓
+  - **설명:** 사용자 오브젝트 동기화, 채팅 기능을 하는 웹소켓 서버
+- **webview/**
+  - **기능:** 웹뷰
+  - **설명:** 유니티 클라이언트 내에서 노출 되는 웹뷰 API 
+
+
+### `libs/`
+- **common/**
+  - **기능:** 공용 프로젝트
+  - **설명:** 각 서버에서 공용으로 사용 되는 함수 프로젝트
+- **constants/**
+  - **기능:** 상수 프로젝트
+  - **설명:** 각 서버에서 공용으로 사용 되는 상수 모음 프로젝트
+- **entity/**
+  - **기능:** 데이터베이스 entity
+  - **설명:** mysql, typeorm으로 작성된 entity 프로젝트
+- **mongodb/**
+  - **기능:** mongodb
+  - **설명:** mongoose로 작성된 mongodb schema 프로젝트
+- **redis/**
+  - **기능:** redis
+  - **설명:** redis 공용 함수 프로젝트
+
+
+## 설치 및 실행
+
+### 설치
+
+프로젝트를 클론한 후 의존성을 설치합니다.
 
 ```bash
-# development
-$ yarn run start
-
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+git clone https://github.com/username/my-nestjs-monorepo.git
+cd my-nestjs-monorepo
+yarn install
 ```
-
-## Test
-
-```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
